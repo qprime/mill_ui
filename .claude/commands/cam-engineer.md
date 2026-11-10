@@ -73,14 +73,13 @@ Read `docs/invariants/testing.md` before adding or modifying tests. Key rules:
 
 ## Recipe Validation
 
-Run `python -m tests.test_recipes` (no `--regen`) as an integration gate — all recipes must pass. This validates without rewriting any recipe files.
+Run `python -m tests.test_recipes` (no `--regen`) as an integration gate — all recipes must pass. It compares every file in each recipe's `output/` with what current code generates, writes nothing, and also runs as a pre-commit hook.
 
 If a recipe **fails** due to your changes:
 1. Diagnose the failure
-2. Fix the implementation or, if the output change is intentional, regenerate **only** the affected recipe(s) with `python -m tests.test_recipes --regen_recipes` (which regenerates all — then `git checkout` the ones you didn't intend to change)
-3. Stage the intentionally changed recipe outputs along with your implementation
-
-Do **not** run a blanket `--regen_recipes` on every commit. Snapshot updates (commit hashes, golden metrics) are a separate on-demand workflow (`/snapshot-recipes`).
+2. If the output change is unintended, it is a regression: fix the implementation
+3. If it is intended, run `python -m tests.test_recipes --regen_recipes`, review every changed output file, and stage all of them with your implementation. Every changed output belongs to this change; never revert outputs to make the gate pass
+4. Update golden metrics for the changed recipes with `python -m cli.generate_golden --recipe docs/recipes/<name> --update`
 
 ## Issue Comment on Completion
 

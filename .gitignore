@@ -50,8 +50,6 @@ Thumbs.db
 output/
 !docs/recipes/*/output/
 !docs/recipes/*/output/**
-docs/recipes/*/output/*.svg
-docs/recipes/*/output/machining_summary.json
 
 # Claude Code local settings
 .claude/settings.json

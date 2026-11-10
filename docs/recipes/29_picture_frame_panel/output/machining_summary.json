@@ -1,0 +1,58 @@
+{
+  "stock": {
+    "width_mm": 300.0,
+    "height_mm": 400.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "pocket-6.35mm.nc",
+      "operation": "pocket",
+      "tool_diameter_mm": 6.35,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 1800.0,
+      "feed_z_mm_min": 594.0,
+      "stepdown_mm": 3.0,
+      "max_depth_mm": 5.0,
+      "feature_count": 1,
+      "strategy": "raster_pocket",
+      "estimated_runtime_min": 2.8
+    },
+    {
+      "filename": "edge-12.70mm.nc",
+      "operation": "edge",
+      "tool_diameter_mm": 12.7,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 540.0,
+      "feed_z_mm_min": 135.0,
+      "stepdown_mm": 1.0,
+      "max_depth_mm": 3.0,
+      "feature_count": 1,
+      "strategy": "edge",
+      "estimated_runtime_min": 8.1
+    },
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.2,
+      "feature_count": 5,
+      "strategy": "contour",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 32.5
+    }
+  ],
+  "total_runtime_min": 43.4,
+  "feature_counts": {
+    "chamfer": 1,
+    "pocket": 1,
+    "profile": 2
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

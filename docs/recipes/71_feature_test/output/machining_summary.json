@@ -1,0 +1,100 @@
+{
+  "stock": {
+    "width_mm": 550.0,
+    "height_mm": 400.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "pocket-12.70mm.nc",
+      "operation": "pocket",
+      "tool_diameter_mm": 12.7,
+      "rpm": 14000.0,
+      "feed_xy_mm_min": 1400.0,
+      "feed_z_mm_min": 350.0,
+      "stepdown_mm": 3.5,
+      "max_depth_mm": 6.0,
+      "feature_count": 3,
+      "strategy": "raster_pocket",
+      "estimated_runtime_min": 6.1
+    },
+    {
+      "filename": "bore-3.17mm.nc",
+      "operation": "bore",
+      "tool_diameter_mm": 3.175,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 1080.0,
+      "feed_z_mm_min": 356.4,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.0,
+      "feature_count": 12,
+      "strategy": "helical_bore",
+      "estimated_runtime_min": 3.2
+    },
+    {
+      "filename": "engrave-1.00mm.nc",
+      "operation": "engrave",
+      "tool_diameter_mm": 1.0,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 400.0,
+      "feed_z_mm_min": 100.0,
+      "stepdown_mm": 0.5,
+      "max_depth_mm": 2.0,
+      "feature_count": 98,
+      "strategy": "engrave",
+      "estimated_runtime_min": 28.6
+    },
+    {
+      "filename": "dogbone-12.70mm.nc",
+      "operation": "dogbone",
+      "tool_diameter_mm": 12.7,
+      "rpm": 14000.0,
+      "feed_xy_mm_min": 1400.0,
+      "feed_z_mm_min": 350.0,
+      "stepdown_mm": 3.5,
+      "max_depth_mm": 6.0,
+      "feature_count": 4,
+      "strategy": "dogbone",
+      "estimated_runtime_min": 0.5
+    },
+    {
+      "filename": "edge-12.70mm.nc",
+      "operation": "edge",
+      "tool_diameter_mm": 12.7,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 540.0,
+      "feed_z_mm_min": 135.0,
+      "stepdown_mm": 1.0,
+      "max_depth_mm": 3.0,
+      "feature_count": 1,
+      "strategy": "edge",
+      "estimated_runtime_min": 3.0
+    },
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.2,
+      "feature_count": 6,
+      "strategy": "tabbed_profile",
+      "holding": "tabs 4x3mm",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 37.6
+    }
+  ],
+  "total_runtime_min": 79.0,
+  "feature_counts": {
+    "chamfer": 1,
+    "engrave": 98,
+    "hole": 12,
+    "pocket": 3,
+    "profile": 6
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

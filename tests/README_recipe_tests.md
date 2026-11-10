@@ -1,121 +1,88 @@
 # Recipe Output Tests
 
-Recipe output tests automatically verify that recipe PML files generate expected G-code output. This provides:
+Every recipe with a `*.pml.yml` source has its outputs committed under `docs/recipes/<name>/output/`. The recipe gate checks that those committed files are exactly what current code generates.
 
-- **Regression detection**: Immediately see if code changes affect output
-- **Performance tracking**: Monitor generation time and complexity metrics
-- **Integration testing**: Full pipeline validation from PML → G-code
+## The rule
 
-## Usage
+For every recipe, `output/` holds exactly the files `cam.pipeline.write_run_outputs` produces from current code, byte for byte, and git tracks all of them.
 
-### Running Tests
+When a change alters recipe output, regenerate every recipe, review every changed file, and commit all of them with the change that caused them. An unintended change is a regression to fix in code. Outputs are never reverted to make the gate pass.
 
-**With pytest (recommended):**
+## Commands
+
 ```bash
-# Verify all recipes match recipe outputs
-pytest tests/test_recipes.py
+# Gate: every output file matches current code, and no output file is untracked
+python -m tests.test_recipes
 
-# Verify specific recipe
-pytest tests/test_recipes.py::test_recipe_output[shaker_corner_cleanup.pml]
+# Regenerate every recipe's output/
+python -m tests.test_recipes --regen_recipes
 
-# Regenerate all recipe outputs
-pytest tests/test_recipes.py --regen_recipes
+# The same gate inside the full suite
+.venv/bin/python tools/run_tests.py tests/test_recipes.py
 ```
 
-**Standalone mode (no pytest required):**
-```bash
-# Regenerate all recipe outputs
-python3 tests/test_recipes.py
-```
+The gate also runs as the `recipe-outputs` pre-commit hook. Pre-commit stashes unstaged changes before running hooks, so the hook checks the files being committed. A regenerated output left unstaged fails the commit.
 
-### Adding New Recipes
+## What the gate reports
 
-Recipe output tests automatically discover all `.pml` files in `docs/recipes/*/`:
+Each recipe is written into a temporary directory and compared with its `output/`:
 
-1. Create your recipe PML file:
-   ```
-   docs/recipes/15_my_recipe/
-   ├── README.md
-   └── example.pml
-   ```
+| Message | Meaning |
+|---|---|
+| `Missing generated file: <name>` | Current code writes a file that `output/` does not have |
+| `File no longer generated: <name>` | `output/` has a file current code no longer writes |
+| `<name> differs: N lines changed` | The committed file's content differs from what current code writes |
+| `Untracked recipe output: <path>` | A file under some `output/` is not tracked by git |
 
-2. Generate initial recipe outputs:
-   ```bash
-   pytest tests/test_recipes.py --regen_recipes
-   # or
-   python3 tests/test_recipes.py
-   ```
+## Adding a recipe
 
-3. Commit the artifacts:
-   ```bash
-   git add docs/recipes/15_my_recipe/output/
-   git commit -m "Add recipe outputs for recipe 15"
-   ```
+1. Create `docs/recipes/NN_name/` with `README.md` and `example.pml.yml`.
+2. Run `python -m tests.test_recipes --regen_recipes`.
+3. Stage every file in the new `output/` and commit them with the recipe.
 
-The test will now automatically include your recipe.
-
-## Output Structure
-
-For each recipe, the test generates:
+## Output structure
 
 ```
 docs/recipes/14_corner_cleanup_multi_tool/
-├── shaker_corner_cleanup.pml       # Source
-└── output/                          # Generated (committed)
-    ├── pocket-9.53mm.nc             # G-code per tool
-    ├── corner_cleanup-3.17mm.nc
+├── example.pml.yml
+└── output/
+    ├── 14_corner_cleanup_multi_tool.svg    # Blueprint
+    ├── corner_cleanup-3.17mm.nc            # G-code per tool
+    ├── pocket-12.70mm.nc
     ├── profile-3.17mm.nc
-    └── metrics.json                 # Performance/quality metrics
+    ├── machining_summary.json              # Per-file tools, feeds, depths, runtime
+    └── metrics.json                        # Complexity, fidelity, errors, warnings
 ```
 
-### Metrics Schema
+A recipe with a back face also writes `<name>.back.svg`. A multi-sheet recipe prefixes each G-code file with `sheet_N.`, writes one SVG per sheet, and adds `manifest.json`.
 
-`metrics.json` tracks:
+### Metrics schema
 
 ```json
 {
-  "timing": {
-    "parse_ms": 0.32,      // PML parsing time
-    "ir_ms": 0.02,          // RemovalIntent IR generation
-    "hints_ms": 0.01,       // Planner hints generation
-    "plan_ms": 3.67,        // CAM planning time
-    "gcode_ms": 8.05,       // G-code generation
-    "total_ms": 12.06       // End-to-end time
-  },
+  "constraint_audit": {},
   "complexity": {
-    "total_moves": 3366,    // Total move count
-    "rapid_moves": 0,       // Rapids (positioning)
-    "cut_moves": 3366,      // Cuts (material removal)
-    "rapid_ratio": 0.0      // Efficiency metric
+    "total_moves": 3366,
+    "rapid_moves": 0,
+    "cut_moves": 3366,
+    "rapid_ratio": 0.0
   },
   "fidelity": {
-    "tool_changes": 3,      // Number of tools required
-    "passes": [             // Per-pass breakdown
-      {
-        "name": "pocket",
-        "tool_diameter_mm": 9.525,
-        "move_count": 1314
-      }
-    ]
+    "tool_changes": 3,
+    "passes": [{"name": "pocket", "tool_diameter_mm": 9.525, "move_count": 1314}]
   },
   "output_size": {
-    "total_bytes": 75532,   // Total G-code size
-    "total_lines": 3368,    // Total line count
-    "files": {              // Per-file breakdown
-      "pocket-9.53mm": {
-        "bytes": 23734,
-        "lines": 1320
-      }
-    }
+    "total_bytes": 75532,
+    "total_lines": 3368,
+    "files": {"pocket-9.53mm": {"bytes": 23734, "lines": 1320}}
   },
-  "errors": [],             // Design errors; non-empty makes cli.mill exit 3
+  "errors": [],
   "warnings": [],
-  "build": {...},           // kerf_mm, theme, y_origin, source
-  "provenance": {...}
+  "build": {"kerf_mm": 3.175, "theme": "dark", "y_origin": "back", "source": "example.pml.yml"}
 }
 ```
 
-`timing` is stripped before the file is written, so the committed file is deterministic.
+`errors` lists design errors; a non-empty list makes `cli.mill` exit 3. Pipeline timing is stripped before the file is written. Recipe outputs carry no commit hash: the commit that holds them is their provenance. `--project` and `--input` runs add `"provenance": {"mill_ui": "<short hash>"}`.
 
 A run with more than one sheet (a multi-sheet layout, or several input files) writes one `metrics.json` with a `sheets` list. Each entry holds that sheet's metrics, `errors` and `warnings`, plus `source`, `sheet_index` and `job_name`. The top-level `errors` and `warnings` collect every sheet's messages, prefixed `sheet N: ` (or `<source> sheet N: ` when the run has several input files):
 
@@ -125,95 +92,16 @@ A run with more than one sheet (a multi-sheet layout, or several input files) wr
   "sheets": [{"source": "example.pml.yml", "sheet_index": 1, "job_name": "74_multi_sheet_assembly_sheet_1", "...": "...", "errors": [], "warnings": []}],
   "errors": [],
   "warnings": [],
-  "build": {...},
-  "provenance": {...}
+  "build": {...}
 }
 ```
 
-`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json`, `machining_summary.json` and `manifest.json` (runs with more than one sheet); `cli.mill` and `tests.test_recipes --regen_recipes` both call it. A run with several input files prefixes each `.nc` with its input stem (`door.pml.profile-6.35mm.nc`). The writer raises `GcodeNameCollisionError` if two G-code files would share a name. `machining_summary.json` is a production artifact and is gitignored in recipe outputs.
+`cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json`, `machining_summary.json` and `manifest.json` (runs with more than one sheet); `cli.mill` and `tests.test_recipes --regen_recipes` both call it with the same build parameters, so either one refreshes a recipe's outputs. A run with several input files prefixes each `.nc` with its input stem (`door.pml.profile-6.35mm.nc`). The writer raises `GcodeNameCollisionError` if two G-code files would share a name.
 
-## Workflow Examples
+## Golden metrics
 
-### After Making Planner Changes
+Golden metrics in `tests/golden/` are a separate baseline, built from the committed outputs. When outputs change on purpose, update the goldens for the changed recipes with `python -m cli.generate_golden --recipe docs/recipes/<name> --update`, or all of them with `/snapshot-recipes`.
 
-```bash
-# Run tests to see if output changed
-pytest tests/test_recipes.py
+## Scope
 
-# If changes are expected/correct, regenerate
-pytest tests/test_recipes.py --regen_recipes
-
-# Review the diff
-git diff docs/recipes/*/output/
-
-# Commit if good
-git add docs/recipes/*/output/
-git commit -m "Update recipe outputs after planner optimization"
-```
-
-### Detecting Performance Regressions
-
-```bash
-# Before your changes
-pytest tests/test_recipes.py --regen_recipes
-git add docs/recipes/*/output/metrics.json
-git commit -m "Baseline metrics before optimization"
-
-# After your changes
-pytest tests/test_recipes.py --regen_recipes
-
-# Compare metrics
-git diff docs/recipes/*/output/metrics.json
-```
-
-Look for changes in:
-- `total_ms`: Overall performance
-- `plan_ms`: Planner efficiency
-- `total_moves`: Output complexity
-- `rapid_ratio`: Toolpath efficiency
-
-### Checking Algorithm Improvements
-
-After optimizing the planner, check if output improved:
-
-```bash
-pytest tests/test_recipes.py --regen_recipes
-git diff docs/recipes/*/output/
-```
-
-Look for:
-- Fewer moves (better efficiency)
-- Shorter G-code files (simpler paths)
-- Lower `total_ms` (faster generation)
-- Higher `rapid_ratio` (more efficient rapids)
-
-## Design Philosophy
-
-**PML as source of truth**: Recipes are PML files, not Python scripts. This matches how users interact with the system.
-
-**Committed artifacts**: G-code outputs are committed for:
-- Zero-friction review (view on GitHub)
-- Historical record (see evolution over time)
-- Fast testing (no generation required for verification)
-
-**Comprehensive metrics**: Track time/complexity/fidelity to detect both improvements and regressions.
-
-**Auto-discovery**: No manual registration - just add a `.pml` file and it's included.
-
-## Troubleshooting
-
-**Test fails with "Missing expected file":**
-- You need to generate initial recipe outputs: `pytest --regen_recipes`
-
-**Test fails with "differs: N lines changed":**
-- Your code changed the output. Review with `git diff docs/recipes/*/output/`
-- If expected: `pytest --regen_recipes` to accept changes
-- If unexpected: investigate why output changed
-
-**"No module named pytest":**
-- Use standalone mode: `python3 tests/test_recipes.py`
-- Or install pytest: `pip install pytest`
-
-**Recipe not discovered:**
-- Ensure `.pml` file is in `docs/recipes/*/` (subdirectory required)
-- Check `python3 -c "from tests.test_recipe_outputs import discover_recipe_pml_files; print(discover_recipe_pml_files())"`
+The gate covers recipes with a `*.pml.yml` source. Nest recipes (`*.nest.yml`) are run by `tests/test_nesting_recipes.py`, which does not compare outputs.

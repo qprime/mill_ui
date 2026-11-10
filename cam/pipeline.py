@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
@@ -29,7 +29,6 @@ from config.machine_loader import (
 from core.constants import BACK_SVG_SUFFIX
 from ir.removal_intent import RemovalIntent
 from layout_ast.layout import LayoutAST, mirror_item_about_x
-from pml.revision_header import build_provenance
 from validation.removal_checks import (
     check_back_face_support,
     check_cross_face_web,
@@ -612,7 +611,12 @@ def _sheet_label(run: SheetRun, multi_source: bool) -> str:
     return f"{run.source} sheet {run.sheet_index}" if multi_source else f"sheet {run.sheet_index}"
 
 
-def build_run_metrics(runs: Sequence[SheetRun], build_params: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_run_metrics(
+    runs: Sequence[SheetRun],
+    build_params: dict[str, Any] | None = None,
+    *,
+    provenance: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
     sources = list(dict.fromkeys(run.source for run in runs))
     build = dict(build_params or {})
     if len(sources) == 1:
@@ -647,7 +651,8 @@ def build_run_metrics(runs: Sequence[SheetRun], build_params: dict[str, Any] | N
             "warnings": [f"{_sheet_label(run, multi_source)}: {w}" for run in runs for w in run.result.warnings],
         }
     metrics["build"] = build
-    metrics["provenance"] = build_provenance()
+    if provenance is not None:
+        metrics["provenance"] = dict(provenance)
     return metrics
 
 
@@ -775,6 +780,7 @@ def write_run_outputs(
     *,
     clean_output_dir: bool = True,
     build_params: dict[str, Any] | None = None,
+    provenance: Mapping[str, str] | None = None,
 ) -> dict[str, Path]:
     filenames = _gcode_filenames(runs)
 
@@ -787,7 +793,7 @@ def write_run_outputs(
         outputs.update(_write_sheet_artifacts(run, output_dir, run_filenames))
 
     metrics_path = output_dir / "metrics.json"
-    metrics_path.write_text(json.dumps(build_run_metrics(runs, build_params), indent=2))
+    metrics_path.write_text(json.dumps(build_run_metrics(runs, build_params, provenance=provenance), indent=2))
     outputs["metrics"] = metrics_path
 
     summary_path = output_dir / "machining_summary.json"

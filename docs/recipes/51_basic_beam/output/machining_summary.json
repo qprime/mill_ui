@@ -1,0 +1,30 @@
+{
+  "stock": {
+    "width_mm": 800.0,
+    "height_mm": 600.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.2,
+      "feature_count": 12,
+      "strategy": "contour",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 55.9
+    }
+  ],
+  "total_runtime_min": 55.9,
+  "feature_counts": {
+    "profile": 3
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

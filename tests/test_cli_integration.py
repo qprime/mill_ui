@@ -272,3 +272,23 @@ def test_cli_recipe_runs_without_default_machine(tmp_path: Path):
     metrics = json.loads((recipe_dir / "output" / "metrics.json").read_text())
     assert metrics["errors"] == []
     assert list((recipe_dir / "output").glob("*.nc"))
+
+
+def test_cli_recipe_run_omits_provenance(tmp_path: Path):
+    recipe_dir = tmp_path / "recipe"
+    recipe_dir.mkdir()
+    (recipe_dir / "example.pml.yml").write_text(PML_FILE.read_text())
+
+    _run_cli(["-m", "cli.mill", "--recipe", str(recipe_dir), "--no-svg"])
+
+    metrics = json.loads((recipe_dir / "output" / "metrics.json").read_text())
+    assert "provenance" not in metrics
+
+
+def test_cli_input_run_records_provenance(tmp_path: Path):
+    out_dir = tmp_path / "out"
+
+    _run_cli(["-m", "cli.mill", "--input", str(PML_FILE), "--out", str(out_dir), "--no-svg"])
+
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    assert set(metrics["provenance"]) == {"mill_ui"}

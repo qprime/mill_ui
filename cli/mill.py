@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
+from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
@@ -28,7 +29,7 @@ from config.machine_loader import (
     load_machine_by_name,
 )
 from layout_ast.layout import LayoutAST
-from pml.revision_header import format_pml_header
+from pml.revision_header import build_provenance, format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
@@ -267,8 +268,15 @@ def _compile(
     return runs
 
 
-def _finish_run(runs: list[SheetRun], output_dir: Path, build_params: dict) -> None:
-    outputs = write_run_outputs(runs, output_dir, clean_output_dir=False, build_params=build_params)
+def _finish_run(
+    runs: list[SheetRun],
+    output_dir: Path,
+    build_params: dict,
+    provenance: Mapping[str, str] | None,
+) -> None:
+    outputs = write_run_outputs(
+        runs, output_dir, clean_output_dir=False, build_params=build_params, provenance=provenance
+    )
 
     print("  Outputs:", file=sys.stderr)
     for path in outputs.values():
@@ -375,7 +383,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
         generate_svg=not args.no_svg,
         machine_config=_load_machine(args.machine),
     )
-    _finish_run(runs, output_dir, {"kerf_mm": kerf, "theme": theme, "y_origin": args.y_origin})
+    _finish_run(runs, output_dir, {"kerf_mm": kerf, "theme": theme, "y_origin": args.y_origin}, None)
 
 
 def main():
@@ -567,7 +575,12 @@ Exit codes:
                     feeds=feeds_list,
                 )
             )
-        _finish_run(runs, output_dir, {"kerf_mm": kerf_mm, "theme": theme, "y_origin": args.y_origin})
+        _finish_run(
+            runs,
+            output_dir,
+            {"kerf_mm": kerf_mm, "theme": theme, "y_origin": args.y_origin},
+            build_provenance(),
+        )
 
     except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)

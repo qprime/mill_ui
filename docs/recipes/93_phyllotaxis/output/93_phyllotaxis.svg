@@ -1,0 +1,1010 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.588 -51.587 853.175 487.175" width="853.175mm" height="487.17499999999995mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-11.5875" y="-51.5875" width="853.175" height="487.17499999999995" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="700.000" height="260.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <circle cx="120.000" cy="130.000" r="100.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="sunflower" />
+    <circle cx="350.000" cy="130.000" r="100.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="scaled_pockets" />
+    <path d="M 480.000 230.000 L 680.000 230.000 L 680.000 30.000 L 480.000 30.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_2" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <circle cx="120.000" cy="130.000" r="101.588" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="sunflower_toolpath" />
+    <circle cx="350.000" cy="130.000" r="101.588" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="scaled_pockets_toolpath" />
+    <path d="M 478.413 231.588 L 681.587 231.588 L 681.587 28.412 L 478.413 28.412 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_2_toolpath" />
+  </g>
+  <g id="POCKET_REGIONS" class="pocket-regions">
+    <circle cx="366.259" cy="67.074" r="2.005" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_000" />
+    <circle cx="295.094" cy="165.684" r="2.020" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_001" />
+    <circle cx="415.070" cy="140.856" r="2.035" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_002" />
+    <circle cx="309.055" cy="77.660" r="2.049" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_003" />
+    <circle cx="344.799" cy="196.730" r="2.064" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_004" />
+    <circle cx="399.259" cy="83.983" r="2.078" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_005" />
+    <circle cx="282.121" cy="130.662" r="2.093" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_006" />
+    <circle cx="400.849" cy="175.677" r="2.107" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_007" />
+    <circle cx="343.315" cy="61.507" r="2.121" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_008" />
+    <circle cx="308.385" cy="185.391" r="2.135" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_009" />
+    <circle cx="418.554" cy="117.183" r="2.149" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_010" />
+    <circle cx="290.404" cy="92.902" r="2.163" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_011" />
+    <circle cx="369.007" cy="198.050" r="2.177" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_012" />
+    <circle cx="382.156" cy="66.581" r="2.191" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_013" />
+    <circle cx="283.030" cy="155.200" r="2.205" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_014" />
+    <circle cx="416.818" cy="156.821" r="2.218" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_015" />
+    <circle cx="318.657" cy="64.689" r="2.232" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_016" />
+    <circle cx="328.867" cy="199.752" r="2.245" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_017" />
+    <circle cx="413.077" cy="92.619" r="2.258" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_018" />
+    <circle cx="277.813" cy="114.867" r="2.272" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_019" />
+    <circle cx="393.258" cy="190.272" r="2.285" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_020" />
+    <circle cx="358.867" cy="55.910" r="2.298" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_021" />
+    <circle cx="293.090" cy="178.921" r="2.311" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_022" />
+    <circle cx="425.434" cy="132.382" r="2.324" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_023" />
+    <circle cx="295.684" cy="76.993" r="2.337" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_024" />
+    <circle cx="354.269" cy="206.196" r="2.349" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_025" />
+    <circle cx="398.587" cy="70.609" r="2.362" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_026" />
+    <circle cx="273.644" cy="141.033" r="2.375" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_027" />
+    <circle cx="414.097" cy="173.675" r="2.387" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_028" />
+    <circle cx="332.145" cy="54.098" r="2.400" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_029" />
+    <circle cx="311.695" cy="198.386" r="2.412" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_030" />
+    <circle cx="424.826" cy="105.321" r="2.425" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_031" />
+    <circle cx="277.786" cy="97.486" r="2.437" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_032" />
+    <circle cx="381.445" cy="203.125" r="2.449" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_033" />
+    <circle cx="376.340" cy="54.461" r="2.462" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_034" />
+    <circle cx="279.200" cy="168.097" r="2.474" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_035" />
+    <circle cx="428.325" cy="149.831" r="2.486" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_036" />
+    <circle cx="305.425" cy="62.140" r="2.498" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_037" />
+    <circle cx="336.967" cy="210.537" r="2.510" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_038" />
+    <circle cx="414.319" cy="79.176" r="2.522" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_039" />
+    <circle cx="267.854" cy="124.001" r="2.534" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_040" />
+    <circle cx="406.786" cy="190.195" r="2.546" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_041" />
+    <circle cx="348.783" cy="46.870" r="2.557" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_042" />
+    <circle cx="294.489" cy="192.406" r="2.569" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_043" />
+    <circle cx="433.467" cy="121.442" r="2.581" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_044" />
+    <circle cx="282.368" cy="79.702" r="2.592" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_045" />
+    <circle cx="365.965" cy="213.145" r="2.604" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_046" />
+    <circle cx="394.589" cy="57.586" r="2.615" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_047" />
+    <circle cx="267.845" cy="153.379" r="2.627" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_048" />
+    <circle cx="426.705" cy="168.423" r="2.638" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_049" />
+    <circle cx="319.262" cy="49.507" r="2.650" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_050" />
+    <circle cx="318.157" cy="210.461" r="2.661" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_051" />
+    <circle cx="428.163" cy="92.019" r="2.672" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_052" />
+    <circle cx="266.357" cy="105.103" r="2.683" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_053" />
+    <circle cx="395.046" cy="205.172" r="2.694" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_054" />
+    <circle cx="367.635" cy="43.785" r="2.706" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_055" />
+    <circle cx="278.465" cy="181.873" r="2.717" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_056" />
+    <circle cx="438.146" cy="140.113" r="2.728" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_057" />
+    <circle cx="291.599" cy="62.729" r="2.739" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_058" />
+    <circle cx="347.613" cy="219.411" r="2.750" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_059" />
+    <circle cx="412.405" cy="65.427" r="2.760" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_060" />
+    <circle cx="260.011" cy="135.482" r="2.771" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_061" />
+    <circle cx="420.333" cy="186.967" r="2.782" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_062" />
+    <circle cx="336.567" cy="40.136" r="2.793" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_063" />
+    <circle cx="299.006" cy="205.628" r="2.804" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_064" />
+    <circle cx="439.028" cy="108.598" r="2.814" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_065" />
+    <circle cx="269.592" cy="85.475" r="2.825" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_066" />
+    <circle cx="379.324" cy="217.476" r="2.835" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_067" />
+    <circle cx="387.607" cy="45.373" r="2.846" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_068" />
+    <circle cx="264.789" cy="167.136" r="2.857" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_069" />
+    <circle cx="438.242" cy="160.288" r="2.867" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_070" />
+    <circle cx="305.229" cy="47.759" r="2.877" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_071" />
+    <circle cx="327.378" cy="221.215" r="2.888" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_072" />
+    <circle cx="428.579" cy="77.833" r="2.898" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_073" />
+    <circle cx="256.486" cy="115.334" r="2.909" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_074" />
+    <circle cx="409.258" cy="204.246" r="2.919" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_075" />
+    <circle cx="356.480" cy="34.889" r="2.929" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_076" />
+    <circle cx="280.733" cy="195.986" r="2.939" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_077" />
+    <circle cx="445.982" cy="128.127" r="2.950" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_078" />
+    <circle cx="277.711" cy="66.327" r="2.960" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_079" />
+    <circle cx="360.328" cy="226.111" r="2.970" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_080" />
+    <circle cx="407.502" cy="51.888" r="2.980" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_phyllotaxis_pocket_1_081" />
+  </g>
+  <g id="HOLES" class="holes">
+    <circle cx="120.000" cy="130.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_000" />
+    <line x1="117.000" y1="130.000" x2="123.000" y2="130.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_000_cross_h" />
+    <line x1="120.000" y1="127.000" x2="120.000" y2="133.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_000_cross_v" />
+    <circle cx="114.838" cy="125.272" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_001" />
+    <line x1="111.838" y1="125.272" x2="117.838" y2="125.272" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_001_cross_h" />
+    <line x1="114.838" y1="122.272" x2="114.838" y2="128.272" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_001_cross_v" />
+    <circle cx="120.865" cy="139.862" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_002" />
+    <line x1="117.865" y1="139.862" x2="123.865" y2="139.862" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_002_cross_h" />
+    <line x1="120.865" y1="136.862" x2="120.865" y2="142.862" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_002_cross_v" />
+    <circle cx="127.377" cy="120.378" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_003" />
+    <line x1="124.377" y1="120.378" x2="130.377" y2="120.378" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_003_cross_h" />
+    <line x1="127.377" y1="117.378" x2="127.377" y2="123.378" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_003_cross_v" />
+    <circle cx="106.214" cy="132.439" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_004" />
+    <line x1="103.214" y1="132.439" x2="109.214" y2="132.439" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_004_cross_h" />
+    <line x1="106.214" y1="129.439" x2="106.214" y2="135.439" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_004_cross_v" />
+    <circle cx="133.207" cy="138.401" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_005" />
+    <line x1="130.207" y1="138.401" x2="136.207" y2="138.401" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_005_cross_h" />
+    <line x1="133.207" y1="135.401" x2="133.207" y2="141.401" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_005_cross_v" />
+    <circle cx="115.549" cy="113.441" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_006" />
+    <line x1="112.549" y1="113.441" x2="118.549" y2="113.441" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_006_cross_h" />
+    <line x1="115.549" y1="110.441" x2="115.549" y2="116.441" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_006_cross_v" />
+    <circle cx="111.464" cy="146.436" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_007" />
+    <line x1="108.464" y1="146.436" x2="114.464" y2="146.436" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_007_cross_h" />
+    <line x1="111.464" y1="143.436" x2="111.464" y2="149.436" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_007_cross_v" />
+    <circle cx="138.598" cy="123.208" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_008" />
+    <line x1="135.598" y1="123.208" x2="141.598" y2="123.208" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_008_cross_h" />
+    <line x1="138.598" y1="120.208" x2="138.598" y2="126.208" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_008_cross_v" />
+    <circle cx="100.589" cy="121.987" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_009" />
+    <line x1="97.589" y1="121.987" x2="103.589" y2="121.987" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_009_cross_h" />
+    <line x1="100.589" y1="118.987" x2="100.589" y2="124.987" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_009_cross_v" />
+    <circle cx="129.382" cy="150.049" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_010" />
+    <line x1="126.382" y1="150.049" x2="132.382" y2="150.049" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_010_cross_h" />
+    <line x1="129.382" y1="147.049" x2="129.382" y2="153.049" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_010_cross_v" />
+    <circle cx="126.948" cy="107.848" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_011" />
+    <line x1="123.948" y1="107.848" x2="129.948" y2="107.848" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_011_cross_h" />
+    <line x1="126.948" y1="104.848" x2="126.948" y2="110.848" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_011_cross_v" />
+    <circle cx="99.020" cy="142.158" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_012" />
+    <line x1="96.020" y1="142.158" x2="102.020" y2="142.158" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_012_cross_h" />
+    <line x1="99.020" y1="139.158" x2="99.020" y2="145.158" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_012_cross_v" />
+    <circle cx="144.650" cy="135.419" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_013" />
+    <line x1="141.650" y1="135.419" x2="147.650" y2="135.419" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_013_cross_h" />
+    <line x1="144.650" y1="132.419" x2="144.650" y2="138.419" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_013_cross_v" />
+    <circle cx="104.936" cy="108.574" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_014" />
+    <line x1="101.936" y1="108.574" x2="107.936" y2="108.574" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_014_cross_h" />
+    <line x1="104.936" y1="105.574" x2="104.936" y2="111.574" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_014_cross_v" />
+    <circle cx="116.516" cy="156.886" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_015" />
+    <line x1="113.516" y1="156.886" x2="119.516" y2="156.886" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_015_cross_h" />
+    <line x1="116.516" y1="153.886" x2="116.516" y2="159.886" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_015_cross_v" />
+    <circle cx="141.410" cy="111.955" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_016" />
+    <line x1="138.410" y1="111.955" x2="144.410" y2="111.955" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_016_cross_h" />
+    <line x1="141.410" y1="108.955" x2="141.410" y2="114.955" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_016_cross_v" />
+    <circle cx="91.163" cy="128.807" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_017" />
+    <line x1="88.163" y1="128.807" x2="94.163" y2="128.807" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_017_cross_h" />
+    <line x1="91.163" y1="125.807" x2="91.163" y2="131.807" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_017_cross_v" />
+    <circle cx="141.051" cy="150.949" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_018" />
+    <line x1="138.051" y1="150.949" x2="144.051" y2="150.949" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_018_cross_h" />
+    <line x1="141.051" y1="147.949" x2="141.051" y2="153.949" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_018_cross_v" />
+    <circle cx="118.591" cy="99.520" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_019" />
+    <line x1="115.591" y1="99.520" x2="121.591" y2="99.520" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_019_cross_h" />
+    <line x1="118.591" y1="96.520" x2="118.591" y2="102.520" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_019_cross_v" />
+    <circle cx="99.943" cy="154.035" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_020" />
+    <line x1="96.943" y1="154.035" x2="102.943" y2="154.035" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_020_cross_h" />
+    <line x1="99.943" y1="151.035" x2="99.943" y2="157.035" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_020_cross_v" />
+    <circle cx="151.792" cy="125.722" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_021" />
+    <line x1="148.792" y1="125.722" x2="154.792" y2="125.722" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_021_cross_h" />
+    <line x1="151.792" y1="122.722" x2="151.792" y2="128.722" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_021_cross_v" />
+    <circle cx="93.049" cy="111.248" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_022" />
+    <line x1="90.049" y1="111.248" x2="96.049" y2="111.248" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_022_cross_h" />
+    <line x1="93.049" y1="108.248" x2="93.049" y2="114.248" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_022_cross_v" />
+    <circle cx="127.368" cy="162.752" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_023" />
+    <line x1="124.368" y1="162.752" x2="130.368" y2="162.752" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_023_cross_h" />
+    <line x1="127.368" y1="159.752" x2="127.368" y2="165.752" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_023_cross_v" />
+    <circle cx="137.050" cy="100.246" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_024" />
+    <line x1="134.050" y1="100.246" x2="140.050" y2="100.246" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_024_cross_h" />
+    <line x1="137.050" y1="97.246" x2="137.050" y2="103.246" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_024_cross_v" />
+    <circle cx="86.656" cy="140.638" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_025" />
+    <line x1="83.656" y1="140.638" x2="89.656" y2="140.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_025_cross_h" />
+    <line x1="86.656" y1="137.638" x2="86.656" y2="143.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_025_cross_v" />
+    <circle cx="152.402" cy="144.971" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_026" />
+    <line x1="149.402" y1="144.971" x2="155.402" y2="144.971" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_026_cross_h" />
+    <line x1="152.402" y1="141.971" x2="152.402" y2="147.971" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_026_cross_v" />
+    <circle cx="105.958" cy="96.447" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_027" />
+    <line x1="102.958" y1="96.447" x2="108.958" y2="96.447" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_027_cross_h" />
+    <line x1="105.958" y1="93.447" x2="105.958" y2="99.447" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_027_cross_v" />
+    <circle cx="107.464" cy="164.855" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_028" />
+    <line x1="104.464" y1="164.855" x2="110.464" y2="164.855" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_028_cross_h" />
+    <line x1="107.464" y1="161.855" x2="107.464" y2="167.855" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_028_cross_v" />
+    <circle cx="153.368" cy="112.463" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_029" />
+    <line x1="150.368" y1="112.463" x2="156.368" y2="112.463" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_029_cross_h" />
+    <line x1="153.368" y1="109.463" x2="153.368" y2="115.463" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_029_cross_v" />
+    <circle cx="82.926" cy="120.227" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_030" />
+    <line x1="79.926" y1="120.227" x2="85.926" y2="120.227" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_030_cross_h" />
+    <line x1="82.926" y1="117.227" x2="82.926" y2="123.227" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_030_cross_v" />
+    <circle cx="141.079" cy="162.782" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_031" />
+    <line x1="138.079" y1="162.782" x2="144.079" y2="162.782" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_031_cross_h" />
+    <line x1="141.079" y1="159.782" x2="141.079" y2="165.782" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_031_cross_v" />
+    <circle cx="126.707" cy="90.974" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_032" />
+    <line x1="123.707" y1="90.974" x2="129.707" y2="90.974" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_032_cross_h" />
+    <line x1="126.707" y1="87.974" x2="126.707" y2="93.974" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_032_cross_v" />
+    <circle cx="88.208" cy="154.622" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_033" />
+    <line x1="85.208" y1="154.622" x2="91.208" y2="154.622" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_033_cross_h" />
+    <line x1="88.208" y1="151.622" x2="88.208" y2="157.622" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_033_cross_v" />
+    <circle cx="160.677" cy="133.370" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_034" />
+    <line x1="157.677" y1="133.370" x2="163.677" y2="133.370" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_034_cross_h" />
+    <line x1="160.677" y1="130.370" x2="160.677" y2="136.370" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_034_cross_v" />
+    <circle cx="91.878" cy="99.600" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_035" />
+    <line x1="88.878" y1="99.600" x2="94.878" y2="99.600" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_035_cross_h" />
+    <line x1="91.878" y1="96.600" x2="91.878" y2="102.600" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_035_cross_v" />
+    <circle cx="120.205" cy="172.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_036" />
+    <line x1="117.205" y1="172.000" x2="123.205" y2="172.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_036_cross_h" />
+    <line x1="120.205" y1="169.000" x2="120.205" y2="175.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_036_cross_v" />
+    <circle cx="148.608" cy="98.463" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_037" />
+    <line x1="145.608" y1="98.463" x2="151.608" y2="98.463" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_037_cross_h" />
+    <line x1="148.608" y1="95.463" x2="148.608" y2="101.463" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_037_cross_v" />
+    <circle cx="77.033" cy="133.982" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_038" />
+    <line x1="74.033" y1="133.982" x2="80.033" y2="133.982" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_038_cross_h" />
+    <line x1="77.033" y1="130.982" x2="77.033" y2="136.982" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_038_cross_v" />
+    <circle cx="154.822" cy="156.428" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_039" />
+    <line x1="151.822" y1="156.428" x2="157.822" y2="156.428" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_039_cross_h" />
+    <line x1="154.822" y1="153.428" x2="154.822" y2="159.428" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_039_cross_v" />
+    <circle cx="112.076" cy="86.443" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_040" />
+    <line x1="109.076" y1="86.443" x2="115.076" y2="86.443" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_040_cross_h" />
+    <line x1="112.076" y1="83.443" x2="112.076" y2="89.443" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_040_cross_v" />
+    <circle cx="96.128" cy="167.936" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_041" />
+    <line x1="93.128" y1="167.936" x2="99.128" y2="167.936" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_041_cross_h" />
+    <line x1="96.128" y1="164.936" x2="96.128" y2="170.936" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_041_cross_v" />
+    <circle cx="163.752" cy="118.009" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_042" />
+    <line x1="160.752" y1="118.009" x2="166.752" y2="118.009" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_042_cross_h" />
+    <line x1="163.752" y1="115.009" x2="163.752" y2="121.009" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_042_cross_v" />
+    <circle cx="79.162" cy="109.042" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_043" />
+    <line x1="76.162" y1="109.042" x2="82.162" y2="109.042" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_043_cross_h" />
+    <line x1="79.162" y1="106.042" x2="79.162" y2="112.042" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_043_cross_v" />
+    <circle cx="136.141" cy="173.537" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_044" />
+    <line x1="133.141" y1="173.537" x2="139.141" y2="173.537" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_044_cross_h" />
+    <line x1="136.141" y1="170.537" x2="136.141" y2="176.537" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_044_cross_v" />
+    <circle cx="137.705" cy="86.508" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_045" />
+    <line x1="134.705" y1="86.508" x2="140.705" y2="86.508" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_045_cross_h" />
+    <line x1="137.705" y1="83.508" x2="137.705" y2="89.508" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_045_cross_v" />
+    <circle cx="77.098" cy="150.332" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_046" />
+    <line x1="74.098" y1="150.332" x2="80.098" y2="150.332" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_046_cross_h" />
+    <line x1="77.098" y1="147.332" x2="77.098" y2="153.332" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_046_cross_v" />
+    <circle cx="165.859" cy="144.139" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_047" />
+    <line x1="162.859" y1="144.139" x2="168.859" y2="144.139" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_047_cross_h" />
+    <line x1="165.859" y1="141.139" x2="165.859" y2="147.139" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_047_cross_v" />
+    <circle cx="95.479" cy="88.159" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_048" />
+    <line x1="92.479" y1="88.159" x2="98.479" y2="88.159" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_048_cross_h" />
+    <line x1="95.479" y1="85.159" x2="95.479" y2="91.159" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_048_cross_v" />
+    <circle cx="109.712" cy="177.908" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_049" />
+    <line x1="106.712" y1="177.908" x2="112.712" y2="177.908" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_049_cross_h" />
+    <line x1="109.712" y1="174.908" x2="109.712" y2="180.908" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_049_cross_v" />
+    <circle cx="160.353" cy="101.335" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_050" />
+    <line x1="157.353" y1="101.335" x2="163.353" y2="101.335" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_050_cross_h" />
+    <line x1="160.353" y1="98.335" x2="160.353" y2="104.335" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_050_cross_v" />
+    <circle cx="70.394" cy="123.818" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_051" />
+    <line x1="67.394" y1="123.818" x2="73.394" y2="123.818" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_051_cross_h" />
+    <line x1="70.394" y1="120.818" x2="70.394" y2="126.818" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_051_cross_v" />
+    <circle cx="152.718" cy="168.439" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_052" />
+    <line x1="149.718" y1="168.439" x2="155.718" y2="168.439" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_052_cross_h" />
+    <line x1="152.718" y1="165.439" x2="152.718" y2="171.439" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_052_cross_v" />
+    <circle cx="121.857" cy="79.073" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_053" />
+    <line x1="118.857" y1="79.073" x2="124.857" y2="79.073" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_053_cross_h" />
+    <line x1="121.857" y1="76.073" x2="121.857" y2="82.073" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_053_cross_v" />
+    <circle cx="83.894" cy="166.638" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_054" />
+    <line x1="80.894" y1="166.638" x2="86.894" y2="166.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_054_cross_h" />
+    <line x1="83.894" y1="163.638" x2="83.894" y2="169.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_054_cross_v" />
+    <circle cx="171.846" cy="127.349" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_055" />
+    <line x1="168.846" y1="127.349" x2="174.846" y2="127.349" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_055_cross_h" />
+    <line x1="171.846" y1="124.349" x2="171.846" y2="130.349" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_055_cross_v" />
+    <circle cx="79.618" cy="96.634" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_056" />
+    <line x1="76.618" y1="96.634" x2="82.618" y2="96.634" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_056_cross_h" />
+    <line x1="79.618" y1="93.634" x2="79.618" y2="99.634" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_056_cross_v" />
+    <circle cx="127.303" cy="182.342" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_057" />
+    <line x1="124.303" y1="182.342" x2="130.303" y2="182.342" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_057_cross_h" />
+    <line x1="127.303" y1="179.342" x2="127.303" y2="185.342" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_057_cross_v" />
+    <circle cx="150.233" cy="86.092" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_058" />
+    <line x1="147.233" y1="86.092" x2="153.233" y2="86.092" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_058_cross_h" />
+    <line x1="150.233" y1="83.092" x2="150.233" y2="89.092" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_058_cross_v" />
+    <circle cx="67.601" cy="142.057" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_059" />
+    <line x1="64.601" y1="142.057" x2="70.601" y2="142.057" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_059_cross_h" />
+    <line x1="67.601" y1="139.057" x2="67.601" y2="145.057" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_059_cross_v" />
+    <circle cx="167.176" cy="156.728" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_060" />
+    <line x1="164.176" y1="156.728" x2="170.176" y2="156.728" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_060_cross_h" />
+    <line x1="167.176" y1="153.728" x2="167.176" y2="159.728" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_060_cross_v" />
+    <circle cx="103.129" cy="77.996" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_061" />
+    <line x1="100.129" y1="77.996" x2="106.129" y2="77.996" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_061_cross_h" />
+    <line x1="103.129" y1="74.996" x2="103.129" y2="80.996" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_061_cross_v" />
+    <circle cx="97.127" cy="180.148" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_062" />
+    <line x1="94.127" y1="180.148" x2="100.127" y2="180.148" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_062_cross_h" />
+    <line x1="97.127" y1="177.148" x2="97.127" y2="183.148" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_062_cross_v" />
+    <circle cx="171.148" cy="108.300" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_063" />
+    <line x1="168.148" y1="108.300" x2="174.148" y2="108.300" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_063_cross_h" />
+    <line x1="171.148" y1="105.300" x2="171.148" y2="111.300" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_063_cross_v" />
+    <circle cx="67.213" cy="111.304" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_064" />
+    <line x1="64.213" y1="111.304" x2="70.213" y2="111.304" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_064_cross_h" />
+    <line x1="67.213" y1="108.304" x2="67.213" y2="114.304" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_064_cross_v" />
+    <circle cx="146.499" cy="179.828" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_065" />
+    <line x1="143.499" y1="179.828" x2="149.499" y2="179.828" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_065_cross_h" />
+    <line x1="146.499" y1="176.828" x2="146.499" y2="182.828" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_065_cross_v" />
+    <circle cx="134.227" cy="74.940" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_066" />
+    <line x1="131.227" y1="74.940" x2="137.227" y2="74.940" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_066_cross_h" />
+    <line x1="134.227" y1="71.940" x2="134.227" y2="77.940" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_066_cross_v" />
+    <circle cx="71.957" cy="161.223" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_067" />
+    <line x1="68.957" y1="161.223" x2="74.957" y2="161.223" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_067_cross_h" />
+    <line x1="71.957" y1="158.223" x2="71.957" y2="164.223" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_067_cross_v" />
+    <circle cx="176.936" cy="139.499" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_068" />
+    <line x1="173.936" y1="139.499" x2="179.936" y2="139.499" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_068_cross_h" />
+    <line x1="176.936" y1="136.499" x2="176.936" y2="142.499" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_068_cross_v" />
+    <circle cx="84.173" cy="84.202" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_069" />
+    <line x1="81.173" y1="84.202" x2="87.173" y2="84.202" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_069_cross_h" />
+    <line x1="84.173" y1="81.202" x2="84.173" y2="87.202" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_069_cross_v" />
+    <circle cx="115.449" cy="188.389" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_070" />
+    <line x1="112.449" y1="188.389" x2="118.449" y2="188.389" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_070_cross_h" />
+    <line x1="115.449" y1="185.389" x2="115.449" y2="191.389" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_070_cross_v" />
+    <circle cx="163.101" cy="89.735" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_071" />
+    <line x1="160.101" y1="89.735" x2="166.101" y2="89.735" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_071_cross_h" />
+    <line x1="163.101" y1="86.735" x2="163.101" y2="92.735" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_071_cross_v" />
+    <circle cx="60.606" cy="130.580" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_072" />
+    <line x1="57.606" y1="130.580" x2="63.606" y2="130.580" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_072_cross_h" />
+    <line x1="60.606" y1="127.580" x2="60.606" y2="133.580" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_072_cross_v" />
+    <circle cx="164.493" cy="169.968" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_073" />
+    <line x1="161.493" y1="169.968" x2="167.493" y2="169.968" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_073_cross_h" />
+    <line x1="164.493" y1="166.968" x2="164.493" y2="172.968" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_073_cross_v" />
+    <circle cx="114.151" cy="70.069" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_074" />
+    <line x1="111.151" y1="70.069" x2="117.151" y2="70.069" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_074_cross_h" />
+    <line x1="114.151" y1="67.069" x2="114.151" y2="73.069" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_074_cross_v" />
+    <circle cx="83.586" cy="178.467" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_075" />
+    <line x1="80.586" y1="178.467" x2="86.586" y2="178.467" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_075_cross_h" />
+    <line x1="83.586" y1="175.467" x2="83.586" y2="181.467" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_075_cross_v" />
+    <circle cx="179.985" cy="118.785" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_076" />
+    <line x1="176.985" y1="118.785" x2="182.985" y2="118.785" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_076_cross_h" />
+    <line x1="179.985" y1="115.785" x2="179.985" y2="121.785" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_076_cross_v" />
+    <circle cx="67.853" cy="97.539" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_077" />
+    <line x1="64.853" y1="97.539" x2="70.853" y2="97.539" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_077_cross_h" />
+    <line x1="67.853" y1="94.539" x2="67.853" y2="100.539" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_077_cross_v" />
+    <circle cx="136.631" cy="189.543" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_078" />
+    <line x1="133.631" y1="189.543" x2="139.631" y2="189.543" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_078_cross_h" />
+    <line x1="136.631" y1="186.543" x2="136.631" y2="192.543" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_078_cross_v" />
+    <circle cx="148.136" cy="74.508" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_079" />
+    <line x1="145.136" y1="74.508" x2="151.136" y2="74.508" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_079_cross_h" />
+    <line x1="148.136" y1="71.508" x2="148.136" y2="77.508" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_079_cross_v" />
+    <circle cx="61.402" cy="152.050" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_080" />
+    <line x1="58.402" y1="152.050" x2="64.402" y2="152.050" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_080_cross_h" />
+    <line x1="61.402" y1="149.050" x2="61.402" y2="155.050" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_080_cross_v" />
+    <circle cx="178.466" cy="153.469" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_081" />
+    <line x1="175.466" y1="153.469" x2="181.466" y2="153.469" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_081_cross_h" />
+    <line x1="178.466" y1="150.469" x2="178.466" y2="156.469" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_081_cross_v" />
+    <circle cx="92.575" cy="72.852" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_082" />
+    <line x1="89.575" y1="72.852" x2="95.575" y2="72.852" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_082_cross_h" />
+    <line x1="92.575" y1="69.852" x2="92.575" y2="75.852" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_082_cross_v" />
+    <circle cx="101.508" cy="191.033" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_083" />
+    <line x1="98.508" y1="191.033" x2="104.508" y2="191.033" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_083_cross_h" />
+    <line x1="101.508" y1="188.033" x2="101.508" y2="194.033" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_083_cross_v" />
+    <circle cx="175.192" cy="97.292" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_084" />
+    <line x1="172.192" y1="97.292" x2="178.192" y2="97.292" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_084_cross_h" />
+    <line x1="175.192" y1="94.292" x2="175.192" y2="100.292" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_084_cross_v" />
+    <circle cx="56.836" cy="116.758" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_085" />
+    <line x1="53.836" y1="116.758" x2="59.836" y2="116.758" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_085_cross_h" />
+    <line x1="56.836" y1="113.758" x2="56.836" y2="119.758" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_085_cross_v" />
+    <circle cx="157.851" cy="182.738" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_086" />
+    <line x1="154.851" y1="182.738" x2="160.851" y2="182.738" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_086_cross_h" />
+    <line x1="157.851" y1="179.738" x2="157.851" y2="185.738" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_086_cross_v" />
+    <circle cx="127.759" cy="65.171" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_087" />
+    <line x1="124.759" y1="65.171" x2="130.759" y2="65.171" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_087_cross_h" />
+    <line x1="127.759" y1="62.171" x2="127.759" y2="68.171" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_087_cross_v" />
+    <circle cx="70.204" cy="172.806" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_088" />
+    <line x1="67.204" y1="172.806" x2="73.204" y2="172.806" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_088_cross_h" />
+    <line x1="70.204" y1="169.806" x2="70.204" y2="175.806" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_088_cross_v" />
+    <circle cx="186.005" cy="132.085" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_089" />
+    <line x1="183.005" y1="132.085" x2="189.005" y2="132.085" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_089_cross_h" />
+    <line x1="186.005" y1="129.085" x2="186.005" y2="135.085" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_089_cross_v" />
+    <circle cx="72.473" cy="83.619" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_090" />
+    <line x1="69.473" y1="83.619" x2="75.473" y2="83.619" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_090_cross_h" />
+    <line x1="72.473" y1="80.619" x2="72.473" y2="86.619" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_090_cross_v" />
+    <circle cx="123.735" cy="196.671" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_091" />
+    <line x1="120.735" y1="196.671" x2="126.735" y2="196.671" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_091_cross_h" />
+    <line x1="123.735" y1="193.671" x2="123.735" y2="199.671" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_091_cross_v" />
+    <circle cx="162.513" cy="78.032" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_092" />
+    <line x1="159.513" y1="78.032" x2="165.513" y2="78.032" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_092_cross_h" />
+    <line x1="162.513" y1="75.032" x2="162.513" y2="81.032" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_092_cross_v" />
+    <circle cx="53.188" cy="139.654" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_093" />
+    <line x1="50.188" y1="139.654" x2="56.188" y2="139.654" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_093_cross_h" />
+    <line x1="53.188" y1="136.654" x2="53.188" y2="142.654" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_093_cross_v" />
+    <circle cx="176.085" cy="168.216" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_094" />
+    <line x1="173.085" y1="168.216" x2="179.085" y2="168.216" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_094_cross_h" />
+    <line x1="176.085" y1="165.216" x2="176.085" y2="171.216" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_094_cross_v" />
+    <circle cx="104.377" cy="63.585" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_095" />
+    <line x1="101.377" y1="63.585" x2="107.377" y2="63.585" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_095_cross_h" />
+    <line x1="104.377" y1="60.585" x2="104.377" y2="66.585" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_095_cross_v" />
+    <circle cx="86.483" cy="189.838" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_096" />
+    <line x1="83.483" y1="189.838" x2="89.483" y2="189.838" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_096_cross_h" />
+    <line x1="86.483" y1="186.838" x2="86.483" y2="192.838" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_096_cross_v" />
+    <circle cx="185.473" cy="108.406" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_097" />
+    <line x1="182.473" y1="108.406" x2="188.473" y2="108.406" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_097_cross_h" />
+    <line x1="185.473" y1="105.406" x2="185.473" y2="111.406" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_097_cross_v" />
+    <circle cx="56.813" cy="101.551" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_098" />
+    <line x1="53.813" y1="101.551" x2="59.813" y2="101.551" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_098_cross_h" />
+    <line x1="56.813" y1="98.551" x2="56.813" y2="104.551" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_098_cross_v" />
+    <circle cx="147.514" cy="193.984" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_099" />
+    <line x1="144.514" y1="193.984" x2="150.514" y2="193.984" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_099_cross_h" />
+    <line x1="147.514" y1="190.984" x2="147.514" y2="196.984" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_099_cross_v" />
+    <circle cx="143.048" cy="63.903" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_100" />
+    <line x1="140.048" y1="63.903" x2="146.048" y2="63.903" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_100_cross_h" />
+    <line x1="143.048" y1="60.903" x2="143.048" y2="66.903" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_100_cross_v" />
+    <circle cx="58.050" cy="163.335" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_101" />
+    <line x1="55.050" y1="163.335" x2="61.050" y2="163.335" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_101_cross_h" />
+    <line x1="58.050" y1="160.335" x2="58.050" y2="166.335" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_101_cross_v" />
+    <circle cx="188.534" cy="147.352" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_102" />
+    <line x1="185.534" y1="147.352" x2="191.534" y2="147.352" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_102_cross_h" />
+    <line x1="188.534" y1="144.352" x2="188.534" y2="150.352" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_102_cross_v" />
+    <circle cx="80.997" cy="70.622" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_103" />
+    <line x1="77.997" y1="70.622" x2="83.997" y2="70.622" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_103_cross_h" />
+    <line x1="80.997" y1="67.622" x2="80.997" y2="73.622" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_103_cross_v" />
+    <circle cx="108.596" cy="200.469" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_104" />
+    <line x1="105.596" y1="200.469" x2="111.596" y2="200.469" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_104_cross_h" />
+    <line x1="108.596" y1="197.469" x2="108.596" y2="203.469" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_104_cross_v" />
+    <circle cx="176.279" cy="85.529" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_105" />
+    <line x1="173.279" y1="85.529" x2="179.279" y2="85.529" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_105_cross_h" />
+    <line x1="176.279" y1="82.529" x2="176.279" y2="88.529" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_105_cross_v" />
+    <circle cx="48.122" cy="124.751" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_106" />
+    <line x1="45.122" y1="124.751" x2="51.122" y2="124.751" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_106_cross_h" />
+    <line x1="48.122" y1="121.751" x2="48.122" y2="127.751" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_106_cross_v" />
+    <circle cx="169.687" cy="182.670" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_107" />
+    <line x1="166.687" y1="182.670" x2="172.687" y2="182.670" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_107_cross_h" />
+    <line x1="169.687" y1="179.670" x2="169.687" y2="185.670" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_107_cross_v" />
+    <circle cx="118.935" cy="57.262" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_108" />
+    <line x1="115.935" y1="57.262" x2="121.935" y2="57.262" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_108_cross_h" />
+    <line x1="118.935" y1="54.262" x2="118.935" y2="60.262" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_108_cross_v" />
+    <circle cx="71.428" cy="184.605" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_109" />
+    <line x1="68.428" y1="184.605" x2="74.428" y2="184.605" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_109_cross_h" />
+    <line x1="71.428" y1="181.605" x2="71.428" y2="187.605" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_109_cross_v" />
+    <circle cx="193.034" cy="122.512" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_110" />
+    <line x1="190.034" y1="122.512" x2="196.034" y2="122.512" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_110_cross_h" />
+    <line x1="193.034" y1="119.512" x2="193.034" y2="125.512" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_110_cross_v" />
+    <circle cx="60.822" cy="85.989" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_111" />
+    <line x1="57.822" y1="85.989" x2="63.822" y2="85.989" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_111_cross_h" />
+    <line x1="60.822" y1="82.989" x2="60.822" y2="88.989" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_111_cross_v" />
+    <circle cx="133.970" cy="202.752" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_112" />
+    <line x1="130.970" y1="202.752" x2="136.970" y2="202.752" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_112_cross_h" />
+    <line x1="133.970" y1="199.752" x2="133.970" y2="205.752" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_112_cross_v" />
+    <circle cx="159.015" cy="66.638" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_113" />
+    <line x1="156.015" y1="66.638" x2="162.015" y2="66.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_113_cross_h" />
+    <line x1="159.015" y1="63.638" x2="159.015" y2="69.638" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_113_cross_v" />
+    <circle cx="48.115" cy="150.457" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_114" />
+    <line x1="45.115" y1="150.457" x2="51.115" y2="150.457" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_114_cross_h" />
+    <line x1="48.115" y1="147.457" x2="48.115" y2="153.457" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_114_cross_v" />
+    <circle cx="187.117" cy="163.620" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_115" />
+    <line x1="184.117" y1="163.620" x2="190.117" y2="163.620" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_115_cross_h" />
+    <line x1="187.117" y1="160.620" x2="187.117" y2="166.620" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_115_cross_v" />
+    <circle cx="93.104" cy="59.568" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_116" />
+    <line x1="90.104" y1="59.568" x2="96.104" y2="59.568" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_116_cross_h" />
+    <line x1="93.104" y1="56.568" x2="93.104" y2="62.568" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_116_cross_v" />
+    <circle cx="92.137" cy="200.404" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_117" />
+    <line x1="89.137" y1="200.404" x2="95.137" y2="200.404" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_117_cross_h" />
+    <line x1="92.137" y1="197.404" x2="92.137" y2="203.404" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_117_cross_v" />
+    <circle cx="188.393" cy="96.767" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_118" />
+    <line x1="185.393" y1="96.767" x2="191.393" y2="96.767" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_118_cross_h" />
+    <line x1="188.393" y1="93.767" x2="188.393" y2="99.767" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_118_cross_v" />
+    <circle cx="46.812" cy="108.215" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_119" />
+    <line x1="43.812" y1="108.215" x2="49.812" y2="108.215" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_119_cross_h" />
+    <line x1="46.812" y1="105.215" x2="46.812" y2="111.215" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_119_cross_v" />
+    <circle cx="159.415" cy="195.776" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_120" />
+    <line x1="156.415" y1="195.776" x2="162.415" y2="195.776" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_120_cross_h" />
+    <line x1="159.415" y1="192.776" x2="159.415" y2="198.776" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_120_cross_v" />
+    <circle cx="135.431" cy="54.562" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_121" />
+    <line x1="132.431" y1="54.562" x2="138.431" y2="54.562" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_121_cross_h" />
+    <line x1="135.431" y1="51.562" x2="135.431" y2="57.562" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_121_cross_v" />
+    <circle cx="57.407" cy="175.388" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_122" />
+    <line x1="54.407" y1="175.388" x2="60.407" y2="175.388" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_122_cross_h" />
+    <line x1="57.407" y1="172.388" x2="57.407" y2="178.388" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_122_cross_v" />
+    <circle cx="197.128" cy="138.849" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_123" />
+    <line x1="194.128" y1="138.849" x2="200.128" y2="138.849" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_123_cross_h" />
+    <line x1="197.128" y1="135.849" x2="197.128" y2="141.849" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_123_cross_v" />
+    <circle cx="68.899" cy="71.138" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_124" />
+    <line x1="65.899" y1="71.138" x2="71.899" y2="71.138" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_124_cross_h" />
+    <line x1="68.899" y1="68.138" x2="68.899" y2="74.138" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_124_cross_v" />
+    <circle cx="117.911" cy="208.234" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_125" />
+    <line x1="114.911" y1="208.234" x2="120.911" y2="208.234" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_125_cross_h" />
+    <line x1="117.911" y1="205.234" x2="117.911" y2="211.234" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_125_cross_v" />
+    <circle cx="174.604" cy="73.499" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_126" />
+    <line x1="171.604" y1="73.499" x2="177.604" y2="73.499" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_126_cross_h" />
+    <line x1="174.604" y1="70.499" x2="174.604" y2="76.499" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_126_cross_v" />
+    <circle cx="41.260" cy="134.797" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_127" />
+    <line x1="38.260" y1="134.797" x2="44.260" y2="134.797" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_127_cross_h" />
+    <line x1="41.260" y1="131.797" x2="41.260" y2="137.797" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_127_cross_v" />
+    <circle cx="181.541" cy="179.846" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_128" />
+    <line x1="178.541" y1="179.846" x2="184.541" y2="179.846" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_128_cross_h" />
+    <line x1="181.541" y1="176.846" x2="181.541" y2="182.846" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_128_cross_v" />
+    <circle cx="108.246" cy="51.369" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_129" />
+    <line x1="105.246" y1="51.369" x2="111.246" y2="51.369" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_129_cross_h" />
+    <line x1="108.246" y1="48.369" x2="108.246" y2="54.369" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_129_cross_v" />
+    <circle cx="75.380" cy="196.175" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_130" />
+    <line x1="72.380" y1="196.175" x2="78.380" y2="196.175" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_130_cross_h" />
+    <line x1="75.380" y1="193.175" x2="75.380" y2="199.175" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_130_cross_v" />
+    <circle cx="197.899" cy="111.273" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_131" />
+    <line x1="194.899" y1="111.273" x2="200.899" y2="111.273" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_131_cross_h" />
+    <line x1="197.899" y1="108.273" x2="197.899" y2="114.273" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_131_cross_v" />
+    <circle cx="49.643" cy="91.040" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_132" />
+    <line x1="46.643" y1="91.040" x2="52.643" y2="91.040" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_132_cross_h" />
+    <line x1="49.643" y1="88.040" x2="49.643" y2="94.040" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_132_cross_v" />
+    <circle cx="145.659" cy="206.542" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_133" />
+    <line x1="142.659" y1="206.542" x2="148.659" y2="206.542" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_133_cross_h" />
+    <line x1="145.659" y1="203.542" x2="145.659" y2="209.542" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_133_cross_v" />
+    <circle cx="152.906" cy="55.951" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_134" />
+    <line x1="149.906" y1="55.951" x2="155.906" y2="55.951" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_134_cross_h" />
+    <line x1="152.906" y1="52.951" x2="152.906" y2="58.951" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_134_cross_v" />
+    <circle cx="45.440" cy="162.494" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_135" />
+    <line x1="42.440" y1="162.494" x2="48.440" y2="162.494" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_135_cross_h" />
+    <line x1="45.440" y1="159.494" x2="45.440" y2="165.494" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_135_cross_v" />
+    <circle cx="197.212" cy="156.502" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_136" />
+    <line x1="194.212" y1="156.502" x2="200.212" y2="156.502" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_136_cross_h" />
+    <line x1="197.212" y1="153.502" x2="197.212" y2="159.502" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_136_cross_v" />
+    <circle cx="80.825" cy="58.039" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_137" />
+    <line x1="77.825" y1="58.039" x2="83.825" y2="58.039" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_137_cross_h" />
+    <line x1="80.825" y1="55.039" x2="80.825" y2="61.039" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_137_cross_v" />
+    <circle cx="100.206" cy="209.813" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_138" />
+    <line x1="97.206" y1="209.813" x2="103.206" y2="209.813" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_138_cross_h" />
+    <line x1="100.206" y1="206.813" x2="100.206" y2="212.813" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_138_cross_v" />
+    <circle cx="188.757" cy="84.354" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_139" />
+    <line x1="185.757" y1="84.354" x2="191.757" y2="84.354" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_139_cross_h" />
+    <line x1="188.757" y1="81.354" x2="188.757" y2="87.354" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_139_cross_v" />
+    <circle cx="38.175" cy="117.167" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_140" />
+    <line x1="35.175" y1="117.167" x2="41.175" y2="117.167" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_140_cross_h" />
+    <line x1="38.175" y1="114.167" x2="38.175" y2="120.167" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_140_cross_v" />
+    <circle cx="171.851" cy="194.965" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_141" />
+    <line x1="168.851" y1="194.965" x2="174.851" y2="194.965" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_141_cross_h" />
+    <line x1="171.851" y1="191.965" x2="171.851" y2="197.965" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_141_cross_v" />
+    <circle cx="125.670" cy="46.778" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_142" />
+    <line x1="122.670" y1="46.778" x2="128.670" y2="46.778" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_142_cross_h" />
+    <line x1="125.670" y1="43.778" x2="125.670" y2="49.778" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_142_cross_v" />
+    <circle cx="59.391" cy="187.737" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_143" />
+    <line x1="56.391" y1="187.737" x2="62.391" y2="187.737" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_143_cross_h" />
+    <line x1="59.391" y1="184.737" x2="59.391" y2="190.737" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_143_cross_v" />
+    <circle cx="203.984" cy="128.361" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_144" />
+    <line x1="200.984" y1="128.361" x2="206.984" y2="128.361" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_144_cross_h" />
+    <line x1="203.984" y1="125.361" x2="203.984" y2="131.361" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_144_cross_v" />
+    <circle cx="56.747" cy="74.286" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_145" />
+    <line x1="53.747" y1="74.286" x2="59.747" y2="74.286" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_145_cross_h" />
+    <line x1="56.747" y1="71.286" x2="56.747" y2="77.286" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_145_cross_v" />
+    <circle cx="129.037" cy="214.097" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_146" />
+    <line x1="126.037" y1="214.097" x2="132.037" y2="214.097" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_146_cross_h" />
+    <line x1="129.037" y1="211.097" x2="129.037" y2="217.097" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_146_cross_v" />
+    <circle cx="170.314" cy="61.652" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_147" />
+    <line x1="167.314" y1="61.652" x2="173.314" y2="61.652" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_147_cross_h" />
+    <line x1="170.314" y1="58.652" x2="170.314" y2="64.652" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_147_cross_v" />
+    <circle cx="36.448" cy="146.466" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_148" />
+    <line x1="33.448" y1="146.466" x2="39.448" y2="146.466" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_148_cross_h" />
+    <line x1="36.448" y1="143.466" x2="36.448" y2="149.466" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_148_cross_v" />
+    <circle cx="192.977" cy="174.446" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_149" />
+    <line x1="189.977" y1="174.446" x2="195.977" y2="174.446" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_149_cross_h" />
+    <line x1="192.977" y1="171.446" x2="192.977" y2="177.446" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_149_cross_v" />
+    <circle cx="96.132" cy="47.657" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_150" />
+    <line x1="93.132" y1="47.657" x2="99.132" y2="47.657" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_150_cross_h" />
+    <line x1="96.132" y1="44.657" x2="96.132" y2="50.657" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_150_cross_v" />
+    <circle cx="81.851" cy="207.095" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_151" />
+    <line x1="78.851" y1="207.095" x2="84.851" y2="207.095" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_151_cross_h" />
+    <line x1="81.851" y1="204.095" x2="81.851" y2="210.095" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_151_cross_v" />
+    <circle cx="200.472" cy="98.819" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_152" />
+    <line x1="197.472" y1="98.819" x2="203.472" y2="98.819" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_152_cross_h" />
+    <line x1="200.472" y1="95.819" x2="200.472" y2="101.819" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_152_cross_v" />
+    <circle cx="39.336" cy="98.531" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_153" />
+    <line x1="36.336" y1="98.531" x2="42.336" y2="98.531" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_153_cross_h" />
+    <line x1="39.336" y1="95.531" x2="39.336" y2="101.531" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_153_cross_v" />
+    <circle cx="158.347" cy="207.946" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_154" />
+    <line x1="155.347" y1="207.946" x2="161.347" y2="207.946" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_154_cross_h" />
+    <line x1="158.347" y1="204.946" x2="158.347" y2="210.946" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_154_cross_v" />
+    <circle cx="144.455" cy="46.352" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_155" />
+    <line x1="141.455" y1="46.352" x2="147.455" y2="46.352" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_155_cross_h" />
+    <line x1="144.455" y1="43.352" x2="144.455" y2="49.352" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_155_cross_v" />
+    <circle cx="45.224" cy="175.306" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_156" />
+    <line x1="42.224" y1="175.306" x2="48.224" y2="175.306" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_156_cross_h" />
+    <line x1="45.224" y1="172.306" x2="45.224" y2="178.306" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_156_cross_v" />
+    <circle cx="206.015" cy="147.158" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_157" />
+    <line x1="203.015" y1="147.158" x2="209.015" y2="147.158" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_157_cross_h" />
+    <line x1="206.015" y1="144.158" x2="206.015" y2="150.158" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_157_cross_v" />
+    <circle cx="68.000" cy="59.021" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_158" />
+    <line x1="65.000" y1="59.021" x2="71.000" y2="59.021" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_158_cross_h" />
+    <line x1="68.000" y1="56.021" x2="68.000" y2="62.021" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_158_cross_v" />
+    <circle cx="110.367" cy="217.739" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_159" />
+    <line x1="107.367" y1="217.739" x2="113.367" y2="217.739" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_159_cross_h" />
+    <line x1="110.367" y1="214.739" x2="110.367" y2="220.739" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_159_cross_v" />
+    <circle cx="186.579" cy="71.628" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_160" />
+    <line x1="183.579" y1="71.628" x2="189.579" y2="71.628" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_160_cross_h" />
+    <line x1="186.579" y1="68.628" x2="186.579" y2="74.628" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_160_cross_v" />
+    <circle cx="31.201" cy="128.062" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_161" />
+    <line x1="28.201" y1="128.062" x2="34.201" y2="128.062" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_161_cross_h" />
+    <line x1="31.201" y1="125.062" x2="31.201" y2="131.062" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_161_cross_v" />
+    <circle cx="184.368" cy="191.602" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_162" />
+    <line x1="181.368" y1="191.602" x2="187.368" y2="191.602" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_162_cross_h" />
+    <line x1="184.368" y1="188.602" x2="184.368" y2="194.602" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_162_cross_v" />
+    <circle cx="114.131" cy="40.823" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_163" />
+    <line x1="111.131" y1="40.823" x2="117.131" y2="40.823" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_163_cross_h" />
+    <line x1="114.131" y1="37.823" x2="114.131" y2="43.823" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_163_cross_v" />
+    <circle cx="63.918" cy="199.935" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_164" />
+    <line x1="60.918" y1="199.935" x2="66.918" y2="199.935" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_164_cross_h" />
+    <line x1="63.918" y1="196.935" x2="63.918" y2="202.935" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_164_cross_v" />
+    <circle cx="208.863" cy="116.273" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_165" />
+    <line x1="205.863" y1="116.273" x2="211.863" y2="116.273" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_165_cross_h" />
+    <line x1="208.863" y1="113.273" x2="208.863" y2="119.273" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_165_cross_v" />
+    <circle cx="44.977" cy="79.945" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_166" />
+    <line x1="41.977" y1="79.945" x2="47.977" y2="79.945" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_166_cross_h" />
+    <line x1="44.977" y1="76.945" x2="44.977" y2="82.945" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_166_cross_v" />
+    <circle cx="141.573" cy="217.850" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_167" />
+    <line x1="138.573" y1="217.850" x2="144.573" y2="217.850" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_167_cross_h" />
+    <line x1="141.573" y1="214.850" x2="141.573" y2="220.850" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_167_cross_v" />
+    <circle cx="163.565" cy="50.413" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_168" />
+    <line x1="160.565" y1="50.413" x2="166.565" y2="50.413" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_168_cross_h" />
+    <line x1="163.565" y1="47.413" x2="163.565" y2="53.413" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_168_cross_v" />
+    <circle cx="33.861" cy="159.344" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_169" />
+    <line x1="30.861" y1="159.344" x2="36.861" y2="159.344" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_169_cross_h" />
+    <line x1="33.861" y1="156.344" x2="33.861" y2="162.344" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_169_cross_v" />
+    <circle cx="203.584" cy="166.656" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_170" />
+    <line x1="200.584" y1="166.656" x2="206.584" y2="166.656" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_170_cross_h" />
+    <line x1="203.584" y1="163.656" x2="203.584" y2="169.656" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_170_cross_v" />
+    <circle cx="83.020" cy="46.265" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_171" />
+    <line x1="80.020" y1="46.265" x2="86.020" y2="46.265" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_171_cross_h" />
+    <line x1="83.020" y1="43.265" x2="83.020" y2="49.265" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_171_cross_v" />
+    <circle cx="90.620" cy="216.976" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_172" />
+    <line x1="87.620" y1="216.976" x2="93.620" y2="216.976" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_172_cross_h" />
+    <line x1="90.620" y1="213.976" x2="90.620" y2="219.976" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_172_cross_v" />
+    <circle cx="200.649" cy="85.584" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_173" />
+    <line x1="197.649" y1="85.584" x2="203.649" y2="85.584" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_173_cross_h" />
+    <line x1="200.649" y1="82.584" x2="200.649" y2="88.584" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_173_cross_v" />
+    <circle cx="30.271" cy="108.211" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_174" />
+    <line x1="27.271" y1="108.211" x2="33.271" y2="108.211" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_174_cross_h" />
+    <line x1="30.271" y1="105.211" x2="30.271" y2="111.211" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_174_cross_v" />
+    <circle cx="171.593" cy="206.897" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_175" />
+    <line x1="168.593" y1="206.897" x2="174.593" y2="206.897" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_175_cross_h" />
+    <line x1="171.593" y1="203.897" x2="171.593" y2="209.897" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_175_cross_v" />
+    <circle cx="133.940" cy="38.187" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_176" />
+    <line x1="130.940" y1="38.187" x2="136.940" y2="38.187" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_176_cross_h" />
+    <line x1="133.940" y1="35.187" x2="133.940" y2="41.187" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_176_cross_v" />
+    <circle cx="47.497" cy="188.449" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_177" />
+    <line x1="44.497" y1="188.449" x2="50.497" y2="188.449" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_177_cross_h" />
+    <line x1="47.497" y1="185.449" x2="47.497" y2="191.449" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_177_cross_v" />
+    <circle cx="213.206" cy="135.893" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_178" />
+    <line x1="210.206" y1="135.893" x2="216.206" y2="135.893" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_178_cross_h" />
+    <line x1="213.206" y1="132.893" x2="213.206" y2="138.893" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_178_cross_v" />
+    <circle cx="55.072" cy="62.506" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_179" />
+    <line x1="52.072" y1="62.506" x2="58.072" y2="62.506" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_179_cross_h" />
+    <line x1="55.072" y1="59.506" x2="55.072" y2="65.506" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_179_cross_v" />
+    <circle cx="122.290" cy="223.887" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_180" />
+    <line x1="119.290" y1="223.887" x2="125.290" y2="223.887" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_180_cross_h" />
+    <line x1="122.290" y1="220.887" x2="122.290" y2="226.887" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_180_cross_v" />
+    <circle cx="181.902" cy="59.027" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_181" />
+    <line x1="178.902" y1="59.027" x2="184.902" y2="59.027" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_181_cross_h" />
+    <line x1="181.902" y1="56.027" x2="181.902" y2="62.027" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_181_cross_v" />
+    <circle cx="26.156" cy="140.548" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_182" />
+    <line x1="23.156" y1="140.548" x2="29.156" y2="140.548" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_182_cross_h" />
+    <line x1="26.156" y1="137.548" x2="26.156" y2="143.548" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_182_cross_v" />
+    <circle cx="196.532" cy="185.766" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_183" />
+    <line x1="193.532" y1="185.766" x2="199.532" y2="185.766" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_183_cross_h" />
+    <line x1="196.532" y1="182.766" x2="196.532" y2="188.766" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_183_cross_v" />
+    <circle cx="101.185" cy="36.930" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_184" />
+    <line x1="98.185" y1="36.930" x2="104.185" y2="36.930" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_184_cross_h" />
+    <line x1="101.185" y1="33.930" x2="101.185" y2="39.930" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_184_cross_v" />
+    <circle cx="70.872" cy="211.557" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_185" />
+    <line x1="67.872" y1="211.557" x2="73.872" y2="211.557" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_185_cross_h" />
+    <line x1="70.872" y1="208.557" x2="70.872" y2="214.557" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_185_cross_v" />
+    <circle cx="211.562" cy="102.975" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_186" />
+    <line x1="208.562" y1="102.975" x2="214.562" y2="102.975" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_186_cross_h" />
+    <line x1="211.562" y1="99.975" x2="211.562" y2="105.975" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_186_cross_v" />
+    <circle cx="34.000" cy="87.965" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_187" />
+    <line x1="31.000" y1="87.965" x2="37.000" y2="87.965" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_187_cross_h" />
+    <line x1="34.000" y1="84.965" x2="34.000" y2="90.965" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_187_cross_v" />
+    <circle cx="155.114" cy="219.325" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_188" />
+    <line x1="152.114" y1="219.325" x2="158.114" y2="219.325" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_188_cross_h" />
+    <line x1="155.114" y1="216.325" x2="155.114" y2="222.325" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_188_cross_v" />
+    <circle cx="154.538" cy="40.177" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_189" />
+    <line x1="151.538" y1="40.177" x2="157.538" y2="40.177" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_189_cross_h" />
+    <line x1="154.538" y1="37.177" x2="154.538" y2="43.177" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_189_cross_v" />
+    <circle cx="33.631" cy="173.015" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_190" />
+    <line x1="30.631" y1="173.015" x2="36.631" y2="173.015" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_190_cross_h" />
+    <line x1="33.631" y1="170.015" x2="33.631" y2="176.015" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_190_cross_v" />
+    <circle cx="212.986" cy="156.693" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_191" />
+    <line x1="209.986" y1="156.693" x2="215.986" y2="156.693" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_191_cross_h" />
+    <line x1="212.986" y1="153.693" x2="212.986" y2="159.693" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_191_cross_v" />
+    <circle cx="69.334" cy="47.290" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_192" />
+    <line x1="66.334" y1="47.290" x2="72.334" y2="47.290" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_192_cross_h" />
+    <line x1="69.334" y1="44.290" x2="69.334" y2="50.290" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_192_cross_v" />
+    <circle cx="101.442" cy="225.460" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_193" />
+    <line x1="98.442" y1="225.460" x2="104.442" y2="225.460" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_193_cross_h" />
+    <line x1="101.442" y1="222.460" x2="101.442" y2="228.460" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_phyllotaxis_hole_0_193_cross_v" />
+  </g>
+  <g id="ENGRAVE_PATHS" class="engrave-paths">
+    <polyline points="577.000,127.000 583.000,130.000 577.000,133.000 577.000,127.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_000" />
+    <polyline points="572.812,127.484 570.414,121.219 576.865,123.059 572.812,127.484" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_001" />
+    <polyline points="583.963,140.837 581.499,147.076 577.986,141.362 583.963,140.837" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_002" />
+    <polyline points="586.332,116.810 592.364,113.874 591.094,120.461 586.332,116.810" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_003" />
+    <polyline points="563.782,135.915 557.352,134.006 562.737,130.007 563.782,135.915" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_004" />
+    <polyline points="597.946,137.860 601.398,143.612 594.725,142.923 597.946,137.860" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_005" />
+    <polyline points="571.523,110.021 572.862,103.448 577.317,108.463 571.523,110.021" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_006" />
+    <polyline points="571.851,152.200 566.423,156.142 566.526,149.435 571.851,152.200" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_007" />
+    <polyline points="602.721,118.509 609.386,119.268 604.779,124.144 602.721,118.509" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_008" />
+    <polyline points="553.898,122.471 549.497,117.409 556.187,116.925 553.898,122.471" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_009" />
+    <polyline points="594.849,154.653 594.675,161.359 589.414,157.196 594.849,154.653" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_010" />
+    <polyline points="586.166,100.319 590.824,95.491 591.891,102.114 586.166,100.319" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_011" />
+    <polyline points="554.128,148.461 547.433,148.873 551.120,143.269 554.128,148.461" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_012" />
+    <polyline points="612.929,134.168 618.145,138.386 611.640,140.028 612.929,134.168" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_013" />
+    <polyline points="557.752,103.570 556.755,96.937 562.660,100.120 557.752,103.570" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_014" />
+    <polyline points="578.383,165.819 574.637,171.384 572.433,165.048 578.383,165.819" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_015" />
+    <polyline points="606.359,103.862 612.880,102.289 610.225,108.449 606.359,103.862" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_016" />
+    <polyline points="541.678,131.418 535.807,128.172 541.926,125.423 541.678,131.418" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_017" />
+    <polyline points="610.063,155.684 612.200,162.043 605.830,159.937 610.063,155.684" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_018" />
+    <polyline points="575.128,89.593 577.848,83.461 581.122,89.316 575.128,89.593" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_019" />
+    <polyline points="555.572,163.955 549.424,166.640 550.965,160.111 555.572,163.955" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_020" />
+    <polyline points="622.043,121.316 628.390,123.489 622.843,127.263 622.043,121.316" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_021" />
+    <polyline points="542.248,107.388 539.036,101.498 545.674,102.462 542.248,107.388" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_022" />
+    <polyline points="592.794,173.204 591.184,179.716 586.941,174.521 592.794,173.204" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_023" />
+    <polyline points="600.262,88.606 605.848,84.891 605.468,91.589 600.262,88.606" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_024" />
+    <polyline points="536.135,147.143 529.507,146.109 534.312,141.427 536.135,147.143" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_025" />
+    <polyline points="624.823,147.405 629.012,152.645 622.307,152.852 624.823,147.405" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_026" />
+    <polyline points="558.330,85.992 558.781,79.299 563.865,83.676 558.330,85.992" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_027" />
+    <polyline points="565.929,177.985 561.075,182.615 560.283,175.954 565.929,177.985" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_028" />
+    <polyline points="623.618,103.687 630.324,103.551 626.409,108.998 623.618,103.687" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_029" />
+    <polyline points="529.173,119.705 524.136,115.274 530.702,113.903 529.173,119.705" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_030" />
+    <polyline points="611.013,172.686 611.735,179.355 605.967,175.931 611.013,172.686" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_031" />
+    <polyline points="586.117,76.697 590.089,71.292 592.030,77.714 586.117,76.697" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_032" />
+    <polyline points="538.791,165.709 532.210,167.011 535.117,160.965 538.791,165.709" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_033" />
+    <polyline points="635.368,131.577 641.100,135.062 634.873,137.556 635.368,131.577" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_034" />
+    <polyline points="539.660,90.812 537.788,84.370 544.065,86.737 539.660,90.812" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_035" />
+    <polyline points="583.278,186.985 580.307,192.999 577.278,187.014 583.278,186.985" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_036" />
+    <polyline points="616.632,85.154 622.885,82.726 621.075,89.185 616.632,85.154" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_037" />
+    <polyline points="521.883,138.399 515.632,135.966 521.329,132.425 521.883,138.399" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_038" />
+    <polyline points="629.169,163.551 632.135,169.568 625.542,168.331 629.169,163.551" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_039" />
+    <polyline points="566.265,71.264 568.143,64.824 572.169,70.190 566.265,71.264" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_040" />
+    <polyline points="550.034,183.252 544.299,186.733 544.955,180.057 550.034,183.252" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_041" />
+    <polyline points="638.816,110.770 645.396,112.078 640.402,116.557 638.816,110.770" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_042" />
+    <polyline points="522.959,104.099 518.990,98.691 525.698,98.761 522.959,104.099" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_043" />
+    <polyline points="604.828,188.340 604.101,195.009 599.203,190.426 604.828,188.340" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_044" />
+    <polyline points="601.383,69.516 606.424,65.090 606.940,71.779 601.383,69.516" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_045" />
+    <polyline points="522.707,160.472 516.000,160.331 520.137,155.050 522.707,160.472" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_046" />
+    <polyline points="643.531,146.448 648.380,151.082 641.763,152.181 643.531,146.448" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_047" />
+    <polyline points="543.898,74.332 543.453,67.638 549.075,71.298 543.898,74.332" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_048" />
+    <polyline points="568.866,196.137 564.673,201.373 563.000,194.877 568.866,196.137" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_049" />
+    <polyline points="633.464,88.342 640.092,87.313 636.938,93.234 633.464,88.342" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_050" />
+    <polyline points="511.740,124.516 506.157,120.797 512.482,118.562 511.740,124.516" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_051" />
+    <polyline points="627.080,180.683 628.685,187.197 622.511,184.572 627.080,180.683" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_052" />
+    <polyline points="579.546,60.136 582.762,54.249 585.542,60.355 579.546,60.136" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_053" />
+    <polyline points="532.663,182.309 526.314,184.477 528.389,178.098 532.663,182.309" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_054" />
+    <polyline points="650.916,123.370 657.061,126.060 651.222,129.362 650.916,123.370" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_055" />
+    <polyline points="522.713,86.558 519.998,80.424 526.535,81.933 522.713,86.558" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_056" />
+    <polyline points="592.989,201.388 590.847,207.745 587.047,202.217 592.989,201.388" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_057" />
+    <polyline points="619.018,68.043 624.892,64.803 623.960,71.446 619.018,68.043" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_058" />
+    <polyline points="508.741,149.475 502.221,147.897 507.395,143.628 508.741,149.475" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_059" />
+    <polyline points="646.263,164.094 650.005,169.662 643.306,169.315 646.263,164.094" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_060" />
+    <polyline points="553.971,59.488 554.973,52.855 559.679,57.637 553.971,59.488" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_061" />
+    <polyline points="551.298,200.155 546.079,204.369 545.839,197.665 551.298,200.155" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_062" />
+    <polyline points="649.135,97.410 655.830,97.829 651.479,102.934 649.135,97.410" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_063" />
+    <polyline points="506.416,107.121 501.762,102.290 508.420,101.465 506.416,107.121" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_064" />
+    <polyline points="619.096,197.125 619.264,203.831 613.798,199.942 619.096,197.125" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_065" />
+    <polyline points="596.669,53.497 601.074,48.438 602.478,54.998 596.669,53.497" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_066" />
+    <polyline points="515.518,175.485 508.852,176.240 512.248,170.455 515.518,175.485" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_067" />
+    <polyline points="658.872,140.118 664.297,144.064 657.885,146.036 658.872,140.118" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_068" />
+    <polyline points="528.304,68.786 526.970,62.212 533.030,65.089 528.304,68.786" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_069" />
+    <polyline points="576.723,210.655 573.266,216.404 570.741,210.189 576.723,210.655" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_070" />
+    <polyline points="637.333,72.334 643.766,70.431 641.429,76.719 637.333,72.334" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_071" />
+    <polyline points="498.180,133.798 492.151,130.857 498.122,127.799 498.180,133.798" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_072" />
+    <polyline points="643.334,182.860 645.793,189.101 639.324,187.323 643.334,182.860" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_073" />
+    <polyline points="568.949,47.661 571.352,41.398 574.921,47.078 568.949,47.661" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_074" />
+    <polyline points="532.181,198.642 526.179,201.637 527.384,195.038 532.181,198.642" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_075" />
+    <polyline points="662.193,111.581 668.642,113.427 663.296,117.479 662.193,111.581" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_076" />
+    <polyline points="506.466,87.759 502.958,82.041 509.637,82.665 506.466,87.759" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_077" />
+    <polyline points="605.841,211.365 604.566,217.951 600.062,212.980 605.841,211.365" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_078" />
+    <polyline points="616.162,52.045 621.551,48.050 621.514,54.758 616.162,52.045" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_079" />
+    <polyline points="500.152,163.252 493.480,162.557 498.039,157.636 500.152,163.252" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_080" />
+    <polyline points="661.856,159.625 666.306,164.644 659.621,165.193 661.856,159.625" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_081" />
+    <polyline points="539.414,52.363 539.523,45.656 544.823,49.767 539.414,52.363" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_082" />
+    <polyline points="557.324,215.189 552.713,220.061 551.582,213.449 557.324,215.189" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_083" />
+    <polyline points="654.735,82.222 661.427,81.744 657.794,87.384 654.735,82.222" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_084" />
+    <polyline points="492.087,114.635 486.830,110.468 493.318,108.763 492.087,114.635" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_085" />
+    <polyline points="634.761,201.154 635.822,207.777 629.886,204.652 634.761,201.154" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_086" />
+    <polyline points="587.748,40.009 591.440,34.408 593.706,40.722 587.748,40.009" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_087" />
+    <polyline points="513.093,191.471 506.588,193.107 509.182,186.921 513.093,191.471" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_088" />
+    <polyline points="671.389,129.885 677.291,133.073 671.200,135.882 671.389,129.885" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_089" />
+    <polyline points="512.157,67.983 509.958,61.646 516.347,63.689 512.157,67.983" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_090" />
+    <polyline points="588.163,222.081 585.504,228.240 582.173,222.417 588.163,222.081" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_091" />
+    <polyline points="636.512,56.183 642.633,53.439 641.156,59.982 636.512,56.183" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_092" />
+    <polyline points="487.953,146.332 481.586,144.220 487.095,140.393 487.953,146.332" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_093" />
+    <polyline points="659.332,180.426 662.601,186.283 655.953,185.384 659.332,180.426" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_094" />
+    <polyline points="555.448,38.729 556.994,32.202 561.288,37.355 555.448,38.729" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_095" />
+    <polyline points="536.202,214.332 530.652,218.100 530.967,211.399 536.202,214.332" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_096" />
+    <polyline points="669.744,97.242 676.382,98.212 671.623,102.941 669.744,97.242" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_097" />
+    <polyline points="491.236,93.325 486.997,88.126 493.700,87.854 491.236,93.325" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_098" />
+    <polyline points="620.877,217.465 620.491,224.162 615.365,219.835 620.877,217.465" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_099" />
+    <polyline points="609.105,37.421 613.913,32.743 614.771,39.396 609.105,37.421" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_100" />
+    <polyline points="495.563,178.841 488.858,179.042 492.720,173.557 495.563,178.841" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_101" />
+    <polyline points="523.420,49.329 522.634,42.667 528.435,46.035 523.420,49.329" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_102" />
+    <polyline points="656.185,65.976 662.753,64.610 659.905,70.684 656.185,65.976" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_103" />
+    <polyline points="651.106,201.002 653.041,207.426 646.741,205.120 651.106,201.002" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_104" />
+    <polyline points="514.846,207.760 508.617,210.249 510.363,203.772 514.846,207.760" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_105" />
+    <polyline points="496.077,71.325 493.053,65.337 499.657,66.510 496.077,71.325" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_106" />
+    <polyline points="631.609,40.464 637.309,36.928 636.718,43.610 631.609,40.464" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_107" />
+    <polyline points="674.543,174.003 678.564,179.372 671.855,179.367 674.543,174.003" stroke="#888888" fill="none" stroke-width="0.25" id="generated_phyllotaxis_svg_3_108" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="120.000" y="130.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="sunflower_label">sunflower</text>
+    <text x="350.000" y="130.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="scaled_pockets_label">scaled_pockets</text>
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="364.25413235420575" y1="65.06932929868445" x2="364.25413235420575" y2="45.06932929868445" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="368.2641198853584" y1="65.06932929868445" x2="368.2641198853584" y2="45.06932929868445" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="364.25413235420575" y1="45.06932929868445" x2="368.2641198853584" y2="45.06932929868445" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="364.25413235420575,45.06932929868445 367.25413235420575,42.06932929868445 367.25413235420575,48.06932929868445" fill="#5ab9ea" />
+    <polygon points="368.2641198853584,45.06932929868445 365.2641198853584,42.06932929868445 365.2641198853584,48.06932929868445" fill="#5ab9ea" />
+    <text x="366.2591261197821" y="40.06932929868445" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀4.0mm</text>
+    <line x1="410.8183126038191" y1="90.36068851639601" x2="410.8183126038191" y2="70.36068851639601" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="415.33494852007357" y1="90.36068851639601" x2="415.33494852007357" y2="70.36068851639601" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="410.8183126038191" y1="70.36068851639601" x2="415.33494852007357" y2="70.36068851639601" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="410.8183126038191,70.36068851639601 413.8183126038191,67.36068851639601 413.8183126038191,73.36068851639601" fill="#5ab9ea" />
+    <polygon points="415.33494852007357,70.36068851639601 412.33494852007357,67.36068851639601 412.33494852007357,73.36068851639601" fill="#5ab9ea" />
+    <text x="413.07663056194633" y="65.36068851639601" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀4.5mm</text>
+    <line x1="409.64422626795596" y1="62.666674008961905" x2="409.64422626795596" y2="22.666674008961905" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="415.1650957646928" y1="62.666674008961905" x2="415.1650957646928" y2="22.666674008961905" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="409.64422626795596" y1="22.666674008961905" x2="415.1650957646928" y2="22.666674008961905" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="409.64422626795596,22.666674008961905 412.64422626795596,19.666674008961905 412.64422626795596,25.666674008961905" fill="#5ab9ea" />
+    <polygon points="415.1650957646928,22.666674008961905 412.1650957646928,19.666674008961905 412.1650957646928,25.666674008961905" fill="#5ab9ea" />
+    <text x="412.4046610163244" y="17.666674008961905" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀5.5mm</text>
+    <line x1="480.0" y1="30.0" x2="480.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="680.0" y1="30.0" x2="680.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="480.0" y1="10.0" x2="680.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="480.0,10.0 483.0,7.0 483.0,13.0" fill="#5ab9ea" />
+    <polygon points="680.0,10.0 677.0,7.0 677.0,13.0" fill="#5ab9ea" />
+    <text x="580.0" y="5.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">200.0mm</text>
+    <line x1="680.0" y1="30.0" x2="700.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="680.0" y1="230.0" x2="700.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="700.0" y1="30.0" x2="700.0" y2="230.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="700.0,30.0 697.0,33.0 703.0,33.0" fill="#5ab9ea" />
+    <polygon points="700.0,230.0 697.0,227.0 703.0,227.0" fill="#5ab9ea" />
+    <text x="705.0" y="130.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 705.0 130.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">200.0mm</text>
+    <line x1="250.0" y1="30.0" x2="250.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="450.0" y1="30.0" x2="450.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="250.0" y1="-11.5875" x2="450.0" y2="-11.5875" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="250.0,-11.5875 253.0,-14.5875 253.0,-8.5875" fill="#5ab9ea" />
+    <polygon points="450.0,-11.5875 447.0,-14.5875 447.0,-8.5875" fill="#5ab9ea" />
+    <text x="350.0" y="-16.5875" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀200.0mm</text>
+    <line x1="68.00030633304155" y1="59.0240382822861" x2="68.00030633304155" y2="39.0240382822861" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="181.9019996074831" y1="59.0240382822861" x2="181.9019996074831" y2="39.0240382822861" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="68.00030633304155" y1="39.0240382822861" x2="181.9019996074831" y2="39.0240382822861" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="68.00030633304155,39.0240382822861 71.00030633304155,36.0240382822861 71.00030633304155,42.0240382822861" fill="#5ab9ea" />
+    <polygon points="181.9019996074831,39.0240382822861 178.9019996074831,36.0240382822861 178.9019996074831,42.0240382822861" fill="#5ab9ea" />
+    <text x="124.95115297026233" y="34.0240382822861" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">113.9mm</text>
+    <line x1="103.1294542313972" y1="78.0143963742674" x2="103.1294542313972" y2="38.014396374267406" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="162.51326924546763" y1="78.0143963742674" x2="162.51326924546763" y2="38.014396374267406" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="103.1294542313972" y1="38.014396374267406" x2="162.51326924546763" y2="38.014396374267406" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="103.1294542313972,38.014396374267406 106.1294542313972,35.014396374267406 106.1294542313972,41.014396374267406" fill="#5ab9ea" />
+    <polygon points="162.51326924546763,38.014396374267406 159.51326924546763,35.014396374267406 159.51326924546763,41.014396374267406" fill="#5ab9ea" />
+    <text x="132.82136173843242" y="33.014396374267406" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">59.4mm</text>
+    <line x1="49.64278505311056" y1="91.00720011750865" x2="49.64278505311056" y2="31.007200117508646" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="126.70695424833897" y1="91.00720011750865" x2="126.70695424833897" y2="31.007200117508646" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="49.64278505311056" y1="31.007200117508646" x2="126.70695424833897" y2="31.007200117508646" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="49.64278505311056,31.007200117508646 52.64278505311056,28.007200117508646 52.64278505311056,34.007200117508646" fill="#5ab9ea" />
+    <polygon points="126.70695424833897,31.007200117508646 123.70695424833897,28.007200117508646 123.70695424833897,34.007200117508646" fill="#5ab9ea" />
+    <text x="88.17486965072476" y="26.007200117508646" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">77.1mm</text>
+    <line x1="39.33595603526372" y1="98.49708160237533" x2="39.33595603526372" y2="18.49708160237533" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="148.60842542666128" y1="98.49708160237533" x2="148.60842542666128" y2="18.49708160237533" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="39.33595603526372" y1="18.49708160237533" x2="148.60842542666128" y2="18.49708160237533" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="39.33595603526372,18.49708160237533 42.33595603526372,15.497081602375331 42.33595603526372,21.49708160237533" fill="#5ab9ea" />
+    <polygon points="148.60842542666128,18.49708160237533 145.60842542666128,15.497081602375331 145.60842542666128,21.49708160237533" fill="#5ab9ea" />
+    <text x="93.9721907309625" y="13.497081602375331" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">109.3mm</text>
+    <line x1="30.27129925646146" y1="108.21305799091712" x2="30.27129925646146" y2="88.21305799091712" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="46.812442517595514" y1="108.21305799091712" x2="46.812442517595514" y2="88.21305799091712" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="30.27129925646146" y1="88.21305799091712" x2="46.812442517595514" y2="88.21305799091712" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="30.27129925646146,88.21305799091712 33.27129925646146,85.21305799091712 33.27129925646146,91.21305799091712" fill="#5ab9ea" />
+    <polygon points="46.812442517595514,88.21305799091712 43.812442517595514,85.21305799091712 43.812442517595514,91.21305799091712" fill="#5ab9ea" />
+    <text x="38.54187088702849" y="83.21305799091712" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">16.5mm</text>
+    <line x1="67.21308823495087" y1="111.28869585283644" x2="67.21308823495087" y2="11.28869585283644" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="197.89939457147122" y1="111.28869585283644" x2="197.89939457147122" y2="11.28869585283644" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="67.21308823495087" y1="11.28869585283644" x2="197.89939457147122" y2="11.28869585283644" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="67.21308823495087,11.28869585283644 70.21308823495087,8.28869585283644 70.21308823495087,14.28869585283644" fill="#5ab9ea" />
+    <polygon points="197.89939457147122,11.28869585283644 194.89939457147122,8.28869585283644 194.89939457147122,14.28869585283644" fill="#5ab9ea" />
+    <text x="132.55624140321106" y="6.28869585283644" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">130.7mm</text>
+    <line x1="167.17629792873964" y1="156.7107957066894" x2="167.17629792873964" y2="96.7107957066894" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="212.98635971496202" y1="156.7107957066894" x2="212.98635971496202" y2="96.7107957066894" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="167.17629792873964" y1="96.7107957066894" x2="212.98635971496202" y2="96.7107957066894" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="167.17629792873964,96.7107957066894 170.17629792873964,93.7107957066894 170.17629792873964,99.7107957066894" fill="#5ab9ea" />
+    <polygon points="212.98635971496202,96.7107957066894 209.98635971496202,93.7107957066894 209.98635971496202,99.7107957066894" fill="#5ab9ea" />
+    <text x="190.08132882185083" y="91.7107957066894" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">45.8mm</text>
+    <line x1="127.3681696858817" y1="162.76731472972665" x2="127.3681696858817" y2="42.76731472972665" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="141.07879959992306" y1="162.76731472972665" x2="141.07879959992306" y2="42.76731472972665" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="127.3681696858817" y1="42.76731472972665" x2="141.07879959992306" y2="42.76731472972665" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="127.3681696858817,42.76731472972665 130.3681696858817,39.76731472972665 130.3681696858817,45.76731472972665" fill="#5ab9ea" />
+    <polygon points="141.07879959992306,42.76731472972665 138.07879959992306,39.76731472972665 138.07879959992306,45.76731472972665" fill="#5ab9ea" />
+    <text x="134.22348464290238" y="37.76731472972665" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">13.7mm</text>
+    <line x1="146.49906073269503" y1="179.83699727960266" x2="146.49906073269503" y2="39.836997279602656" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="181.54142516830905" y1="179.83699727960266" x2="181.54142516830905" y2="39.836997279602656" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="146.49906073269503" y1="39.836997279602656" x2="181.54142516830905" y2="39.836997279602656" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="146.49906073269503,39.836997279602656 149.49906073269503,36.836997279602656 149.49906073269503,42.836997279602656" fill="#5ab9ea" />
+    <polygon points="181.54142516830905,39.836997279602656 178.54142516830905,36.836997279602656 178.54142516830905,42.836997279602656" fill="#5ab9ea" />
+    <text x="164.02024295050205" y="34.836997279602656" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">35.0mm</text>
+    <line x1="157.85105305213673" y1="182.70416420147728" x2="157.85105305213673" y2="62.70416420147728" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="169.68739924072997" y1="182.70416420147728" x2="169.68739924072997" y2="62.70416420147728" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="157.85105305213673" y1="62.70416420147728" x2="169.68739924072997" y2="62.70416420147728" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="157.85105305213673,62.70416420147728 160.85105305213673,59.70416420147728 160.85105305213673,65.70416420147728" fill="#5ab9ea" />
+    <polygon points="169.68739924072997,62.70416420147728 166.68739924072997,59.70416420147728 166.68739924072997,65.70416420147728" fill="#5ab9ea" />
+    <text x="163.76922614643337" y="57.70416420147728" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">11.8mm</text>
+    <line x1="47.49674928955794" y1="188.41903636656525" x2="47.49674928955794" y2="48.41903636656525" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="115.44926072845237" y1="188.41903636656525" x2="115.44926072845237" y2="48.41903636656525" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="47.49674928955794" y1="48.41903636656525" x2="115.44926072845237" y2="48.41903636656525" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="47.49674928955794,48.41903636656525 50.49674928955794,45.41903636656525 50.49674928955794,51.41903636656525" fill="#5ab9ea" />
+    <polygon points="115.44926072845237,48.41903636656525 112.44926072845237,45.41903636656525 112.44926072845237,51.41903636656525" fill="#5ab9ea" />
+    <text x="81.47300500900516" y="43.41903636656525" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">68.0mm</text>
+    <line x1="48.11829437375363" y1="124.7506060997809" x2="88.11829437375363" y2="124.7506060997809" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="48.11829437375363" y1="150.4568968425817" x2="88.11829437375363" y2="150.4568968425817" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="88.11829437375363" y1="124.7506060997809" x2="88.11829437375363" y2="150.4568968425817" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="88.11829437375363,124.7506060997809 85.11829437375363,127.7506060997809 91.11829437375363,127.7506060997809" fill="#5ab9ea" />
+    <polygon points="88.11829437375363,150.4568968425817 85.11829437375363,147.4568968425817 91.11829437375363,147.4568968425817" fill="#5ab9ea" />
+    <text x="93.11829437375363" y="137.60375147118128" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 93.11829437375363 137.60375147118128)" fill="#5ab9ea" font-family="monospace" font-size="10px">25.7mm</text>
+    <line x1="56.82448699368458" y1="101.55063040918847" x2="116.82448699368459" y2="101.55063040918847" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="56.82448699368458" y1="116.75831561468476" x2="116.82448699368459" y2="116.75831561468476" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="116.82448699368459" y1="101.55063040918847" x2="116.82448699368459" y2="116.75831561468476" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="116.82448699368459,101.55063040918847 113.82448699368459,104.55063040918847 119.82448699368459,104.55063040918847" fill="#5ab9ea" />
+    <polygon points="116.82448699368459,116.75831561468476 113.82448699368459,113.75831561468476 119.82448699368459,113.75831561468476" fill="#5ab9ea" />
+    <text x="121.82448699368459" y="109.15447301193662" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 121.82448699368459 109.15447301193662)" fill="#5ab9ea" font-family="monospace" font-size="10px">15.2mm</text>
+    <line x1="96.12998825616991" y1="47.65720721609142" x2="176.1299882561699" y2="47.65720721609142" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="96.12998825616991" y1="167.93559732022035" x2="176.1299882561699" y2="167.93559732022035" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="176.1299882561699" y1="47.65720721609142" x2="176.1299882561699" y2="167.93559732022035" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="176.1299882561699,47.65720721609142 173.1299882561699,50.65720721609142 179.1299882561699,50.65720721609142" fill="#5ab9ea" />
+    <polygon points="176.1299882561699,167.93559732022035 173.1299882561699,164.93559732022035 179.1299882561699,164.93559732022035" fill="#5ab9ea" />
+    <text x="181.1299882561699" y="107.79640226815589" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 181.1299882561699 107.79640226815589)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.3mm</text>
+    <line x1="127.3725494147424" y1="120.37810224486566" x2="227.3725494147424" y2="120.37810224486566" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="127.3725494147424" y1="162.75225298326902" x2="227.3725494147424" y2="162.75225298326902" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="227.3725494147424" y1="120.37810224486566" x2="227.3725494147424" y2="162.75225298326902" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="227.3725494147424,120.37810224486566 224.3725494147424,123.37810224486566 230.3725494147424,123.37810224486566" fill="#5ab9ea" />
+    <polygon points="227.3725494147424,162.75225298326902 224.3725494147424,159.75225298326902 230.3725494147424,159.75225298326902" fill="#5ab9ea" />
+    <text x="232.3725494147424" y="141.56517761406735" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 232.3725494147424 141.56517761406735)" fill="#5ab9ea" font-family="monospace" font-size="10px">42.4mm</text>
+    <line x1="141.06497959668872" y1="150.94871546827906" x2="261.0649795966887" y2="150.94871546827906" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="141.06497959668872" y1="162.7823764761843" x2="261.0649795966887" y2="162.7823764761843" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="261.0649795966887" y1="150.94871546827906" x2="261.0649795966887" y2="162.7823764761843" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="261.0649795966887,150.94871546827906 258.0649795966887,153.94871546827906 264.0649795966887,153.94871546827906" fill="#5ab9ea" />
+    <polygon points="261.0649795966887,162.7823764761843 258.0649795966887,159.7823764761843 264.0649795966887,159.7823764761843" fill="#5ab9ea" />
+    <text x="266.0649795966887" y="156.8655459722317" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 266.0649795966887 156.8655459722317)" fill="#5ab9ea" font-family="monospace" font-size="10px">11.8mm</text>
+    <line x1="193.00514260912263" y1="122.51189428489138" x2="333.00514260912263" y2="122.51189428489138" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="193.00514260912263" y1="174.44575279555943" x2="333.00514260912263" y2="174.44575279555943" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="333.00514260912263" y1="122.51189428489138" x2="333.00514260912263" y2="174.44575279555943" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="333.00514260912263,122.51189428489138 330.00514260912263,125.51189428489138 336.00514260912263,125.51189428489138" fill="#5ab9ea" />
+    <polygon points="333.00514260912263,174.44575279555943 330.00514260912263,171.44575279555943 336.00514260912263,171.44575279555943" fill="#5ab9ea" />
+    <text x="338.00514260912263" y="148.4788235402254" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 338.00514260912263 148.4788235402254)" fill="#5ab9ea" font-family="monospace" font-size="10px">51.9mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-1.5875000000000004" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-1.5875000000000004" y="-23.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="709.5875" y="-37.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="709.5875" y1="-19.5875" x2="724.5875" y2="-19.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="729.5875" y="-16.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="709.5875" y1="-3.5874999999999986" x2="724.5875" y2="-3.5874999999999986" stroke="#e8e8e8" stroke-width="2" />
+    <text x="729.5875" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="709.5875" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="729.5875" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="709.5875" y1="28.4125" x2="724.5875" y2="28.4125" stroke="#e8e8e8" stroke-width="1.5" />
+    <text x="729.5875" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Holes</text>
+    <line x1="709.5875" y1="44.4125" x2="724.5875" y2="44.4125" stroke="#888888" stroke-width="0.25" />
+    <text x="729.5875" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
+    <line x1="709.5875" y1="60.4125" x2="724.5875" y2="60.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="729.5875" y="63.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="709.5875" y1="76.4125" x2="724.5875" y2="76.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="729.5875" y="79.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="281.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="293.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 700.0 × 260.0 × 12.0mm</text>
+    <text x="20.0" y="305.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 109 engraves, 194 holes, 82 pockets, 3 profiles</text>
+    <text x="20.0" y="317.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="329.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.3mm</text>
+    <text x="30.0" y="341.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: through</text>
+    <text x="30.0" y="353.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm</text>
+    <text x="20.0" y="365.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
+    <text x="30.0" y="377.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀5.0mm</text>
+    <text x="20.0" y="389.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (2):</text>
+    <text x="30.0" y="401.5875" fill="#cccccc" font-family="monospace" font-size="10px">• scaled_pockets</text>
+    <text x="30.0" y="413.5875" fill="#cccccc" font-family="monospace" font-size="10px">• sunflower</text>
+  </g>
+</svg>

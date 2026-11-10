@@ -1,0 +1,42 @@
+{
+  "stock": {
+    "width_mm": 300.0,
+    "height_mm": 200.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "pocket-12.70mm.nc",
+      "operation": "pocket",
+      "tool_diameter_mm": 12.7,
+      "rpm": 14000.0,
+      "feed_xy_mm_min": 1400.0,
+      "feed_z_mm_min": 350.0,
+      "stepdown_mm": 3.5,
+      "max_depth_mm": 9.5,
+      "feature_count": 2,
+      "strategy": "raster_pocket",
+      "estimated_runtime_min": 1.2
+    },
+    {
+      "filename": "dogbone-12.70mm.nc",
+      "operation": "dogbone",
+      "tool_diameter_mm": 12.7,
+      "rpm": 14000.0,
+      "feed_xy_mm_min": 1400.0,
+      "feed_z_mm_min": 350.0,
+      "stepdown_mm": 3.5,
+      "max_depth_mm": 9.5,
+      "feature_count": 8,
+      "strategy": "dogbone",
+      "estimated_runtime_min": 1.5
+    }
+  ],
+  "total_runtime_min": 2.7,
+  "feature_counts": {
+    "pocket": 2
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

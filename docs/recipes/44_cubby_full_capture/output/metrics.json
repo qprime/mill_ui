@@ -71,8 +71,5 @@
     "theme": "dark",
     "y_origin": "back",
     "source": "example.pml.yml"
-  },
-  "provenance": {
-    "mill_ui": "3473d5e4"
   }
 }

@@ -78,6 +78,18 @@ def test_single_sheet_without_issues_lists_empty_errors_and_warnings():
     assert metrics["warnings"] == []
 
 
+def test_metrics_omit_provenance_unless_given():
+    metrics = build_run_metrics([_run("door.pml.yml", 1, "door")], BUILD)
+
+    assert "provenance" not in metrics
+
+
+def test_metrics_record_given_provenance():
+    metrics = build_run_metrics([_run("door.pml.yml", 1, "door")], BUILD, provenance={"mill_ui": "abc1234"})
+
+    assert metrics["provenance"] == {"mill_ui": "abc1234"}
+
+
 def test_multi_sheet_metrics_keep_every_sheet_and_prefix_top_level_issues():
     runs = [
         _run("box.pml.yml", 1, "box_sheet_1", errors=["overlap"]),

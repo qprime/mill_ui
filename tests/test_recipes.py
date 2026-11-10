@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
+import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
@@ -16,9 +18,11 @@ from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
 
+REPO_ROOT = Path(__file__).parent.parent
+
 
 def discover_recipe_pml_files() -> list[Path]:
-    recipes_dir = Path(__file__).parent.parent / "docs" / "recipes"
+    recipes_dir = REPO_ROOT / "docs" / "recipes"
     if not recipes_dir.exists():
         return []
 
@@ -62,55 +66,61 @@ def write_recipe_outputs(pml_path: Path, runs: Sequence[SheetRun]) -> None:
     write_run_outputs(runs, pml_path.parent / "output", build_params=RECIPE_BUILD_PARAMS)
 
 
-def compare_outputs(
-    output_dir: Path,
-    gcode: Mapping[str, str],
-) -> tuple[bool, list[str]]:
-    if not output_dir.exists():
-        return False, [f"Output directory does not exist: {output_dir}"]
+def _changed_line_count(committed: str, generated: str) -> tuple[int, int, int]:
+    committed_lines = committed.split("\n")
+    generated_lines = generated.split("\n")
+    changed = sum(1 for c, g in zip(committed_lines, generated_lines, strict=False) if c != g)
+    changed += abs(len(committed_lines) - len(generated_lines))
+    return changed, len(generated_lines), len(committed_lines)
 
-    diffs = []
 
-    for pass_name, generated_gcode in gcode.items():
-        expected_path = output_dir / f"{pass_name}.nc"
-        if not expected_path.exists():
-            diffs.append(f"Missing expected file: {expected_path}")
-            continue
+def compare_output_dirs(committed: Path, generated: Path) -> list[str]:
+    if not committed.is_dir():
+        return [f"Output directory does not exist: {committed}"]
 
-        with open(expected_path) as f:
-            expected_gcode = f.read()
+    committed_names = {entry.name for entry in committed.iterdir()}
+    generated_names = {entry.name for entry in generated.iterdir()}
 
-        if generated_gcode != expected_gcode:
-            gen_lines = generated_gcode.split("\n")
-            exp_lines = expected_gcode.split("\n")
-            diff_count = sum(1 for g, e in zip(gen_lines, exp_lines, strict=False) if g != e)
-            diff_count += abs(len(gen_lines) - len(exp_lines))
+    diffs = [f"Missing generated file: {name}" for name in sorted(generated_names - committed_names)]
+    diffs += [f"File no longer generated: {name}" for name in sorted(committed_names - generated_names)]
+
+    for name in sorted(committed_names & generated_names):
+        committed_text = (committed / name).read_text(encoding="utf-8")
+        generated_text = (generated / name).read_text(encoding="utf-8")
+        if committed_text != generated_text:
+            changed, generated_count, committed_count = _changed_line_count(committed_text, generated_text)
             diffs.append(
-                f"{pass_name}.nc differs: {diff_count} lines changed "
-                f"({len(gen_lines)} generated vs {len(exp_lines)} expected)"
+                f"{name} differs: {changed} lines changed ({generated_count} generated vs {committed_count} committed)"
             )
 
-    generated_files = {f"{pass_name}.nc" for pass_name in gcode}
-    ungenerated = sorted(f.name for f in output_dir.glob("*.nc") if f.name not in generated_files)
-    if ungenerated:
-        diffs.append(f"Expected G-code no longer generated: {ungenerated}")
+    return diffs
 
-    expected_extensions = {".nc", ".svg", ".json"}
-    actual_files = {f.name for f in output_dir.iterdir() if f.is_file()}
-    extra_files = {f for f in actual_files if not any(f.endswith(ext) for ext in expected_extensions)}
-    if extra_files:
-        diffs.append(f"Extra files in output directory: {extra_files}")
 
-    return len(diffs) == 0, diffs
+def untracked_recipe_outputs(repo_root: Path) -> list[str]:
+    listing = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", "docs/recipes"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return [path for path in listing.stdout.splitlines() if "/output/" in path]
 
 
 def _test_recipe_output_impl(pml_path: Path) -> None:
     runs = generate_outputs_from_pml(pml_path)
-    all_match, diffs = compare_outputs(pml_path.parent / "output", combined_gcode(runs))
+    with tempfile.TemporaryDirectory() as scratch:
+        generated_dir = Path(scratch) / "output"
+        write_run_outputs(runs, generated_dir, build_params=RECIPE_BUILD_PARAMS)
+        diffs = compare_output_dirs(pml_path.parent / "output", generated_dir)
 
-    if not all_match:
+    if diffs:
         diff_summary = "\n  ".join(diffs)
-        raise AssertionError(f"Recipe output mismatch for {pml_path.name}:\n  {diff_summary}")
+        raise AssertionError(f"Recipe output mismatch for {pml_path.parent.name}:\n  {diff_summary}")
+
+
+def untracked_output_failures() -> list[str]:
+    return [f"Untracked recipe output: {path}" for path in untracked_recipe_outputs(REPO_ROOT)]
 
 
 def validate_recipes(pml_files: list[Path]) -> list[str]:
@@ -119,18 +129,65 @@ def validate_recipes(pml_files: list[Path]) -> list[str]:
         try:
             _test_recipe_output_impl(pml_path)
         except Exception as e:
-            failures.append(f"{pml_path.name}: {e}")
+            failures.append(f"{pml_path.parent.name}: {e}")
 
     return failures
 
 
-def test_compare_outputs_flags_expected_gcode_no_longer_generated(tmp_path: Path):
-    (tmp_path / "pocket-3.17mm.nc").write_text("G0\n")
-    (tmp_path / "profile-3.17mm.nc").write_text("G1\n")
-    matches, diffs = compare_outputs(tmp_path, {"profile-3.17mm": "G1\n"})
+def _write_dir(directory: Path, files: Mapping[str, str]) -> Path:
+    directory.mkdir(parents=True)
+    for name, text in files.items():
+        (directory / name).write_text(text)
+    return directory
 
-    assert not matches
-    assert diffs == ["Expected G-code no longer generated: ['pocket-3.17mm.nc']"]
+
+def test_compare_output_dirs_flags_changed_svg(tmp_path: Path):
+    committed = _write_dir(tmp_path / "committed", {"profile-3.17mm.nc": "G1\n", "door.svg": "<svg>a</svg>"})
+    generated = _write_dir(tmp_path / "generated", {"profile-3.17mm.nc": "G1\n", "door.svg": "<svg>b</svg>"})
+
+    assert compare_output_dirs(committed, generated) == [
+        "door.svg differs: 1 lines changed (1 generated vs 1 committed)"
+    ]
+
+
+def test_compare_output_dirs_flags_changed_metrics(tmp_path: Path):
+    committed = _write_dir(tmp_path / "committed", {"metrics.json": '{"errors": []}'})
+    generated = _write_dir(tmp_path / "generated", {"metrics.json": '{"errors": ["too deep"]}'})
+
+    assert compare_output_dirs(committed, generated) == [
+        "metrics.json differs: 1 lines changed (1 generated vs 1 committed)"
+    ]
+
+
+def test_compare_output_dirs_flags_file_no_longer_generated(tmp_path: Path):
+    committed = _write_dir(tmp_path / "committed", {"pocket-3.17mm.nc": "G0\n", "profile-3.17mm.nc": "G1\n"})
+    generated = _write_dir(tmp_path / "generated", {"profile-3.17mm.nc": "G1\n"})
+
+    assert compare_output_dirs(committed, generated) == ["File no longer generated: pocket-3.17mm.nc"]
+
+
+def test_compare_output_dirs_flags_missing_file(tmp_path: Path):
+    committed = _write_dir(tmp_path / "committed", {"profile-3.17mm.nc": "G1\n"})
+    generated = _write_dir(tmp_path / "generated", {"profile-3.17mm.nc": "G1\n", "machining_summary.json": "{}"})
+
+    assert compare_output_dirs(committed, generated) == ["Missing generated file: machining_summary.json"]
+
+
+def test_compare_output_dirs_accepts_identical_dirs(tmp_path: Path):
+    files = {"profile-3.17mm.nc": "G1\n", "door.svg": "<svg/>", "metrics.json": "{}"}
+    committed = _write_dir(tmp_path / "committed", files)
+    generated = _write_dir(tmp_path / "generated", files)
+
+    assert compare_output_dirs(committed, generated) == []
+
+
+def test_untracked_recipe_outputs_lists_new_output_file(tmp_path: Path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    output_dir = _write_dir(tmp_path / "docs" / "recipes" / "x" / "output", {"a.nc": "G0\n", "b.svg": "<svg/>"})
+    _write_dir(tmp_path / "docs" / "recipes" / "x" / "src", {"example.pml.yml": "Sheet: {}"})
+    subprocess.run(["git", "add", str(output_dir / "a.nc")], cwd=tmp_path, check=True)
+
+    assert untracked_recipe_outputs(tmp_path) == ["docs/recipes/x/output/b.svg"]
 
 
 def test_recipe_outputs():
@@ -139,7 +196,7 @@ def test_recipe_outputs():
     if not pml_files:
         pytest.skip("No recipe PML files found")
 
-    failures = validate_recipes(pml_files)
+    failures = untracked_output_failures() + validate_recipes(pml_files)
 
     if failures:
         raise AssertionError("Recipe output mismatches:\n  " + "\n  ".join(failures))
@@ -187,10 +244,11 @@ if __name__ == "__main__":
 
         print(f"Validating {len(pml_files)} recipe(s)...")
 
+        untracked = untracked_output_failures()
         failures = validate_recipes(pml_files)
 
-        for failure in failures:
+        for failure in untracked + failures:
             print(f"  FAIL: {failure}")
 
         print(f"\n{len(pml_files) - len(failures)} passed, {len(failures)} failed")
-        sys.exit(1 if failures else 0)
+        sys.exit(1 if untracked or failures else 0)

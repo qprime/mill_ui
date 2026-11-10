@@ -1,0 +1,44 @@
+{
+  "stock": {
+    "width_mm": 700.0,
+    "height_mm": 260.0,
+    "thickness_mm": 12.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "engrave-1.00mm.nc",
+      "operation": "engrave",
+      "tool_diameter_mm": 1.0,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 400.0,
+      "feed_z_mm_min": 100.0,
+      "stepdown_mm": 0.5,
+      "max_depth_mm": 0.3,
+      "feature_count": 5,
+      "strategy": "engrave",
+      "estimated_runtime_min": 8.2
+    },
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 12.2,
+      "feature_count": 3,
+      "strategy": "contour",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 18.4
+    }
+  ],
+  "total_runtime_min": 26.6,
+  "feature_counts": {
+    "engrave": 5,
+    "profile": 3
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

@@ -1,0 +1,44 @@
+{
+  "stock": {
+    "width_mm": 350.0,
+    "height_mm": 450.0,
+    "thickness_mm": 19.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "pocket-3.17mm.nc",
+      "operation": "pocket",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 2.0,
+      "feature_count": 3,
+      "strategy": "raster_pocket",
+      "estimated_runtime_min": 14.3
+    },
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.2,
+      "feature_count": 1,
+      "strategy": "contour",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 18.1
+    }
+  ],
+  "total_runtime_min": 32.4,
+  "feature_counts": {
+    "pocket": 3,
+    "profile": 1
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

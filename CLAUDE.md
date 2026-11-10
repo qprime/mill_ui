@@ -55,11 +55,13 @@ python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
 python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 python -m cli.nest --project my_table job.nest.yml -v
 python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
-python -m tests.test_recipes                    # validate recipes (pass/fail gate, no file changes)
-python -m tests.test_recipes --regen_recipes    # snapshot: regenerate all recipe outputs + commit hashes
+python -m tests.test_recipes                    # recipe gate: every output file matches current code (also a pre-commit hook)
+python -m tests.test_recipes --regen_recipes    # regenerate every recipe's output/
 python -m cli.generate_golden --all-recipes docs/recipes --update --force  # snapshot: update golden metrics
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
 ```
+
+**Recipe outputs:** each recipe's `output/` must equal what current code generates, and git tracks every file in it. When a change alters recipe output, run `--regen_recipes`, review every changed file, and commit all of them with the change; they count as files touched this session. An unintended change is a regression to fix in code. Never revert outputs to make the gate pass.
 
 **Verification wrappers:** always invoke via the `tools/run_*.py` wrappers so the command passes the agent's allowed-command filters (no compound `source && ...` needed). Do not call `pytest`, `ruff`, `mypy`, `pylint`, `clang-format`, `clang-tidy`, or `ctest` directly.
 

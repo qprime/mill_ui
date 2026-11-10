@@ -1,0 +1,71 @@
+{
+  "stock": {
+    "width_mm": 480.0,
+    "height_mm": 260.0,
+    "thickness_mm": 12.0,
+    "material": "mdf"
+  },
+  "files": [
+    {
+      "filename": "pocket-12.70mm.nc",
+      "operation": "pocket",
+      "tool_diameter_mm": 12.7,
+      "rpm": 14000.0,
+      "feed_xy_mm_min": 1400.0,
+      "feed_z_mm_min": 350.0,
+      "stepdown_mm": 3.5,
+      "max_depth_mm": 3.0,
+      "feature_count": 25,
+      "strategy": "raster_pocket",
+      "estimated_runtime_min": 5.9
+    },
+    {
+      "filename": "pocket_rest-3.17mm.nc",
+      "operation": "pocket_rest",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 3.0,
+      "feature_count": 25,
+      "strategy": "pocket_rest",
+      "estimated_runtime_min": 13.4
+    },
+    {
+      "filename": "engrave-1.00mm.nc",
+      "operation": "engrave",
+      "tool_diameter_mm": 1.0,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 400.0,
+      "feed_z_mm_min": 100.0,
+      "stepdown_mm": 0.5,
+      "max_depth_mm": 0.5,
+      "feature_count": 99,
+      "strategy": "engrave",
+      "estimated_runtime_min": 13.0
+    },
+    {
+      "filename": "profile-3.17mm.nc",
+      "operation": "profile",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 12.2,
+      "feature_count": 2,
+      "strategy": "contour",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 11.7
+    }
+  ],
+  "total_runtime_min": 44.0,
+  "feature_counts": {
+    "engrave": 99,
+    "pocket": 25,
+    "profile": 2
+  },
+  "safe_z_mm": 6.0,
+  "kerf_mm": 3.175
+}

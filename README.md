@@ -231,20 +231,20 @@ mill_ui/
 
 The `docs/recipes/` directory contains 70+ worked examples covering basic profiles, pockets, assemblies, joinery, nesting, edge treatments, surface facing, and more. Each recipe includes PML input, expected G-code, and SVG blueprint output.
 
-Validate every recipe against its committed output. This is a pass/fail gate — it writes nothing:
+Each recipe's `output/` holds exactly the files current code generates for it, byte for byte, and git tracks all of them. The recipe gate checks this. It writes nothing, and it also runs as the `recipe-outputs` pre-commit hook:
 
 ```bash
 python -m tests.test_recipes
 ```
 
-Regenerating recipe outputs is a separate, on-demand **snapshot** operation. Recipe artifacts and golden metrics are two halves of one baseline, so update both together or the tree is left inconsistent:
+When a change alters recipe output, regenerate every recipe, review every changed file, and commit all of them with the change. An unintended change is a regression to fix in code; outputs are never reverted to make the gate pass:
 
 ```bash
-python -m tests.test_recipes --regen_recipes                              # recipe outputs + commit hashes
+python -m tests.test_recipes --regen_recipes                              # recipe outputs
 python -m cli.generate_golden --all-recipes docs/recipes --update --force # golden metrics
 ```
 
-The `/snapshot-recipes` skill runs both in order. Do not snapshot on every commit — when a change intentionally alters one recipe, regenerate and stage only that recipe's output.
+The `/snapshot-recipes` skill runs both in order. See [tests/README_recipe_tests.md](tests/README_recipe_tests.md).
 
 ## Tests
 

@@ -4,7 +4,7 @@ description: Regenerate all recipe outputs from current code.
 
 # /snapshot-recipes — Recipe Output Snapshot
 
-Regenerate every recipe's `output/` from current code. Recipe outputs are regenerated and committed with any change that alters them.
+Regenerate every recipe's `output/`, the recipe index, the category READMEs and the feature guide from current code. Recipe outputs are regenerated and committed with any change that alters them.
 
 ## When To Use
 
@@ -36,6 +36,6 @@ All recipes must pass after regeneration. If any fail, diagnose and raise to the
 Report to the user:
 - Number of recipes regenerated
 - Whether all recipes pass
-- Ask if they want to commit the snapshot (stage every changed file under `docs/recipes/*/output/`, one path per `git add`)
+- Ask if they want to commit the snapshot (stage every changed file under `docs/recipes/*/*/output/` and every changed generated document: `docs/recipes/README.md`, `docs/recipes/*/README.md`, `docs/feature_guide.md`; one path per `git add`)
 
 Do not commit automatically — the user decides when to commit snapshot updates.

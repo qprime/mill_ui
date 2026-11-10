@@ -36,7 +36,7 @@ All proposed features have been implemented:
 - Updated golden test files for new SVG layer
 
 **New Recipe:**
-- `docs/recipes/39_box_bottom_styles/` - Demonstrates dado bottom with labels and edge colors
+- `39_box_bottom_styles` (removed in #244) - Demonstrated dado bottom with labels and edge colors
 
 **Test Coverage:**
 - 37 total box-related tests passing
@@ -199,5 +199,5 @@ python -m pytest tests/test_box_assembly.py tests/test_box_integration.py -v
 
 Generate recipe output:
 ```bash
-python -m cli.mill --input docs/recipes/39_box_bottom_styles/example.pml --out docs/recipes/39_box_bottom_styles/output
+python -m cli.mill --input box.pml.yml --out output/
 ```

@@ -23,6 +23,7 @@ from validation.metrics import (
 )
 from validation.metrics.gcode_metrics import extract_gcode_metrics_from_file
 from validation.metrics.svg_metrics import extract_svg_metrics_from_file
+from validation.recipes import recipe_at
 from validation.regression import ComparisonConfig, compare_metrics
 
 
@@ -137,11 +138,13 @@ def validate_recipe(
     recipe_dir = Path(recipe_dir)
     output_dir = recipe_dir / "output"
 
-    source_file = None
-    for candidate in ["example.pml.yml", "source.pml.yml"]:
-        if (recipe_dir / candidate).exists():
-            source_file = recipe_dir / candidate
-            break
+    recipe = recipe_at(recipe_dir)
+    if recipe is not None and len(recipe.pml_sources) > 1:
+        raise ValueError(
+            f"validate_recipe handles one PML source; {recipe_dir} has {len(recipe.pml_sources)}: "
+            + ", ".join(source.name for source in recipe.pml_sources)
+        )
+    source_file = recipe.pml_sources[0] if recipe is not None and recipe.pml_sources else None
 
     svg_path = None
     svg_back_path = None

@@ -121,8 +121,4 @@ The loader reads the PNG IHDR chunk directly rather than relying on PIL's `mode`
 
 ## Recipes
 
-| Recipe | What it shows |
-|--------|---------------|
-| `82_heightfield_ir_only` | Minimal IR-only example (no toolpath) |
-| `83_heightfield_rough_synthetic` | Rough-only, two tools, morphological barrier stacking |
-| `85_heightfield_full_synthetic` | Full pipeline — two rough tools + ball-nose finish with rest-floor |
+The [feature guide](feature_guide.md#relief) lists the recipes that use `Heightfield`.

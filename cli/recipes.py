@@ -6,24 +6,31 @@ import argparse
 import subprocess
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 
 from cli.mill import write_recipe_outputs
 from cli.nest import nest_job
+from config.machine_loader import MachineConfig, load_machine_by_name
+from ir.removal_intent import Bounds2D
 from pml.yaml_parser import parse_nest_yaml
+from validation.core import InvariantResult
+from validation.machine_checks import check_job_fits_machine, check_sheet_fits_machine
+from validation.recipe_docs import (
+    document_problems,
+    load_catalog,
+    readme_problems,
+    render_documents,
+    uncatalogued_categories,
+    unknown_recipe_names,
+    write_documents,
+)
+from validation.recipes import OUTPUT_DIR_NAME, RECIPES_ROOT, Recipe, find_recipes, misplaced_inputs
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RECIPES_DIR = REPO_ROOT / "docs" / "recipes"
+RECIPE_MACHINE = "altmill_4x4"
 MIN_NEST_UTILIZATION = 0.3
-
-
-def find_pml_sources(recipes_dir: Path = RECIPES_DIR) -> list[Path]:
-    return sorted(recipes_dir.glob("*/*.pml.yml"))
-
-
-def find_nest_sources(recipes_dir: Path = RECIPES_DIR) -> list[Path]:
-    return sorted(recipes_dir.glob("*/*.nest.yml"))
+REGEN_HINT = "run `python -m cli.recipes --regen`"
 
 
 def _changed_line_count(committed: str, generated: str) -> tuple[int, int, int]:
@@ -56,76 +63,124 @@ def compare_output_dirs(committed: Path, generated: Path) -> list[str]:
     return diffs
 
 
-def untracked_recipe_outputs(repo_root: Path) -> list[str]:
+def untracked_recipe_files(repo_root: Path, root: Path, documents: Iterable[Path]) -> list[str]:
+    generated = {path.relative_to(repo_root).as_posix() for path in documents}
     listing = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "--", "docs/recipes"],
+        ["git", "ls-files", "--others", "--exclude-standard", "--", root.relative_to(repo_root).as_posix(), *generated],
         cwd=repo_root,
         capture_output=True,
         text=True,
         check=True,
     )
-    return [path for path in listing.stdout.splitlines() if "/output/" in path]
+    return [path for path in listing.stdout.splitlines() if f"/{OUTPUT_DIR_NAME}/" in path or path in generated]
 
 
-def check_pml_recipe(source: Path) -> list[str]:
+def _fit_problems(result: InvariantResult, label: str) -> list[str]:
+    return [f"{label} does not fit {RECIPE_MACHINE}: {failure}" for failure in result.failures]
+
+
+def check_pml_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
     with tempfile.TemporaryDirectory() as scratch:
-        generated = Path(scratch) / "output"
-        write_recipe_outputs(source, source.parent.name, generated)
-        return compare_output_dirs(source.parent / "output", generated)
+        generated = Path(scratch) / OUTPUT_DIR_NAME
+        runs, _ = write_recipe_outputs(recipe, generated)
+        problems = compare_output_dirs(recipe.path / OUTPUT_DIR_NAME, generated)
+    for run in runs:
+        problems += _fit_problems(
+            check_sheet_fits_machine(run.result.ast, machine), f"{run.source} sheet {run.sheet_index}"
+        )
+    return problems
 
 
-def check_nest_recipe(source: Path) -> list[str]:
-    result = nest_job(parse_nest_yaml(source.read_text(encoding="utf-8")))
-    if result["total_sheets"] == 0:
-        return ["Nesting produced 0 sheets"]
-    if result["utilization"] < MIN_NEST_UTILIZATION:
-        return [f"Utilization too low: {result['utilization'] * 100:.1f}%"]
+def check_nest_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
+    problems: list[str] = []
+    for source in recipe.nest_sources:
+        job = parse_nest_yaml(source.read_text(encoding="utf-8"))
+        bounds = Bounds2D(
+            x_min=job.margin_mm,
+            x_max=job.sheet_width_mm - job.margin_mm,
+            y_min=job.margin_mm,
+            y_max=job.sheet_height_mm - job.margin_mm,
+        )
+        problems += _fit_problems(check_job_fits_machine(bounds, machine), source.name)
+        result = nest_job(job)
+        if result["total_sheets"] == 0:
+            problems.append(f"{source.name}: nesting produced 0 sheets")
+        elif result["utilization"] < MIN_NEST_UTILIZATION:
+            problems.append(f"{source.name}: utilization too low: {result['utilization'] * 100:.1f}%")
+    return problems
+
+
+def check_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
+    problems = readme_problems(recipe)
+    if recipe.pml_sources:
+        problems += check_pml_recipe(recipe, machine)
+    if recipe.nest_sources:
+        problems += check_nest_recipe(recipe, machine)
+    return problems
+
+
+def regenerate_recipe(recipe: Recipe) -> list[str]:
+    write_recipe_outputs(recipe, recipe.path / OUTPUT_DIR_NAME)
     return []
 
 
-def regenerate_pml_recipe(source: Path) -> list[str]:
-    write_recipe_outputs(source, source.parent.name, source.parent / "output")
-    return []
-
-
-def run_on_recipes(sources: list[Path], action: Callable[[Path], list[str]]) -> list[str]:
+def run_on_recipes(recipes: Sequence[Recipe], action: Callable[[Recipe], list[str]]) -> list[str]:
     failures: list[str] = []
-    for source in sources:
+    for recipe in recipes:
         try:
-            problems = action(source)
+            problems = action(recipe)
         except Exception as e:
             problems = [f"{type(e).__name__}: {e}"]
-        failures += [f"{source.parent.name}: {problem}" for problem in problems]
+        failures += [f"{recipe.name}: {problem}" for problem in problems]
+    return failures
+
+
+def check_tree(root: Path, machine: MachineConfig, repo_root: Path | None = None) -> list[str]:
+    recipes = find_recipes(root)
+    catalog = load_catalog(root)
+    documents = render_documents(catalog, recipes, root)
+    failures = [f"Misplaced input file: {path}" for path in misplaced_inputs(root)]
+    failures += uncatalogued_categories(catalog, recipes)
+    failures += unknown_recipe_names(catalog, recipes)
+    failures += [f"{problem}; {REGEN_HINT}" for problem in document_problems(documents, root)]
+    if repo_root is not None:
+        failures += [f"Untracked recipe file: {path}" for path in untracked_recipe_files(repo_root, root, documents)]
+    failures += run_on_recipes(recipes, lambda recipe: check_recipe(recipe, machine))
+    return failures
+
+
+def regenerate_tree(root: Path) -> list[str]:
+    recipes = find_recipes(root)
+    catalog = load_catalog(root)
+    failures = run_on_recipes([recipe for recipe in recipes if recipe.pml_sources], regenerate_recipe)
+    write_documents(render_documents(catalog, recipes, root), root)
     return failures
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Check that every recipe's committed output/ matches what current code generates",
+        description="Check that every recipe's committed output/ and the generated recipe documents match current code",
         epilog="Without --regen, writes nothing. Also runs as the recipe-outputs pre-commit hook.",
     )
-    parser.add_argument("--regen", action="store_true", help="Rewrite every recipe's output/ from current code")
+    parser.add_argument(
+        "--regen",
+        action="store_true",
+        help="Rewrite every recipe's output/, the recipe index, category READMEs and the feature guide",
+    )
     args = parser.parse_args()
 
-    pml_sources = find_pml_sources()
-    if not pml_sources:
-        print(f"No recipe PML files found under {RECIPES_DIR}", file=sys.stderr)
-        return 1
-
+    recipe_count = len(find_recipes(RECIPES_ROOT))
     if args.regen:
-        failures = run_on_recipes(pml_sources, regenerate_pml_recipe)
+        failures = regenerate_tree(RECIPES_ROOT)
         for failure in failures:
             print(f"  FAILED: {failure}", file=sys.stderr)
-        print(f"Regenerated {len(pml_sources) - len(failures)} of {len(pml_sources)} recipe(s)")
+        print(f"Regenerated {recipe_count} recipe(s) and the recipe documents: {len(failures)} failure(s)")
         return 1 if failures else 0
 
-    nest_sources = find_nest_sources()
-    failures = [f"Untracked recipe output: {path}" for path in untracked_recipe_outputs(REPO_ROOT)]
-    failures += run_on_recipes(pml_sources, check_pml_recipe)
-    failures += run_on_recipes(nest_sources, check_nest_recipe)
+    failures = check_tree(RECIPES_ROOT, load_machine_by_name(RECIPE_MACHINE), REPO_ROOT)
     for failure in failures:
         print(f"  FAIL: {failure}", file=sys.stderr)
-    print(f"Checked {len(pml_sources) + len(nest_sources)} recipe(s): {len(failures)} failure(s)")
+    print(f"Checked {recipe_count} recipe(s): {len(failures)} failure(s)")
     return 1 if failures else 0
 
 

@@ -395,6 +395,5 @@ if result.is_empty:
 
 ## See Also
 
-- [Recipe 19: Domain/Generator Basics](recipes/19_domain_generator_basics/README.md) - Tutorial with examples
-- [Recipe 21-30](recipes/) - Domain/generator recipe examples
+- [Feature guide](feature_guide.md) - Every PML capability with the recipes that use it
 - [CLAUDE.md](../CLAUDE.md) - AI development guide with domain/generator patterns

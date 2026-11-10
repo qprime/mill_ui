@@ -15,6 +15,7 @@ from layout_ast.layout import (
 )
 from pml import parse_pml
 from validation.core import CAMValidationResult, Verdict
+from validation.recipes import recipe_at
 from validation.runner import (
     ValidationInput,
     ValidationOptions,
@@ -107,7 +108,9 @@ def _make_recipe(tmp_path: Path, pml: str) -> Path:
     recipe_dir.mkdir()
     source = recipe_dir / "example.pml.yml"
     source.write_text(pml)
-    write_recipe_outputs(source, recipe_dir.name, recipe_dir / "output")
+    recipe = recipe_at(recipe_dir)
+    assert recipe is not None
+    write_recipe_outputs(recipe, recipe_dir / "output")
     return recipe_dir
 
 

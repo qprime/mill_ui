@@ -33,6 +33,7 @@ from pml.revision_header import build_provenance, format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
+from validation.recipes import Recipe, recipe_at, recipe_job_stem
 
 RECIPE_KERF_MM = 3.175
 RECIPE_THEME = "dark"
@@ -182,14 +183,6 @@ def init_project(args) -> None:
         print(f"  Working area: {working_width:.0f}x{working_height:.0f}mm", file=sys.stderr)
     print(f"  Margin: {margin:.0f}mm", file=sys.stderr)
     print(f"  Kerf: {kerf}mm", file=sys.stderr)
-
-
-def find_recipe_source(recipe_dir: Path) -> Path | None:
-    for candidate in ["example.pml.yml", "source.pml.yml"]:
-        source = recipe_dir / candidate
-        if source.exists():
-            return source
-    return None
 
 
 def collect_input_files(project: str | None, input_arg: str | None) -> list[Path]:
@@ -362,8 +355,7 @@ def load_pml_asts(source: Path) -> list[LayoutAST]:
 
 
 def write_recipe_outputs(
-    source: Path,
-    job_stem: str,
+    recipe: Recipe,
     output_dir: Path,
     *,
     kerf_mm: float = RECIPE_KERF_MM,
@@ -372,16 +364,20 @@ def write_recipe_outputs(
     generate_svg: bool = True,
     machine_config: MachineConfig | None = None,
 ) -> tuple[list[SheetRun], dict[str, Path]]:
-    runs = _compile(
-        load_pml_asts(source),
-        source,
-        job_stem,
-        kerf_mm=kerf_mm,
-        theme=theme,
-        y_origin=y_origin,
-        generate_svg=generate_svg,
-        machine_config=machine_config,
-    )
+    runs = [
+        run
+        for source in recipe.pml_sources
+        for run in _compile(
+            load_pml_asts(source),
+            source,
+            recipe_job_stem(recipe, source),
+            kerf_mm=kerf_mm,
+            theme=theme,
+            y_origin=y_origin,
+            generate_svg=generate_svg,
+            machine_config=machine_config,
+        )
+    ]
     outputs = write_run_outputs(
         runs, output_dir, build_params={"kerf_mm": kerf_mm, "theme": theme, "y_origin": y_origin}
     )
@@ -389,16 +385,22 @@ def write_recipe_outputs(
 
 
 def process_recipe(recipe_dir: Path, args) -> None:
-    source = find_recipe_source(recipe_dir)
-    if not source:
-        print(f"Error: No example.pml.yml or source.pml.yml in {recipe_dir}", file=sys.stderr)
+    recipe = recipe_at(recipe_dir)
+    if recipe is None:
+        print(f"Error: No *.pml.yml or *.nest.yml in {recipe_dir}", file=sys.stderr)
+        sys.exit(1)
+    if not recipe.pml_sources:
+        print(
+            f"Error: {recipe_dir} has only nest sources; run them with python -m cli.nest <file>.nest.yml",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    print(f"Recipe: {recipe_dir.name}", file=sys.stderr)
-    print(f"Compiling: {source.name}", file=sys.stderr)
+    print(f"Recipe: {recipe.name}", file=sys.stderr)
+    for source in recipe.pml_sources:
+        print(f"Compiling: {source.name}", file=sys.stderr)
     runs, outputs = write_recipe_outputs(
-        source,
-        recipe_dir.name,
+        recipe,
         recipe_dir / "output",
         kerf_mm=args.kerf if args.kerf is not None else RECIPE_KERF_MM,
         theme=args.theme if args.theme is not None else RECIPE_THEME,
@@ -425,7 +427,7 @@ Examples:
 
   python -m cli.mill --project cabinet --input panel.pml.yml --kerf 3.175
 
-  python -m cli.mill --recipe docs/recipes/01_simple_profile
+  python -m cli.mill --recipe docs/recipes/doors/shaker_door
 
   python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19
 
@@ -459,7 +461,7 @@ Exit codes:
         "--recipe",
         "-r",
         default=None,
-        help="Recipe directory (e.g., docs/recipes/01_simple_profile)",
+        help="Recipe directory (e.g., docs/recipes/doors/shaker_door)",
     )
     parser.add_argument(
         "--input",

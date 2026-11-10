@@ -1,17 +1,47 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from collections.abc import Mapping
 from pathlib import Path
 
+import pytest
+
+from cli.mill import write_recipe_outputs
 from cli.recipes import (
+    REPO_ROOT,
+    check_nest_recipe,
     check_pml_recipe,
+    check_tree,
     compare_output_dirs,
-    find_pml_sources,
-    regenerate_pml_recipe,
+    regenerate_recipe,
+    regenerate_tree,
     run_on_recipes,
-    untracked_recipe_outputs,
+    untracked_recipe_files,
 )
+from config.machine_loader import MachineConfig, load_machine_by_name
+from validation.recipe_docs import parse_detect_rule, readme_problems, rule_matches
+from validation.recipes import find_recipe, find_recipes, misplaced_inputs, recipe_at, recipe_job_stem
+from validation.runner import validate_recipe
+
+CATALOG = """categories:
+  doors:
+    title: Doors
+    description: Doors cut from one sheet.
+  panels:
+    title: Panels
+    description: Flat parts.
+guide:
+  - group: Cutting parts out
+    capabilities:
+      - name: Tabs
+        summary: Bridges that hold a part in the sheet.
+        spec: pml/syntax_spec.md#profile
+        detect: [{param: tab_count}]
+      - name: Multi-sheet partitioning
+        summary: Panels split across sheets.
+        spec: pml/syntax_spec.md#multi-sheet-partitioning
+"""
 
 PART_PML = """Sheet:
   width: 300mm
@@ -25,12 +55,34 @@ children:
       type: profile
       depth: through
       side: outside
+      tab_count: 4
+      tab_height: 3mm
     at:
       x: 150mm
       y: 100mm
       width: 200mm
       height: 120mm
 """
+
+OVERSIZED_PML = PART_PML.replace("width: 300mm", "width: 1400mm").replace("height: 200mm", "height: 1400mm")
+
+LONG_SHEET_NEST = """Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 1220mm
+    height: 2440mm
+    thickness: 19mm
+  margin: 10mm
+  parts:
+    - name: panel
+      width: 400mm
+      height: 600mm
+      quantity: 6
+"""
+
+
+def _altmill() -> MachineConfig:
+    return load_machine_by_name("altmill_4x4")
 
 
 def _write_dir(directory: Path, files: Mapping[str, str]) -> Path:
@@ -40,12 +92,17 @@ def _write_dir(directory: Path, files: Mapping[str, str]) -> Path:
     return directory
 
 
-def _make_recipe_source(recipes_dir: Path) -> Path:
-    recipe_dir = recipes_dir / "part"
-    recipe_dir.mkdir(parents=True)
-    source = recipe_dir / "example.pml.yml"
-    source.write_text(PART_PML)
-    return source
+def _make_root(tmp_path: Path, catalog: str = CATALOG) -> Path:
+    root = tmp_path / "docs" / "recipes"
+    root.mkdir(parents=True)
+    (root / "catalog.yml").write_text(catalog)
+    return root
+
+
+def _make_recipe(root: Path, category: str, name: str, sources: Mapping[str, str] | None = None) -> Path:
+    files = dict(sources) if sources is not None else {f"{name}.pml.yml": PART_PML}
+    files["README.md"] = f"# {name}\n\n![Blueprint](output/{name}.svg)\n\n**Demonstrates:** A part.\n"
+    return _write_dir(root / category / name, files)
 
 
 def test_compare_output_dirs_flags_changed_svg(tmp_path: Path):
@@ -88,45 +145,287 @@ def test_compare_output_dirs_accepts_identical_dirs(tmp_path: Path):
     assert compare_output_dirs(committed, generated) == []
 
 
-def test_untracked_recipe_outputs_lists_new_output_file(tmp_path: Path):
+def test_untracked_recipe_files_lists_outputs_and_generated_documents(tmp_path: Path):
     subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
-    output_dir = _write_dir(tmp_path / "docs" / "recipes" / "x" / "output", {"a.nc": "G0\n", "b.svg": "<svg/>"})
-    _write_dir(tmp_path / "docs" / "recipes" / "x" / "src", {"example.pml.yml": "Sheet: {}"})
+    root = tmp_path / "docs" / "recipes"
+    output_dir = _write_dir(root / "doors" / "x" / "output", {"a.nc": "G0\n", "b.svg": "<svg/>"})
+    (root / "doors" / "README.md").write_text("# Doors\n")
+    (root / "doors" / "x" / "x.pml.yml").write_text("Sheet: {}")
     subprocess.run(["git", "add", str(output_dir / "a.nc")], cwd=tmp_path, check=True)
 
-    assert untracked_recipe_outputs(tmp_path) == ["docs/recipes/x/output/b.svg"]
+    untracked = untracked_recipe_files(tmp_path, root, [root / "doors" / "README.md"])
+
+    assert untracked == ["docs/recipes/doors/README.md", "docs/recipes/doors/x/output/b.svg"]
 
 
-def test_find_pml_sources_reads_one_level_and_skips_outputs(tmp_path: Path):
-    source = _make_recipe_source(tmp_path)
-    _write_dir(source.parent / "output", {"sheet_1.pml.yml": PART_PML})
+def test_find_recipes_reads_category_folders(tmp_path: Path):
+    root = _make_root(tmp_path)
+    _make_recipe(root, "doors", "shaker_door")
+    _make_recipe(root, "panels", "plate")
 
-    assert find_pml_sources(tmp_path) == [source]
+    assert [(recipe.category, recipe.name) for recipe in find_recipes(root)] == [
+        ("doors", "shaker_door"),
+        ("panels", "plate"),
+    ]
 
 
-def test_regenerated_recipe_passes_the_check(tmp_path: Path):
-    source = _make_recipe_source(tmp_path)
+def test_find_recipes_does_not_search_inside_a_recipe(tmp_path: Path):
+    root = _make_root(tmp_path)
+    folder = _make_recipe(root, "doors", "x")
+    _write_dir(folder / "output", {"sheet_1.pml.yml": PART_PML})
 
-    assert regenerate_pml_recipe(source) == []
-    assert check_pml_recipe(source) == []
+    (recipe,) = find_recipes(root)
+
+    assert recipe.pml_sources == (folder / "x.pml.yml",)
+    assert misplaced_inputs(root) == ()
+
+
+def test_find_recipes_rejects_duplicate_names(tmp_path: Path):
+    root = _make_root(tmp_path)
+    first = _make_recipe(root, "doors", "x")
+    second = _make_recipe(root, "panels", "x")
+
+    with pytest.raises(ValueError, match="Two recipes are named x") as raised:
+        find_recipes(root)
+
+    assert str(first) in str(raised.value)
+    assert str(second) in str(raised.value)
+
+
+def test_find_recipe_names_a_missing_recipe(tmp_path: Path):
+    root = _make_root(tmp_path)
+    folder = _make_recipe(root, "doors", "x")
+
+    assert find_recipe("x", root).path == folder
+    with pytest.raises(KeyError, match="No recipe named nope"):
+        find_recipe("nope", root)
+
+
+def test_misplaced_inputs_lists_files_at_the_wrong_depth(tmp_path: Path):
+    root = _make_root(tmp_path)
+    folder = _make_recipe(root, "doors", "x")
+    _write_dir(folder / "output", {"sheet_1.pml.yml": PART_PML})
+    _write_dir(folder / "variants", {"v2.pml.yml": PART_PML})
+    (root / "loose.pml.yml").write_text(PART_PML)
+    (root / "doors" / "in_category.nest.yml").write_text(LONG_SHEET_NEST)
+
+    assert misplaced_inputs(root) == (
+        root / "doors" / "in_category.nest.yml",
+        folder / "variants" / "v2.pml.yml",
+        root / "loose.pml.yml",
+    )
+
+
+def test_recipe_at_accepts_source_named_after_recipe(tmp_path: Path):
+    folder = _make_recipe(_make_root(tmp_path), "doors", "x")
+
+    recipe = recipe_at(folder)
+
+    assert recipe is not None
+    assert recipe.pml_sources == (folder / "x.pml.yml",)
+    assert recipe.category == "doors"
+
+
+def test_recipe_job_stem_uses_source_stems_for_multi_file_recipes(tmp_path: Path):
+    root = _make_root(tmp_path)
+    single = recipe_at(_make_recipe(root, "doors", "x"))
+    double = recipe_at(_make_recipe(root, "panels", "y", {"a.pml.yml": PART_PML, "b.pml.yml": PART_PML}))
+    assert single is not None
+    assert double is not None
+
+    assert recipe_job_stem(single, single.pml_sources[0]) == "x"
+    assert [recipe_job_stem(double, source) for source in double.pml_sources] == ["a.pml", "b.pml"]
+
+
+def test_two_source_recipe_writes_outputs_per_source(tmp_path: Path):
+    recipe = recipe_at(
+        _make_recipe(_make_root(tmp_path), "panels", "y", {"a.pml.yml": PART_PML, "b.pml.yml": PART_PML})
+    )
+    assert recipe is not None
+
+    regenerate_recipe(recipe)
+    names = sorted(path.name for path in (recipe.path / "output").iterdir())
+
+    assert {"a.pml.svg", "b.pml.svg", "manifest.json"} <= set(names)
+    assert [name for name in names if name.endswith(".nc")] == ["a.pml.profile-3.17mm.nc", "b.pml.profile-3.17mm.nc"]
+
+
+def test_gate_passes_with_no_recipes(tmp_path: Path):
+    root = _make_root(tmp_path)
+
+    assert regenerate_tree(root) == []
+    assert check_tree(root, _altmill()) == []
+
+
+def test_regenerated_tree_passes_the_check(tmp_path: Path):
+    root = _make_root(tmp_path)
+    _make_recipe(root, "doors", "door")
+
+    assert regenerate_tree(root) == []
+    assert check_tree(root, _altmill()) == []
 
 
 def test_check_reports_a_stale_output_file(tmp_path: Path):
-    source = _make_recipe_source(tmp_path)
-    regenerate_pml_recipe(source)
-    (source.parent / "output" / "metrics.json").write_text("{}")
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "door"))
+    assert recipe is not None
+    regenerate_recipe(recipe)
+    (recipe.path / "output" / "metrics.json").write_text("{}")
 
-    failures = run_on_recipes([source], check_pml_recipe)
+    failures = run_on_recipes([recipe], lambda r: check_pml_recipe(r, _altmill()))
 
     assert len(failures) == 1
-    assert failures[0].startswith("part: metrics.json differs: ")
+    assert failures[0].startswith("door: metrics.json differs: ")
 
 
 def test_run_on_recipes_reports_an_unreadable_source(tmp_path: Path):
-    source = _make_recipe_source(tmp_path)
-    source.write_text("Sheet: [")
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "door"))
+    assert recipe is not None
+    recipe.pml_sources[0].write_text("Sheet: [")
 
-    failures = run_on_recipes([source], check_pml_recipe)
+    failures = run_on_recipes([recipe], lambda r: check_pml_recipe(r, _altmill()))
 
     assert len(failures) == 1
-    assert failures[0].startswith("part: ")
+    assert failures[0].startswith("door: ")
+
+
+def test_detect_rules():
+    document = {
+        "children": [{"SvgStamp": {"file": "art.svg"}}, {"Rect": {"feature": {"tab_count": 4}}}],
+        "interfaces": [{"joinery": "step"}],
+    }
+
+    assert rule_matches(parse_detect_rule({"node": "SvgStamp"}), "x", [document])
+    assert rule_matches(parse_detect_rule({"param": "tab_count"}), "x", [document])
+    assert rule_matches(parse_detect_rule({"value": {"joinery": "step"}}), "x", [document])
+    assert rule_matches(parse_detect_rule({"recipes": ["x"]}), "x", [{}])
+    assert not rule_matches(parse_detect_rule({"value": {"joinery": "finger"}}), "x", [document])
+    assert not rule_matches(parse_detect_rule({"node": "Voronoi"}), "x", [document])
+    with pytest.raises(ValueError, match="Malformed detect rule"):
+        parse_detect_rule({"param": "a", "node": "B"})
+
+
+def test_recipes_rule_naming_a_missing_recipe_fails(tmp_path: Path):
+    root = _make_root(tmp_path, CATALOG + "        detect: [{recipes: [nope]}]\n")
+    regenerate_tree(root)
+
+    assert check_tree(root, _altmill()) == [
+        "catalog.yml: capability 'Multi-sheet partitioning' names recipe 'nope', which does not exist"
+    ]
+
+
+def test_recipe_docs_render_index_category_and_guide(tmp_path: Path):
+    root = _make_root(tmp_path)
+    _make_recipe(root, "doors", "door")
+
+    regenerate_tree(root)
+    index = (root / "README.md").read_text()
+    guide = (root.parent / "feature_guide.md").read_text()
+
+    assert '### [door](doors/door/)\n\n<img src="doors/door/output/door.svg" width="240">\n\nA part.' in index
+    assert "## Panels\n\nFlat parts.\n\nNo recipes yet." in index
+    assert "## [door](door/)" in (root / "doors" / "README.md").read_text()
+    assert not (root / "panels" / "README.md").exists()
+    assert "Recipes: [door](recipes/doors/door/)" in guide
+    assert "Spec: [pml/syntax_spec.md#profile](../pml/syntax_spec.md#profile)" in guide
+    assert guide.endswith("## No recipe yet\n\n- Multi-sheet partitioning (Cutting parts out)\n")
+
+
+def test_untracked_or_stale_generated_document_is_reported(tmp_path: Path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    root = _make_root(tmp_path)
+    _make_recipe(root, "doors", "door")
+    regenerate_tree(root)
+    (root / "panels").mkdir()
+    (root / "panels" / "README.md").write_text("# Panels\n")
+
+    failures = check_tree(root, _altmill(), repo_root=tmp_path)
+
+    assert any(
+        f.startswith(f"Generated document is no longer generated: {root / 'panels' / 'README.md'}") for f in failures
+    )
+    assert "Untracked recipe file: docs/recipes/doors/README.md" in failures
+    assert "Untracked recipe file: docs/feature_guide.md" in failures
+
+
+def test_recipe_readme_requires_demonstrates_and_blueprint(tmp_path: Path):
+    root = _make_root(tmp_path)
+    folder = _make_recipe(root, "doors", "door")
+    (folder / "README.md").write_text("# Door\n\n![Blueprint](output/door.svg)\n")
+    nest_folder = _write_dir(
+        root / "production" / "job",
+        {"job.nest.yml": LONG_SHEET_NEST, "README.md": "# Job\n\n**Demonstrates:** Nesting.\n"},
+    )
+    recipe = recipe_at(folder)
+    nest_recipe = recipe_at(nest_folder)
+    assert recipe is not None
+    assert nest_recipe is not None
+
+    assert readme_problems(recipe) == [
+        "README.md has no **Demonstrates:** line",
+        "README.md embeds no image from its own output/ that exists",
+    ]
+    assert readme_problems(nest_recipe) == []
+
+
+def test_recipe_must_fit_altmill(tmp_path: Path):
+    root = _make_root(tmp_path)
+    pml_recipe = recipe_at(_make_recipe(root, "doors", "big", {"big.pml.yml": OVERSIZED_PML}))
+    nest_recipe = recipe_at(_write_dir(root / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST}))
+    assert pml_recipe is not None
+    assert nest_recipe is not None
+    regenerate_recipe(pml_recipe)
+
+    assert any("does not fit altmill_4x4" in problem for problem in check_pml_recipe(pml_recipe, _altmill()))
+    assert any(
+        problem.startswith("job.nest.yml does not fit altmill_4x4: Job y_max")
+        for problem in check_nest_recipe(nest_recipe, _altmill())
+    )
+
+
+def test_category_recipe_outputs_are_not_gitignored():
+    result = subprocess.run(
+        ["git", "check-ignore", "--no-index", "docs/recipes/doors/x/output/x.svg"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1, result.stdout
+
+
+def _run_mill_recipe(recipe_dir: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "-m", "cli.mill", "--recipe", str(recipe_dir), "--no-svg"],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
+
+
+def test_cli_recipe_runs_source_named_after_recipe(tmp_path: Path):
+    folder = _make_recipe(_make_root(tmp_path), "doors", "x")
+
+    result = _run_mill_recipe(folder)
+
+    assert result.returncode == 0, result.stderr
+    assert (folder / "output" / "metrics.json").exists()
+
+
+def test_cli_recipe_rejects_nest_only_folder(tmp_path: Path):
+    folder = _write_dir(tmp_path / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST})
+
+    result = _run_mill_recipe(folder)
+
+    assert result.returncode == 1
+    assert "python -m cli.nest" in result.stderr
+
+
+def test_validate_recipe_rejects_several_pml_sources(tmp_path: Path):
+    recipe = recipe_at(
+        _make_recipe(_make_root(tmp_path), "panels", "y", {"a.pml.yml": PART_PML, "b.pml.yml": PART_PML})
+    )
+    assert recipe is not None
+    write_recipe_outputs(recipe, recipe.path / "output")
+
+    with pytest.raises(ValueError, match="handles one PML source"):
+        validate_recipe(recipe.path)

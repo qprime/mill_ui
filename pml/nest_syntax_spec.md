@@ -418,5 +418,4 @@ python -m pml.convert_to_yaml job.nest.yml            # Convert in place
 
 **See Also:**
 - [PML Syntax Specification](syntax_spec.md) - For single-sheet layouts
-- [Recipe 17: Guillotine Nesting](../docs/recipes/17_nesting_guillotine/)
-- [Recipe 18: MaxRects Nesting](../docs/recipes/18_nesting_maxrects/)
+- [Feature guide](../docs/feature_guide.md#cutting-parts-out) - Nesting recipes

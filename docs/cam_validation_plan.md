@@ -148,7 +148,7 @@ validation/
 
 ```bash
 # Validate recipe
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile
+python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door
 
 # With golden baseline
 python -m cli.validate_cam --recipe <path> --golden baseline.json
@@ -170,7 +170,7 @@ Exit codes: 0=PASS, 1=WARN, 2=FAIL
 from validation.runner import validate_recipe, ValidationOptions
 
 result = validate_recipe(
-    "docs/recipes/01_simple_profile",
+    "docs/recipes/doors/shaker_door",
     options=ValidationOptions(
         extract_metrics=True,
         check_invariants=True,

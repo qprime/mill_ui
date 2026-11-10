@@ -7,6 +7,14 @@ from .core import (
     ValidationResult,
     Verdict,
 )
+from .recipes import (
+    Recipe,
+    find_recipe,
+    find_recipes,
+    misplaced_inputs,
+    recipe_at,
+    recipe_job_stem,
+)
 from .removal_checks import (
     check_back_face_support,
     check_cross_face_web,
@@ -29,6 +37,7 @@ __all__ = [
     "AssertionResult",
     "CAMValidationResult",
     "InvariantResult",
+    "Recipe",
     "RegressionResult",
     "ValidationInput",
     "ValidationIssue",
@@ -44,6 +53,11 @@ __all__ = [
     "check_toolability",
     "check_toolpath_clearance",
     "check_working_area_bounds",
+    "find_recipe",
+    "find_recipes",
+    "misplaced_inputs",
+    "recipe_at",
+    "recipe_job_stem",
     "validate",
     "validate_recipe",
 ]

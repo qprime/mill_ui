@@ -49,12 +49,12 @@ Activate venv first: `source .venv/bin/activate`
 ```bash
 python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml.yml
-python -m cli.mill --recipe docs/recipes/01_simple_profile
+python -m cli.mill --recipe docs/recipes/doors/shaker_door
 python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19
 python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
 python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
 python -m cli.nest --project my_table job.nest.yml -v
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary
 python -m cli.recipes                           # recipe gate: every output file matches current code (also a pre-commit hook)
 python -m cli.recipes --regen                   # regenerate every recipe's output/
 gh issue view <number> --json title,body,state,labels,comments,author,createdAt,updatedAt,url
@@ -95,7 +95,7 @@ gh issue view <number> --json title,body,state,labels,comments,author,createdAt,
 
 The unified `cli.mill` command generates all outputs (G-code and SVG blueprint) in one invocation:
 - `--project`: User workspace in `$MILL_UI_PROJECTS` (real manufacturing)
-- `--recipe`: Recipe directory in `docs/recipes/` (examples/documentation)
+- `--recipe`: Recipe directory `docs/recipes/<category>/<recipe>/` (examples/documentation)
 - `--init_project TYPE`: Generate starter PML (TYPE: `layout` for manual placement, `assembly` for boxes)
 
 Options: `--kerf`, `--theme`, `--no-svg`, `--no-clean`, `--margin`, `--sheet`, `--thickness`
@@ -130,7 +130,7 @@ Check before implementing — these already exist:
 | CAM artifact validation | `validation/runner.py` |
 | Nest parts on sheets | `cli/nest.py` |
 | Domain/generator composition | `domains/`, `generators/` |
-| Shaker door template | `templates/` (see `docs/recipes/21_simple_shaker_door`) |
+| Shaker door template | `templates/` |
 | Profile with tabs | `pml/yaml_parser.py` |
 | Polygon/RoundedRect profiles | `cam/planner/passes/__init__.py` |
 | Waste cuts decomposition | `nesting/waste_decomposition.py` |
@@ -144,11 +144,13 @@ Check before implementing — these already exist:
 | Machine configuration | `config/machine_loader.py` |
 | Layout resolution | `resolution/layout_resolver.py` |
 | Radial pattern placement | `generators/area/radial_pocket.py`, `radial_tick.py`, `radial_label.py`, `radial_svg.py` |
-| Phyllotaxis spiral placement | `generators/area/phyllotaxis.py` (see `docs/recipes/93_phyllotaxis`) |
-| Voronoi cell partition (engraved edges, pocketed cells) | `generators/area/voronoi.py` (see `docs/recipes/94_voronoi`) |
-| String art chords between outline anchors | `generators/area/string_art.py` (see `docs/recipes/92_string_art`) |
+| Phyllotaxis spiral placement | `generators/area/phyllotaxis.py` |
+| Voronoi cell partition (engraved edges, pocketed cells) | `generators/area/voronoi.py` |
+| String art chords between outline anchors | `generators/area/string_art.py` |
 | Motif placement (scale/rotate/translate, containment) | `generators/placement.py` |
-| Surface facing with cooling | `cam/ops/face.py`, `docs/recipes/73_surface_facing` |
+| Surface facing with cooling | `cam/ops/face.py` |
+| Recipe finder | `validation/recipes.py` |
+| Recipe index and feature guide | `validation/recipe_docs.py`, `docs/recipes/catalog.yml`, `docs/feature_guide.md` |
 | Recipe validation (pass/fail) | `python -m cli.recipes` |
 | Recipe snapshot (regen) | `/snapshot-recipes` skill |
 
@@ -172,7 +174,7 @@ All machining features must be expressible in PML. Python-level generators are i
 2. AST node in `layout_ast/compositional.py`
 3. Parser support in `pml/yaml_parser.py`
 4. Syntax documented in `pml/syntax_spec.md`
-5. Recipe demonstrating usage in `docs/recipes/`
+5. Recipe demonstrating usage in a `docs/recipes/<category>/` folder, with its category listed in `docs/recipes/catalog.yml`
 
 **Projects must use declarative input:**
 - Single-sheet layouts: `.pml.yml` files

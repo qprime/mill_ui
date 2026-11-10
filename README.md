@@ -41,7 +41,7 @@ cmake -S cam/native/cpp -B build/native_cam -Dpybind11_DIR=$(python -m pybind11 
 cmake --build build/native_cam
 cp build/native_cam/python/_native.*.so cam/native/
 
-python -m cli.mill --recipe docs/recipes/01_simple_profile
+python -c "import cam.native._native"
 ```
 
 This generates G-code and an SVG blueprint in the recipe's `output/` directory.
@@ -193,10 +193,10 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | Command | Description |
 |---------|-------------|
 | `python -m cli.mill --project my_project` | Generate G-code and SVG blueprint |
-| `python -m cli.mill --recipe docs/recipes/01_simple_profile` | Run a recipe example |
+| `python -m cli.mill --recipe docs/recipes/doors/shaker_door` | Run a recipe example |
 | `python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19` | Generate starter PML |
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
-| `python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary` | Validate CAM outputs |
+| `python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert between formats |
 | `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
 
@@ -229,9 +229,9 @@ mill_ui/
 
 ## Recipes
 
-The `docs/recipes/` directory contains 70+ worked examples covering basic profiles, pockets, assemblies, joinery, nesting, edge treatments, surface facing, and more. Each recipe includes PML input, expected G-code, and SVG blueprint output.
+Recipes are worked examples in `docs/recipes/<category>/<recipe>/`, each with its PML input, G-code and SVG blueprint. [docs/recipes/README.md](docs/recipes/README.md) indexes them, and [docs/feature_guide.md](docs/feature_guide.md) lists every PML capability with the recipes that use it. Both are generated from the recipes and `docs/recipes/catalog.yml`.
 
-Each recipe's `output/` holds exactly the files current code generates for it, byte for byte, and git tracks all of them. The recipe gate checks this. It writes nothing, and it also runs as the `recipe-outputs` pre-commit hook:
+Each recipe's `output/` holds exactly the files current code generates for it, byte for byte, and git tracks all of them. The recipe gate checks this, and checks that the generated documents are current. It writes nothing, and it also runs as the `recipe-outputs` pre-commit hook:
 
 ```bash
 python -m cli.recipes

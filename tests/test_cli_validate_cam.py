@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from cli.mill import write_recipe_outputs
 from cli.validate_cam import EXIT_FAIL, EXIT_PASS, EXIT_WARN, main
+from validation.recipes import recipe_at
 
 FRAME_PML = """Sheet:
   width: 200mm
@@ -52,7 +53,9 @@ def _make_recipe(tmp_path: Path) -> Path:
     recipe_dir.mkdir()
     source = recipe_dir / "example.pml.yml"
     source.write_text(FRAME_PML)
-    write_recipe_outputs(source, recipe_dir.name, recipe_dir / "output")
+    recipe = recipe_at(recipe_dir)
+    assert recipe is not None
+    write_recipe_outputs(recipe, recipe_dir / "output")
     return recipe_dir
 
 

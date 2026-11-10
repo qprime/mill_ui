@@ -1,0 +1,336 @@
+categories:
+  doors:
+    title: Doors
+    description: One-piece cabinet doors cut from a single sheet of 19mm MDF.
+  panels:
+    title: Panels
+    description: "Flat parts: decorative faces, edge styles, frames, trays, and casework panels."
+  assemblies:
+    title: Assemblies
+    description: Multi-panel builds with interface joinery. Large assemblies split across 1220 × 1220 sheets.
+  beams:
+    title: Beams
+    description: Structural members laminated from sheet layers.
+  production:
+    title: Production
+    description: Whole-sheet jobs laid out for the machine.
+  shop:
+    title: Shop
+    description: "Test pieces and machine upkeep: cut these to check the machine, the tools, and the fit before a real job."
+  engraving:
+    title: Engraving
+    description: "Shallow V-bit and engraving work: text, logos, and measuring tools."
+  patterns:
+    title: Patterns
+    description: Generated art, cut as coasters and discs so each family sits beside its siblings.
+
+guide:
+  - group: Cutting parts out
+    capabilities:
+      - name: Profile
+        summary: "Cut around a shape: outside, inside or on the line, through the sheet or to a depth."
+        spec: pml/syntax_spec.md#profile
+        detect: [{node: Profile}, {value: {type: profile}}]
+      - name: Tabs
+        summary: Small bridges that keep a through-cut part attached to the sheet.
+        spec: pml/syntax_spec.md#profile
+        detect: [{param: tab_count}]
+      - name: Onion skin
+        summary: A thin skin left under a through cut to hold the part.
+        spec: pml/syntax_spec.md#profile
+        detect: [{param: onion_skin_mm}, {param: onion_skin}]
+      - name: Waste cuts
+        summary: Cuts that split the leftover sheet into usable offcuts.
+        spec: pml/syntax_spec.md#wastecuts
+        detect: [{node: WasteCuts}]
+      - name: Nesting
+        summary: Bin-pack parts onto sheets from a .nest.yml job, with the guillotine or maxrects algorithm.
+        spec: pml/nest_syntax_spec.md#algorithms
+        detect: [{value: {algorithm: guillotine}}, {value: {algorithm: maxrects}}]
+      - name: Nested part shapes
+        summary: Rounded, round, polygonal and triangular parts in a nesting job.
+        spec: pml/nest_syntax_spec.md#parts-with-shape-primitives
+        detect:
+          - {value: {type: RoundedRect}}
+          - {value: {type: Circle}}
+          - {value: {type: Polygon}}
+          - {value: {type: Triangle}}
+      - name: Nested parts from templates
+        summary: Nesting-job parts whose features come from a parametric template.
+        spec: pml/nest_syntax_spec.md#parts-with-templates
+        detect: [{param: template}]
+      - name: Per-part holding override
+        summary: A nesting-job part that holds with tabs or onion skin different from the job default.
+        spec: pml/nest_syntax_spec.md#per-part-override
+
+  - group: Pockets and recesses
+    capabilities:
+      - name: Pocket
+        summary: Clear an enclosed area to a depth.
+        spec: pml/syntax_spec.md#pocket
+        detect: [{node: Pocket}, {value: {type: pocket}}]
+      - name: Holes
+        summary: Drilled or bored round holes.
+        spec: pml/syntax_spec.md#feature-types
+        detect: [{value: {type: hole}}]
+      - name: Hole grids
+        summary: A rectangular array of holes.
+        spec: pml/syntax_spec.md#holegrid
+        detect: [{node: HoleGrid}]
+      - name: Rest pocketing
+        summary: A smaller tool clears what the pocket tool could not reach.
+        spec: pml/syntax_spec.md#rest-pocketing
+        detect: [{param: rest_tool}]
+      - name: Corner cleanup
+        summary: A small tool sharpens a pocket's inside corners.
+        spec: pml/syntax_spec.md#corner-cleanup
+        detect: [{param: corner_cleanup}]
+      - name: Dogbone and T-bone
+        summary: Corner reliefs so a square part seats in a pocket.
+        spec: pml/syntax_spec.md#dogbone-fillets
+        detect: [{param: dogbone}]
+      - name: Rough and finish allowance
+        summary: A roughing pass leaves stock for a finishing pass.
+        spec: pml/syntax_spec.md#edge
+        detect: [{param: rough_allowance}, {param: finish_allowance}]
+      - name: Islands
+        summary: Areas a pocket leaves standing.
+        spec: pml/syntax_spec.md#keepout
+        detect: [{node: Keepout}]
+      - name: Holes inside a recess
+        summary: Holes drilled through the floor of a pocket.
+        spec: pml/syntax_spec.md#feature-types
+      - name: Back-face machining
+        summary: Features cut on the back of the sheet after a flip.
+        spec: pml/syntax_spec.md#two-sided-machining-face
+        detect: [{value: {face: back}}]
+
+  - group: Edges
+    capabilities:
+      - name: Chamfer
+        summary: An angled edge cut with a V-bit.
+        spec: pml/syntax_spec.md#chamfer
+        detect: [{node: Chamfer}, {value: {treatment: chamfer}}]
+      - name: Roundover
+        summary: A rounded edge cut with a roundover bit.
+        spec: pml/syntax_spec.md#roundover
+        detect: [{node: Roundover}, {value: {treatment: roundover}}]
+      - name: Raised-panel bevel
+        summary: A bevelled border around a raised field.
+        spec: pml/syntax_spec.md#raisedpanel
+        detect: [{node: RaisedPanel}]
+      - name: Edge cross-section callouts
+        summary: Blueprint callouts that show an edge treatment's cross-section.
+        spec: pml/syntax_spec.md#edge
+        detect: [{node: Edge}]
+
+  - group: Shapes
+    capabilities:
+      - name: Rect, Circle
+        summary: The basic part outlines.
+        spec: pml/syntax_spec.md#rect
+        detect: [{node: Rect}, {node: Circle}]
+      - name: RoundedRect, Ellipse, Polygon, Triangle
+        summary: Outlines with rounded corners, curves or straight sides.
+        spec: pml/syntax_spec.md#roundedrect
+        detect: [{node: RoundedRect}, {node: Ellipse}, {node: Polygon}, {node: Triangle}]
+      - name: Arch
+        summary: A rectangle with an arched top.
+        spec: pml/syntax_spec.md#arch
+        detect: [{node: Arch}]
+      - name: Line, Polyline, Spline
+        summary: Open paths for engraving and cutting.
+        spec: pml/syntax_spec.md#line--polyline--spline
+        detect: [{node: Line}, {node: Polyline}, {node: Spline}]
+
+  - group: Layout
+    capabilities:
+      - name: Frame, Inset
+        summary: A border region and an inner region of a parent shape.
+        spec: pml/syntax_spec.md#frame
+        detect: [{node: Frame}, {node: Inset}]
+      - name: Split, SplitGrid, SplitHorizontal, SplitVertical
+        summary: Divide a region into panels.
+        spec: pml/syntax_spec.md#split
+        detect: [{node: Split}, {node: SplitGrid}, {node: SplitHorizontal}, {node: SplitVertical}]
+      - name: Grid, Place, AtPosition
+        summary: Repeat children in a grid, or place them at given positions.
+        spec: pml/syntax_spec.md#grid
+        detect: [{node: Grid}, {node: Place}, {node: AtPosition}]
+      - name: Subtract, Shell
+        summary: Cut one shape from another, or keep a wall of a given width.
+        spec: pml/syntax_spec.md#subtract
+        detect: [{node: Subtract}, {node: Shell}]
+      - name: Reusable components
+        summary: Named, parameterised pieces of PML used more than once.
+        spec: pml/syntax_spec.md#components
+        detect: [{param: components}]
+
+  - group: Face decorations
+    capabilities:
+      - name: X-panel
+        summary: Diagonal grooves across a panel.
+        spec: pml/syntax_spec.md#xpanel
+        detect: [{node: XPanel}]
+      - name: Louvers
+        summary: Slats cut into the gaps of a horizontal split.
+        spec: pml/syntax_spec.md#splithorizontalgaps
+        detect: [{node: SplitHorizontalGaps}]
+      - name: Wave
+        summary: A wave texture across a face.
+        spec: pml/syntax_spec.md#wave
+        detect: [{node: Wave}]
+      - name: Lattice lines
+        summary: Parallel or crossing grooves across a region.
+        spec: pml/syntax_spec.md#lines
+        detect: [{node: Lines}]
+      - name: Fluting
+        summary: Parallel rounded grooves along a panel.
+        spec: pml/syntax_spec.md#fluting
+        detect: [{node: Fluting}]
+      - name: Concentric border
+        summary: Rings inset from a shape's edge.
+        spec: pml/syntax_spec.md#concentricborder
+        detect: [{node: ConcentricBorder}]
+
+  - group: Mathematical patterns
+    capabilities:
+      - name: Curve families
+        summary: Rose, spirograph, Lissajous, superformula and harmonograph curves.
+        spec: pml/syntax_spec.md#curve
+        detect: [{node: Curve}]
+      - name: Phyllotaxis
+        summary: Points on a sunflower spiral.
+        spec: pml/syntax_spec.md#phyllotaxis
+        detect: [{node: Phyllotaxis}]
+      - name: Voronoi
+        summary: Cells around seed points, engraved or pocketed.
+        spec: pml/syntax_spec.md#voronoi
+        detect: [{node: Voronoi}]
+      - name: String art
+        summary: Chords between anchors on an outline.
+        spec: pml/syntax_spec.md#stringart
+        detect: [{node: StringArt}]
+      - name: Concentric ripples
+        summary: Rings that grow outward from a hole as well as inward from the edge.
+        spec: pml/syntax_spec.md#concentricborder
+      - name: Radial arrays
+        summary: Pockets, ticks, labels or artwork repeated around a center.
+        spec: pml/syntax_spec.md#radial
+        detect: [{node: Radial}]
+
+  - group: Text, images and measurement
+    capabilities:
+      - name: Engraved text
+        summary: Text engraved in a single-line font.
+        spec: pml/syntax_spec.md#engravetext
+        detect: [{node: EngraveText}]
+      - name: Engraving
+        summary: Shallow marking along a shape's outline.
+        spec: pml/syntax_spec.md#engrave
+        detect: [{node: Engrave}, {value: {type: engrave}}]
+      - name: SVG artwork from a file
+        summary: Paths from an SVG file, engraved or pocketed.
+        spec: pml/syntax_spec.md#svgstamp
+        detect: [{node: SvgStamp}]
+      - name: Measurement ticks
+        summary: Ruler ticks and labels along an edge.
+        spec: pml/syntax_spec.md#measurementedge
+        detect: [{node: MeasurementEdge}]
+      - name: Measurement grid, grid lines
+        summary: A labelled measurement grid and plain grid lines.
+        spec: pml/syntax_spec.md#measurementgrid
+        detect: [{node: MeasurementGrid}, {node: GridLines}]
+
+  - group: Joinery and assemblies
+    capabilities:
+      - name: Box, carcass, cubby
+        summary: Assemblies whose panels and joinery come from one block.
+        spec: pml/syntax_spec.md#assembly
+        detect: [{value: {type: box}}, {value: {type: carcass}}, {value: {type: cubby}}]
+      - name: Finger, captured, dado, half-lap
+        summary: Joinery that interlocks panel edges or seats one panel in another.
+        spec: pml/syntax_spec.md#joinery-types
+        detect:
+          - {value: {joinery: finger}}
+          - {value: {joinery: captured}}
+          - {value: {joinery: dado}}
+          - {value: {joinery: half_lap}}
+          - {value: {perimeter_joinery: finger}}
+          - {value: {shelf_joinery: captured}}
+          - {value: {shelf_joinery: dado}}
+          - {value: {partition_joinery: captured}}
+          - {value: {partition_joinery: dado}}
+          - {value: {internal_joinery: half_lap}}
+      - name: Step, rabbet, butt
+        summary: Joinery that steps, shoulders or butts panel edges.
+        spec: pml/syntax_spec.md#joinery-types
+        detect: [{value: {joinery: step}}, {value: {joinery: rabbet}}, {value: {joinery: butt}}]
+      - name: Partitions and shelves
+        summary: Dividers and fixed shelves inside a carcass.
+        spec: pml/syntax_spec.md#carcass-assembly
+        detect: [{param: vertical_partitions}, {param: fixed_shelves}]
+      - name: Multi-sheet partitioning
+        summary: Assembly panels split across sheets when they do not fit on one.
+        spec: pml/syntax_spec.md#multi-sheet-partitioning
+
+  - group: Laminated beams
+    capabilities:
+      - name: Beam layers
+        summary: A beam laminated from sheet layers.
+        spec: pml/syntax_spec.md#beam
+        detect: [{node: Beam}]
+      - name: Mortise, tenon, edge dado, rabbet, drill hole
+        summary: Face, end and edge features cut into beam layers.
+        spec: pml/syntax_spec.md#beam-features
+        detect:
+          - {node: SquareMortise}
+          - {node: Tenon}
+          - {node: EdgeDado}
+          - {node: EdgeNotch}
+          - {node: Rabbet}
+          - {node: DrillHole}
+      - name: Explicit layer specs
+        summary: Beam layers given one by one instead of by count.
+        spec: pml/syntax_spec.md#explicit-layer-specs
+      - name: Splicing beyond sheet length
+        summary: Layers longer than the sheet, spliced with staggered butt joints.
+        spec: pml/syntax_spec.md#splicing
+
+  - group: Relief
+    capabilities:
+      - name: Heightfield rough and finish
+        summary: A relief carved from a height map with roughing and finishing tools.
+        spec: pml/syntax_spec.md#heightfield
+        detect: [{node: Heightfield}]
+
+  - group: Sheet and machine setup
+    capabilities:
+      - name: Margin, working-area dimensions
+        summary: A clamp margin, or a sheet given by its cuttable area.
+        spec: pml/syntax_spec.md#working-area-dimensions
+        detect: [{param: margin}, {param: working_width}]
+      - name: Material
+        summary: The stock material that selects feeds and speeds.
+        spec: pml/syntax_spec.md#document-structure
+        detect: [{param: material}]
+      - name: Kerf override
+        summary: A tool kerf set in the document.
+        spec: pml/syntax_spec.md#document-structure
+        detect: [{param: kerf}]
+      - name: Safe Z
+        summary: The retract height between cuts.
+        spec: pml/syntax_spec.md#retract-height-safe_z
+        detect: [{param: safe_z}]
+      - name: Per-tool G-code files
+        summary: One G-code file per tool instead of one per operation.
+        spec: pml/syntax_spec.md#g-code-output-modes
+        detect: [{value: {gcode_output: per-tool}}]
+      - name: Feed overrides
+        summary: Spindle speed and feed rates set on a feature.
+        spec: pml/syntax_spec.md#feed-overrides
+        detect: [{param: feeds}]
+      - name: Spoilboard facing
+        summary: Full-sheet facing passes with cooling retracts.
+        spec: pml/syntax_spec.md#surface-full-sheet-facing
+        detect: [{node: Surface}]

@@ -156,7 +156,7 @@ options = ValidationOptions(
 )
 
 result = validate_recipe(
-    "docs/recipes/01_simple_profile",
+    "docs/recipes/doors/shaker_door",
     golden_metrics=golden_metrics,
     options=options,
 )
@@ -167,7 +167,7 @@ print(f"Invariants: {result.invariants.passed}/{result.invariants.total}")
 
 **CLI alternative:**
 ```bash
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary
 ```
 
 **Key point:** See `docs/cam_validation_plan.md` for full validation architecture.
@@ -259,7 +259,7 @@ for i, ast in enumerate(result["output"]):
 python -m cli.nest job.nest.yml -o output/ --export-svg
 ```
 
-**Key point:** See `docs/recipes/18_nesting_maxrects/` for complete example.
+**Key point:** See [pml/nest_syntax_spec.md](../pml/nest_syntax_spec.md) for the full syntax.
 
 ---
 
@@ -277,7 +277,7 @@ python -m pytest tests/ -x
 python -m cli.recipes
 
 # Validate specific recipe
-python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --summary
+python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary
 ```
 
 **Key point:** Prefer IR tests for development velocity. Run CAM tests only when planner behavior changes.
@@ -296,8 +296,8 @@ source .venv/bin/activate
 python -m cli.mill --project my_table
 python -m cli.mill --project my_table --input layout.pml
 
-# Recipes (examples in docs/recipes/)
-python -m cli.mill --recipe docs/recipes/01_simple_profile
+# Recipes (examples in docs/recipes/<category>/<recipe>/)
+python -m cli.mill --recipe docs/recipes/doors/shaker_door
 ```
 
 **Projects vs Recipes:**
@@ -388,7 +388,7 @@ placed = place_on_rails(
 source .venv/bin/activate
 
 # Automatic — if panels overflow, multiple sheet outputs are generated
-python -m cli.mill --recipe docs/recipes/74_multi_sheet_assembly
+python -m cli.mill --input big_box.pml.yml --out output/
 ```
 
 Output for a 3-sheet assembly:

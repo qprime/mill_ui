@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from validation.core import Verdict
+from validation.recipes import recipe_at
 from validation.regression import ComparisonConfig
 from validation.runner import (
     ValidationInput,
@@ -27,19 +28,19 @@ def main() -> int:
 Examples:
 
 
-  python -m cli.validate_cam --recipe docs/recipes/01_simple_profile
+  python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door
 
 
   python -m cli.validate_cam --svg output/drawing.svg --gcode output/toolpath.nc
 
 
-  python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --golden baseline.json
+  python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --golden baseline.json
 
 
   python -m cli.validate_cam --svg output/drawing.svg --metrics-only
 
 
-  python -m cli.validate_cam --recipe docs/recipes/01_simple_profile --output result.json
+  python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --output result.json
 
 Exit codes:
   0 = PASS (all checks passed)
@@ -147,7 +148,7 @@ Exit codes:
         return EXIT_FAIL
 
 
-def run_validation(args: argparse.Namespace) -> int:  # noqa: C901 — validation orchestrator
+def run_validation(args: argparse.Namespace) -> int:
 
     golden_metrics = None
     golden_file = None
@@ -187,15 +188,11 @@ def run_validation(args: argparse.Namespace) -> int:  # noqa: C901 — validatio
         if not recipe_dir.is_dir():
             raise ValueError(f"Not a directory: {args.recipe}")
 
-        if ast is None:
-            for candidate in ["example.pml.yml", "source.pml.yml"]:
-                pml_path = recipe_dir / candidate
-                if pml_path.exists():
-                    from pml import parse_pml
+        recipe = recipe_at(recipe_dir)
+        if ast is None and recipe is not None and len(recipe.pml_sources) == 1:
+            from pml import parse_pml
 
-                    with open(pml_path) as f:
-                        ast = parse_pml(f.read())
-                    break
+            ast = parse_pml(recipe.pml_sources[0].read_text(encoding="utf-8"))
 
         result = validate_recipe(
             recipe_dir,

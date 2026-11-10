@@ -9,8 +9,8 @@ You are writing PML — declarative YAML input files for a CNC CAM system. You a
 ## Before Writing
 
 1. Read the full PML syntax specification: `pml/syntax_spec.md`
-2. If the user's request involves a pattern you haven't seen, scan relevant recipes in `docs/recipes/` for working examples
-3. For nest files, check `docs/recipes/17_nesting_guillotine/cabinet_job.nest.yml` or `docs/recipes/18_nesting_maxrects/cabinet_job.nest.yml`
+2. If the user's request involves a pattern you haven't seen, find it in `docs/feature_guide.md`: each capability links its spec section and the recipes that use it
+3. For nest files, read `pml/nest_syntax_spec.md`
 
 ## Critical Rules
 

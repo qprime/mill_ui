@@ -4,7 +4,7 @@
 
 mill_ui was built solo over roughly three months as an AI-augmented engineering project. It serves a dual purpose: a production CAM tool used by TenneCNC LLC for real CNC work, and a worked demonstration of structured AI-collaborative software development.
 
-The system is in active use. Recipes in `docs/recipes/` are not toy examples — they correspond to real parts that have been cut on a real CNC machine. The validation discipline (golden metrics, IR-level checks, recipe regression tests) exists because the cost of a bad G-code file is wasted material and machine time, not a failed unit test.
+The system is in active use. Recipes in `docs/recipes/` are not toy examples — they correspond to real parts that have been cut on a real CNC machine. The validation discipline (IR-level checks, recipe regression checks) exists because the cost of a bad G-code file is wasted material and machine time, not a failed unit test.
 
 ## Why This Architecture
 

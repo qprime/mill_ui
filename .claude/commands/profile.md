@@ -36,7 +36,7 @@ When called with `full`, profile a representative set covering every major pipel
 
 ### With a recipe name or path
 
-When given a specific recipe (e.g., `/profile 71_feature_test` or `/profile docs/recipes/71_feature_test`), profile only that recipe in depth. Still do a single-run comparison against a light baseline (e.g., `01_simple_profile`) so relative cost is visible.
+When given a specific recipe (e.g., `/profile shaker_door` or `/profile docs/recipes/doors/shaker_door`), profile only that recipe in depth. Still do a single-run comparison against a light baseline so relative cost is visible.
 
 ### With a subsystem or stage
 
@@ -48,15 +48,15 @@ Ask the user what they're investigating. Do not run a default `full` sweep silen
 
 ## Recipe Selection
 
-A good default set (five recipes, ~30 seconds of profiling):
+Pick one recipe per role from `docs/recipes/README.md`; `docs/feature_guide.md` lists the recipes for each capability:
 
-| Role | Recipe | What it stresses |
+| Role | Pick a recipe that | What it stresses |
 |---|---|---|
-| Light baseline | `01_simple_profile` | Per-call fixed overhead — exposes anything that runs regardless of workload |
-| Heavy generator | `40b_frameless_cabinet_all_finger` | Assembly resolution, joinery, many passes |
-| Move-heavy | `71_feature_test` | Planner + gcode post-processing on 20k+ moves |
-| Text/labels | `78_radial_clock_face` | Font loading, text generation, radial placement |
-| Multi-sheet | `74_multi_sheet_assembly` | Partitioner, per-sheet pipeline invocations |
+| Light baseline | cuts one simple profile | Per-call fixed overhead — exposes anything that runs regardless of workload |
+| Heavy generator | is a multi-panel assembly with finger joinery | Assembly resolution, joinery, many passes |
+| Move-heavy | writes the most G-code moves (see its `machining_summary.json`) | Planner + gcode post-processing |
+| Text/labels | engraves text or radial labels | Font loading, text generation, radial placement |
+| Multi-sheet | splits an assembly across sheets | Partitioner, per-sheet pipeline invocations |
 
 Adjust based on scope. If the user reports slowness on a specific recipe, that recipe is your primary subject; the defaults are comparators.
 

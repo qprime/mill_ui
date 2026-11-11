@@ -4,9 +4,7 @@ import math
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from shapely.geometry import Polygon, box
 from shapely.geometry.base import BaseGeometry
-from shapely.ops import unary_union
 
 from cam.ops.bore import bore_helical, pocket_circle_concentric
 from cam.ops.drill import drill_peck
@@ -16,6 +14,8 @@ from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import move_comment, offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
+from core.geometry import pocket_region
+from ir.removal_intent import Bounds2D
 from layout_ast.layout import RestSpec
 
 from .profile import offset_rect_shape, rect_shape
@@ -346,23 +346,12 @@ def _plan_surface_pass(
 
 
 def _pocket_region(entry: FeatureInput) -> BaseGeometry | None:
-    sg = entry.geometry.geometry
-    shape_name = entry.shape.lower()
-    cx, cy = entry.center_xy_mm
-    base: BaseGeometry
-    if shape_name == "polygon" and sg.points:
-        shell = [(float(x) + cx, float(y) + cy) for x, y in sg.points]
-        holes = [[(float(x) + cx, float(y) + cy) for x, y in hole] for hole in sg.holes or ()]
-        base = Polygon(shell, holes)
-    elif entry.islands and shape_name == "rect":
-        half_w = float(sg.w_mm or 0.0) / 2.0
-        half_h = float(sg.h_mm or 0.0) / 2.0
-        base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
-    else:
-        return None
-    if not entry.islands:
-        return base
-    return base.difference(unary_union([box(i.x_min, i.y_min, i.x_max, i.y_max) for i in entry.islands]))
+    return pocket_region(
+        entry.shape,
+        entry.geometry.geometry,
+        entry.center_xy_mm,
+        tuple(Bounds2D(i.x_min, i.x_max, i.y_min, i.y_max) for i in entry.islands),
+    )
 
 
 def _reject_unsupported_region_strategy(entry: FeatureInput) -> None:

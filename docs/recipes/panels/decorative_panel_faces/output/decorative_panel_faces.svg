@@ -91,10 +91,10 @@
     <path d="M 194.785 845.000 L 185.804 845.000 L 70.000 729.196 L 70.000 720.215 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_lines_15_008" />
     <path d="M 138.216 845.000 L 129.236 845.000 L 70.000 785.764 L 70.000 776.784 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_lines_15_009" />
     <path d="M 81.647 845.000 L 72.667 845.000 L 70.000 842.333 L 70.000 833.353 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_lines_15_010" />
-    <path d="M 780.000 495.000 L 1040.000 495.000 L 1040.000 855.000 L 780.000 855.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_border_19_000" />
-    <path d="M 795.000 510.000 L 1025.000 510.000 L 1025.000 840.000 L 795.000 840.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_border_19_001" />
-    <path d="M 810.000 525.000 L 1010.000 525.000 L 1010.000 825.000 L 810.000 825.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_border_19_002" />
-    <path d="M 825.000 540.000 L 995.000 540.000 L 995.000 810.000 L 825.000 810.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_border_19_003" />
+    <path d="M 780.000 495.000 L 1040.000 495.000 L 1040.000 855.000 L 780.000 855.000 Z M 1033.650 848.650 L 1033.650 501.350 L 786.350 501.350 L 786.350 848.650 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_19_000" />
+    <path d="M 795.000 510.000 L 1025.000 510.000 L 1025.000 840.000 L 795.000 840.000 Z M 1018.650 833.650 L 1018.650 516.350 L 801.350 516.350 L 801.350 833.650 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_19_001" />
+    <path d="M 810.000 525.000 L 1010.000 525.000 L 1010.000 825.000 L 810.000 825.000 Z M 1003.650 818.650 L 1003.650 531.350 L 816.350 531.350 L 816.350 818.650 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_19_002" />
+    <path d="M 825.000 540.000 L 995.000 540.000 L 995.000 810.000 L 825.000 810.000 Z M 988.650 803.650 L 988.650 546.350 L 831.350 546.350 L 831.350 803.650 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_19_003" />
   </g>
   <g id="ENGRAVE_PATHS" class="engrave-paths">
     <polyline points="792.384,395.000 792.500,394.823 795.000,391.579 797.500,389.411 800.000,388.650 802.500,389.411 805.000,391.579 807.500,394.823 807.616,395.000" stroke="#888888" fill="none" stroke-width="0.25" id="generated_wave_12_000" />

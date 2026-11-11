@@ -1,5 +1,6 @@
 import re
 import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,30 @@ from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, She
 from resolution.layout_resolver import LayoutResolver
 
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
+
+
+@pytest.mark.parametrize("theme", ["dark", "print"])
+def test_pocket_holes_survive_svg_export_without_background_overpainting(theme):
+    item = Item(
+        kind="shape",
+        type="Polygon",
+        shape_id="ring",
+        geometry=Geometry(
+            data={
+                "points": [(-40, -25), (40, -25), (40, 25), (-40, 25)],
+                "holes": [[(-20, -10), (-20, 10), (20, 10), (20, -10)]],
+            }
+        ),
+        placement=Placement(center_xy_mm=(70, 50)),
+        feature=Feature(type="pocket", depth_mm=5),
+    )
+
+    svg = render_blueprint_svg(LayoutAST(sheet=Sheet(220, 180, 19, margin_mm=10), items=(item,)), theme=theme)
+
+    root = ET.fromstring(svg)
+    (path,) = root.findall(".//*[@id='ring']")
+    assert path.tag.endswith("path") and path.get("fill-rule") == "evenodd"
+    assert path.get("d", "").count("M ") == path.get("d", "").count("Z") == 2
 
 
 def test_svg_output_deterministic():

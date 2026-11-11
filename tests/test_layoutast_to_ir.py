@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
+import pytest
+
 from adapters.layoutast_to_ir import (
     FEATURE_HANDLERS,
     FEATURE_LAYER,
     layoutast_to_diagram_ir,
 )
-from diagram_ir import Circle, DiagramIR, Rect, Text
+from diagram_ir import Circle, DiagramIR, Path, Rect, Text
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 
@@ -166,6 +170,80 @@ def test_pocket_layer():
     rect_shapes = [s for s in pocket_layer.items if isinstance(s, Rect)]
     assert len(rect_shapes) == 1
     assert rect_shapes[0].style_token == "pocket"
+
+
+@pytest.mark.parametrize("origin", ["front", "back"])
+def test_polygon_pocket_preserves_local_holes_and_margin(origin):
+    item = Item(
+        kind="shape",
+        type="Polygon",
+        shape_id="ring",
+        geometry=Geometry(
+            data={
+                "points": [(-40, -25), (40, -25), (40, 25), (-40, 25)],
+                "holes": [[(-20, -10), (5, -10), (5, 10), (-20, 10)], [(15, -5), (25, -5), (25, 5), (15, 5)]],
+            }
+        ),
+        placement=Placement(center_xy_mm=(70, 50)),
+        feature=Feature(type="pocket", depth_mm=5),
+    )
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(220, 180, m=10), items=(item,)), y_origin=origin)
+    (path,) = next(layer.items for layer in diagram.layers if layer.name == "POCKET_REGIONS")
+
+    assert isinstance(path, Path)
+    assert path.fill_rule == "evenodd" and path.id == "ring" and path.style_token == "pocket"
+    assert path.d.count("M ") == path.d.count("Z") == 3
+    assert ("40.000 35.000" if origin == "front" else "40.000 145.000") in path.d
+    assert ("60.000 50.000" if origin == "front" else "60.000 130.000") in path.d
+
+
+def test_rect_pocket_islands_use_absolute_bounds_and_union():
+    item = _make_pocket_item("island_pocket", 100, 60, 80, 70)
+    item = replace(
+        item,
+        geometry=Geometry(
+            data={
+                "w_mm": 100,
+                "h_mm": 60,
+                "islands": [
+                    {"x_min": 60, "x_max": 80, "y_min": 60, "y_max": 80},
+                    {"x_min": 70, "x_max": 90, "y_min": 60, "y_max": 80},
+                ],
+            }
+        ),
+    )
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(220, 180, m=10), items=(item,)))
+    (path,) = next(layer.items for layer in diagram.layers if layer.name == "POCKET_REGIONS")
+
+    assert isinstance(path, Path) and path.fill_rule == "evenodd"
+    assert path.d.count("M ") == path.d.count("Z") == 2
+    assert "70.000 90.000" in path.d and "100.000 110.000" in path.d
+
+
+@pytest.mark.parametrize("covered", [False, True])
+def test_edge_touching_islands_split_or_empty_the_pocket(covered):
+    item = _make_pocket_item("split", 100, 60, 80, 70)
+    island = {"x_min": 20 if covered else 70, "x_max": 140 if covered else 90, "y_min": 30, "y_max": 110}
+    item = replace(item, geometry=Geometry(data={"w_mm": 100, "h_mm": 60, "islands": [island]}))
+
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(220, 180), items=(item,)))
+
+    pockets = [shape for layer in diagram.layers if layer.name == "POCKET_REGIONS" for shape in layer.items]
+    if covered:
+        assert not pockets
+    else:
+        (path,) = pockets
+        assert isinstance(path, Path) and path.d.count("M ") == path.d.count("Z") == 2
+
+
+@pytest.mark.parametrize("origin,top", [("front", 40), ("back", 110)])
+def test_plain_rect_pocket_uses_same_sheet_coordinates_as_holed_pocket(origin, top):
+    item = _make_pocket_item("plain", 50, 30, 65, 45)
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(220, 180, m=10), items=(item,)), y_origin=origin)
+    (rect,) = next(layer.items for layer in diagram.layers if layer.name == "POCKET_REGIONS")
+
+    assert isinstance(rect, Rect)
+    assert rect.x == 50 and rect.y == top
 
 
 def test_hole_layer():

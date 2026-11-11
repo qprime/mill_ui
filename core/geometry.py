@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 from core.constants import GeometryKeys, ShapeType
@@ -8,6 +9,8 @@ from domains.domain import Bounds2D
 from ir.removal_intent import ShapeGeometry
 
 if TYPE_CHECKING:
+    from shapely.geometry.base import BaseGeometry
+
     from domains import Domain
 
 
@@ -265,3 +268,25 @@ def extract_polygon_points(
         result: list[list[float]] = geometry[GeometryKeys.POINTS]
         return result
     return None
+
+
+def pocket_region(
+    shape: str, geometry: ShapeGeometry, center_xy_mm: tuple[float, float], islands: Sequence[Bounds2D] = ()
+) -> BaseGeometry | None:
+    from shapely.geometry import Polygon, box
+    from shapely.ops import unary_union
+
+    cx, cy = center_xy_mm
+    base: BaseGeometry
+    if shape.lower() == "polygon" and geometry.points:
+        shell = [(float(x) + cx, float(y) + cy) for x, y in geometry.points]
+        holes = [[(float(x) + cx, float(y) + cy) for x, y in hole] for hole in geometry.holes or ()]
+        base = Polygon(shell, holes)
+    elif islands and shape.lower() == "rect":
+        half_w, half_h = float(geometry.w_mm or 0.0) / 2, float(geometry.h_mm or 0.0) / 2
+        base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)
+    else:
+        return None
+    if not islands:
+        return base
+    return base.difference(unary_union([box(i.x_min, i.y_min, i.x_max, i.y_max) for i in islands]))

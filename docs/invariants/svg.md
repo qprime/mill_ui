@@ -25,6 +25,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-7 | HARD | VALID_XML_OUTPUT | Output is well-formed XML with proper escaping |
 | SVG-8 | HARD | VIEWBOX_CONTAINS_CONTENT | All rendered elements fit within SVG viewBox |
 | SVG-9 | HARD | DETERMINISTIC_OUTPUT | Same LayoutAST always produces identical SVG |
+| SVG-10 | HARD | POCKET_REGION_FIDELITY | Pocket fills preserve all holes and islands, using the same region subtraction as machining. |
 
 ---
 
@@ -44,6 +45,14 @@ Registered shape renderers in `diagram_render/render_svg.py`:
 ---
 
 ## Feature -> Layer Mapping
+
+Pocket polygons with holes and Rect pockets with islands use an even-odd compound
+`Path`. Island bounds are in working-area coordinates; polygon vertices and holes
+are relative to their placement. `core.geometry.pocket_region()` owns the region
+calculation for both the planner and drawing adapter, including unions of
+overlapping islands, clipped edge-touching exclusions, and disconnected remnants.
+Do not paint holes with a background-colored overlay: underlying cuts must remain
+visible. Margin and Y-origin transforms apply once to every contour.
 
 Defined in `adapters/layoutast_to_ir.py`:
 

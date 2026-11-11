@@ -3,8 +3,9 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
+from adapters.hints_to_removal import _geometry_dict_to_shape_geometry
 from core.constants import DepthMode, ShapeType
-from core.geometry import compute_shape_bounds
+from core.geometry import compute_shape_bounds, pocket_region
 from diagram_ir import Circle, DiagramIR, Image, LayerIR, Line, Path, Point2D, Polyline, Rect, Text
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir.geometry import rounded_rect_path
@@ -174,7 +175,35 @@ def _handle_profile(item: Item, style_token: str, flip_y: Callable, margin: floa
 
 @register_feature("pocket")  # type: ignore[untyped-decorator]
 def _handle_pocket(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _item_to_shapes(item, style_token, flip_y, margin)
+    if item.geometry is None or item.placement is None:
+        return []
+    data = item.geometry.data
+    if not data.get("holes") and not data.get("islands"):
+        return _item_to_shapes(item, style_token, flip_y, margin)
+    bounds = compute_shape_bounds(item.type, data, item.placement.center_xy_mm)
+    geometry = _geometry_dict_to_shape_geometry(data, item.placement.center_xy_mm, bounds)
+    islands = tuple(
+        Bounds2D(float(i["x_min"]), float(i["x_max"]), float(i["y_min"]), float(i["y_max"]))
+        for i in data.get("islands", [])
+    )
+    region = pocket_region(item.type, geometry, bounds.center, islands)
+    if region is None:
+        raise ValueError(f"Pocket '{item.shape_id}': cannot draw holes/islands for shape '{item.type}'")
+    return _region_path(region, style_token, item.shape_id or "unnamed", flip_y, margin)
+
+
+def _region_path(region, style_token: str, shape_id: str, flip_y: Callable, margin: float) -> list[Shape]:
+    from shapely import get_parts
+    from shapely.geometry import Polygon
+
+    commands: list[str] = []
+    for polygon in get_parts(region):
+        if not isinstance(polygon, Polygon) or polygon.is_empty:
+            continue
+        for ring in (polygon.exterior, *polygon.interiors):
+            points = [(margin + x, flip_y(y)) for x, y in ring.coords[:-1]]
+            commands.append("M " + " L ".join(f"{x:.3f} {y:.3f}" for x, y in points) + " Z")
+    return [Path(d=" ".join(commands), fill_rule="evenodd", style_token=style_token, id=shape_id)] if commands else []
 
 
 @register_feature("hole")  # type: ignore[untyped-decorator]
@@ -335,7 +364,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y, margin: float) -> list
         return [
             Rect(
                 x=sx - w / 2,
-                y=flip_y(cy + h / 2),
+                y=min(flip_y(cy + h / 2), flip_y(cy - h / 2)),
                 width=w,
                 height=h,
                 style_token=style_token,
@@ -379,7 +408,7 @@ def _item_to_shapes(item: Item, style_token: str, flip_y, margin: float) -> list
         radius_bl = float(data.get("radius_bl_mm", radius))
 
         x = sx - w / 2
-        y = flip_y(cy + h / 2)
+        y = min(flip_y(cy + h / 2), flip_y(cy - h / 2))
         path_d = rounded_rect_path(x, y, w, h, radius_tl, radius_tr, radius_br, radius_bl)
         return [Path(d=path_d, style_token=style_token, id=shape_id)]
 
@@ -524,7 +553,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
         return [
             Rect(
                 x=margin + cx - new_w / 2,
-                y=flip_y(cy + new_h / 2),
+                y=min(flip_y(cy + new_h / 2), flip_y(cy - new_h / 2)),
                 width=new_w,
                 height=new_h,
                 style_token="toolpath",
@@ -581,7 +610,7 @@ def _build_toolpath_shapes(item: Item, tool_radius: float, flip_y, margin: float
         r_bl = max(0.0, float(data.get("radius_bl_mm", radius)) + offset)
         sx = margin + cx
         x = sx - new_w / 2
-        y = flip_y(cy + new_h / 2)
+        y = min(flip_y(cy + new_h / 2), flip_y(cy - new_h / 2))
         path_d = rounded_rect_path(x, y, new_w, new_h, r_tl, r_tr, r_br, r_bl)
         return [Path(d=path_d, style_token="toolpath", id=f"{item.shape_id or 'item'}_toolpath")]
 

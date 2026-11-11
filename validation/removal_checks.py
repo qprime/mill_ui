@@ -3,16 +3,22 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from shapely.geometry import LineString, Point
+from shapely.geometry.base import BaseGeometry
+from shapely.ops import unary_union
+
 from core.constants import (
     BACK_FACE_DEPTH_MODES,
     BACK_FACE_FEATURE_TYPES,
     WEB_CHECK_FEATURE_TYPES,
     FeatureType,
 )
+from core.geometry import engraving_paths, extract_shape_geometry
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
 _WEB_TOLERANCE_MM = 1e-6
+_ENGRAVE_CLEARANCE_TOLERANCE_MM = 1e-6
 
 
 def check_depth_profile(
@@ -272,14 +278,39 @@ def _is_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
     )
 
 
-def check_overlap(intents: list[RemovalIntent]) -> ValidationResult:
+def _engraving_trace(intent: RemovalIntent) -> BaseGeometry | None:
+    if intent.hint_type != FeatureType.ENGRAVE or (intent.ramp_mm is not None and intent.ramp_mm > 0):
+        return None
+    geometry = extract_shape_geometry(intent.shape, intent.bounds, intent.shape_geometry)
+    paths = engraving_paths(intent.shape, geometry, intent.bounds.center)
+    if not paths:
+        return None
+    return unary_union([LineString(path) if len(path) > 1 else Point(path[0]) for path in paths])
+
+
+def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: float | None = None) -> ValidationResult:
+    if engrave_tool_diameter_mm is not None and (
+        not math.isfinite(engrave_tool_diameter_mm) or engrave_tool_diameter_mm <= 0
+    ):
+        raise ValueError(
+            f"check_overlap: engrave_tool_diameter_mm must be finite and positive, got {engrave_tool_diameter_mm}"
+        )
     result = ValidationResult()
+    traces = [_engraving_trace(intent) if engrave_tool_diameter_mm is not None else None for intent in intents]
 
     for i, intent_a in enumerate(intents):
-        for intent_b in intents[i + 1 :]:
+        for j, intent_b in enumerate(intents[i + 1 :], start=i + 1):
             if intent_a.face != intent_b.face:
                 continue
             if _regions_overlap(intent_a, intent_b):
+                trace_a, trace_b = traces[i], traces[j]
+                if (
+                    engrave_tool_diameter_mm is not None
+                    and trace_a is not None
+                    and trace_b is not None
+                    and trace_a.distance(trace_b) > engrave_tool_diameter_mm + _ENGRAVE_CLEARANCE_TOLERANCE_MM
+                ):
+                    continue
                 if _are_sibling_features(intent_a, intent_b):
                     continue
                 if _are_perpendicular_pockets(intent_a, intent_b):

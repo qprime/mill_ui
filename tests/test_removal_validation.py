@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from adapters.hints_to_removal import engrave_hint_to_removal_intent
 from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
@@ -101,6 +102,77 @@ def test_check_overlap_xy_overlap():
     assert len(result.errors) == 1
     assert "pocket_a" in result.errors[0].message
     assert "pocket_b" in result.errors[0].message
+
+
+def _engraving_trace(region_id, points):
+    return engrave_hint_to_removal_intent(
+        {
+            "id": region_id,
+            "shape": "Polyline",
+            "geometry": {"points": points},
+            "center_xy_mm": [120, 80],
+            "depth_mm": 0.8,
+        }
+    )
+
+
+def test_overlap_disjoint_engraving_borders_with_nested_bounds():
+    outer = _engraving_trace("outer", [(0, 0), (100, 0), (100, 80), (0, 80), (0, 0)])
+    inner = _engraving_trace("inner", [(10, 10), (90, 10), (90, 70), (10, 70), (10, 10)])
+    assert not check_overlap([outer, inner]).is_valid()
+    assert check_overlap([outer, inner], engrave_tool_diameter_mm=3).is_valid()
+
+
+@pytest.mark.parametrize("diameter, valid", [(1, True), (3, False), (4, False)])
+def test_overlap_parallel_engraving_paths_accounts_for_full_cutter(diameter, valid):
+    a = _engraving_trace("a", [(0, 0), (100, 0), (100, 80)])
+    b = _engraving_trace("b", [(10, 3), (97, 3), (97, 70)])
+    result = check_overlap([a, b], engrave_tool_diameter_mm=diameter)
+    assert result.is_valid() == valid
+
+
+def test_overlap_crossing_engraving_paths_still_reported():
+    a = _engraving_trace("a", [(0, 0), (50, 50)])
+    b = _engraving_trace("b", [(0, 50), (50, 0)])
+    assert len(check_overlap([a, b], engrave_tool_diameter_mm=1).errors) == 1
+
+
+@pytest.mark.parametrize(
+    "shape, geometry, center",
+    [
+        ("Line", {"start": [10, 20], "end": [90, 60]}, [120, 80]),
+        ("Rect", {"w_mm": 60, "h_mm": 40}, [170, 120]),
+    ],
+)
+def test_overlap_engraving_shapes_share_positioned_planner_paths(shape, geometry, center):
+    outer = _engraving_trace("outer", [(0, 0), (100, 0), (100, 80), (0, 80), (0, 0)])
+    inner = engrave_hint_to_removal_intent(
+        {"id": "inner", "shape": shape, "geometry": geometry, "center_xy_mm": center, "depth_mm": 0.8}
+    )
+    assert not check_overlap([outer, inner]).is_valid()
+    assert check_overlap([outer, inner], engrave_tool_diameter_mm=3).is_valid()
+
+
+def test_overlap_ramped_engraving_keeps_conservative_bounds_check():
+    from dataclasses import replace
+
+    outer = _engraving_trace("outer", [(0, 0), (0, 50), (50, 50)])
+    inner = _engraving_trace("inner", [(10, 5), (45, 40)])
+    assert check_overlap([outer, inner], engrave_tool_diameter_mm=1).is_valid()
+    ramped = replace(outer, ramp_mm=5)
+    assert not check_overlap([ramped, inner], engrave_tool_diameter_mm=1).is_valid()
+
+
+def test_overlap_unknown_engraving_geometry_keeps_bounds_check():
+    a = _make_intent("a", Bounds2D(0, 100, 0, 100), hint_type="engrave")
+    b = _make_intent("b", Bounds2D(10, 90, 10, 90), hint_type="engrave")
+    assert not check_overlap([a, b], engrave_tool_diameter_mm=1).is_valid()
+
+
+@pytest.mark.parametrize("diameter", [0, -1, float("inf"), float("nan")])
+def test_overlap_rejects_invalid_engraving_tool_diameter(diameter):
+    with pytest.raises(ValueError, match="engrave_tool_diameter_mm"):
+        check_overlap([], engrave_tool_diameter_mm=diameter)
 
 
 def test_check_overlap_different_z_levels():

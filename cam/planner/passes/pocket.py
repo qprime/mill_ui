@@ -14,7 +14,7 @@ from cam.ops.profile import profile_outline
 from cam.path.strategies import pocket_then_finish_profile
 from cam.path.toolpath import move_comment, offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
-from core.geometry import pocket_region
+from core.geometry import engraving_paths, pocket_region
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import RestSpec
 
@@ -578,46 +578,7 @@ def plan_engrave_passes(
     tool_db: Sequence[ToolSelection],
 ) -> None:
     for entry in engraves:
-        sg = entry.geometry.geometry
-        shape_name = entry.shape.lower()
-        lines: list[list[tuple[float, float]]] = []
-
-        if shape_name == "polyline":
-            raw_points = sg.points or ()
-            cx, cy = entry.center_xy_mm
-            line = [(float(pt[0]) + cx, float(pt[1]) + cy) for pt in raw_points]
-            if line:
-                lines.append(line)
-        elif shape_name == "rect":
-            width = float(sg.w_mm or 0.0)
-            height = float(sg.h_mm or 0.0)
-            if width <= 0.0 or height <= 0.0:
-                continue
-            cx, cy = entry.center_xy_mm
-            half_w = 0.5 * width
-            half_h = 0.5 * height
-            lines.append(
-                [
-                    (cx - half_w, cy - half_h),
-                    (cx + half_w, cy - half_h),
-                    (cx + half_w, cy + half_h),
-                    (cx - half_w, cy + half_h),
-                    (cx - half_w, cy - half_h),
-                ]
-            )
-        elif shape_name == "line":
-            start = sg.start or (0.0, 0.0)
-            end = sg.end or (0.0, 0.0)
-            cx, cy = entry.center_xy_mm
-            lines.append(
-                [
-                    (float(start[0]) + cx, float(start[1]) + cy),
-                    (float(end[0]) + cx, float(end[1]) + cy),
-                ]
-            )
-        else:
-            continue
-
+        lines = engraving_paths(entry.shape, entry.geometry.geometry, entry.center_xy_mm)
         if not lines:
             continue
 

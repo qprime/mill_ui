@@ -290,3 +290,33 @@ def pocket_region(
     if not islands:
         return base
     return base.difference(unary_union([box(i.x_min, i.y_min, i.x_max, i.y_max) for i in islands]))
+
+
+def engraving_paths(
+    shape: str, geometry: ShapeGeometry, center_xy_mm: tuple[float, float]
+) -> list[list[tuple[float, float]]]:
+    cx, cy = center_xy_mm
+    shape_name = shape.lower()
+    if shape_name == "polyline":
+        line = [(float(x) + cx, float(y) + cy) for x, y in geometry.points or ()]
+        return [line] if line else []
+    if shape_name == "rect":
+        width = float(geometry.w_mm or 0.0)
+        height = float(geometry.h_mm or 0.0)
+        if width <= 0.0 or height <= 0.0:
+            return []
+        half_w, half_h = width / 2, height / 2
+        return [
+            [
+                (cx - half_w, cy - half_h),
+                (cx + half_w, cy - half_h),
+                (cx + half_w, cy + half_h),
+                (cx - half_w, cy + half_h),
+                (cx - half_w, cy - half_h),
+            ]
+        ]
+    if shape_name == "line":
+        start = geometry.start or (0.0, 0.0)
+        end = geometry.end or (0.0, 0.0)
+        return [[(float(start[0]) + cx, float(start[1]) + cy), (float(end[0]) + cx, float(end[1]) + cy)]]
+    return []

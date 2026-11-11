@@ -17,7 +17,7 @@ from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.summary import summarise_gcode_file
-from cam.planner.passes.tools import ToolSelection, normalize_tool_entries, pass_key
+from cam.planner.passes.tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_engrave
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
     Endmill,
@@ -26,7 +26,7 @@ from config.machine_loader import (
     build_tool_db,
     load_machine_tool_db,
 )
-from core.constants import BACK_SVG_SUFFIX
+from core.constants import BACK_SVG_SUFFIX, FeatureType
 from ir.removal_intent import RemovalIntent
 from layout_ast.layout import LayoutAST, mirror_item_about_x
 from validation.removal_checks import (
@@ -323,7 +323,12 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     for warning in constraint_audit.warnings:
         warnings.append(f"Constraint audit: {warning}")
 
-    overlap_result = check_overlap(non_surface_intents)
+    engrave_diameter = (
+        pick_tool_for_engrave(tools).diameter
+        if tools and any(intent.hint_type == FeatureType.ENGRAVE for intent in non_surface_intents)
+        else None
+    )
+    overlap_result = check_overlap(non_surface_intents, engrave_tool_diameter_mm=engrave_diameter)
     if overlap_result.has_issues():
         for issue in overlap_result.errors:
             errors.append(issue.message)

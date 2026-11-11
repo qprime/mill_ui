@@ -45,19 +45,8 @@
     }
   },
   "errors": [
-    "Overlapping regions detected: engrave_generated_radial_svg_4_000 and engrave_generated_radial_svg_5_000",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_000 and engrave_generated_radial_svg_5_001",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_000 and engrave_generated_radial_svg_5_006",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_000 and engrave_generated_radial_svg_5_007",
     "Overlapping regions detected: engrave_generated_radial_svg_4_001 and engrave_generated_radial_svg_5_006",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_002 and engrave_generated_radial_svg_5_000",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_002 and engrave_generated_radial_svg_5_001",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_002 and engrave_generated_radial_svg_5_002",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_002 and engrave_generated_radial_svg_5_003",
     "Overlapping regions detected: engrave_generated_radial_svg_4_004 and engrave_generated_radial_svg_5_002",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_004 and engrave_generated_radial_svg_5_003",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_004 and engrave_generated_radial_svg_5_004",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_004 and engrave_generated_radial_svg_5_005",
     "Overlapping regions detected: engrave_generated_radial_svg_4_006 and engrave_generated_radial_svg_5_004",
     "Overlapping regions detected: engrave_generated_radial_svg_4_006 and engrave_generated_radial_svg_5_005"
   ],

@@ -39,6 +39,15 @@ Overlap is also face-scoped: a front feature and a back feature never conflict,
 because they are machined in separate setups from opposite surfaces.
 `check_overlap` skips any pair whose `face` differs.
 
+Bounding boxes are a conservative first check. For two non-ramped engravings,
+the pipeline supplies the diameter selected by the engraving planner. The check
+may discard a bounding-box overlap only when the distance between their shared
+planner paths exceeds that full diameter plus numerical tolerance. This uses
+the cutter's full cylindrical width, including for ball and V bits, rather than
+assuming a narrower cut at a particular depth. Crossing, touching and closely
+spaced cuts retain the existing conflict policy. Missing tool diameter,
+unsupported geometry and ramped engravings retain the bounding-box check.
+
 ---
 
 ## Cross-Face Web (VL-8)

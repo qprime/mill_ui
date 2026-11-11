@@ -534,7 +534,7 @@ class TestRectangleProfilePlanning:
 
     @pytest.mark.parametrize("holding", ["tabs", "onion_skin_mm"])
     @pytest.mark.parametrize("global_option", [False, True])
-    def test_allowances_cannot_silently_drop_holding(self, holding, global_option):
+    def test_allowances_preserve_holding_through_finish(self, holding, global_option):
         from cam.planner.planner_input import TabsInput
 
         feature = replace(
@@ -542,14 +542,129 @@ class TestRectangleProfilePlanning:
             side="outside",
             edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.2),
         )
-        options = {holding: {"count": 4, "height_mm": 2, "width_mm": 8} if holding == "tabs" else 0.3}
+        options = {
+            holding: {"count": 4, "height_mm": 2, "width_mm": 8} if holding == "tabs" else 0.3,
+            "cut_through_mm": 0.2,
+        }
         if not global_option:
             feature = (
                 replace(feature, tabs=TabsInput(4, 2, 8)) if holding == "tabs" else replace(feature, onion_skin_mm=0.3)
             )
+            options = {"cut_through_mm": 0.2}
 
-        with pytest.raises(ValueError, match="must preserve the requested holding"):
-            self._plan(feature, profile_opts=options if global_option else None)
+        passes = self._plan(feature, profile_opts=options)
+
+        assert [record.op for record in passes] == (
+            ["profile", "profile_finish"] if holding == "tabs" else ["profile", "profile_finish", "release"]
+        )
+        rough_depth = min(end[2] for _, end in _cut_segments(passes[0].moves))
+        assert rough_depth == pytest.approx(-17 if holding == "tabs" else -18.7)
+        finish_depth = min(end[2] for _, end in _cut_segments(passes[1].moves))
+        assert finish_depth == pytest.approx(-19.2 if holding == "tabs" else -18.7)
+        if holding == "onion_skin_mm":
+            assert min(end[2] for _, end in _cut_segments(passes[-1].moves)) == pytest.approx(-19.2)
+
+    def test_plain_onion_skin_uses_nominal_depth_and_one_cut_through(self):
+        feature = replace(
+            _feature("Rect", {"w_mm": 100, "h_mm": 60}, (100, 100), 19), side="outside", onion_skin_mm=0.3
+        )
+
+        rough, release = self._plan(feature, profile_opts={"cut_through_mm": 0.2})
+
+        assert rough.op == "profile" and release.op == "release"
+        assert min(end[2] for _, end in _cut_segments(rough.moves)) == pytest.approx(-18.7)
+        assert min(end[2] for _, end in _cut_segments(release.moves)) == pytest.approx(-19.2)
+
+    @pytest.mark.parametrize("corner_tab", [False, True])
+    @pytest.mark.parametrize("allowance", [False, True])
+    def test_cutter_footprint_preserves_tabs_during_entry_and_corner_traversal(self, corner_tab, allowance):
+        from cam.planner.planner_input import TabsInput
+
+        feature = replace(
+            _feature("Rect", {"w_mm": 40 if corner_tab else 30, "h_mm": 40 if corner_tab else 20}, (100, 100), 19),
+            side="outside",
+            tabs=TabsInput(1 if corner_tab else 4, 2, 10),
+        )
+        bridges = (
+            [box(121.25, 118.75, 121.75, 119.25), box(118.75, 121.25, 119.25, 121.75)]
+            if corner_tab
+            else [
+                box(97.25, 88.25, 97.75, 88.75),
+                box(116.25, 97.25, 116.75, 97.75),
+                box(102.25, 111.25, 102.75, 111.75),
+                box(83.25, 102.25, 83.75, 102.75),
+            ]
+        )
+
+        if allowance:
+            feature = replace(
+                feature,
+                edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0.0),
+            )
+        passes = self._plan(feature, profile_opts={"cut_through_mm": 0.2})
+
+        for start, end in _cut_segments([move for record in passes for move in record.moves]):
+            if min(start[2], end[2]) < -17 - 1e-6:
+                swept = LineString([start[:2], end[:2]]).buffer(1.5)
+                assert all(swept.intersection(bridge).area < 1e-6 for bridge in bridges)
+
+    @pytest.mark.parametrize(
+        "shape,geometry",
+        [
+            ("Rect", {"w_mm": 80, "h_mm": 50}),
+            ("Circle", {"diameter_mm": 60}),
+            ("Polygon", {"points": [(-40, -25), (40, -25), (30, 25), (-30, 25)]}),
+            ("RoundedRect", {"w_mm": 80, "h_mm": 50}),
+        ],
+    )
+    @pytest.mark.parametrize("side", ["inside", "outside"])
+    @pytest.mark.parametrize("holding", ["tabs", "onion"])
+    def test_all_shape_paths_share_holding_schedule(self, shape, geometry, side, holding):
+        from cam.planner.planner_input import TabsInput
+
+        feature = _feature(shape, geometry, (100, 100), 19)
+        feature = replace(
+            feature,
+            geometry=replace(feature.geometry, geometry=replace(feature.geometry.geometry, radius_mm=5)),
+            side=side,
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0),
+            tabs=TabsInput(4, 2, 8) if holding == "tabs" else None,
+            onion_skin_mm=0.3 if holding == "onion" else None,
+            feeds_override=FeedsOverride(rpm=12000, feed_xy=650, depth_per_pass=1),
+        )
+
+        passes = self._plan(feature, profile_opts={"cut_through_mm": 0.2})
+
+        assert [p.op for p in passes] == (
+            ["profile", "profile_finish"] if holding == "tabs" else ["profile", "profile_finish", "release"]
+        )
+        assert all(move.rpm == 12000 for p in passes for move in p.moves if isinstance(move, SetRpmMove))
+        assert all(move.feed == 650 for p in passes for move in p.moves if isinstance(move, SetFeedMove))
+        assert min(end[2] for _, end in _cut_segments(passes[0].moves)) == pytest.approx(
+            -17 if holding == "tabs" else -18.7
+        )
+        assert min(end[2] for _, end in _cut_segments(passes[-1].moves)) == pytest.approx(-19.2)
+
+    @pytest.mark.parametrize("per_tool", [False, True])
+    def test_release_stays_after_other_tool_finishing_in_output_groups(self, per_tool):
+        from cam.pipeline import gcode_file_groups
+
+        feature = replace(
+            _feature("Rect", {"w_mm": 100, "h_mm": 60}, (100, 100), 19),
+            side="outside",
+            onion_skin_mm=0.3,
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0.5, finish_allowance_mm=0),
+        )
+        passes = self._plan(feature, profile_opts={"cut_through_mm": 0.2})
+        other_acc = _accumulator()
+        other_finish = other_acc.get_record("finish", normalize_tool_entries([FLAT_6MM])[0])
+        records = [*passes[:-1], other_finish, passes[-1]]
+
+        groups = gcode_file_groups(records, per_tool=per_tool)
+
+        assert groups[-1][0].startswith("release-")
+        assert all(p.op == "release" for p in groups[-1][1])
+        assert all(p.op != "release" for _, group in groups[:-1] for p in group)
 
     @pytest.mark.parametrize("side,rough_min,finish_min", [("outside", 73.0, 73.3), ("inside", 77.0, 76.7)])
     def test_allowances_and_feed_overrides_survive_dispatch(self, side, rough_min, finish_min):
@@ -1564,6 +1679,27 @@ class TestGcodeFileStrategy:
 
         assert entry["strategy"] == "contour"
         assert "holding" not in entry
+
+    def test_release_summary_describes_only_onion_skin_removal(self):
+        entry = self._entry(
+            "release",
+            [
+                _profile_intent(Constraints(onion_skin_mm=0.3)),
+                _profile_intent(Constraints(tabs=TabConstraint(count=4, height_mm=3, width_mm=None))),
+            ],
+        )
+
+        assert entry["strategy"] == "onion_skin_release"
+        assert entry["holding"] == "onion_skin 0.3mm"
+        assert entry["cut_through_mm"] == 0.2
+
+    def test_allowance_finish_summary_retains_holding(self):
+        entry = self._entry(
+            "profile_finish", [_profile_intent(Constraints(tabs=TabConstraint(count=4, height_mm=3, width_mm=None)))]
+        )
+
+        assert entry["strategy"] == "allowance_finish"
+        assert entry["holding"] == "tabs 4x3mm"
 
     def test_bore_is_helical_and_carries_no_profile_fields(self):
         entry = self._entry("bore", [])

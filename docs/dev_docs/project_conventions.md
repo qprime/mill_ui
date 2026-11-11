@@ -142,6 +142,11 @@ Each `plan_X_passes()` function: pick tool → call ops function → append move
 G-code. Required edge features that cannot be planned contribute errors and block
 the affected setup's programs; valid planned passes remain diagnostic evidence.
 
+Profile allowance/holding scheduling is shared across supported shape types.
+Held allowance contours finish in deferred `profile_finish` passes; onion-skin
+removal is deferred further into `release` passes. Output grouping may combine
+normal operations per tool, but keeps release programs separate and last.
+
 ## Test Organization
 
 - No shared pytest fixtures — all test state built via `_make_*()` factory functions inline in each test file

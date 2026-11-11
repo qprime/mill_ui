@@ -89,10 +89,22 @@ Rectangle profiles use the canonical closed-profile operation with the requested
 `inside`, `outside`, or `on` cutter offset. Isolated or incompatible profiles keep
 their feed overrides, allowances, and existing holding operations.
 
-Combining profile edge allowances with tabs or onion skin is explicitly rejected:
-the existing rough/finish allowance path cannot preserve holding through both
-contours. Global holding options receive the same check as per-feature options.
-An inside rectangle whose compensated centerline collapses is also rejected.
+Profile edge allowances may combine with tabs or onion skin. Roughing retains a
+continuous bottom web equal to the tab height or onion-skin thickness. The final
+XY contour is then cut in a deferred `profile_finish` operation, keeping tabs or
+leaving the specified onion skin. The same scheduler handles every supported
+profile shape and global or per-feature holding options.
+
+Tab height and onion-skin thickness are measured from the nominal cut depth;
+cut-through is added once to the final cutting depth and never reduces the
+specified holding thickness. Tab spans survive entry ramps, retracing, and polygon
+corners. Tabs and onion skin on the same feature remain mutually exclusive.
+
+Onion-skin removal uses a separate `release` operation after every deferred finish.
+Its programs remain separate and last even with per-tool output grouping, so a
+release cannot move ahead of another tool's finishing. Planned passes and emitted
+program order must both respect this barrier. An inside rectangle whose
+compensated centerline collapses is rejected.
 
 A shared cut preserves both nominal parts. It is eligible only where compensated
 outside tool centerlines coincide, with identical depth and no per-feature feeds,

@@ -32,10 +32,10 @@
       "strategy": "tabbed_profile",
       "holding": "tabs 4x3mm",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 23.4
+      "estimated_runtime_min": 24.7
     }
   ],
-  "total_runtime_min": 29.8,
+  "total_runtime_min": 31.1,
   "feature_counts": {
     "pocket": 1,
     "profile": 3

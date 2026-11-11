@@ -47,21 +47,36 @@
     },
     {
       "filename": "3.17mm-upcut.nc",
-      "operation": "profile",
+      "operation": "profile, profile_finish",
       "tool_diameter_mm": 3.175,
       "rpm": 20000.0,
       "feed_xy_mm_min": 1200.0,
       "feed_z_mm_min": 396.0,
       "stepdown_mm": 1.5,
-      "max_depth_mm": 19.4,
-      "feature_count": 9,
-      "strategy": "onion_skin_then_finish",
+      "max_depth_mm": 19.2,
+      "feature_count": 14,
+      "strategy": "onion_skin_then_finish, allowance_finish",
       "holding": "tabs 4x3mm, onion_skin 0.3mm, tabs 3x3mm, tabs 2x3mm",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 136.6
+      "estimated_runtime_min": 187.1
+    },
+    {
+      "filename": "release-3.17mm.nc",
+      "operation": "release",
+      "tool_diameter_mm": 3.175,
+      "rpm": 20000.0,
+      "feed_xy_mm_min": 1200.0,
+      "feed_z_mm_min": 396.0,
+      "stepdown_mm": 1.5,
+      "max_depth_mm": 19.2,
+      "feature_count": 3,
+      "strategy": "onion_skin_release",
+      "holding": "onion_skin 0.3mm",
+      "cut_through_mm": 0.2,
+      "estimated_runtime_min": 6.0
     }
   ],
-  "total_runtime_min": 170.7,
+  "total_runtime_min": 227.2,
   "feature_counts": {
     "hole": 17,
     "pocket": 1,

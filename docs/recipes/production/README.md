@@ -12,4 +12,4 @@ Nesting a part list with MaxRects, including templated parts, shaped parts and a
 
 <img src="production_sheet/output/production_sheet.svg" width="240">
 
-A whole-sheet job: tabs, onion skin, waste cuts, safe Z, per-tool G-code, feed overrides and a kerf override.
+A whole-sheet job: tabs, onion skin, rough/finish allowances, waste cuts, safe Z, per-tool G-code, feed overrides and a kerf override.

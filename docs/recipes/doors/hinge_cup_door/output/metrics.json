@@ -7,9 +7,9 @@
     }
   },
   "complexity": {
-    "total_moves": 3695,
+    "total_moves": 3679,
     "rapid_moves": 17,
-    "cut_moves": 3607,
+    "cut_moves": 3604,
     "rapid_ratio": 0.005
   },
   "fidelity": {
@@ -28,13 +28,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 184
+        "move_count": 168
       }
     ]
   },
   "output_size": {
-    "total_bytes": 115418,
-    "total_lines": 3718,
+    "total_bytes": 114981,
+    "total_lines": 3715,
     "files": {
       "back-bore-25.40mm": {
         "bytes": 101921,
@@ -45,8 +45,8 @@
         "lines": 314
       },
       "profile-3.17mm": {
-        "bytes": 4696,
-        "lines": 184
+        "bytes": 4259,
+        "lines": 181
       }
     }
   },

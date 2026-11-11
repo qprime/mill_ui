@@ -1584,6 +1584,14 @@ Edge treatment specification for profile cross-section callouts:
 | radius | no | - | Radius for rounded treatments |
 | distance | no | - | Distance parameter |
 
+For `treatment: allowance`, profiles may also specify tabs or onion skin. The rough
+contour leaves a continuous bottom web; `profile_finish` cuts the final contour
+with the requested holding. Tab height and skin thickness are measured from the
+nominal cut depth, independently of cut-through overrun. Tabs remain after finishing;
+onion skin is removed by a final `release-*.nc` program. Run release programs after
+all other machining programs, including when `gcode_output: per-tool` is selected.
+Tabs and onion skin on the same feature remain mutually exclusive.
+
 #### Engrave
 
 Shorthand for an engrave feature:

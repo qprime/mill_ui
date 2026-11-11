@@ -37,6 +37,10 @@ children:
                             feeds:
                               rpm: 16000
                               feed_xy: 1500
+                        - Edge:
+                            treatment: allowance
+                            rough_allowance: 0.5mm
+                            finish_allowance: 0mm
 
   - AtPosition:
       x: 920mm
@@ -91,6 +95,10 @@ children:
             side: outside
             depth: through
             onion_skin_mm: 0.3
+        - Edge:
+            treatment: allowance
+            rough_allowance: 0.5mm
+            finish_allowance: 0mm
         - HoleGrid:
             spacing: 64mm
             diameter: 8mm

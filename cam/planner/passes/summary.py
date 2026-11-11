@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 OP_STRATEGIES = {
     "bore": "helical_bore",
     "pocket": "raster_pocket",
+    "profile_finish": "allowance_finish",
+    "release": "onion_skin_release",
 }
 
 
@@ -145,8 +147,11 @@ def summarise_gcode_file(
         "feature_count": sum(record.count for record in passes),
         "strategy": ", ".join(_strategy(op, profile_intents) for op in ops),
     }
-    if "profile" in ops:
-        holding = _holding(profile_intents)
+    if any(op in {"profile", "profile_finish", "release"} for op in ops):
+        holding_intents = profile_intents
+        if ops == ["release"]:
+            holding_intents = [intent for intent in profile_intents if (intent.constraints.onion_skin_mm or 0.0) > 0.0]
+        holding = _holding(holding_intents)
         if holding is not None:
             entry["holding"] = holding
         entry["cut_through_mm"] = cut_through_mm

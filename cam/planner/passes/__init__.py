@@ -211,51 +211,63 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         return onion_skin_mm
 
     for rec in profiles:
-        if (
-            rec.edge_treatment is not None
-            and rec.edge_treatment.type == "allowance"
-            and (_tabs_for_feature(rec) or _onion_skin_for_feature(rec) > 0.0)
-        ):
-            raise ValueError(
-                f"Profile '{rec.id}': combining edge allowances with tabs or onion skin is unsupported; "
-                "rough and finish contours must preserve the requested holding"
-            )
+        if _tabs_for_feature(rec) and _onion_skin_for_feature(rec) > 0.0:
+            raise ValueError(f"Profile '{rec.id}': onion skin and tabs cannot be combined")
 
     rect_profiles = [rec for rec in profiles if rec.shape.lower() == "rect"]
     circle_profiles = [rec for rec in profiles if rec.shape.lower() == "circle"]
     polygon_profiles = [rec for rec in profiles if rec.shape.lower() == "polygon"]
     rounded_rect_profiles = [rec for rec in profiles if rec.shape.lower() == "roundedrect"]
 
-    deferred_finishes: list[tuple[Shape2D, PassRecord, Setup, float]] = []
+    deferred_finishes: list[tuple[FeatureInput, Shape2D, ToolSelection]] = []
+    deferred_releases: list[tuple[Shape2D, Setup, ToolSelection, float]] = []
 
-    def _add_profile_moves(
-        rec: FeatureInput, shape: Shape2D, record: PassRecord, depth: float, tool: ToolSelection
-    ) -> None:
+    def _add_profile_moves(rec: FeatureInput, shape: Shape2D, tool: ToolSelection, *, finishing: bool = False) -> None:
         skin = _onion_skin_for_feature(rec)
+        tabs = _tabs_for_feature(rec)
+        nominal_depth = max(0.0, rec.depth_mm)
+        held = skin > 0.0 or bool(tabs)
+        allowance = rec.edge_treatment is not None and rec.edge_treatment.type == "allowance"
+        operation = ("profile_finish" if held else "finish") if finishing else "profile"
+        record = accumulator.get_record(operation, tool)
         setup = record.setup_for(tool)
-        if skin > 0.0:
+        if allowance and not finishing and held:
+            web = float(tabs["height_mm"]) if tabs else skin
+            rough_depth = max(0.0, nominal_depth - web)
+            if rough_depth > 0.0:
+                record.add_moves(
+                    profile_outline(shape, setup, rough_depth, step_down=stepdown_for_tool(tool)), increment=1
+                )
+        elif skin > 0.0:
             rough_moves, finish_depth = onion_skin_rough_moves(
                 shape,
                 setup=setup,
-                depth_mm=depth,
+                depth_mm=nominal_depth,
                 tool=tool,
                 onion_skin_mm=skin,
                 cut_through_mm=cut_through_mm,
             )
             record.add_moves(rough_moves, increment=1)
-            deferred_finishes.append((shape, record, setup, finish_depth))
+            deferred_releases.append((shape, setup, tool, finish_depth))
         else:
+            adjusted_tabs = {**tabs, "height_mm": tabs["height_mm"] + cut_through_mm} if tabs else None
             record.add_moves(
                 profile_moves_with_options(
                     shape,
                     setup=setup,
-                    depth_mm=depth,
+                    depth_mm=nominal_depth + cut_through_mm,
                     tool=tool,
                     onion_skin_mm=0.0,
-                    tabs_opts=_tabs_for_feature(rec),
+                    tabs_opts=adjusted_tabs,
                 ),
                 increment=1,
             )
+
+    def _plan_profile_stage(rec: FeatureInput, shape: Shape2D, tool: ToolSelection, label: str = "profile") -> None:
+        if label == "finish" and (_tabs_for_feature(rec) or _onion_skin_for_feature(rec) > 0.0):
+            deferred_finishes.append((rec, shape, tool))
+        else:
+            _add_profile_moves(rec, shape, tool, finishing=label == "finish")
 
     merged_seams = 0
     merged_indices: set[int] = set()
@@ -279,7 +291,6 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
             width = float(rec.geometry.geometry.w_mm or 0.0)
             height = float(rec.geometry.geometry.h_mm or 0.0)
-            depth = max(0.0, rec.depth_mm) + cut_through_mm
             side = (rec.side or "on").lower()
             sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
             tool_radius = profile_tool.diameter / 2.0
@@ -299,16 +310,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                         f"has no positive centerline dimensions at offset {offset}mm "
                         f"with selected cutter diameter {profile_tool.diameter}mm"
                     )
-                record = accumulator.get_record(label, profile_tool)
-                if has_allowance:
-                    record.add_moves(
-                        profile_outline(
-                            shape, record.setup_for(profile_tool), depth, step_down=stepdown_for_tool(profile_tool)
-                        ),
-                        increment=1,
-                    )
-                else:
-                    _add_profile_moves(rec, shape, record, depth, profile_tool)
+                _plan_profile_stage(rec, shape, profile_tool, label)
 
     for rec in circle_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -317,22 +319,17 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         radius = 0.5 * diameter
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
-        depth = max(0.0, rec.depth_mm) + cut_through_mm
         et = rec.edge_treatment
         if et is not None and et.type == "allowance":
             rough_allow = et.rough_allowance_mm or 0.0
             finish_allow = et.finish_allowance_mm or 0.0
             sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
-            step_down = stepdown_for_tool(profile_tool)
             for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
                 r = radius + sign * (tool_radius + allow)
                 if r <= 0.0:
                     continue
                 s = circle_shape_mm(r * 2.0, rec.center_xy_mm)
-                rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(
-                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
-                )
+                _plan_profile_stage(rec, s, profile_tool, label)
         else:
             if side == "outside":
                 radius += tool_radius
@@ -340,9 +337,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 radius -= tool_radius
             if radius <= 0.0:
                 continue
-            record = accumulator.get_record("profile", profile_tool)
             shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
-            _add_profile_moves(rec, shape, record, depth, profile_tool)
+            _plan_profile_stage(rec, shape, profile_tool)
 
     for rec in polygon_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -353,13 +349,11 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             continue
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
-        depth = max(0.0, rec.depth_mm) + cut_through_mm
         et = rec.edge_treatment
         if et is not None and et.type == "allowance":
             rough_allow = et.rough_allowance_mm or 0.0
             finish_allow = et.finish_allowance_mm or 0.0
             sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
-            step_down = stepdown_for_tool(profile_tool)
             for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
                 off = sign * (tool_radius + allow)
                 s: Shape2D | None = (
@@ -369,12 +363,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 )
                 if s is None:
                     continue
-                rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(
-                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
-                )
+                _plan_profile_stage(rec, s, profile_tool, label)
         else:
-            record = accumulator.get_record("profile", profile_tool)
             offset = 0.0
             if side == "outside":
                 offset = tool_radius
@@ -387,7 +377,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 shape_poly = polygon_shape(points, rec.center_xy_mm)
             if shape_poly is None:
                 continue
-            _add_profile_moves(rec, shape_poly, record, depth, profile_tool)
+            _plan_profile_stage(rec, shape_poly, profile_tool)
 
     for rec in rounded_rect_profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
@@ -404,13 +394,11 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         }
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
-        depth = max(0.0, rec.depth_mm) + cut_through_mm
         et = rec.edge_treatment
         if et is not None and et.type == "allowance":
             rough_allow = et.rough_allowance_mm or 0.0
             finish_allow = et.finish_allowance_mm or 0.0
             sign = 1.0 if side == "outside" else (-1.0 if side == "inside" else 0.0)
-            step_down = stepdown_for_tool(profile_tool)
             for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
                 off = sign * (tool_radius + allow)
                 s: Shape2D | None = (
@@ -420,12 +408,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 )
                 if s is None:
                     continue
-                rec_pass = accumulator.get_record(label, profile_tool)
-                rec_pass.add_moves(
-                    profile_outline(s, rec_pass.setup_for(profile_tool), depth, step_down=step_down), increment=1
-                )
+                _plan_profile_stage(rec, s, profile_tool, label)
         else:
-            record = accumulator.get_record("profile", profile_tool)
             offset = 0.0
             if side == "outside":
                 offset = tool_radius
@@ -438,10 +422,16 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 shape_rr = rounded_rect_shape(width, height, radii, rec.center_xy_mm)
             if shape_rr is None:
                 continue
-            _add_profile_moves(rec, shape_rr, record, depth, profile_tool)
+            _plan_profile_stage(rec, shape_rr, profile_tool)
 
-    for shape_def, deferred_record, deferred_setup, finish_depth in deferred_finishes:
-        deferred_record.add_moves(onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth))
+    for feature, finish_shape, finish_tool in deferred_finishes:
+        _add_profile_moves(feature, finish_shape, finish_tool, finishing=True)
+
+    for shape_def, deferred_setup, release_tool, finish_depth in deferred_releases:
+        release_record = accumulator.get_record("release", release_tool)
+        release_record.add_moves(
+            onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth), increment=1
+        )
 
     pass_records = accumulator.passes()
 

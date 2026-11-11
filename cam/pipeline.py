@@ -150,12 +150,14 @@ def gcode_file_groups(passes: Sequence[PassRecord], *, per_tool: bool) -> list[t
     groups: dict[tuple[Any, ...], list[PassRecord]] = {}
     for p in passes:
         identity = pass_key(p.op, p.tool_selection)
-        groups.setdefault(identity[1:] if per_tool else identity, []).append(p)
+        groups.setdefault((p.op == "release", *identity[1:]) if per_tool else identity, []).append(p)
 
     by_base: dict[str, list[list[PassRecord]]] = {}
     for group in groups.values():
         diameter = f"{group[0].setup.tool.diameter:.2f}mm"
-        by_base.setdefault(diameter if per_tool else f"{group[0].op}-{diameter}", []).append(group)
+        by_base.setdefault(
+            diameter if per_tool and group[0].op != "release" else f"{group[0].op}-{diameter}", []
+        ).append(group)
 
     named: list[tuple[str, list[PassRecord]]] = []
     for base, sharing in by_base.items():

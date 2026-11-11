@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from dataclasses import dataclass
+from itertools import pairwise
 
 from cam.model.setup import Setup
 from cam.moves import Move
@@ -84,52 +86,108 @@ def _lerp_vec(a: Vec2, b: Vec2, t: float) -> Vec2:
     return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
 
 
-def _ramp_entry_moves(
-    pts: Sequence[Vec2], target_z: float, prev_z: float, ramp_angle_deg: float, setup: Setup
-) -> list[Move]:
-    start = pts[0]
-    step_down = abs(target_z - prev_z)
-    if ramp_angle_deg <= 0 or step_down < 1e-9 or len(pts) < 2:
-        return [
-            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
-            move_cut(z=target_z, feed=setup.tool.feed_z),
-        ]
-    ramp_dist = step_down / math.tan(math.radians(ramp_angle_deg))
-    closed = len(pts) >= 2 and abs(pts[0].x - pts[-1].x) < 1e-9 and abs(pts[0].y - pts[-1].y) < 1e-9
-    if not closed:
-        return [
-            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
-            move_cut(z=target_z, feed=setup.tool.feed_z),
-        ]
-    rev_pts = list(reversed(pts))
-    avail = sum(_segment_length(rev_pts[i], rev_pts[i + 1]) for i in range(len(rev_pts) - 1))
-    if avail < ramp_dist - 1e-9:
-        return [
-            move_rapid(x=start.x, y=start.y, z=setup.safe_z),
-            move_cut(z=target_z, feed=setup.tool.feed_z),
-        ]
-    ramp_start = rev_pts[0]
-    moves: list[Move] = [
-        move_rapid(x=ramp_start.x, y=ramp_start.y, z=setup.safe_z),
-        move_cut(x=ramp_start.x, y=ramp_start.y, z=prev_z, feed=setup.tool.feed_xy),
-    ]
-    remaining = ramp_dist
-    z = prev_z
-    for i in range(len(rev_pts) - 1):
-        sl = _segment_length(rev_pts[i], rev_pts[i + 1])
-        if sl < 1e-9:
+@dataclass(frozen=True)
+class _TabSegment:
+    start: Vec2
+    end: Vec2
+    held: bool
+
+    @property
+    def length(self) -> float:
+        return _segment_length(self.start, self.end)
+
+
+def _tab_segments(pts: Sequence[Vec2], windows: Sequence[tuple[float, float]]) -> list[_TabSegment]:
+    segments: list[_TabSegment] = []
+    distance = 0.0
+    for start, end in pairwise(pts):
+        length = _segment_length(start, end)
+        if length < 1e-9:
             continue
-        use = min(sl, remaining)
-        frac = use / sl
-        pt = _lerp_vec(rev_pts[i], rev_pts[i + 1], frac)
-        dz = step_down * (use / ramp_dist)
-        z -= dz
-        moves.append(move_cut(x=pt.x, y=pt.y, z=z, feed=setup.tool.feed_xy))
-        remaining -= use
+        splits = sorted(
+            {
+                0.0,
+                length,
+                *(
+                    boundary - distance
+                    for window in windows
+                    for boundary in window
+                    if distance < boundary < distance + length
+                ),
+            }
+        )
+        for lo, hi in pairwise(splits):
+            midpoint = distance + (lo + hi) / 2
+            segments.append(
+                _TabSegment(
+                    _lerp_vec(start, end, lo / length),
+                    _lerp_vec(start, end, hi / length),
+                    any(a <= midpoint <= b for a, b in windows),
+                )
+            )
+        distance += length
+    return segments
+
+
+def _tab_path_moves(
+    segments: Sequence[_TabSegment], start_z: float, end_z: float, tab_z: float, setup: Setup
+) -> list[Move]:
+    length = sum(segment.length for segment in segments)
+    if length < 1e-9:
+        return []
+    moves: list[Move] = []
+    distance = 0.0
+    current_z = start_z
+    for segment in segments:
+        z0 = start_z + (end_z - start_z) * distance / length
+        distance += segment.length
+        z1 = start_z + (end_z - start_z) * distance / length
+        if segment.held:
+            z0, z1 = max(z0, tab_z), max(z1, tab_z)
+        if abs(z0 - current_z) > 1e-9:
+            moves.append(move_cut(z=z0, feed=setup.tool.feed_z))
+        moves.append(
+            move_cut(
+                x=segment.end.x,
+                y=segment.end.y,
+                z=z1 if abs(z1 - z0) > 1e-9 else None,
+                feed=setup.tool.feed_xy,
+            )
+        )
+        current_z = z1
+    return moves
+
+
+def _ramp_entry_moves(
+    segments: Sequence[_TabSegment],
+    target_z: float,
+    prev_z: float,
+    ramp_angle_deg: float,
+    tab_z: float,
+    setup: Setup,
+) -> list[Move]:
+    start = segments[0].start
+    step_down = abs(target_z - prev_z)
+    ramp_dist = step_down / math.tan(math.radians(ramp_angle_deg)) if ramp_angle_deg > 0 else 0.0
+    if ramp_dist < 1e-9 or sum(segment.length for segment in segments) < ramp_dist - 1e-9:
+        return [move_rapid(x=start.x, y=start.y, z=setup.safe_z), move_cut(z=target_z, feed=setup.tool.feed_z)]
+
+    entry: list[_TabSegment] = []
+    remaining = ramp_dist
+    for segment in reversed(segments):
+        length = min(segment.length, remaining)
+        end = _lerp_vec(segment.end, segment.start, length / segment.length)
+        entry.append(_TabSegment(segment.end, end, segment.held))
+        remaining -= length
         if remaining < 1e-9:
             break
-    moves.append(move_cut(x=start.x, y=start.y, z=target_z, feed=setup.tool.feed_xy))
-    return moves
+    return_path = [_TabSegment(segment.end, segment.start, segment.held) for segment in reversed(entry)]
+    return [
+        move_rapid(x=start.x, y=start.y, z=setup.safe_z),
+        move_cut(z=prev_z, feed=setup.tool.feed_z),
+        *_tab_path_moves(entry, prev_z, target_z, tab_z, setup),
+        *_tab_path_moves(return_path, target_z, target_z, tab_z, setup),
+    ]
 
 
 def _tab_windows(perimeter: float, count: int, width: float) -> list[tuple[float, float]]:
@@ -147,7 +205,7 @@ def _tab_windows(perimeter: float, count: int, width: float) -> list[tuple[float
     return windows
 
 
-def profile_outline_with_tabs(  # noqa: C901 — tab geometry dispatcher
+def profile_outline_with_tabs(
     shape: Shape2D,
     setup: Setup,
     *,
@@ -168,15 +226,8 @@ def profile_outline_with_tabs(  # noqa: C901 — tab geometry dispatcher
     if len(perimeter_pts) < 2 or tab_count <= 0:
         return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
-    segments: list[tuple[Vec2, Vec2]] = []
-    lengths: list[float] = []
-    for i in range(len(perimeter_pts)):
-        a = perimeter_pts[i]
-        b = perimeter_pts[(i + 1) % len(perimeter_pts)]
-        segments.append((a, b))
-        lengths.append(_segment_length(a, b))
-
-    perimeter = sum(lengths)
+    closed_pts = (*perimeter_pts, perimeter_pts[0])
+    perimeter = sum(_segment_length(a, b) for a, b in pairwise(closed_pts))
     if perimeter <= 0.0:
         return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
@@ -185,87 +236,23 @@ def profile_outline_with_tabs(  # noqa: C901 — tab geometry dispatcher
     if not tab_windows:
         return profile_outline(shape, setup, depth_mm=total, step_down=sd)
 
-    moves: list[Move] = []
-    moves.append(move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"))
-    moves.append(move_set_rpm(setup.tool.rpm))
-    moves.append(move_set_feed(setup.tool.feed_xy))
-
+    segments = _tab_segments(closed_pts, tab_windows)
+    clear_segments = _tab_segments(closed_pts, ())
+    moves: list[Move] = [
+        move_comment(f"profile_with_tabs depth={total:.3f} tabs={tab_count}"),
+        move_set_rpm(setup.tool.rpm),
+        move_set_feed(setup.tool.feed_xy),
+    ]
     target = -total
+    tab_z = min(0.0, target + max(0.0, float(tab_height_mm)))
     z = 0.0
-    start_point = pts[0]
-
-    tab_height = max(0.0, float(tab_height_mm))
-    tab_z = min(0.0, target + tab_height)
-
-    ramp_angle = float(setup.ramp_angle_deg)
-
     while z > target + 1e-9:
         z_next = max(target, z - sd)
-        moves += _ramp_entry_moves(pts, z_next, z, ramp_angle, setup)
-        moves.append(move_set_feed(setup.tool.feed_xy))
-
-        tab_active = tab_windows and z_next < tab_z + 1e-9
-        if not tab_active:
-            for p in pts[1:]:
-                moves.append(move_cut(x=p.x, y=p.y))
-            moves.append(move_retract(setup.safe_z))
-            z = z_next
-            continue
-
-        current_depth = z_next
-        window_iter = iter(tab_windows)
-        try:
-            current_window = next(window_iter)
-        except StopIteration:
-            current_window = None
-
-        dist = 0.0
-        moves.append(move_cut(x=start_point.x, y=start_point.y))
-
-        for (seg_start, seg_end), seg_len in zip(segments, lengths, strict=False):
-            if seg_len <= 0.0:
-                continue
-
-            seg_offset = 0.0
-            while current_window and current_window[0] < dist + seg_len + 1e-9:
-                win_start, win_end = current_window
-                win_start = max(win_start, dist)
-                win_end = min(win_end, dist + seg_len)
-                if win_end <= win_start + 1e-9:
-                    try:
-                        current_window = next(window_iter)
-                        continue
-                    except StopIteration:
-                        current_window = None
-                        break
-
-                start_frac = (win_start - dist) / seg_len
-                end_frac = (win_end - dist) / seg_len
-
-                if start_frac > seg_offset + 1e-9:
-                    lead_point = _lerp_vec(seg_start, seg_end, start_frac)
-                    moves.append(move_cut(x=lead_point.x, y=lead_point.y))
-
-                lifts_to = max(tab_z, z_next)
-                moves.append(move_cut(z=lifts_to))
-                tab_point = _lerp_vec(seg_start, seg_end, end_frac)
-                moves.append(move_cut(x=tab_point.x, y=tab_point.y))
-                moves.append(move_cut(z=current_depth))
-
-                seg_offset = end_frac
-                try:
-                    current_window = next(window_iter)
-                except StopIteration:
-                    current_window = None
-                    break
-
-            if seg_offset < 1.0 - 1e-9:
-                moves.append(move_cut(x=seg_end.x, y=seg_end.y))
-            dist += seg_len
-
+        layer_segments = segments if z_next < tab_z else clear_segments
+        moves += _ramp_entry_moves(layer_segments, z_next, z, float(setup.ramp_angle_deg), tab_z, setup)
+        moves += _tab_path_moves(layer_segments, z_next, z_next, tab_z, setup)
         moves.append(move_retract(setup.safe_z))
         z = z_next
-
     return moves
 
 

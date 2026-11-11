@@ -124,7 +124,7 @@ A roughing pass leaves stock for a finishing pass.
 
 Spec: [pml/syntax_spec.md#edge](../pml/syntax_spec.md#edge)
 
-Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/)
+Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/)
 
 ### Islands
 
@@ -190,7 +190,7 @@ Blueprint callouts that show an edge treatment's cross-section.
 
 Spec: [pml/syntax_spec.md#edge](../pml/syntax_spec.md#edge)
 
-Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/)
+Recipes: [edge_treatments](recipes/panels/edge_treatments/), [pocket_corner_test](recipes/shop/pocket_corner_test/), [production_sheet](recipes/production/production_sheet/)
 
 ## Shapes
 

@@ -2403,13 +2403,13 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        arch_domain = Domain.from_arch(node.width_mm, node.height_mm, node.radius_mm)
-
+        arch_domain = Domain.from_arch(node.width_mm, node.height_mm, node.radius_mm, center=region.center)
+        bounds = arch_domain.bounds
         arch_region = ResolvedRegion(
-            x_min=0,
-            y_min=0,
-            x_max=node.width_mm,
-            y_max=node.height_mm,
+            x_min=bounds.x_min,
+            y_min=bounds.y_min,
+            x_max=bounds.x_max,
+            y_max=bounds.y_max,
         )
 
         cx, cy = arch_region.center

@@ -38,7 +38,7 @@
     ]
   },
   "output_size": {
-    "total_bytes": 92030,
+    "total_bytes": 92437,
     "total_lines": 3282,
     "files": {
       "pocket-12.70mm": {
@@ -46,11 +46,11 @@
         "lines": 1873
       },
       "edge-12.70mm": {
-        "bytes": 14810,
+        "bytes": 14868,
         "lines": 528
       },
       "profile-3.17mm": {
-        "bytes": 23636,
+        "bytes": 23985,
         "lines": 881
       }
     }
@@ -60,35 +60,12 @@
     "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_2_border",
     "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_3_border",
     "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_4_border",
-    "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_arch_raised_panel_6_border",
     "Overlapping regions detected: bevel_generated_raised_panel_1_border and pocket_generated_raised_panel_1_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_1_border and profile_generated_profile_5",
-    "Overlapping regions detected: bevel_generated_raised_panel_1_border and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_raised_panel_1_border and pocket_generated_arch_raised_panel_6_field",
-    "Overlapping regions detected: pocket_generated_raised_panel_1_field and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: pocket_generated_raised_panel_1_field and pocket_generated_arch_raised_panel_6_field",
     "Overlapping regions detected: bevel_generated_raised_panel_2_border and pocket_generated_raised_panel_2_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_2_border and profile_generated_profile_5",
-    "Overlapping regions detected: bevel_generated_raised_panel_2_border and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_raised_panel_2_border and pocket_generated_arch_raised_panel_6_field",
-    "Overlapping regions detected: pocket_generated_raised_panel_2_field and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: pocket_generated_raised_panel_2_field and pocket_generated_arch_raised_panel_6_field",
     "Overlapping regions detected: bevel_generated_raised_panel_3_border and pocket_generated_raised_panel_3_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_3_border and profile_generated_profile_5",
-    "Overlapping regions detected: bevel_generated_raised_panel_3_border and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_raised_panel_3_border and pocket_generated_arch_raised_panel_6_field",
-    "Overlapping regions detected: pocket_generated_raised_panel_3_field and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: pocket_generated_raised_panel_3_field and pocket_generated_arch_raised_panel_6_field",
     "Overlapping regions detected: bevel_generated_raised_panel_4_border and pocket_generated_raised_panel_4_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_4_border and profile_generated_profile_5",
-    "Overlapping regions detected: bevel_generated_raised_panel_4_border and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_raised_panel_4_border and pocket_generated_arch_raised_panel_6_field",
-    "Overlapping regions detected: pocket_generated_raised_panel_4_field and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: pocket_generated_raised_panel_4_field and pocket_generated_arch_raised_panel_6_field",
     "Overlapping regions detected: profile_generated_profile_5 and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_arch_raised_panel_6_border and pocket_generated_arch_raised_panel_6_field",
-    "Cutting edge extends 3.17mm into left margin zone",
-    "Cutting edge extends 3.17mm into bottom margin zone"
+    "Overlapping regions detected: bevel_generated_arch_raised_panel_6_border and pocket_generated_arch_raised_panel_6_field"
   ],
   "warnings": [
     "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]",

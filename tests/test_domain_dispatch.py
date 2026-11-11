@@ -2,23 +2,30 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
+from adapters.ast_to_removal import ast_to_removal_intents
+from core.geometry import pocket_region
 from domains import Domain
 from layout_ast.compositional import (
     Arch,
+    AtPosition,
     ChamferGen,
     Circle,
     CompositionalLayoutAST,
+    Frame,
     Panel,
     PocketGen,
     Polygon,
     ProfileGen,
+    RaisedPanelGen,
     Rect,
     RoundedRect,
     RoundoverGen,
     Subtract,
     Triangle,
 )
-from layout_ast.layout import Sheet
+from layout_ast.layout import Feature, Sheet
 from resolution.layout_resolver import resolve_layout
 
 
@@ -135,6 +142,44 @@ class TestDomainAwareDispatch:
         assert len(profiles) == 1
         assert profiles[0].type == "Polygon"
         assert len(profiles[0].geometry.data["points"]) > 4
+
+    @pytest.mark.parametrize("direct_feature", [False, True])
+    @pytest.mark.parametrize("positioned", [False, True])
+    def test_arch_and_generated_features_use_parent_center(self, direct_feature, positioned):
+        profile = ProfileGen(side="outside", depth="through")
+        arch = Arch(
+            width_mm=200,
+            height_mm=300,
+            radius_mm=80,
+            feature=Feature(type="profile", side="outside", depth_mm=0, is_through=True) if direct_feature else None,
+            children=(
+                *((profile,) if not direct_feature else ()),
+                Frame(
+                    width_mm=20,
+                    children=(RaisedPanelGen(border_width_mm=15, border_depth_mm=6, field_depth_mm=2),),
+                ),
+            ),
+        )
+        center = (610, 420) if positioned else (400, 300)
+        root = (
+            AtPosition(x_mm=center[0], y_mm=center[1], width_mm=240, height_mm=340, child=arch) if positioned else arch
+        )
+        flat = _resolve_pml(root, width=800, height=600)
+        intents = ast_to_removal_intents(flat)
+        profile_intent = next(intent for intent in intents if intent.hint_type == "profile")
+        assert profile_intent.bounds.center == pytest.approx(center)
+        assert profile_intent.bounds.width == pytest.approx(200)
+        assert profile_intent.bounds.height == pytest.approx(300)
+        assert profile_intent.depth_profile.z_bottom == -19
+        arch_domain = Domain.from_arch(200, 300, 80, center=center)
+        assert len(intents) == 3
+        for intent in intents:
+            footprint = pocket_region(intent.shape, intent.shape_geometry, intent.bounds.center)
+            assert footprint is not None
+            assert footprint.difference(arch_domain.polygon).area < 1e-8
+        field = next(intent for intent in intents if intent.hint_type == "pocket")
+        assert field.bounds.center[0] == pytest.approx(center[0])
+        assert field.depth_profile.z_bottom == -2
 
     def test_profile_on_rounded_rect_via_dispatch(self):
         flat = _resolve_pml(

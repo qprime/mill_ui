@@ -329,6 +329,10 @@ With positioning (rx/ry omitted → fills region):
 
 #### Arch
 
+The arch keeps its declared width and height and is centered in its parent region.
+Wrap it in `AtPosition` to choose its center. Profiles and generated features
+inside the arch use the same positioned domain.
+
 ```yaml
 - Arch:
     width: 500mm

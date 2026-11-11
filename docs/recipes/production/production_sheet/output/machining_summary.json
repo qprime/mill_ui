@@ -17,7 +17,7 @@
       "max_depth_mm": 6.0,
       "feature_count": 1,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 28.3
+      "estimated_runtime_min": 28.8
     },
     {
       "filename": "25.40mm.nc",
@@ -76,7 +76,7 @@
       "estimated_runtime_min": 6.0
     }
   ],
-  "total_runtime_min": 227.2,
+  "total_runtime_min": 227.7,
   "feature_counts": {
     "hole": 17,
     "pocket": 1,

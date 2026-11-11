@@ -23,7 +23,7 @@
           "max_depth_mm": 9.0,
           "feature_count": 8,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 34.1
+          "estimated_runtime_min": 34.0
         },
         {
           "filename": "sheet_1.dogbone-12.70mm.nc",
@@ -53,7 +53,7 @@
           "estimated_runtime_min": 57.1
         }
       ],
-      "total_runtime_min": 99.2,
+      "total_runtime_min": 99.1,
       "feature_counts": {
         "pocket": 8,
         "profile": 2
@@ -179,6 +179,6 @@
       "safe_z_mm": 6.0
     }
   ],
-  "total_runtime_min": 210.8,
+  "total_runtime_min": 210.7,
   "kerf_mm": 3.175
 }

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from adapters.hints_to_removal import engrave_hint_to_removal_intent
+from adapters.hints_to_removal import engrave_hint_to_removal_intent, pocket_hint_to_removal_intent
 from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
@@ -192,6 +192,73 @@ def test_check_overlap_different_z_levels():
 
     result = check_overlap([intent_a, intent_b])
     assert result.is_valid()
+
+
+def _ring_pocket():
+    return pocket_hint_to_removal_intent(
+        {
+            "id": "ring",
+            "shape": "Polygon",
+            "center_xy_mm": [120, 80],
+            "geometry": {
+                "points": [[-10, -10], [110, -10], [110, 110], [-10, 110]],
+                "holes": [[[0, 0], [0, 100], [100, 100], [100, 0]]],
+            },
+            "depth_mm": 3,
+        }
+    )
+
+
+@pytest.mark.parametrize("gap, valid", [(10, True), (0, False), (-2, False), (1e-7, False)])
+def test_overlap_pocket_within_ring_hole_uses_material_regions(gap, valid):
+    center = pocket_hint_to_removal_intent(
+        {
+            "id": "center",
+            "shape": "Rect",
+            "center_xy_mm": [170, 130],
+            "geometry": {"w_mm": 100 - 2 * gap, "h_mm": 100 - 2 * gap},
+            "depth_mm": 6,
+        }
+    )
+    assert check_overlap([_ring_pocket(), center]).is_valid() == valid
+
+
+def test_overlap_pockets_respect_preserved_island_material():
+    from dataclasses import replace
+
+    outer = _make_intent(
+        "outer",
+        Bounds2D(0, 100, 0, 100),
+        hint_type="pocket",
+        constraints=Constraints(islands=(Island(Bounds2D(20, 80, 20, 80)),)),
+    )
+    outer = replace(outer, shape="Rect")
+    inner = _make_intent("inner", Bounds2D(30, 70, 30, 70), hint_type="pocket")
+    assert check_overlap([outer, inner]).is_valid()
+
+
+def test_overlap_pocket_with_missing_geometry_remains_conservative():
+    unknown = _make_intent("unknown", Bounds2D(100, 240, 60, 200), hint_type="pocket")
+    assert not check_overlap([_ring_pocket(), unknown]).is_valid()
+
+
+@pytest.mark.parametrize("extra", ["allowance", "dogbone"])
+def test_overlap_pocket_boundary_modifiers_keep_conservative_check(extra):
+    from dataclasses import replace
+
+    from ir.removal_intent import EdgeTreatment
+    from layout_ast.layout import DogboneSpec
+
+    ring = _ring_pocket()
+    inner = _make_intent("inner", Bounds2D(130, 210, 90, 170), hint_type="pocket")
+    assert check_overlap([ring, inner]).is_valid()
+    if extra == "allowance":
+        ring = replace(
+            ring, constraints=Constraints(edge_treatment=EdgeTreatment(type="allowance", finish_allowance_mm=-20))
+        )
+    else:
+        ring = replace(ring, dogbone=DogboneSpec())
+    assert not check_overlap([ring, inner]).is_valid()
 
 
 def test_check_depth_feasibility_valid():

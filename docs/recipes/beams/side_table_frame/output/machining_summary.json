@@ -17,7 +17,7 @@
       "max_depth_mm": 19.0,
       "feature_count": 8,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 8.5
+      "estimated_runtime_min": 8.2
     },
     {
       "filename": "pocket-6.35mm.nc",
@@ -30,7 +30,7 @@
       "max_depth_mm": 19.0,
       "feature_count": 16,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 15.8
+      "estimated_runtime_min": 15.6
     },
     {
       "filename": "bore-3.17mm.nc",
@@ -60,7 +60,7 @@
       "estimated_runtime_min": 204.3
     }
   ],
-  "total_runtime_min": 230.7,
+  "total_runtime_min": 230.2,
   "feature_counts": {
     "hole": 8,
     "pocket": 24,

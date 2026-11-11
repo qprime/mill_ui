@@ -13,10 +13,10 @@
         }
       },
       "complexity": {
-        "total_moves": 940,
+        "total_moves": 916,
         "rapid_moves": 58,
-        "cut_moves": 712,
-        "rapid_ratio": 0.062
+        "cut_moves": 688,
+        "rapid_ratio": 0.063
       },
       "fidelity": {
         "tool_changes": 3,
@@ -24,7 +24,7 @@
           {
             "name": "pocket",
             "tool_diameter_mm": 12.7,
-            "move_count": 288
+            "move_count": 264
           },
           {
             "name": "dogbone",
@@ -39,12 +39,12 @@
         ]
       },
       "output_size": {
-        "total_bytes": 21203,
-        "total_lines": 902,
+        "total_bytes": 20504,
+        "total_lines": 878,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 7515,
-            "lines": 264
+            "bytes": 6816,
+            "lines": 240
           },
           "dogbone-12.70mm": {
             "bytes": 7092,
@@ -71,9 +71,9 @@
         }
       },
       "complexity": {
-        "total_moves": 375,
+        "total_moves": 372,
         "rapid_moves": 10,
-        "cut_moves": 297,
+        "cut_moves": 294,
         "rapid_ratio": 0.027
       },
       "fidelity": {
@@ -82,7 +82,7 @@
           {
             "name": "pocket",
             "tool_diameter_mm": 12.7,
-            "move_count": 36
+            "move_count": 33
           },
           {
             "name": "dogbone",
@@ -97,12 +97,12 @@
         ]
       },
       "output_size": {
-        "total_bytes": 9754,
-        "total_lines": 369,
+        "total_bytes": 9664,
+        "total_lines": 366,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 1044,
-            "lines": 46
+            "bytes": 954,
+            "lines": 43
           },
           "dogbone-12.70mm": {
             "bytes": 977,
@@ -129,9 +129,9 @@
         }
       },
       "complexity": {
-        "total_moves": 183,
+        "total_moves": 180,
         "rapid_moves": 8,
-        "cut_moves": 141,
+        "cut_moves": 138,
         "rapid_ratio": 0.044
       },
       "fidelity": {
@@ -140,7 +140,7 @@
           {
             "name": "pocket",
             "tool_diameter_mm": 12.7,
-            "move_count": 36
+            "move_count": 33
           },
           {
             "name": "dogbone",
@@ -155,12 +155,12 @@
         ]
       },
       "output_size": {
-        "total_bytes": 4525,
-        "total_lines": 206,
+        "total_bytes": 4441,
+        "total_lines": 203,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 992,
-            "lines": 46
+            "bytes": 908,
+            "lines": 43
           },
           "dogbone-12.70mm": {
             "bytes": 969,

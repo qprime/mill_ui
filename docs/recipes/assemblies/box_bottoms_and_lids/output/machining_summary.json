@@ -17,7 +17,7 @@
       "max_depth_mm": 3.0,
       "feature_count": 24,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 19.7
+      "estimated_runtime_min": 28.8
     },
     {
       "filename": "dogbone-3.17mm.nc",
@@ -47,7 +47,7 @@
       "estimated_runtime_min": 56.2
     }
   ],
-  "total_runtime_min": 129.7,
+  "total_runtime_min": 138.8,
   "feature_counts": {
     "pocket": 216,
     "profile": 24

@@ -246,44 +246,14 @@ Paths plan_pocket_spiral(const ConvexPolygon& boundary, const Tool& tool,
             const Polygon& ring = rings[ring_idx];
             size_t n = ring.size();
 
-            size_t start_vertex = (ring_idx == 0) ? (ramp_end_idx + 1) % n : 0;
-
-            bool has_next = (ring_idx + 1 < rings.size());
-
-            if (!has_next) {
-                for (size_t step = 0; step < n; ++step) {
-                    size_t vi = (start_vertex + step) % n;
-                    moves.push_back(make_cut(ring[vi].x, ring[vi].y, std::nullopt));
-                }
-                moves.push_back(
-                    make_cut(ring[start_vertex % n].x, ring[start_vertex % n].y, std::nullopt));
-            } else {
-                size_t edges_to_full = (ring_idx == 0) ? n - 1 : n;
-                for (size_t step = 0; step < edges_to_full; ++step) {
-                    size_t vi = (start_vertex + step) % n;
-                    size_t vi_next = (start_vertex + step + 1) % n;
-
-                    bool is_last_edge = (step == edges_to_full - 1);
-                    if (!is_last_edge) {
-                        moves.push_back(make_cut(ring[vi_next].x, ring[vi_next].y, std::nullopt));
-                    } else {
-                        const Vec2& A = ring[vi];
-                        const Vec2& B = ring[vi_next];
-                        const Vec2& T = rings[ring_idx + 1][0];
-
-                        double dx = B.x - A.x;
-                        double dy = B.y - A.y;
-                        double len2 = dx * dx + dy * dy;
-                        double t_param = 0.0;
-                        if (len2 > kEps) {
-                            t_param =
-                                std::clamp(((T.x - A.x) * dx + (T.y - A.y) * dy) / len2, 0.0, 1.0);
-                        }
-                        Vec2 P = {A.x + t_param * dx, A.y + t_param * dy};
-                        moves.push_back(make_cut(P.x, P.y, std::nullopt));
-                        moves.push_back(make_cut(T.x, T.y, std::nullopt));
-                    }
-                }
+            const size_t start_vertex = ring_idx == 0 ? ramp_end_idx : 0;
+            for (size_t step = 1; step <= n; ++step) {
+                const Vec2& next = ring[(start_vertex + step) % n];
+                moves.push_back(make_cut(next.x, next.y, std::nullopt));
+            }
+            if (ring_idx + 1 < rings.size()) {
+                const Vec2& next_start = rings[ring_idx + 1][0];
+                moves.push_back(make_cut(next_start.x, next_start.y, std::nullopt));
             }
         }
 

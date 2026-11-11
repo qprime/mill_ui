@@ -49,6 +49,15 @@ spaced cuts retain the existing conflict policy. Missing tool diameter
 and unsupported geometry retain the bounding-box check. Ramped engraving follows
 the same XY path; its varying Z does not widen the conservative cutter envelope.
 
+For two pockets, use the shared planner region for polygons with holes and
+rectangles with islands. A pocket occupies the material it removes, excluding
+those preserved regions. Unknown shapes retain their bounding box as a
+conservative envelope. Discard a bounding-box overlap only when the two regions
+have a positive separation greater than numerical tolerance; touching or
+intersecting regions retain the existing conflict policy. Pockets with edge
+treatments or dogbone relief keep the prior bounding-box check because their
+boundary modifications are not represented by the plain pocket region.
+
 ---
 
 ## Cross-Face Web (VL-8)

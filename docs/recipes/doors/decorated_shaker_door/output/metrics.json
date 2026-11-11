@@ -50,9 +50,7 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: pocket_generated_border_1_000 and pocket_generated_pocket_2"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

@@ -17,7 +17,7 @@
       "max_depth_mm": 3.0,
       "feature_count": 1,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 2.5
+      "estimated_runtime_min": 2.8
     },
     {
       "filename": "bore-3.17mm.nc",
@@ -47,7 +47,7 @@
       "estimated_runtime_min": 9.2
     }
   ],
-  "total_runtime_min": 12.4,
+  "total_runtime_min": 12.7,
   "feature_counts": {
     "hole": 4,
     "pocket": 1,

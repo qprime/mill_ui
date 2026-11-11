@@ -33,11 +33,11 @@
     ]
   },
   "output_size": {
-    "total_bytes": 37523,
+    "total_bytes": 37531,
     "total_lines": 1641,
     "files": {
       "pocket-3.17mm": {
-        "bytes": 3497,
+        "bytes": 3505,
         "lines": 132
       },
       "dogbone-3.17mm": {

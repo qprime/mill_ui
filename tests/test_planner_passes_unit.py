@@ -134,12 +134,13 @@ def _setup(tool_diameter=6.0):
     )
 
 
-def _accumulator():
+def _accumulator(ramp_angle=3.0):
     return PassAccumulator(
         machine=Machine(),
         stock=Stock(width=300, height=200, thickness=19),
         safe_z=5.0,
         prime_spindle=False,
+        ramp_angle_deg=ramp_angle,
     )
 
 
@@ -892,6 +893,26 @@ def _cut_positions(moves) -> list[tuple[float, float, float]]:
 
 
 class TestPlanPocketPasses:
+    @pytest.mark.parametrize("ramp_angle", [0.0, 3.0])
+    @pytest.mark.parametrize("width,height", [(80.0, 40.0), (40.0, 80.0)])
+    def test_spiral_clears_the_complete_machinable_pocket_at_every_depth(self, ramp_angle, width, height):
+        acc = _accumulator(ramp_angle)
+        pocket = _feature("Rect", {"w_mm": width, "h_mm": height}, (100, 100), 6)
+        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config(ramp_angle_deg=ramp_angle))
+        (record,) = acc.passes()
+        radius = record.tool_selection.diameter / 2
+        nominal = box(100 - width / 2, 100 - height / 2, 100 + width / 2, 100 + height / 2)
+        machinable = nominal.buffer(-radius, join_style="mitre").buffer(radius, quad_segs=64)
+        for depth in [-3.0, -6.0]:
+            segments = [
+                LineString([a[:2], b[:2]])
+                for a, b in _cut_segments(record.moves)
+                if abs(a[2] - depth) < 1e-8 and abs(b[2] - depth) < 1e-8 and a[:2] != b[:2]
+            ]
+            removed = unary_union(segments).buffer(radius, quad_segs=64)
+            assert machinable.difference(removed.buffer(1e-7)).area < 1e-5
+            assert removed.difference(nominal.buffer(1e-7)).area < 1e-5
+
     def test_rect_pocket(self):
         acc = _accumulator()
         pockets = (_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0),)

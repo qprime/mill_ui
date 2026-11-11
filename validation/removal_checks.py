@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
@@ -13,12 +13,12 @@ from core.constants import (
     WEB_CHECK_FEATURE_TYPES,
     FeatureType,
 )
-from core.geometry import engraving_paths, extract_shape_geometry
+from core.geometry import engraving_paths, extract_shape_geometry, pocket_region
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
 _WEB_TOLERANCE_MM = 1e-6
-_ENGRAVE_CLEARANCE_TOLERANCE_MM = 1e-6
+_OVERLAP_CLEARANCE_TOLERANCE_MM = 1e-6
 
 
 def check_depth_profile(
@@ -288,6 +288,21 @@ def _engraving_trace(intent: RemovalIntent) -> BaseGeometry | None:
     return unary_union([LineString(path) if len(path) > 1 else Point(path[0]) for path in paths])
 
 
+def _pocket_overlap_region(intent: RemovalIntent) -> BaseGeometry | None:
+    if (
+        intent.hint_type != FeatureType.POCKET
+        or intent.constraints.edge_treatment is not None
+        or intent.dogbone is not None
+        or intent.dogbone_corners is not None
+    ):
+        return None
+    geometry = extract_shape_geometry(intent.shape, intent.bounds, intent.shape_geometry)
+    region = pocket_region(intent.shape, geometry, intent.bounds.center, [i.bounds for i in intent.constraints.islands])
+    if region is None:
+        region = box(intent.bounds.x_min, intent.bounds.y_min, intent.bounds.x_max, intent.bounds.y_max)
+    return region if region.is_valid else None
+
+
 def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: float | None = None) -> ValidationResult:
     if engrave_tool_diameter_mm is not None and (
         not math.isfinite(engrave_tool_diameter_mm) or engrave_tool_diameter_mm <= 0
@@ -297,6 +312,7 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
         )
     result = ValidationResult()
     traces = [_engraving_trace(intent) if engrave_tool_diameter_mm is not None else None for intent in intents]
+    pocket_regions = [_pocket_overlap_region(intent) for intent in intents]
 
     for i, intent_a in enumerate(intents):
         for j, intent_b in enumerate(intents[i + 1 :], start=i + 1):
@@ -308,7 +324,14 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
                     engrave_tool_diameter_mm is not None
                     and trace_a is not None
                     and trace_b is not None
-                    and trace_a.distance(trace_b) > engrave_tool_diameter_mm + _ENGRAVE_CLEARANCE_TOLERANCE_MM
+                    and trace_a.distance(trace_b) > engrave_tool_diameter_mm + _OVERLAP_CLEARANCE_TOLERANCE_MM
+                ):
+                    continue
+                pocket_a, pocket_b = pocket_regions[i], pocket_regions[j]
+                if (
+                    pocket_a is not None
+                    and pocket_b is not None
+                    and pocket_a.distance(pocket_b) > _OVERLAP_CLEARANCE_TOLERANCE_MM
                 ):
                     continue
                 if _are_sibling_features(intent_a, intent_b):

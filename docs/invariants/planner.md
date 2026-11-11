@@ -83,6 +83,13 @@ requires selection and planning failures to be surfaced rather than warned away.
 
 ---
 
+## Spiral Pocket Coverage
+
+Spiral pockets complete each inset contour at every layer depth before moving
+to the next contour. The outer contour starts at the actual end of its entry
+ramp and must be completed at depth, including the edge used for ramping.
+Bridges between contours must not replace a required boundary segment.
+
 ## Rectangle Profiles and Shared Cuts
 
 Rectangle profiles use the canonical closed-profile operation with the requested

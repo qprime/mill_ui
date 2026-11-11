@@ -452,7 +452,8 @@ Exit codes:
   1  input, parse, or unexpected error
   2  command-line usage error
   3  design errors (listed in metrics.json); outputs are still written, except
-     G-code and SVG when the sheet exceeds the machine envelope
+     G-code for setups with planner errors or keepout violations, and G-code
+     and SVG when the sheet exceeds the machine envelope
         """,
     )
 

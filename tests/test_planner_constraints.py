@@ -227,6 +227,47 @@ class TestToolpathKeepoutVerification:
         assert len(result.keepout_violations) == 1
 
 
+class TestPipelineEdgeFeatureIntegration:
+    def test_missing_edge_tool_blocks_only_its_setup_and_retains_diagnostics(self, tmp_path):
+        from cam.pipeline import SheetRun, write_run_outputs
+
+        pml = """Sheet:
+  width: 400mm
+  height: 250mm
+  thickness: 19mm
+  margin: 10mm
+children:
+- Rect:
+    id: part
+    at: {x: 100mm, y: 100mm, width: 100mm, height: 60mm}
+    children:
+    - Profile: {side: outside, depth: through}
+    - Roundover: {radius: 6mm}
+- Circle:
+    diameter: 10mm
+    at: {x: 250mm, y: 100mm}
+    feature: {type: hole, face: back, depth: 3mm}
+"""
+        flat = {"name": "flat", "diameter": 3.175, "kind": "flat"}
+        roundover = {"name": "roundover", "diameter": 25.4, "kind": "roundover", "roundover_radius_mm": 6}
+        ast = resolve_layout(parse_pml_yaml(pml))
+        valid_result = run_pipeline(ast, tool_db=[flat, roundover])
+        write_run_outputs([SheetRun("part.pml.yml", 1, "part", valid_result)], tmp_path)
+        assert any(not path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
+
+        result = run_pipeline(ast, tool_db=[flat])
+        write_run_outputs([SheetRun("part.pml.yml", 1, "part", result)], tmp_path)
+
+        assert any("no roundover bit with 6.0mm radius" in error for error in result.errors)
+        assert result.metrics["constraint_audit"]["edge_feature"]["safety_critical"] is True
+        assert all("no roundover bit" not in warning for warning in result.warnings)
+        assert result.gcode and all(name.startswith("back-") for name in result.gcode)
+        assert result.gcode_files and all(name.startswith("back-") for name in result.gcode_files)
+        assert any(record.op == "profile" for record in result.passes)
+        assert result.svg is not None and result.svg_back is not None
+        assert all(path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
+
+
 class TestPipelineKeepoutIntegration:
     def test_keepout_violation_blocks_only_front_setup_gcode(self, tmp_path):
         from dataclasses import replace

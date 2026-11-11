@@ -6,13 +6,14 @@
 
 ## What gets cut
 
-Three small panels with different outside edges: a chamfer, a roundover, and a profile with rough and finish allowances shown as a cross-section callout.
+Three small panels request different outside edges: a chamfer, a roundover, and a profile with rough and finish allowances shown as a cross-section callout.
+
+The current tool library has no 6mm-radius roundover bit. This recipe reports a
+design error and withholds all front-setup G-code; the blueprint remains available
+for inspection. Add a tool only when that bit is available in the shop. Existing
+profile/edge overlap errors also remain under investigation in the recipe audit.
 
 Sheet 900 × 400 × 19mm mdf.
-
-- `edge-12.70mm.nc`: edge, 12.7mm tool, 1 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 19.2mm
-- `finish-3.17mm.nc`: finish, 3.175mm tool, 1 feature(s), to 19.2mm
 
 ## Run
 
@@ -20,9 +21,6 @@ Sheet 900 × 400 × 19mm mdf.
 
 ## Outputs
 
-- `edge-12.70mm.nc`
 - `edge_treatments.svg`
-- `finish-3.17mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `profile-3.17mm.nc`

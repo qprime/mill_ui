@@ -711,7 +711,7 @@ class TestRectangleProfilePlanning:
             b = replace(b, tabs=TabsInput(count=4, height_mm=2, width_mm=8))
         else:
             b = replace(b, onion_skin_mm=0.3)
-        passes, summary, _ = plan_passes(
+        passes, summary, _, _ = plan_passes(
             PlannerInput(profiles=(a, b), kerf_width_mm=3),
             config=Config(),
             tool_db=FLAT_ONLY,
@@ -1288,53 +1288,50 @@ class TestPlanEdgeFeaturePasses:
         assert records[0].op == "edge"
         assert len(records[0].moves) > 0
 
-    def test_no_vbit_skips(self):
-        acc = _accumulator()
-        entries = (
-            _edge_feature(
-                "Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
+    @pytest.mark.parametrize(
+        "spec,shape,tools,message",
+        [
+            (None, "Rect", TOOLS_WITH_VBIT, "no edge_feature spec"),
+            ("invalid", "Rect", TOOLS_WITH_VBIT, "unknown spec type"),
+            (ChamferSpec(width_mm=2, angle_deg=45), "Rect", FLAT_ONLY, "no V-bit with 90.0°"),
+            (
+                ChamferSpec(width_mm=2, angle_deg=45),
+                "Rect",
+                normalize_tool_entries([{**VBIT_90, "v_angle_deg": 0}]),
+                "v_angle_deg must be positive",
             ),
-        )
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
-        assert len(acc.passes()) == 0
-
-    def test_none_spec_skips(self):
+            (ChamferSpec(width_mm=2, angle_deg=45), "Hexagon", TOOLS_WITH_VBIT, "unsupported shape"),
+            (RoundoverSpec(radius_mm=6.0), "Rect", FLAT_ONLY, "no roundover bit with 6.0mm radius"),
+            (RoundoverSpec(radius_mm=6), "Hexagon", TOOLS_WITH_ROUNDOVER, "unsupported shape"),
+            (ChamferSpec(width_mm=0, angle_deg=45), "Rect", TOOLS_WITH_VBIT, "cut depth must be positive"),
+        ],
+    )
+    def test_unmachinable_edge_is_an_error(self, spec, shape, tools, message):
         acc = _accumulator()
-        entries = (_edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, None),)
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
-        assert len(acc.passes()) == 0
+        entry = _edge_feature(shape, {"w_mm": 50, "h_mm": 30}, (100, 75), 6, spec, id="required_edge")
 
-    def test_no_vbit_warns(self):
-        acc = _accumulator()
-        entries = (
-            _edge_feature(
-                "Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
-            ),
-        )
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
-        assert len(acc.warnings) == 1
-        assert "no V-bit" in acc.warnings[0]
+        plan_edge_feature_passes((entry,), accumulator=acc, tool_db=tools)
 
-    def test_no_roundover_bit_warns(self):
-        acc = _accumulator()
-        entries = (
-            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=6.0)),
-        )
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
-        assert len(acc.warnings) == 1
-        assert "no roundover bit" in acc.warnings[0]
+        assert len(acc.errors) == 1
+        assert "required_edge" in acc.errors[0]
+        assert message in acc.errors[0]
+        assert not acc.warnings
+        assert not acc.passes()
 
-    def test_unsupported_shape_warns(self):
+    def test_collects_each_edge_error_and_retains_valid_passes(self):
         acc = _accumulator()
-        entries = (
-            _edge_feature(
-                "Hexagon", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, ChamferSpec(width_mm=2.0, angle_deg=45.0)
-            ),
+        base = _edge_feature(
+            "Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 6, ChamferSpec(width_mm=2, angle_deg=45), id="valid"
         )
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_VBIT)
-        assert len(acc.passes()) == 0
-        assert len(acc.warnings) == 1
-        assert "unsupported shape" in acc.warnings[0].lower()
+        missing_tool = replace(base, id="missing_tool", edge_feature=RoundoverSpec(radius_mm=6))
+        missing_spec = replace(base, id="missing_spec", edge_feature=None)
+
+        plan_edge_feature_passes((missing_tool, base, missing_spec), accumulator=acc, tool_db=TOOLS_WITH_VBIT)
+
+        assert len(acc.errors) == 2
+        assert "missing_tool" in acc.errors[0]
+        assert "missing_spec" in acc.errors[1]
+        assert sum(record.count for record in acc.passes()) == 1
 
     def test_inside_offset_negative(self):
         acc = _accumulator()
@@ -1430,13 +1427,15 @@ class TestPlanRoundoverPasses:
         assert records[0].op == "edge"
         assert len(records[0].moves) > 0
 
-    def test_no_roundover_bit_skips(self):
+    def test_wrong_roundover_radius_is_an_error(self):
         acc = _accumulator()
         entries = (
-            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=6.0)),
+            _edge_feature("Rect", {"w_mm": 50.0, "h_mm": 30.0}, (100.0, 75.0), 6.0, RoundoverSpec(radius_mm=10.0)),
         )
-        plan_edge_feature_passes(entries, accumulator=acc, tool_db=FLAT_ONLY)
+        plan_edge_feature_passes(entries, accumulator=acc, tool_db=TOOLS_WITH_ROUNDOVER)
         assert len(acc.passes()) == 0
+        assert len(acc.errors) == 1
+        assert "no roundover bit with 10.0mm radius" in acc.errors[0]
 
     def test_roundover_inside_offset(self):
         acc = _accumulator()

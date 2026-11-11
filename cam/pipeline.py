@@ -203,7 +203,7 @@ def _plan_and_emit_face(
     hints_ms = (time.perf_counter() - hints_start) * 1000
 
     plan_start = time.perf_counter()
-    passes, _, planner_warnings = plan_passes(
+    passes, _, planner_warnings, planner_errors = plan_passes(
         planner_input,
         config=Config(),
         tool_db=tools,
@@ -214,29 +214,30 @@ def _plan_and_emit_face(
     )
     plan_ms = (time.perf_counter() - plan_start) * 1000
     warnings.extend(planner_warnings)
+    errors.extend(planner_errors)
 
     groups = gcode_file_groups(passes, per_tool=ast.sheet.gcode_output == "per-tool")
+    blocked = bool(planner_errors)
     if planner_input.keepouts:
         keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
-        violating = False
         for _, group in groups:
             keepout_result = verify_passes_avoid_keepouts(group, keepout_dicts)
             for error_msg in keepout_result.format_errors():
                 errors.append(f"Keepout violation: {error_msg}")
             warnings.extend(keepout_result.format_warnings(safe_z))
-            violating = violating or keepout_result.has_violations()
-        if violating:
-            return FaceOutput(
-                passes=passes,
-                gcode={},
-                gcode_files={},
-                total_moves=0,
-                rapid_moves=0,
-                cut_moves=0,
-                hints_ms=hints_ms,
-                plan_ms=plan_ms,
-                gcode_ms=0.0,
-            )
+            blocked = blocked or keepout_result.has_violations()
+    if blocked:
+        return FaceOutput(
+            passes=passes,
+            gcode={},
+            gcode_files={},
+            total_moves=0,
+            rapid_moves=0,
+            cut_moves=0,
+            hints_ms=hints_ms,
+            plan_ms=plan_ms,
+            gcode_ms=0.0,
+        )
 
     gcode_start = time.perf_counter()
     gcode_dict: dict[str, str] = {}

@@ -11,6 +11,7 @@
 | PC-1 | HARD | NO_SILENT_DROPS | Unsupported constraints must not silently pass. Safety-critical constraints error; others warn. |
 | PC-2 | HARD | CONSTRAINT_AUDIT | Every pipeline run must audit constraints and emit a summary. |
 | PC-3 | STRUCTURAL | TYPED_PLANNER_INPUT | Planner receives typed PlannerInput, not untyped hints dict. |
+| PC-4 | HARD | REQUIRED_EDGE_MACHINING | A requested edge cut that cannot be planned is a design error; suppress G-code for that setup. |
 
 ---
 
@@ -36,8 +37,8 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | rest | HONORED | — | Two-tool rest pocketing: rough with large tool, finish corners + perimeter with small tool. A plain Rect uses the rectangle pass; a Polygon (holes allowed) or a Rect with islands uses offset loops that follow the region. Mutually exclusive with edge_treatment allowance. |
 | corner_cleanup | HONORED | — | Secondary tool pass for rectangular pocket internal corners |
 | dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
-| edge_feature (bevel/chamfer) | HONORED | — | V-bit boundary-following pass |
-| edge_feature (roundover) | HONORED | — | Roundover bit boundary-following pass |
+| edge_feature (bevel/chamfer) | HONORED | CRITICAL | V-bit boundary-following pass; unavailable tooling or unsupported geometry errors |
+| edge_feature (roundover) | HONORED | CRITICAL | Roundover bit boundary-following pass; unavailable tooling or unsupported geometry errors |
 | allowance.inside/outside/on | VALIDATED_ONLY | — | May be applied upstream by generators |
 | allowance.kerf_compensation | VALIDATED_ONLY | — | Applied via global kerf_width_mm |
 
@@ -56,6 +57,29 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 |-------|---------|----------------|
 | CRITICAL | Violation could damage machine, fixture, or part | Error (fails build) |
 | — | No special safety concern | Warning only |
+
+---
+
+## Required Edge Machining (PC-4)
+
+A bevel, chamfer, or roundover is part of the requested finished geometry. If the
+planner cannot machine it, the job must not succeed with that cut omitted.
+Missing or unknown specifications, unavailable tooling, invalid selected-tool
+angles, nonpositive cutting depths, and unsupported or collapsed geometry produce
+errors naming the feature and the unmet requirement.
+
+The planner collects errors for every rejected edge while retaining valid planned
+passes for diagnostics. `plan_passes()` returns passes, summary, warnings, and
+errors. The pipeline suppresses every G-code file for a setup with planner errors,
+retains its blueprint and metrics, and may retain valid programs for the other
+setup. The CLI exits 3. The normal clean-output workflow removes stale programs.
+An explicit `--no-clean` preserves existing files and does not certify them as
+current build outputs; consumers must use the current metrics and output list.
+
+Tool-library entries must describe available shop tools. Do not invent a tool or
+substitute another machining strategy to make a failing recipe appear successful.
+Tool selection retains its existing angle/radius matching policies; this invariant
+requires selection and planning failures to be surfaced rather than warned away.
 
 ---
 

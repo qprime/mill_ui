@@ -8,7 +8,7 @@
     "edge_feature": {
       "status": "honored",
       "count": 5,
-      "safety_critical": false
+      "safety_critical": true
     }
   },
   "complexity": {

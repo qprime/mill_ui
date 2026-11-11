@@ -83,6 +83,7 @@ class PassAccumulator:
         self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
         self._warnings: list[str] = []
+        self._errors: list[str] = []
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
         setup = Setup(
@@ -119,6 +120,13 @@ class PassAccumulator:
     def add_warning(self, message: str) -> None:
         self._warnings.append(message)
 
+    def add_error(self, message: str) -> None:
+        self._errors.append(message)
+
+    @property
+    def errors(self) -> list[str]:
+        return list(self._errors)
+
     @property
     def warnings(self) -> list[str]:
         return list(self._warnings)
@@ -148,7 +156,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     safe_z: float | None = None,
     prime_spindle: bool = False,
     profile_opts: Mapping[str, Any] | None = None,
-) -> tuple[list[PassRecord], dict[str, Any], list[str]]:
+) -> tuple[list[PassRecord], dict[str, Any], list[str], list[str]]:
 
     safe_z_value = float(config.safe_z_mm if safe_z is None else safe_z)
     accumulator = PassAccumulator(
@@ -445,7 +453,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         profile_options=profile_options_summary,
     )
 
-    return pass_records, summary, accumulator.warnings
+    return pass_records, summary, accumulator.warnings, accumulator.errors
 
 
 def _extract_positive_float(value: Any) -> float:

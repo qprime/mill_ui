@@ -220,6 +220,28 @@ def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
     assert (out_dir / "part.pml.svg").exists()
 
 
+def test_missing_roundover_tool_exits_3_and_replaces_old_gcode_with_diagnostics(tmp_path: Path):
+    source = _write_simple_profile(tmp_path)
+    out_dir = tmp_path / "out"
+    args = ["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)]
+    _run_cli(args)
+    assert list(out_dir.glob("*.nc"))
+    source.write_text(SIMPLE_PROFILE_PML + "    children:\n    - Roundover: {radius: 6mm}\n")
+
+    result = _run_cli(args, check=False)
+
+    assert result.returncode == 3, result.stderr
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    error = next(error for error in metrics["errors"] if "no roundover bit" in error)
+    assert "6.0mm radius" in error and "roundover" in error
+    assert error in result.stderr
+    assert metrics["output_size"]["files"] == {}
+    assert not list(out_dir.glob("*.nc"))
+    assert (out_dir / "part.pml.svg").exists()
+    summary = json.loads((out_dir / "machining_summary.json").read_text())
+    assert summary["files"] == []
+
+
 def test_cli_multi_file_run_keeps_every_file_and_writes_one_metrics_file(tmp_path: Path):
     input_dir = tmp_path / "project"
     input_dir.mkdir()

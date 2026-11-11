@@ -137,6 +137,11 @@ When adding a new Feature field: add it to parser, formatter, JSON emitter, JSON
 
 Each `plan_X_passes()` function: pick tool → call ops function → append moves to accumulator record. Ops functions (`cam/ops/`) are pure: `(geometry, setup, **params) → list[Move]`.
 
+`PassAccumulator` collects warnings and errors separately. `plan_passes()` returns
+`(passes, summary, warnings, errors)`. Callers must inspect errors before emitting
+G-code. Required edge features that cannot be planned contribute errors and block
+the affected setup's programs; valid planned passes remain diagnostic evidence.
+
 ## Test Organization
 
 - No shared pytest fixtures — all test state built via `_make_*()` factory functions inline in each test file

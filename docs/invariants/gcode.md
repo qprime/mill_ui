@@ -45,6 +45,12 @@
 - No large XY jumps during cutting (G1 at negative Z)
 - Large jumps indicate missed retract or path error
 
+Ramped engraving follows every declared path segment, including closing edges.
+Entry and exit taper distances are measured along the complete XY path and are
+clamped to half its length. Z varies linearly along each taper; XY segments may
+be split at taper boundaries but must never shortcut a corner. A closed path is
+one circuit with the requested entry and exit tapers at its declared start.
+
 ### Monotonic Plunge
 - During a plunge sequence, Z must decrease monotonically
 - Z increasing during plunge indicates path error

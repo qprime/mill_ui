@@ -149,6 +149,85 @@ def test_ramped_engrave_move_count():
     assert cut_count >= 4
 
 
+@pytest.mark.parametrize("repeated_vertices", [False, True])
+def test_ramped_engrave_follows_vertices_and_ramps_by_path_length(repeated_vertices):
+    path = [(0.0, 0.0), (5.0, 0.0), (5.0, 20.0), (25.0, 20.0)]
+    if repeated_vertices:
+        path = [point for point in path for _ in range(2)]
+    moves = engrave_lines_ramped([path], _make_setup(), z=-3, ramp_mm=10)
+    cuts = [(m.x, m.y, m.z) for m in moves if isinstance(m, CutMove)]
+    assert cuts == [
+        (None, None, 0.0),
+        (5.0, 0.0, -1.5),
+        (5.0, 5.0, -3.0),
+        (5.0, 20.0, None),
+        (15.0, 20.0, None),
+        (25.0, 20.0, 0.0),
+    ]
+
+
+def test_ramped_engrave_closed_path_is_cut_and_returns_to_surface():
+    path = [(10.0, 10.0), (30.0, 10.0), (30.0, 30.0), (10.0, 30.0), (10.0, 10.0)]
+    moves = engrave_lines_ramped([path], _make_setup(), z=-3, ramp_mm=10)
+    cuts = [(m.x, m.y, m.z) for m in moves if isinstance(m, CutMove)]
+    assert cuts == [
+        (None, None, 0.0),
+        (20.0, 10.0, -3.0),
+        (30.0, 10.0, None),
+        (30.0, 30.0, None),
+        (10.0, 30.0, None),
+        (10.0, 20.0, None),
+        (10.0, 10.0, 0.0),
+    ]
+    assert isinstance(moves[-1], RetractMove)
+    assert moves[-1].z == 6
+
+
+def test_ramped_engrave_clamps_ramp_to_half_the_full_bent_path():
+    moves = engrave_lines_ramped([[(0, 0), (3, 0), (3, 7)]], _make_setup(), z=-4, ramp_mm=20)
+    cuts = [(m.x, m.y, m.z) for m in moves if isinstance(m, CutMove)]
+    assert cuts == [(None, None, 0.0), (3.0, 0.0, -2.4), (3.0, 2.0, -4.0), (3.0, 7.0, 0.0)]
+
+
+def test_ramped_engrave_ramp_boundaries_at_corners_are_not_shortcuts():
+    path: list[tuple[float, float]] = [(0, 0), (10, 0), (10, 20), (20, 20)]
+    moves = engrave_lines_ramped([path], _make_setup(), z=-3, ramp_mm=10)
+    cuts = [(m.x, m.y, m.z) for m in moves if isinstance(m, CutMove)]
+    assert cuts == [(None, None, 0.0), (10.0, 0.0, -3.0), (10.0, 20.0, None), (20.0, 20.0, 0.0)]
+
+
+def test_ramped_engrave_degenerate_path_does_not_move():
+    moves = engrave_lines_ramped([[], [(1, 1)], [(1, 1), (1, 1)]], _make_setup(), z=-3, ramp_mm=10)
+    assert not any(isinstance(m, (CutMove, RapidMove, RetractMove)) for m in moves)
+
+
+@pytest.mark.parametrize(
+    "path, ramp, expected",
+    [
+        (
+            [(40, 30), (43, 34), (43, 44)],
+            6,
+            [(43.0, 34.0, -2.5), (43.0, 35.0, -3.0), (43.0, 38.0, None), (43.0, 44.0, 0.0)],
+        ),
+        (
+            [(0, 0), (20, 0), (20, 5), (25, 5)],
+            10,
+            [(10.0, 0.0, -3.0), (20.0, 0.0, None), (20.0, 5.0, -1.5), (25.0, 5.0, 0.0)],
+        ),
+    ],
+)
+def test_ramped_engrave_preserves_diagonal_lengths_and_exit_corners(path, ramp, expected):
+    moves = engrave_lines_ramped([path], _make_setup(), z=-3, ramp_mm=ramp)
+    cuts = [(m.x, m.y, m.z) for m in moves if isinstance(m, CutMove) and m.x is not None]
+    assert cuts == expected
+
+
+@pytest.mark.parametrize("ramp", [-1, float("inf"), float("nan")])
+def test_ramped_engrave_rejects_invalid_ramp(ramp):
+    with pytest.raises(ValueError, match="ramp_mm"):
+        engrave_lines_ramped([[(0, 0), (10, 0)]], _make_setup(), ramp_mm=ramp)
+
+
 # =============================================================================
 # PML Round-Trip Tests
 # =============================================================================

@@ -609,7 +609,7 @@ Parallel decorative grooves with ramped Z entry/exit:
 Parameters:
 - `spacing` (required): Center-to-center distance between grooves
 - `depth` (required): Maximum groove depth
-- `ramp`: Horizontal ramp distance for Z entry/exit taper. 0 = flat-bottom (default: 10mm)
+- `ramp`: XY distance along the groove for each Z entry/exit taper, clamped to half the path length. 0 = flat-bottom (default: 10mm)
 - `angle`: Groove direction in degrees, counter-clockwise from the X axis. 0 = horizontal (along X), 90 = vertical (default: 0)
 - `inset`: Margin from domain edge before first groove (default: 0mm)
 

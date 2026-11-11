@@ -279,7 +279,7 @@ def _is_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
 
 
 def _engraving_trace(intent: RemovalIntent) -> BaseGeometry | None:
-    if intent.hint_type != FeatureType.ENGRAVE or (intent.ramp_mm is not None and intent.ramp_mm > 0):
+    if intent.hint_type != FeatureType.ENGRAVE:
         return None
     geometry = extract_shape_geometry(intent.shape, intent.bounds, intent.shape_geometry)
     paths = engraving_paths(intent.shape, geometry, intent.bounds.center)

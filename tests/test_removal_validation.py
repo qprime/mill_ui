@@ -153,14 +153,14 @@ def test_overlap_engraving_shapes_share_positioned_planner_paths(shape, geometry
     assert check_overlap([outer, inner], engrave_tool_diameter_mm=3).is_valid()
 
 
-def test_overlap_ramped_engraving_keeps_conservative_bounds_check():
+def test_overlap_ramped_engraving_follows_the_declared_path():
     from dataclasses import replace
 
     outer = _engraving_trace("outer", [(0, 0), (0, 50), (50, 50)])
-    inner = _engraving_trace("inner", [(10, 5), (45, 40)])
+    inner = _engraving_trace("inner", [(25, 10), (25, 40)])
     assert check_overlap([outer, inner], engrave_tool_diameter_mm=1).is_valid()
     ramped = replace(outer, ramp_mm=5)
-    assert not check_overlap([ramped, inner], engrave_tool_diameter_mm=1).is_valid()
+    assert check_overlap([ramped, inner], engrave_tool_diameter_mm=1).is_valid()
 
 
 def test_overlap_unknown_engraving_geometry_keeps_bounds_check():

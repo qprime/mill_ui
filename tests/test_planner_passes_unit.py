@@ -1260,6 +1260,50 @@ class TestPlanHolePasses:
 
 
 class TestPlanEngravePasses:
+    @pytest.mark.parametrize("ramp", [None, 10.0])
+    def test_ir_start_depth_offsets_cutting_but_preserves_safe_z(self, ramp):
+        from adapters.removal_to_planner import _intent_to_feature_input
+
+        intent = RemovalIntent(
+            region_id="engrave_floor",
+            bounds=Bounds2D(50, 150, 50, 50),
+            depth_profile=DepthProfile.constant(z_top=-4, z_bottom=-7),
+            hint_type="engrave",
+            shape="Line",
+            shape_geometry=ShapeGeometry(start=(-50, 0), end=(50, 0)),
+            ramp_mm=ramp,
+        )
+        acc = _accumulator()
+        plan_engrave_passes((_intent_to_feature_input(intent),), accumulator=acc, tool_db=ALL_TOOLS)
+        moves = acc.passes()[0].moves
+        zs = [m.z for m in moves if isinstance(m, CutMove) and m.z is not None]
+        assert min(zs) == -7
+        assert max(zs) == (-4 if ramp is not None else -7)
+        assert all(m.z == 5 for m in moves if isinstance(m, (RapidMove, RetractMove)))
+
+    @pytest.mark.parametrize("ramp", [None, 5.0])
+    def test_grouped_engraving_keeps_each_features_feeds_and_rpm(self, ramp):
+        base = _feature("Line", {"start": [0, 0], "end": [20, 0]}, (50, 50), 1)
+        first = replace(base, ramp_mm=ramp, feeds_override=FeedsOverride(rpm=8000, feed_xy=120, feed_z=40))
+        second = replace(base, ramp_mm=ramp, feeds_override=FeedsOverride(rpm=10000, feed_xy=250, feed_z=80))
+        third = replace(base, ramp_mm=ramp)
+        acc = _accumulator()
+        plan_engrave_passes((first, second, third), accumulator=acc, tool_db=ALL_TOOLS)
+        records = acc.passes()
+        assert len(records) == 1
+        assert records[0].count == 3
+        moves = records[0].moves
+        assert [m.rpm for m in moves if isinstance(m, SetRpmMove)] == [8000, 10000, V_1MM["rpm"]]
+        assert [m.feed for m in moves if isinstance(m, SetFeedMove)] == [
+            120,
+            120,
+            250,
+            250,
+            V_1MM["feed_xy"],
+            V_1MM["feed_xy"],
+        ]
+        assert [m.feed for m in moves if isinstance(m, CutMove) and m.feed is not None] == [40, 80, V_1MM["feed_z"]]
+
     def test_polyline_engrave(self):
         acc = _accumulator()
         engraves = (_feature("polyline", {"points": [[0, 0], [10, 0], [10, 10]]}, (50.0, 50.0), 0.3),)

@@ -23,7 +23,7 @@
 | GN-13 | HARD | HOLE_DIAMETER_LT_SPACING | diameter_mm < spacing_mm (no overlap) |
 | GN-14 | HARD | TEXT_NOT_EMPTY | EngraveText text must not be empty |
 | GN-15 | HARD | RAMP_NON_NEGATIVE | ramp_mm must be >= 0 (0 = no ramp, flat-bottom) |
-| GN-16 | HARD | RAMP_CLAMPED | ramp_mm clamped to line_length/2 at G-code generation |
+| GN-16 | HARD | RAMP_CLAMPED | ramp_mm clamped to half the XY path length at G-code generation |
 | GN-17 | HARD | FONT_NAME_VALID | EngraveText font must be a bundled HersheyFonts name; validated at PML parse and in params |
 | GN-18 | HARD | SEED_EXPLICIT | A generator that uses pseudo-random values takes `seed: int = 0` in its params and builds `numpy.random.default_rng(seed)` locally. No module-level RNG state. |
 

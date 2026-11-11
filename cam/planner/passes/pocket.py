@@ -585,17 +585,13 @@ def plan_engrave_passes(
         tool = pick_tool_for_engrave(tool_db)
         tool = apply_feeds_override(tool, entry.feeds_override)
         record = accumulator.get_record("engrave", tool)
+        setup = record.setup_for(tool)
         depth = entry.depth_mm or 0.3
         if entry.ramp_mm is not None and entry.ramp_mm > 0:
-            record.add_moves(
-                engrave_lines_ramped(lines, record.setup, z=-abs(depth), ramp_mm=entry.ramp_mm),
-                increment=len(lines),
-            )
+            moves = engrave_lines_ramped(lines, setup, z=-abs(depth), ramp_mm=entry.ramp_mm)
         else:
-            record.add_moves(
-                engrave_lines(lines, record.setup, z=-abs(depth)),
-                increment=len(lines),
-            )
+            moves = engrave_lines(lines, setup, z=-abs(depth))
+        record.add_moves(offset_moves_z(moves, entry.start_depth_mm), increment=len(lines))
 
 
 def plan_corner_cleanup_passes(

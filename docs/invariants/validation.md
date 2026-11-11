@@ -58,6 +58,15 @@ intersecting regions retain the existing conflict policy. Pockets with edge
 treatments or dogbone relief keep the prior bounding-box check because their
 boundary modifications are not represented by the plain pocket region.
 
+Perpendicular elongated pockets are an existing allowed crossing pattern.
+Retain the horizontal/vertical rule and recognize rotated plain convex pockets
+using the long axes of their minimum rotated bounds. The bounds must have a
+long-to-short ratio greater than 1.5, and normalized axes must be perpendicular
+within numerical tolerance. This includes straight grooves clipped at the
+parent boundary. Squares, nonconvex or modified pockets, parallel paths and
+oblique crossings do not gain this rotated-pattern exemption. Face and depth
+checks still apply before the crossing rule.
+
 ---
 
 ## Cross-Face Web (VL-8)

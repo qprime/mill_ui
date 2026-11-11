@@ -104,6 +104,111 @@ def test_check_overlap_xy_overlap():
     assert "pocket_b" in result.errors[0].message
 
 
+def _clipped_groove(angle):
+    from shapely.affinity import rotate
+    from shapely.geometry import box
+
+    return rotate(box(-150, -3.175, 150, 3.175), angle, origin=(0, 0)).intersection(box(-60, -80, 60, 80))
+
+
+def _polygon_pocket(polygon, name):
+    return pocket_hint_to_removal_intent(
+        {
+            "id": name,
+            "shape": "Polygon",
+            "center_xy_mm": [200, 200],
+            "geometry": {"points": list(polygon.exterior.coords)[:-1]},
+            "depth_mm": 3,
+        }
+    )
+
+
+@pytest.mark.parametrize("rotation", [0, 17, 45, 72, 90, 135])
+def test_perpendicular_clipped_pockets_are_independent_of_sheet_rotation(rotation):
+    from shapely.affinity import rotate
+
+    a = rotate(_clipped_groove(45), rotation, origin=(0, 0))
+    b = rotate(_clipped_groove(135), rotation, origin=(0, 0))
+    assert check_overlap([_polygon_pocket(a, "a"), _polygon_pocket(b, "b")]).is_valid()
+
+
+@pytest.mark.parametrize("other_angle", [45, 120, 134.999])
+def test_parallel_and_oblique_pocket_intersections_still_reported(other_angle):
+    a = _polygon_pocket(_clipped_groove(45), "a")
+    b = _polygon_pocket(_clipped_groove(other_angle), "b")
+    assert len(check_overlap([a, b]).errors) == 1
+
+
+def test_square_pockets_have_no_dominant_groove_axis():
+    from shapely.affinity import rotate
+    from shapely.geometry import box
+
+    square = rotate(box(-20, -20, 20, 20), 45, origin=(0, 0))
+    assert len(check_overlap([_polygon_pocket(square, "a"), _polygon_pocket(square, "b")]).errors) == 1
+
+
+def test_nonconvex_pocket_shapes_are_not_classified_as_rotated_grooves():
+    from shapely.affinity import rotate
+    from shapely.geometry import box
+
+    notched = box(-70, -4, 70, 4).difference(box(40, 0, 50, 5))
+    a = _polygon_pocket(rotate(notched, 45, origin=(0, 0)), "a")
+    b = _polygon_pocket(rotate(notched, 135, origin=(0, 0)), "b")
+    assert len(check_overlap([a, b]).errors) == 1
+
+
+@pytest.mark.parametrize("modifier", ["allowance", "dogbone"])
+def test_rotated_grooves_with_boundary_modifiers_remain_conservative(modifier):
+    from dataclasses import replace
+
+    from ir.removal_intent import EdgeTreatment
+    from layout_ast.layout import DogboneSpec
+
+    a = _polygon_pocket(_clipped_groove(45), "a")
+    b = _polygon_pocket(_clipped_groove(135), "b")
+    if modifier == "allowance":
+        a = replace(a, constraints=Constraints(edge_treatment=EdgeTreatment(type="allowance", finish_allowance_mm=-1)))
+    else:
+        a = replace(a, dogbone=DogboneSpec())
+    assert len(check_overlap([a, b]).errors) == 1
+
+
+def test_empty_pocket_region_has_no_groove_axis():
+    from dataclasses import replace
+
+    a = replace(
+        _make_intent(
+            "empty",
+            Bounds2D(150, 250, 150, 250),
+            hint_type="pocket",
+            constraints=Constraints(islands=(Island(Bounds2D(150, 250, 150, 250)),)),
+        ),
+        shape="Rect",
+    )
+    b = _polygon_pocket(_clipped_groove(135), "b")
+    assert len(check_overlap([a, b]).errors) == 1
+
+
+def test_diamond_lattice_pockets_validate_without_dropping_features():
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    ast = resolve_layout(
+        parse_pml_yaml("""Sheet:
+  working_width: 240mm
+  working_height: 340mm
+  thickness: 19mm
+children:
+  - Lines: {angle: 45, spacing: 40mm, width: 6.35mm, depth: 3mm}
+  - Lines: {angle: 135, spacing: 40mm, width: 6.35mm, depth: 3mm}
+""")
+    )
+    intents = ast_to_removal_intents(ast)
+    assert len(intents) == 22
+    assert check_overlap(intents).is_valid()
+
+
 def _engraving_trace(region_id, points):
     return engrave_hint_to_removal_intent(
         {

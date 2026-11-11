@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 
@@ -19,6 +19,8 @@ from validation.core import ValidationResult
 
 _WEB_TOLERANCE_MM = 1e-6
 _OVERLAP_CLEARANCE_TOLERANCE_MM = 1e-6
+_GROOVE_ASPECT_RATIO = 1.5
+_PERPENDICULAR_DOT_TOLERANCE = 1e-9
 
 
 def check_depth_profile(
@@ -240,12 +242,17 @@ def _are_perpendicular_pockets(a: RemovalIntent, b: RemovalIntent) -> bool:
     if not _match_same_type(a, b, FeatureType.POCKET):
         return False
 
-    is_a_horizontal = a.bounds.width > a.bounds.height * 1.5
-    is_a_vertical = a.bounds.height > a.bounds.width * 1.5
-    is_b_horizontal = b.bounds.width > b.bounds.height * 1.5
-    is_b_vertical = b.bounds.height > b.bounds.width * 1.5
+    is_a_horizontal = a.bounds.width > a.bounds.height * _GROOVE_ASPECT_RATIO
+    is_a_vertical = a.bounds.height > a.bounds.width * _GROOVE_ASPECT_RATIO
+    is_b_horizontal = b.bounds.width > b.bounds.height * _GROOVE_ASPECT_RATIO
+    is_b_vertical = b.bounds.height > b.bounds.width * _GROOVE_ASPECT_RATIO
 
-    return (is_a_horizontal and is_b_vertical) or (is_a_vertical and is_b_horizontal)
+    if (is_a_horizontal and is_b_vertical) or (is_a_vertical and is_b_horizontal):
+        return True
+    axis_a, axis_b = _pocket_long_axis(a), _pocket_long_axis(b)
+    if axis_a is None or axis_b is None:
+        return False
+    return abs(axis_a[0] * axis_b[0] + axis_a[1] * axis_b[1]) <= _PERPENDICULAR_DOT_TOLERANCE
 
 
 def _is_pocket_on_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
@@ -301,6 +308,24 @@ def _pocket_overlap_region(intent: RemovalIntent) -> BaseGeometry | None:
     if region is None:
         region = box(intent.bounds.x_min, intent.bounds.y_min, intent.bounds.x_max, intent.bounds.y_max)
     return region if region.is_valid else None
+
+
+def _pocket_long_axis(intent: RemovalIntent) -> tuple[float, float] | None:
+    region = _pocket_overlap_region(intent)
+    if not isinstance(region, Polygon) or region.is_empty or not region.equals(region.convex_hull):
+        return None
+    rectangle = region.minimum_rotated_rectangle
+    if not isinstance(rectangle, Polygon):
+        return None
+    corners = list(rectangle.exterior.coords)
+    ax, ay = corners[1][0] - corners[0][0], corners[1][1] - corners[0][1]
+    bx, by = corners[2][0] - corners[1][0], corners[2][1] - corners[1][1]
+    length_a, length_b = math.hypot(ax, ay), math.hypot(bx, by)
+    if length_a > length_b * _GROOVE_ASPECT_RATIO:
+        return ax / length_a, ay / length_a
+    if length_b > length_a * _GROOVE_ASPECT_RATIO:
+        return bx / length_b, by / length_b
+    return None
 
 
 def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: float | None = None) -> ValidationResult:

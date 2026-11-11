@@ -12,6 +12,8 @@ The current tool library has no 6mm-radius roundover bit. This recipe reports a
 design error and withholds all front-setup G-code; the blueprint remains available
 for inspection. Add a tool only when that bit is available in the shop. Existing
 profile/edge overlap errors also remain under investigation in the recipe audit.
+The blueprint shows the planned chamfer centerline/depth and marks the roundover
+boundary as `unplanned`.
 
 Sheet 900 × 400 × 19mm mdf.
 

@@ -6,7 +6,10 @@
 
 ## What gets cut
 
-A four-panel raised door and a cathedral-arch raised door, side by side.
+The intended build is a four-panel raised door and a cathedral-arch raised door,
+side by side. Current output has unresolved raised-panel and overlap errors under
+#238/#241; placement also remains under review. The colored bevel centerlines and
+6.699mm depth labels show the current machining plan, including its errors.
 
 Sheet 1100 × 800 × 19mm mdf.
 

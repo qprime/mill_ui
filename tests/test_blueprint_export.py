@@ -37,6 +37,26 @@ def test_pocket_holes_survive_svg_export_without_background_overpainting(theme):
     assert path.get("d", "").count("M ") == path.get("d", "").count("Z") == 2
 
 
+@pytest.mark.parametrize("theme", ["dark", "print"])
+def test_chamfer_centerline_and_depth_are_exported_in_both_themes(theme):
+    item = Item(
+        kind="shape",
+        type="Rect",
+        shape_id="chamfer",
+        geometry=Geometry(data={"w_mm": 50, "h_mm": 30}),
+        placement=Placement(center_xy_mm=(100, 80)),
+        feature=Feature(type="chamfer", depth_mm=9, chamfer_width_mm=2, chamfer_angle_deg=45),
+    )
+
+    svg = render_blueprint_svg(LayoutAST(sheet=Sheet(240, 200, 19, margin_mm=10), items=(item,)), theme=theme)
+
+    root = ET.fromstring(svg)
+    assert root.find(".//*[@id='CHAMFER_CUTS']") is not None
+    assert root.find(".//*[@id='chamfer_edge_cut']") is not None
+    assert "Chamfer 2.000mm" in svg and "Chamfer Centerline" in svg
+    assert "chamfer: 2.000mm" in svg
+
+
 def test_svg_output_deterministic():
     ast = LayoutAST(
         sheet=Sheet(width_mm=200.0, height_mm=100.0, thickness_mm=12.0, margin_mm=0.0),

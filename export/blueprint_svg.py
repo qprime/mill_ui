@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from ir.removal_intent import RemovalIntent
 from layout_ast.layout import LayoutAST
+
+if TYPE_CHECKING:
+    from cam.planner.passes.tools import ToolSelection
 
 
 def render_blueprint_svg(
@@ -12,6 +16,7 @@ def render_blueprint_svg(
     theme: str = "dark",
     y_origin: str = "back",
     view_face: str = "front",
+    edge_tools: Sequence[ToolSelection] | None = None,
 ) -> str:
     from adapters.layoutast_to_ir import layoutast_to_diagram_ir
     from diagram_ir.diagram import ViewportSpec
@@ -29,6 +34,8 @@ def render_blueprint_svg(
         show_toolpaths=True,
         kerf_width_mm=kerf_width,
         view_face=view_face,
+        edge_tools=edge_tools,
+        removal_intents=removal_intents,
     )
 
     diagram_theme = DIAGRAM_THEMES.get(theme, DIAGRAM_THEMES["dark"])

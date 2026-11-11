@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from adapters.hints_to_removal import _geometry_dict_to_shape_geometry
 from core.constants import DepthMode, ShapeType
@@ -10,12 +12,31 @@ from diagram_ir import Circle, DiagramIR, Image, LayerIR, Line, Path, Point2D, P
 from diagram_ir.dimensions import DimensionRequest, collect_dimension_requests
 from diagram_ir.geometry import rounded_rect_path
 from diagram_ir.shapes import Shape
-from ir.removal_intent import Bounds2D
+from ir.removal_intent import Bounds2D, RemovalIntent
 from layout_ast.layout import Item, LayoutAST, Sheet
 
 _logger = logging.getLogger(__name__)
 
-FEATURE_HANDLERS: dict[str, Callable[[Item, str, Callable, float], list[Shape]]] = {}
+if TYPE_CHECKING:
+    from cam.planner.passes.edge import EdgeCutPlan
+    from cam.planner.passes.tools import ToolSelection
+
+
+_EDGE_TYPES = frozenset({"bevel", "chamfer", "roundover"})
+
+
+@dataclass(frozen=True)
+class _DrawingContext:
+    flip_y: Callable[[float], float]
+    margin_mm: float
+    shape_id: str
+    edge_plan: EdgeCutPlan | None = None
+    edge_error: str | None = None
+    requested_depth_mm: float = 0.0
+
+
+FeatureHandler = Callable[[Item, str, _DrawingContext], list[Shape]]
+FEATURE_HANDLERS: dict[str, FeatureHandler] = {}
 
 FEATURE_LAYER: dict[str, str] = {
     "profile": "PROFILE_CUTS",
@@ -24,6 +45,9 @@ FEATURE_LAYER: dict[str, str] = {
     "hole": "HOLES",
     "engrave": "ENGRAVE_PATHS",
     "heightfield": "HEIGHTFIELD_OVERLAYS",
+    "bevel": "BEVEL_CUTS",
+    "chamfer": "CHAMFER_CUTS",
+    "roundover": "ROUNDOVER_CUTS",
 }
 
 WASTE_LAYER = "WASTE_CUTS"
@@ -36,16 +60,21 @@ _LAYER_ORDER = (
     "HOLES",
     "ENGRAVE_PATHS",
     "KEEPOUT_ZONES",
+    "BEVEL_CUTS",
+    "CHAMFER_CUTS",
+    "ROUNDOVER_CUTS",
+    "UNPLANNED_EDGES",
     "HEIGHTFIELD_OVERLAYS",
     "LABELS",
 )
 
 
-def register_feature(feature_type: str, *, layer: str | None = None):
-    def decorator(fn: Callable[[Item, str, Callable, float], list[Shape]]):
-        FEATURE_HANDLERS[feature_type] = fn
-        if layer is not None:
-            FEATURE_LAYER[feature_type] = layer
+def register_feature(*feature_types: str, layer: str | None = None) -> Callable[[FeatureHandler], FeatureHandler]:
+    def decorator(fn: FeatureHandler) -> FeatureHandler:
+        for feature_type in feature_types:
+            FEATURE_HANDLERS[feature_type] = fn
+            if layer is not None:
+                FEATURE_LAYER[feature_type] = layer
         return fn
 
     return decorator
@@ -71,6 +100,8 @@ def layoutast_to_diagram_ir(
     show_toolpaths: bool = True,
     kerf_width_mm: float = 0.0,
     view_face: str = "front",
+    edge_tools: Sequence[ToolSelection] | None = None,
+    removal_intents: Sequence[RemovalIntent] | None = None,
 ) -> DiagramIR:
     sheet = ast.sheet
     margin = sheet.margin_mm
@@ -97,7 +128,11 @@ def layoutast_to_diagram_ir(
 
     tool_radius = kerf_width_mm / 2.0
 
-    for item in ast.items:
+    edge_tools = _edge_tools_for_layout(ast, edge_tools)
+    edge_depths: dict[str, set[str]] = {}
+    edge_intents = _edge_intent_map(removal_intents)
+
+    for index, item in enumerate(ast.items):
         if item.kind == "keepout":
             bounds = _include_keepout_bounds(bounds, item, flip_y, margin)
             layer_shapes.setdefault("KEEPOUT_ZONES", []).extend(_item_to_shapes(item, "keepout", flip_y, margin))
@@ -112,9 +147,12 @@ def layoutast_to_diagram_ir(
         handler = FEATURE_HANDLERS.get(feature_type)
         if handler:
             style_token = _get_style_token(feature_type, bool(is_waste))
-            shapes = handler(item, style_token, flip_y, margin)
+            context = _drawing_context(item, index, sheet, flip_y, margin, edge_tools, edge_intents)
+            shapes = handler(item, style_token, context)
+            _record_edge_depth(edge_depths, feature_type, context)
+            bounds = _include_edge_plan_bounds(bounds, context)
 
-            target_layer = FEATURE_LAYER.get(feature_type)
+            target_layer = "UNPLANNED_EDGES" if context.edge_error else FEATURE_LAYER.get(feature_type)
             if target_layer:
                 if is_waste and target_layer == "PROFILE_CUTS":
                     target_layer = WASTE_LAYER
@@ -146,7 +184,7 @@ def layoutast_to_diagram_ir(
         "y_origin": y_origin,
         "view_face": view_face,
         "feature_counts": _count_features(ast),
-        "depth_info": _collect_depth_info(ast),
+        "depth_info": _collect_depth_info(ast, edge_depths),
         "hole_diameters": _collect_hole_diameters(ast),
         "part_inventory": _collect_part_inventory(ast),
         "edge_profiles": _collect_edge_profiles(ast),
@@ -162,24 +200,127 @@ def layoutast_to_diagram_ir(
     )
 
 
+def _edge_intent_map(intents: Sequence[RemovalIntent] | None) -> Mapping[tuple[str, str], RemovalIntent] | None:
+    if intents is None:
+        return None
+    result: dict[tuple[str, str], RemovalIntent] = {}
+    for intent in intents:
+        if intent.hint_type not in _EDGE_TYPES:
+            continue
+        key = intent.face, intent.region_id
+        if key in result:
+            raise ValueError(
+                f"Edge drawing: removal intent IDs must be unique within a face, got '{intent.region_id}' twice on '{intent.face}'"
+            )
+        result[key] = intent
+    return result
+
+
+def _edge_tools_for_layout(ast: LayoutAST, tools: Sequence[ToolSelection] | None) -> Sequence[ToolSelection]:
+    if tools is not None:
+        return tools
+    if not any(item.feature and item.feature.type in _EDGE_TYPES for item in ast.items):
+        return ()
+    from cam.planner.passes.tools import normalize_tool_entries
+    from config.machine_loader import load_machine_tool_db
+
+    return normalize_tool_entries(load_machine_tool_db(ast.sheet.material))
+
+
+def _record_edge_depth(depths: dict[str, set[str]], feature_type: str, context: _DrawingContext) -> None:
+    if feature_type not in _EDGE_TYPES:
+        return
+    depth = context.edge_plan.depth_mm if context.edge_plan else context.requested_depth_mm
+    suffix = " (unplanned)" if context.edge_error else ""
+    depths.setdefault(feature_type, set()).add(f"{depth:.3f}mm{suffix}")
+
+
+def _include_edge_plan_bounds(bounds: Bounds2D, context: _DrawingContext) -> Bounds2D:
+    if context.edge_plan is None:
+        return bounds
+    xs = [context.margin_mm + point.x for point in context.edge_plan.shape.points]
+    ys = [context.flip_y(point.y) for point in context.edge_plan.shape.points]
+    return Bounds2D(min(bounds.x_min, *xs), max(bounds.x_max, *xs), min(bounds.y_min, *ys), max(bounds.y_max, *ys))
+
+
+def _drawing_context(
+    item: Item,
+    index: int,
+    sheet: Sheet,
+    flip_y: Callable[[float], float],
+    margin: float,
+    tools: Sequence[ToolSelection],
+    edge_intents: Mapping[tuple[str, str], RemovalIntent] | None,
+) -> _DrawingContext:
+    shape_id = item.shape_id or item.id or f"edge_{index}"
+    if item.feature is None or item.feature.type not in _EDGE_TYPES:
+        return _DrawingContext(flip_y, margin, shape_id)
+    from adapters.ast_to_removal import item_to_removal_intent
+    from adapters.removal_to_planner import removal_intents_to_planner_input
+    from cam.planner.passes.edge import build_edge_cut_plan
+
+    depth = item.feature.depth_mm
+    try:
+        intent = item_to_removal_intent(item, sheet.thickness_mm)
+        if edge_intents is not None:
+            key = intent.face, intent.region_id
+            if key not in edge_intents:
+                raise ValueError(f"Edge feature '{shape_id}': no corresponding removal intent available")
+            intent = edge_intents[key]
+        depth = intent.depth_mm()
+        entry = removal_intents_to_planner_input([intent]).edge_features[0]
+        plan = build_edge_cut_plan(entry, tools)
+    except ValueError as exc:
+        return _DrawingContext(flip_y, margin, shape_id, edge_error=str(exc), requested_depth_mm=depth)
+    return _DrawingContext(flip_y, margin, shape_id, edge_plan=plan, requested_depth_mm=depth)
+
+
+@register_feature("bevel", "chamfer", "roundover")
+def _handle_edge(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    if item.placement is None or item.geometry is None or item.feature is None:
+        return []
+    plan = context.edge_plan
+    if plan is None:
+        shapes = _item_to_shapes(item, "edge-unplanned", context.flip_y, context.margin_mm)
+        x, y = item.placement.center_xy_mm
+        label = f"{item.feature.type.capitalize()} unplanned"
+    else:
+        points = tuple(Point2D(context.margin_mm + p.x, context.flip_y(p.y)) for p in plan.shape.points)
+        shapes = [Polyline(points=points, closed=True, style_token=style_token, id=f"{context.shape_id}_edge_cut")]
+        xs, ys = [p.x for p in plan.shape.points], [p.y for p in plan.shape.points]
+        x, y = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        label = f"{item.feature.type.capitalize()} {plan.depth_mm:.3f}mm"
+    shapes.append(
+        Text(
+            x=context.margin_mm + x,
+            y=context.flip_y(y),
+            content=label,
+            style_token="edge-label",
+            id=f"{context.shape_id}_edge_depth",
+        )
+    )
+    return shapes
+
+
 def _get_style_token(feature_type: str, is_waste: bool) -> str:
     if feature_type == "profile":
         return "waste" if is_waste else "profile"
     return feature_type
 
 
-@register_feature("profile")  # type: ignore[untyped-decorator]
-def _handle_profile(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _item_to_shapes(item, style_token, flip_y, margin)
+@register_feature("profile")
+def _handle_profile(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    return _item_to_shapes(item, style_token, context.flip_y, context.margin_mm)
 
 
-@register_feature("pocket")  # type: ignore[untyped-decorator]
-def _handle_pocket(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+@register_feature("pocket")
+def _handle_pocket(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    flip_y, margin = context.flip_y, context.margin_mm
     if item.geometry is None or item.placement is None:
         return []
     data = item.geometry.data
     if not data.get("holes") and not data.get("islands"):
-        return _item_to_shapes(item, style_token, flip_y, margin)
+        return _item_to_shapes(item, style_token, context.flip_y, context.margin_mm)
     bounds = compute_shape_bounds(item.type, data, item.placement.center_xy_mm)
     geometry = _geometry_dict_to_shape_geometry(data, item.placement.center_xy_mm, bounds)
     islands = tuple(
@@ -206,29 +347,29 @@ def _region_path(region, style_token: str, shape_id: str, flip_y: Callable, marg
     return [Path(d=" ".join(commands), fill_rule="evenodd", style_token=style_token, id=shape_id)] if commands else []
 
 
-@register_feature("hole")  # type: ignore[untyped-decorator]
-def _handle_hole(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _item_to_shapes(item, style_token, flip_y, margin)
+@register_feature("hole")
+def _handle_hole(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    return _item_to_shapes(item, style_token, context.flip_y, context.margin_mm)
 
 
-@register_feature("engrave")  # type: ignore[untyped-decorator]
-def _handle_engrave(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _item_to_shapes(item, style_token, flip_y, margin)
+@register_feature("engrave")
+def _handle_engrave(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    return _item_to_shapes(item, style_token, context.flip_y, context.margin_mm)
 
 
-@register_feature("surface")  # type: ignore[untyped-decorator]
-def _handle_surface(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
+@register_feature("surface")
+def _handle_surface(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
     return []
 
 
-@register_feature("notch")  # type: ignore[untyped-decorator]
-def _handle_notch(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _build_notch_shapes(item, flip_y, margin)
+@register_feature("notch")
+def _handle_notch(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    return _build_notch_shapes(item, context.flip_y, context.margin_mm)
 
 
-@register_feature("heightfield", layer="HEIGHTFIELD_OVERLAYS")  # type: ignore[untyped-decorator]
-def _handle_heightfield(item: Item, style_token: str, flip_y: Callable, margin: float) -> list[Shape]:
-    return _build_heightfield_shapes(item, flip_y, margin)
+@register_feature("heightfield", layer="HEIGHTFIELD_OVERLAYS")
+def _handle_heightfield(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
+    return _build_heightfield_shapes(item, context.flip_y, context.margin_mm)
 
 
 def _build_heightfield_shapes(item: Item, flip_y: Callable, margin: float) -> list[Shape]:
@@ -693,13 +834,16 @@ def _count_features(ast: LayoutAST) -> str:
     return ", ".join(f"{count} {ftype}{'s' if count > 1 else ''}" for ftype, count in sorted(counts.items()))
 
 
-def _collect_depth_info(ast: LayoutAST) -> list[str]:
+def _collect_depth_info(ast: LayoutAST, edge_depths: dict[str, set[str]] | None = None) -> list[str]:
     depths_by_type: dict[str, set[str]] = {}
     for item in ast.items:
         if item.feature is None:
             continue
         ftype = item.feature.type
         if item.feature.is_through and ftype == "profile":
+            continue
+        if edge_depths and ftype in edge_depths:
+            depths_by_type.setdefault(ftype, set()).update(edge_depths[ftype])
             continue
         depth_str = DepthMode.THROUGH if item.feature.is_through else f"{float(item.feature.depth_mm):.1f}mm"
         if ftype not in depths_by_type:

@@ -26,6 +26,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-8 | HARD | VIEWBOX_CONTAINS_CONTENT | All rendered elements fit within SVG viewBox |
 | SVG-9 | HARD | DETERMINISTIC_OUTPUT | Same LayoutAST always produces identical SVG |
 | SVG-10 | HARD | POCKET_REGION_FIDELITY | Pocket fills preserve all holes and islands, using the same region subtraction as machining. |
+| SVG-11 | HARD | EDGE_PLAN_FIDELITY | Edge drawings use the planner's selected-tool contour and depth; unmachinable requests are marked unplanned. |
 
 ---
 
@@ -54,6 +55,19 @@ overlapping islands, clipped edge-touching exclusions, and disconnected remnants
 Do not paint holes with a background-colored overlay: underlying cuts must remain
 visible. Margin and Y-origin transforms apply once to every contour.
 
+Edge centerlines and depth labels come from `build_edge_cut_plan()`, the same pure
+planner function used before G-code generation. The adapter converts through
+RemovalIntent and honors supplied intents and the pipeline's selected tool set.
+Standalone rendering uses the configured material/tool library. Never recompute
+an ideal bevel from the requested angle when the planner selected another tool.
+
+Unmachinable edges appear as dashed requested-boundary references labeled
+`unplanned`; they are not presented as valid toolpaths. Valid plans remain visible
+for diagnosis even if another error blocks the setup's G-code. Centerlines show
+the current planner's contour and depth, not a verified 3D finished surface.
+Existing edge-machining geometry errors must stay visible until fixed separately.
+Diagram bounds may expand to show a problematic plan without relaxing CAM checks.
+
 Defined in `adapters/layoutast_to_ir.py`:
 
 | Feature Type | DiagramIR Layer |
@@ -62,6 +76,10 @@ Defined in `adapters/layoutast_to_ir.py`:
 | pocket | POCKET_REGIONS |
 | hole | HOLES |
 | engrave | ENGRAVE_PATHS |
+| bevel | BEVEL_CUTS |
+| chamfer | CHAMFER_CUTS |
+| roundover | ROUNDOVER_CUTS |
+| Unmachinable edge request | UNPLANNED_EDGES |
 | notch | PROFILE_CUTS |
 | surface | (none — excluded from diagram) |
 | waste | WASTE_CUTS |
@@ -83,6 +101,9 @@ Defined in `diagram_render/render_svg.py` DiagramTheme:
 | engrave | Engraving paths |
 | waste | Waste cut lines |
 | keepout | Fixture zone outlines and translucent fills |
+| bevel / chamfer / roundover | Planned edge-tool centerlines |
+| edge-unplanned | Requested boundary with no valid edge plan |
+| edge-label | Edge operation and planned depth or unplanned status |
 | toolpath | Toolpath preview |
 | dimension | Dimension lines |
 | dimension-text | Dimension labels |

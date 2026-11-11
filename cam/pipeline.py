@@ -515,6 +515,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
                 front_intents,
                 theme=svg_theme,
                 y_origin=y_origin,
+                edge_tools=tools,
             )
             if back_ast is not None:
                 svg_back_string = render_blueprint_svg(
@@ -523,6 +524,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
                     theme=svg_theme,
                     y_origin=y_origin,
                     view_face="back",
+                    edge_tools=tools,
                 )
         except Exception as e:
             warnings.append(f"SVG generation failed: {e}")

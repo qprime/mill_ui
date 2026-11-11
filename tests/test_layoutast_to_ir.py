@@ -9,7 +9,7 @@ from adapters.layoutast_to_ir import (
     FEATURE_LAYER,
     layoutast_to_diagram_ir,
 )
-from diagram_ir import Circle, DiagramIR, Path, Rect, Text
+from diagram_ir import Circle, DiagramIR, Path, Polyline, Rect, Text
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
 
@@ -529,3 +529,97 @@ def test_beam_labels_on_items():
     label = labels[0]
     assert isinstance(label, Text)
     assert label.content == "TEST L0"
+
+
+@pytest.mark.parametrize(
+    "kind,fields,depth",
+    [
+        ("chamfer", {"chamfer_width_mm": 2.0, "chamfer_angle_deg": 45.0}, 2.0),
+        ("bevel", {"bevel_width_mm": 2.0, "bevel_angle_deg": 45.0, "bevel_inner_depth_mm": 1.0}, 2.0),
+        ("roundover", {"roundover_radius_mm": 6.0}, 6.0),
+    ],
+)
+def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, depth):
+    from cam.planner.passes.tools import normalize_tool_entries
+
+    item = replace(_make_profile_item("edge", 50, 30, 100, 80), feature=Feature(type=kind, depth_mm=9, **fields))
+    tools = normalize_tool_entries(
+        [
+            {"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90},
+            {"name": "r6", "kind": "roundover", "diameter": 25.4, "roundover_radius_mm": 6},
+        ]
+    )
+
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools)
+
+    layer = next(layer for layer in diagram.layers if layer.name == f"{kind.upper()}_CUTS")
+    path = next(shape for shape in layer.items if isinstance(shape, Polyline))
+    assert min(p.x for p in path.points) == pytest.approx(85 - depth)
+    assert path.style_token == kind and path.closed
+    assert f"{kind}: {depth:.3f}mm" in diagram.metadata["depth_info"]
+    assert any(isinstance(s, Text) and f"{depth:.3f}mm" in s.content for s in layer.items)
+
+
+@pytest.mark.parametrize("origin", ["front", "back"])
+@pytest.mark.parametrize("inside", [False, True])
+def test_edge_drawing_uses_actual_selected_angle_and_side(origin, inside):
+    from cam.planner.passes.tools import normalize_tool_entries
+
+    item = replace(
+        _make_profile_item("edge", 50, 30, 100, 80),
+        feature=Feature(
+            type="chamfer", depth_mm=2, side="inside" if inside else "outside", chamfer_width_mm=2, chamfer_angle_deg=30
+        ),
+    )
+    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+    diagram = layoutast_to_diagram_ir(
+        LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools, y_origin=origin
+    )
+    layer = next(layer for layer in diagram.layers if layer.name == "CHAMFER_CUTS")
+    path = next(shape for shape in layer.items if isinstance(shape, Polyline))
+    actual_radius = 2 / (3**0.5)
+    sign = -1 if inside else 1
+    assert min(p.x for p in path.points) == pytest.approx(85 - sign * actual_radius)
+    expected_min_y = (75 if origin == "front" else 95) - sign * actual_radius
+    assert min(p.y for p in path.points) == pytest.approx(expected_min_y)
+
+
+def test_missing_edge_tool_is_drawn_as_unplanned_reference():
+    item = replace(
+        _make_profile_item("round", 50, 30, 100, 80),
+        feature=Feature(type="roundover", depth_mm=6, roundover_radius_mm=6),
+    )
+
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=[])
+
+    assert not any(layer.name == "ROUNDOVER_CUTS" for layer in diagram.layers)
+    layer = next(layer for layer in diagram.layers if layer.name == "UNPLANNED_EDGES")
+    assert any(s.style_token == "edge-unplanned" for s in layer.items)
+    assert any(isinstance(s, Text) and "unplanned" in s.content.lower() for s in layer.items)
+    assert any("roundover:" in d and "unplanned" in d for d in diagram.metadata["depth_info"])
+
+
+@pytest.mark.parametrize("other_face", [False, True])
+def test_edge_drawing_honors_supplied_removal_intent_and_start_depth(other_face):
+    from adapters.ast_to_removal import item_to_removal_intent
+    from cam.planner.passes.tools import normalize_tool_entries
+    from ir.removal_intent import DepthProfile
+
+    item = replace(
+        _make_profile_item("edge", 50, 30, 100, 80),
+        feature=Feature(type="chamfer", depth_mm=2, side="outside", chamfer_width_mm=2, chamfer_angle_deg=45),
+    )
+    intent = replace(
+        item_to_removal_intent(item, 19), side="inside", depth_profile=DepthProfile.constant(z_top=-3, z_bottom=-5)
+    )
+    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+
+    intents = [replace(intent, face="back"), intent] if other_face else [intent]
+    diagram = layoutast_to_diagram_ir(
+        LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools, removal_intents=intents
+    )
+
+    layer = next(layer for layer in diagram.layers if layer.name == "CHAMFER_CUTS")
+    path = next(s for s in layer.items if isinstance(s, Polyline))
+    assert min(p.x for p in path.points) == pytest.approx(87)
+    assert "chamfer: 5.000mm" in diagram.metadata["depth_info"]

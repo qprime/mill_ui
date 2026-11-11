@@ -252,6 +252,7 @@ children:
         roundover = {"name": "roundover", "diameter": 25.4, "kind": "roundover", "roundover_radius_mm": 6}
         ast = resolve_layout(parse_pml_yaml(pml))
         valid_result = run_pipeline(ast, tool_db=[flat, roundover])
+        assert valid_result.svg is not None and 'id="ROUNDOVER_CUTS"' in valid_result.svg
         write_run_outputs([SheetRun("part.pml.yml", 1, "part", valid_result)], tmp_path)
         assert any(not path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
 
@@ -265,6 +266,7 @@ children:
         assert result.gcode_files and all(name.startswith("back-") for name in result.gcode_files)
         assert any(record.op == "profile" for record in result.passes)
         assert result.svg is not None and result.svg_back is not None
+        assert 'id="UNPLANNED_EDGES"' in result.svg and 'id="ROUNDOVER_CUTS"' not in result.svg
         assert all(path.name.startswith("back-") for path in tmp_path.glob("*.nc"))
 
 

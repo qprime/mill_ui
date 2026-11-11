@@ -147,6 +147,12 @@ Held allowance contours finish in deferred `profile_finish` passes; onion-skin
 removal is deferred further into `release` passes. Output grouping may combine
 normal operations per tool, but keeps release programs separate and last.
 
+`build_edge_cut_plan()` returns the immutable contour/tool/depth plan shared by
+edge G-code generation and blueprint adaptation. Blueprint drawing passes through
+RemovalIntent, honors the caller's intents/tool set, and marks failed requests as
+unplanned references. Keep planner geometry out of semantic Feature/RemovalIntent
+fields; the computed plan belongs to the planner and drawing context.
+
 ## Test Organization
 
 - No shared pytest fixtures — all test state built via `_make_*()` factory functions inline in each test file

@@ -5,6 +5,11 @@
 .pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
 .hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.bevel { stroke: #ffb454; fill: none; stroke-width: 1.5; }
+.chamfer { stroke: #8bd49c; fill: none; stroke-width: 1.5; stroke-dasharray: 6,2; }
+.roundover { stroke: #cba6f7; fill: none; stroke-width: 1.5; stroke-dasharray: 2,2; }
+.edge-unplanned { stroke: #ff6b6b; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.edge-label { fill: #e8e8e8; stroke: none; font-family: monospace; font-size: 8px; }
 .keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
 .waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
 .toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }

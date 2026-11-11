@@ -5,6 +5,11 @@
 .pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
 .hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.bevel { stroke: #ffb454; fill: none; stroke-width: 1.5; }
+.chamfer { stroke: #8bd49c; fill: none; stroke-width: 1.5; stroke-dasharray: 6,2; }
+.roundover { stroke: #cba6f7; fill: none; stroke-width: 1.5; stroke-dasharray: 2,2; }
+.edge-unplanned { stroke: #ff6b6b; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.edge-label { fill: #e8e8e8; stroke: none; font-family: monospace; font-size: 8px; }
 .keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
 .waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
 .toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
@@ -61,6 +66,10 @@
   <g id="POCKET_REGIONS" class="pocket-regions">
     <path d="M 350.000 200.000 L 350.048 200.980 L 350.192 201.951 L 350.431 202.903 L 350.761 203.827 L 351.181 204.714 L 351.685 205.556 L 352.270 206.344 L 352.929 207.071 L 353.656 207.730 L 354.444 208.315 L 355.286 208.819 L 356.173 209.239 L 357.097 209.569 L 358.049 209.808 L 359.020 209.952 L 360.000 210.000 L 600.000 210.000 L 600.980 209.952 L 601.951 209.808 L 602.903 209.569 L 603.827 209.239 L 604.714 208.819 L 605.556 208.315 L 606.344 207.730 L 607.071 207.071 L 607.730 206.344 L 608.315 205.556 L 608.819 204.714 L 609.239 203.827 L 609.569 202.903 L 609.808 201.951 L 609.952 200.980 L 610.000 200.000 L 610.000 60.000 L 609.952 59.020 L 609.808 58.049 L 609.569 57.097 L 609.239 56.173 L 608.819 55.286 L 608.315 54.444 L 607.730 53.656 L 607.071 52.929 L 606.344 52.270 L 605.556 51.685 L 604.714 51.181 L 603.827 50.761 L 602.903 50.431 L 601.951 50.192 L 600.980 50.048 L 600.000 50.000 L 360.000 50.000 L 359.020 50.048 L 358.049 50.192 L 357.097 50.431 L 356.173 50.761 L 355.286 51.181 L 354.444 51.685 L 353.656 52.270 L 352.929 52.929 L 352.270 53.656 L 351.685 54.444 L 351.181 55.286 L 350.761 56.173 L 350.431 57.097 L 350.192 58.049 L 350.048 59.020 L 350.000 60.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_pocket_4" />
     <path d="M 940.000 130.000 L 939.422 123.139 L 937.694 116.344 L 934.833 109.680 L 930.866 103.212 L 925.831 97.002 L 919.776 91.110 L 912.761 85.592 L 904.853 80.503 L 896.127 75.889 L 886.668 71.797 L 876.568 68.266 L 865.922 65.328 L 854.834 63.014 L 843.411 61.345 L 831.762 60.337 L 820.000 60.000 L 808.238 60.337 L 796.589 61.345 L 785.166 63.014 L 774.078 65.328 L 763.432 68.266 L 753.332 71.797 L 743.873 75.889 L 735.147 80.503 L 727.239 85.592 L 720.224 91.110 L 714.169 97.002 L 709.134 103.212 L 705.167 109.680 L 702.306 116.344 L 700.578 123.139 L 700.000 130.000 L 700.578 136.861 L 702.306 143.656 L 705.167 150.320 L 709.134 156.788 L 714.169 162.998 L 720.224 168.890 L 727.239 174.408 L 735.147 179.497 L 743.873 184.111 L 753.332 188.203 L 763.432 191.734 L 774.078 194.672 L 785.166 196.986 L 796.589 198.655 L 808.238 199.663 L 820.000 200.000 L 831.762 199.663 L 843.411 198.655 L 854.834 196.986 L 865.922 194.672 L 876.568 191.734 L 886.668 188.203 L 896.127 184.111 L 904.853 179.497 L 912.761 174.408 L 919.776 168.890 L 925.831 162.998 L 930.866 156.788 L 934.833 150.320 L 937.694 143.656 L 939.422 136.861 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_pocket_6" />
+  </g>
+  <g id="CHAMFER_CUTS" class="chamfer-cuts">
+    <path d="M 85.000 315.000 L 235.000 315.000 L 235.000 85.000 L 85.000 85.000 L 85.000 315.000 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_2_edge_cut" />
+    <text x="160.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_2_edge_depth">Chamfer 5.000mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="350.0" y1="50.0" x2="350.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
@@ -226,17 +235,19 @@
     <text x="1029.5874999999999" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <rect x="1009.5874999999999" y="9.412500000000001" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="1029.5874999999999" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="1009.5874999999999" y1="28.4125" x2="1024.5874999999999" y2="28.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="1029.5874999999999" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="1009.5874999999999" y1="44.4125" x2="1024.5874999999999" y2="44.4125" stroke="#5ab9ea" stroke-width="1" />
-    <text x="1029.5874999999999" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="1009.5874999999999" y1="28.4125" x2="1024.5874999999999" y2="28.4125" stroke="#8bd49c" stroke-width="1.5" stroke-dasharray="6,2" />
+    <text x="1029.5874999999999" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Chamfer Centerline</text>
+    <line x1="1009.5874999999999" y1="44.4125" x2="1024.5874999999999" y2="44.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1029.5874999999999" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1009.5874999999999" y1="60.4125" x2="1024.5874999999999" y2="60.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1029.5874999999999" y="63.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20.0" y="721.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="733.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1000.0 × 700.0 × 19.0mm</text>
     <text x="20.0" y="745.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 chamfer, 2 pockets, 7 profiles</text>
     <text x="20.0" y="757.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="769.5875" fill="#cccccc" font-family="monospace" font-size="10px">• chamfer: 5.0mm</text>
+    <text x="30.0" y="769.5875" fill="#cccccc" font-family="monospace" font-size="10px">• chamfer: 5.000mm</text>
     <text x="30.0" y="781.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 12.0mm</text>
     <text x="20.0" y="793.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (1):</text>
     <text x="30.0" y="805.5875" fill="#cccccc" font-family="monospace" font-size="10px">• shell_interior_8</text>

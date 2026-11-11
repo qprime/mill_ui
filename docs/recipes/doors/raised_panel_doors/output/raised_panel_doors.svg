@@ -5,6 +5,11 @@
 .pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
 .hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.bevel { stroke: #ffb454; fill: none; stroke-width: 1.5; }
+.chamfer { stroke: #8bd49c; fill: none; stroke-width: 1.5; stroke-dasharray: 6,2; }
+.roundover { stroke: #cba6f7; fill: none; stroke-width: 1.5; stroke-dasharray: 2,2; }
+.edge-unplanned { stroke: #ff6b6b; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.edge-label { fill: #e8e8e8; stroke: none; font-family: monospace; font-size: 8px; }
 .keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
 .waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
 .toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
@@ -58,6 +63,18 @@
     <path d="M 140.000 350.000 L 230.000 350.000 L 230.000 135.000 L 140.000 135.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_3_field" />
     <path d="M 330.000 350.000 L 420.000 350.000 L 420.000 135.000 L 330.000 135.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_4_field" />
     <path d="M 95.000 705.000 L 375.000 705.000 L 375.000 350.000 L 328.274 350.000 L 324.657 257.944 L 323.827 250.931 L 322.450 244.005 L 320.533 237.209 L 318.089 230.584 L 315.132 224.171 L 311.682 218.009 L 307.758 212.138 L 303.387 206.592 L 298.593 201.407 L 293.408 196.613 L 287.862 192.242 L 281.991 188.318 L 275.829 184.868 L 269.416 181.911 L 262.791 179.467 L 255.995 177.550 L 249.069 176.173 L 242.056 175.343 L 235.000 175.066 L 227.944 175.343 L 220.931 176.173 L 214.005 177.550 L 207.209 179.467 L 200.584 181.911 L 194.171 184.868 L 188.009 188.318 L 182.138 192.242 L 176.592 196.613 L 171.407 201.407 L 166.613 206.592 L 162.242 212.138 L 158.318 218.009 L 154.868 224.171 L 151.911 230.584 L 149.467 237.209 L 147.550 244.005 L 146.173 250.931 L 145.343 257.944 L 141.726 350.000 L 95.000 350.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_arch_raised_panel_6_field" />
+  </g>
+  <g id="BEVEL_CUTS" class="bevel-cuts">
+    <path d="M 111.132 693.868 L 258.868 693.868 L 258.868 421.132 L 111.132 421.132 L 111.132 693.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_1_border_edge_cut" />
+    <text x="185.000" y="557.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_1_border_edge_depth">Bevel 6.699mm</text>
+    <path d="M 301.132 693.868 L 448.868 693.868 L 448.868 421.132 L 301.132 421.132 L 301.132 693.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_2_border_edge_cut" />
+    <text x="375.000" y="557.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_2_border_edge_depth">Bevel 6.699mm</text>
+    <path d="M 111.132 378.868 L 258.868 378.868 L 258.868 106.132 L 111.132 106.132 L 111.132 378.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_3_border_edge_cut" />
+    <text x="185.000" y="242.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_3_border_edge_depth">Bevel 6.699mm</text>
+    <path d="M 301.132 378.868 L 448.868 378.868 L 448.868 106.132 L 301.132 106.132 L 301.132 378.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_4_border_edge_cut" />
+    <text x="375.000" y="242.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_4_border_edge_depth">Bevel 6.699mm</text>
+    <path d="M 66.132 733.868 L 403.868 733.868 L 403.868 321.132 L 356.030 321.132 L 353.458 255.677 L 352.361 246.412 L 350.541 237.261 L 348.009 228.281 L 344.779 219.528 L 340.873 211.055 L 336.314 202.915 L 331.131 195.157 L 325.355 187.830 L 319.021 180.979 L 312.170 174.645 L 304.843 168.869 L 297.085 163.686 L 288.945 159.127 L 280.472 155.221 L 271.719 151.991 L 262.739 149.459 L 253.588 147.639 L 244.323 146.542 L 235.000 146.176 L 225.677 146.542 L 216.412 147.639 L 207.261 149.459 L 198.281 151.991 L 189.528 155.221 L 181.055 159.127 L 172.915 163.686 L 165.157 168.869 L 157.830 174.645 L 150.979 180.979 L 144.645 187.830 L 138.869 195.157 L 133.686 202.915 L 129.127 211.055 L 125.221 219.528 L 121.991 228.281 L 119.459 237.261 L 117.639 246.412 L 116.542 255.677 L 113.970 321.132 L 66.132 321.132 L 66.132 733.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_arch_raised_panel_6_border_edge_cut" />
+    <text x="235.000" y="440.022" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_arch_raised_panel_6_border_edge_depth">Bevel 6.699mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="95.0" y1="175.06558248125475" x2="95.0" y2="155.06558248125475" stroke="#5ab9ea" stroke-width="1" />
@@ -121,17 +138,19 @@
     <text x="1139.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <rect x="1119.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
     <text x="1139.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="1119.5875" y1="18.4125" x2="1134.5875" y2="18.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="1139.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="1119.5875" y1="34.4125" x2="1134.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" />
-    <text x="1139.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <line x1="1119.5875" y1="18.4125" x2="1134.5875" y2="18.4125" stroke="#ffb454" stroke-width="1.5" />
+    <text x="1139.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Bevel Centerline</text>
+    <line x1="1119.5875" y1="34.4125" x2="1134.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1139.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1119.5875" y1="50.4125" x2="1134.5875" y2="50.4125" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1139.5875" y="53.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
     <text x="20.0" y="831.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="843.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1100.0 × 800.0 × 19.0mm</text>
     <text x="20.0" y="855.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 5 bevels, 5 pockets, 2 profiles</text>
     <text x="20.0" y="867.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="879.5875" fill="#cccccc" font-family="monospace" font-size="10px">• bevel: 6.0mm</text>
+    <text x="30.0" y="879.5875" fill="#cccccc" font-family="monospace" font-size="10px">• bevel: 6.699mm</text>
     <text x="30.0" y="891.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 2.0mm</text>
   </g>
 </svg>

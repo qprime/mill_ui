@@ -30,7 +30,7 @@ A reusable door component with the split layouts: Split, SplitGrid, SplitHorizon
 
 <img src="doors/raised_panel_doors/output/raised_panel_doors.svg" width="240">
 
-Raised panels in a split grid and in an arched door.
+Three tool-matched raised-panel profiles in rectangular and arched doors.
 
 ### [Shaker door](doors/shaker_door/)
 

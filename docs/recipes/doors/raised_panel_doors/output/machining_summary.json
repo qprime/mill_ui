@@ -7,30 +7,43 @@
   },
   "files": [
     {
-      "filename": "pocket-12.70mm.nc",
-      "operation": "pocket",
+      "filename": "pocket_offset-12.70mm.nc",
+      "operation": "pocket_offset",
       "tool_diameter_mm": 12.7,
       "rpm": 14000.0,
       "feed_xy_mm_min": 1400.0,
       "feed_z_mm_min": 350.0,
       "stepdown_mm": 3.5,
-      "max_depth_mm": 2.0,
-      "feature_count": 5,
-      "strategy": "raster_pocket",
-      "estimated_runtime_min": 30.8
+      "max_depth_mm": 6.0,
+      "feature_count": 7,
+      "strategy": "offset_pocket",
+      "estimated_runtime_min": 42.1
     },
     {
-      "filename": "edge-12.70mm.nc",
+      "filename": "edge-12.70mm-90deg.nc",
       "operation": "edge",
       "tool_diameter_mm": 12.7,
       "rpm": 18000.0,
       "feed_xy_mm_min": 540.0,
       "feed_z_mm_min": 135.0,
       "stepdown_mm": 1.0,
-      "max_depth_mm": 6.699,
-      "feature_count": 5,
+      "max_depth_mm": 6.0,
+      "feature_count": 3,
       "strategy": "edge",
-      "estimated_runtime_min": 68.9
+      "estimated_runtime_min": 34.5
+    },
+    {
+      "filename": "edge-12.70mm-60deg.nc",
+      "operation": "edge",
+      "tool_diameter_mm": 12.7,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 540.0,
+      "feed_z_mm_min": 135.0,
+      "stepdown_mm": 1.0,
+      "max_depth_mm": 6.0,
+      "feature_count": 2,
+      "strategy": "edge",
+      "estimated_runtime_min": 16.6
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -48,11 +61,10 @@
       "estimated_runtime_min": 51.4
     }
   ],
-  "total_runtime_min": 151.1,
+  "total_runtime_min": 144.6,
   "feature_counts": {
-    "bevel": 5,
-    "pocket": 5,
-    "profile": 2
+    "profile": 2,
+    "raised_panel": 5
   },
   "safe_z_mm": 6.0,
   "kerf_mm": 3.175

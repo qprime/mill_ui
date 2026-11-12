@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from generators.core import (
     GeneratorResult,
@@ -30,81 +30,29 @@ def raised_panel_generator(
     ):
         return []
 
-    field_result = domain.inset(params.border_width_mm)
-
-    field_domain = require_single_inset_domain(
+    spec = params.to_spec()
+    field_result = domain.inset(spec.field_inset_mm)
+    field = require_single_inset_domain(
         field_result,
         allow_empty=allow_empty,
         generator_name="RaisedPanelGenerator",
-        empty_message=(
-            f"RaisedPanelGenerator: border_width {params.border_width_mm}mm exceeds "
-            f"half of domain minimum dimension. Domain bounds: "
-            f"{domain.bounds.width}mm x {domain.bounds.height}mm"
-        ),
+        empty_message=f"RaisedPanel: field inset {spec.field_inset_mm}mm leaves no field in {domain.bounds}",
     )
-    if field_domain is None:
+    if field is None:
         return []
-
-    items: list[Item] = []
-
-    bcx, bcy = domain.centroid
-
-    border_points = [[pt[0] - bcx, pt[1] - bcy] for pt in domain.outer_boundary]
-    field_hole = [[pt[0] - bcx, pt[1] - bcy] for pt in field_domain.outer_boundary]
-
-    holes = [field_hole]
     if domain.inner_boundaries:
-        for inner in domain.inner_boundaries:
-            holes.append([[pt[0] - bcx, pt[1] - bcy] for pt in inner])
-
-    border_geometry_data = {
-        "points": border_points,
-        "holes": holes,
-    }
-
-    border_item = Item(
-        kind="shape",
-        type="Polygon",
-        geometry=Geometry(data=border_geometry_data),
-        placement=Placement(center_xy_mm=(bcx, bcy)),
-        feature=Feature(
-            type="bevel",
-            depth_mm=params.border_depth_mm,
-            bevel_width_mm=params.border_width_mm,
-            bevel_angle_deg=params.angle_degrees,
-            bevel_inner_depth_mm=params.field_depth_mm,
-        ),
-        shape_id=generate_shape_id(shape_id_prefix, 0, "border"),
-    )
-    items.append(border_item)
-
-    fcx, fcy = field_domain.centroid
-
-    field_points = [[pt[0] - fcx, pt[1] - fcy] for pt in field_domain.outer_boundary]
-
-    field_geometry_data: dict[str, Any] = {
-        "points": field_points,
-    }
-
-    if field_domain.inner_boundaries:
-        field_geometry_data["holes"] = [
-            [[pt[0] - fcx, pt[1] - fcy] for pt in hole] for hole in field_domain.inner_boundaries
-        ]
-
-    field_item = Item(
-        kind="shape",
-        type="Polygon",
-        geometry=Geometry(data=field_geometry_data),
-        placement=Placement(center_xy_mm=(fcx, fcy)),
-        feature=Feature(
-            type="pocket",
-            depth_mm=params.field_depth_mm,
-        ),
-        shape_id=generate_shape_id(shape_id_prefix, 1, "field"),
-    )
-    items.append(field_item)
-
-    return items
+        raise ValueError("RaisedPanel: domains with holes require an explicit profile layout")
+    cx, cy = domain.centroid
+    return [
+        Item(
+            kind="shape",
+            type="Polygon",
+            geometry=Geometry(data={"points": [[x - cx, y - cy] for x, y in domain.outer_boundary]}),
+            placement=Placement(center_xy_mm=(cx, cy)),
+            feature=Feature(type="raised_panel", depth_mm=spec.border_depth_mm, raised_panel=spec),
+            shape_id=generate_shape_id(shape_id_prefix, 0, "panel"),
+        )
+    ]
 
 
 __all__ = ["raised_panel_generator"]

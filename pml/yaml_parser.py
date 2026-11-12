@@ -1252,10 +1252,15 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "RaisedPanel":
+        _reject_unknown_keys(
+            node_data, ("border_width", "border_depth", "field_depth", "profile", "v_angle"), "RaisedPanel", path
+        )
         return RaisedPanelGen(
-            border_width_mm=parse_dimension(_require(node_data, "border_width", f"{path}.RaisedPanel")),
+            border_width_mm=parse_dimension(node_data["border_width"]) if "border_width" in node_data else None,
             border_depth_mm=parse_dimension(_require(node_data, "border_depth", f"{path}.RaisedPanel")),
             field_depth_mm=parse_dimension(_require(node_data, "field_depth", f"{path}.RaisedPanel")),
+            profile=node_data.get("profile", "gutter"),
+            v_angle_deg=_safe_float(node_data.get("v_angle", 90), "v_angle", f"{path}.RaisedPanel"),
         )
 
     elif node_type == "Chamfer":

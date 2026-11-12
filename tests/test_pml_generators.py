@@ -239,18 +239,14 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    border_items = [i for i in ast.items if i.shape_id and "_border" in i.shape_id]
-    field_items = [i for i in ast.items if i.shape_id and "_field" in i.shape_id]
-
-    assert len(border_items) == 1, f"Expected 1 border item, got {len(border_items)}"
-    assert len(field_items) == 1, f"Expected 1 field item, got {len(field_items)}"
-
-    assert border_items[0].feature is not None
-    assert border_items[0].feature.type == "bevel", f"Expected bevel, got {border_items[0].feature.type}"
-    assert border_items[0].feature.depth_mm == 6.0
-    assert field_items[0].feature is not None
-    assert field_items[0].feature.type == "pocket", f"Expected pocket, got {field_items[0].feature.type}"
-    assert field_items[0].feature.depth_mm == 2.0
+    panels = [i for i in ast.items if i.feature and i.feature.type == "raised_panel"]
+    assert len(panels) == 1
+    panel = panels[0]
+    assert panel.feature is not None and panel.feature.raised_panel is not None
+    assert panel.feature.raised_panel.field_depth_mm == 2
+    intents = ast_to_removal_intents(ast)
+    assert len(intents) == 1
+    assert intents[0].depth_mm() == 6
 
 
 def test_resolve_split_grid_with_raised_panel():
@@ -277,11 +273,8 @@ children:
     comp_ast = parse_pml_yaml(pml)
     ast = resolve_layout(comp_ast)
 
-    border_items = [i for i in ast.items if i.shape_id and "_border" in i.shape_id]
-    field_items = [i for i in ast.items if i.shape_id and "_field" in i.shape_id]
-
-    assert len(border_items) == 4, f"Expected 4 border items, got {len(border_items)}"
-    assert len(field_items) == 4, f"Expected 4 field items, got {len(field_items)}"
+    panels = [i for i in ast.items if i.feature and i.feature.type == "raised_panel"]
+    assert len(panels) == 4
 
 
 def test_resolve_wave_gen():
@@ -375,10 +368,10 @@ children:
     ast = resolve_layout(comp_ast)
 
     profile_items = [i for i in ast.items if i.feature and i.feature.type == "profile"]
-    raised_items = [i for i in ast.items if i.shape_id and ("_border" in i.shape_id or "_field" in i.shape_id)]
+    raised_items = [i for i in ast.items if i.feature and i.feature.type == "raised_panel"]
 
     assert len(profile_items) >= 1, "Should have at least one profile"
-    assert len(raised_items) == 8, f"Should have 8 raised panel items (4 borders + 4 fields), got {len(raised_items)}"
+    assert len(raised_items) == 4
 
 
 def test_example_wave_texture_panel():

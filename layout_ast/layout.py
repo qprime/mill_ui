@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from layout_ast.raised_panel import RaisedPanelSpec
 
 VALID_GCODE_OUTPUT_MODES = ("per-operation", "per-tool")
 VALID_FACES = ("front", "back")
@@ -122,6 +125,7 @@ class Feature:
     feeds_override: FeedsOverride | None = None
 
     ramp_mm: float | None = None
+    raised_panel: RaisedPanelSpec | None = None
 
     def __post_init__(self) -> None:
         if self.face not in VALID_FACES:

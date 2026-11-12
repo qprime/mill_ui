@@ -121,8 +121,8 @@ guide:
         summary: A rounded edge cut with a roundover bit.
         spec: pml/syntax_spec.md#roundover
         detect: [{node: Roundover}, {value: {treatment: roundover}}]
-      - name: Raised-panel bevel
-        summary: A bevelled border around a raised field.
+      - name: Raised-panel profiles
+        summary: Flat gutters with V-bit slopes, V-grooves with pocketed fields, and plain V-grooves.
         spec: pml/syntax_spec.md#raisedpanel
         detect: [{node: RaisedPanel}]
       - name: Edge cross-section callouts

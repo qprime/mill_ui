@@ -25,15 +25,40 @@ children:
         - Frame:
             width: 60mm
             children:
-              - SplitGrid:
-                  rows: 2
-                  cols: 2
+              - SplitHorizontal:
+                  count: 2
                   gap: 50mm
                   children:
-                    - RaisedPanel:
-                        border_width: 25mm
-                        border_depth: 6mm
-                        field_depth: 2mm
+                    - SplitVertical:
+                        count: 2
+                        gap: 50mm
+                        children:
+                          - RaisedPanel:
+                              profile: gutter
+                              v_angle: 90
+                              border_width: 25mm
+                              border_depth: 6mm
+                              field_depth: 2mm
+                          - RaisedPanel:
+                              profile: gutter
+                              v_angle: 60
+                              border_width: 25mm
+                              border_depth: 6mm
+                              field_depth: 2mm
+                    - SplitVertical:
+                        count: 2
+                        gap: 50mm
+                        children:
+                          - RaisedPanel:
+                              profile: v_groove
+                              v_angle: 90
+                              border_depth: 6mm
+                              field_depth: 0mm
+                          - RaisedPanel:
+                              profile: v_groove
+                              v_angle: 60
+                              border_depth: 6mm
+                              field_depth: 2mm
 
   - AtPosition:
       x: 810mm
@@ -57,6 +82,8 @@ children:
                 width: 60mm
                 children:
                   - RaisedPanel:
+                      profile: gutter
+                      v_angle: 90
                       border_width: 25mm
                       border_depth: 6mm
                       field_depth: 2mm

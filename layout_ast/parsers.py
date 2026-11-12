@@ -17,6 +17,7 @@ from layout_ast.layout import (
     RestSpec,
     Sheet,
 )
+from layout_ast.raised_panel import RaisedPanelSpec
 
 
 def _parse_dogbone(raw: Any) -> DogboneSpec | None:
@@ -162,4 +163,7 @@ def _parse_feature(feature_data: dict[str, Any]) -> Feature:
         roundover_radius_mm=feature_data.get("roundover_radius_mm"),
         feeds_override=_parse_feeds_override(feature_data.get("feeds_override")),
         ramp_mm=feature_data.get("ramp_mm"),
+        raised_panel=RaisedPanelSpec.from_dict(feature_data["raised_panel"])
+        if feature_data.get("raised_panel") is not None
+        else None,
     )

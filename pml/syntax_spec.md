@@ -442,14 +442,69 @@ Clear material from enclosed area:
 
 #### RaisedPanel
 
-Decorative panel with beveled border:
+Carves a decorative field in one board. The surrounding frame stays at the
+original face. The field is raised **relative to the bottom of the recess**;
+`field_depth: 2mm` still places its flat top 2mm below the original face.
+All depths are measured from that face.
 
 ```yaml
 - RaisedPanel:
+    profile: gutter
     border_width: 25mm
     border_depth: 6mm
     field_depth: 2mm
+    v_angle: 90
 ```
+
+`gutter` (the default) clears a flat-bottom recess with an endmill, then uses a
+V-bit to cut the slope up to the field. `border_width` is the complete distance
+from the cell boundary to the field. This example has a vertical outer wall,
+21mm of flat floor at 6mm depth, and a 4mm-wide, 45° slope up to the 2mm field.
+The 25mm border is not a continuous shallow slope.
+
+`v_groove` cuts a V-shaped recess and optionally pockets the field:
+
+```yaml
+- RaisedPanel:
+    profile: v_groove
+    border_depth: 6mm
+    field_depth: 2mm
+    v_angle: 60
+```
+
+Omit `border_width` in this mode: the included bit angle and depths determine it.
+The example's transition is 5.774mm wide. Use `field_depth: 0mm` for a plain V
+with the center untouched; a 90° bit at 6mm depth produces a 12mm-wide groove.
+No field-pocket pass is emitted at zero field depth.
+
+| Parameter | Contract |
+|-----------|----------|
+| `profile` | `gutter` (default) or `v_groove` |
+| `border_depth` | Required, positive, less than stock thickness |
+| `field_depth` | Required, `0 <= field_depth < border_depth` |
+| `border_width` | Required for `gutter`; forbidden for `v_groove` |
+| `v_angle` | Included V-bit angle in degrees, default 90; must match an available tool |
+
+For depth `D`, field depth `F`, and included angle `A`, the inner slope's run is
+`(D - F) * tan(A/2)`. The V-tip contour lies this distance outside the field.
+The minimum total border width is `(2D - F) * tan(A/2)`; a gutter must be at least
+this wide, and a V-groove uses exactly this width. A wider included angle makes
+a wider, shallower-sided groove: 30° is narrower than 60°, 90°, or 120°.
+The bit diameter must be at least `2D * tan(A/2)`. A 120° bit at 6mm depth would
+need at least 20.785mm cutting diameter; the recipe's 12.7mm tools cannot do it.
+
+The planner uses offset-contour pocket clearing and layered V-bit contours,
+with exact angle matching. It never substitutes a nearby angle, surface raster,
+or ball-nose strategy. Required tools, connected insets, and complete cutting
+footprints inside the cell are checked; an impossible request errors instead
+of silently disappearing. Rectangular and arched outlines are demonstrated in
+[raised-panel doors](../docs/recipes/doors/raised_panel_doors/README.md).
+Domains with holes and nonzero starting surfaces are unsupported.
+
+Flat cutters leave rounded inside corners and retained corner stock. Sharp
+internal corners, arbitrary broad shallow ramps, and shaped molding profiles
+are outside this operation. See the recipe's actual-G-code cross-sections and
+corner proof before treating a blueprint fill as a fully cleared sharp corner.
 
 #### Chamfer
 

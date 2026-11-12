@@ -541,13 +541,17 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         return {"Pocket": result}
 
     elif isinstance(node, RaisedPanelGen):
-        return {
-            "RaisedPanel": {
-                "border_width": dim(node.border_width_mm),
-                "border_depth": dim(node.border_depth_mm),
-                "field_depth": dim(node.field_depth_mm),
-            }
+        raised: dict[str, Any] = {
+            "border_depth": dim(node.border_depth_mm),
+            "field_depth": dim(node.field_depth_mm),
         }
+        if node.border_width_mm is not None:
+            raised["border_width"] = dim(node.border_width_mm)
+        if node.profile != "gutter":
+            raised["profile"] = node.profile
+        if node.v_angle_deg != 90:
+            raised["v_angle"] = node.v_angle_deg
+        return {"RaisedPanel": raised}
 
     elif isinstance(node, ChamferGen):
         return {"Chamfer": {"width": dim(node.width_mm), "depth": dim(node.depth_mm)}}

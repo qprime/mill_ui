@@ -39,6 +39,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 | dogbone | HONORED | — | Rectangular pockets, assembly dados, and notch internal corners: bore per style with reference_point for 2-corner notches |
 | edge_feature (bevel/chamfer) | HONORED | CRITICAL | V-bit boundary-following pass; unavailable tooling or unsupported geometry errors |
 | edge_feature (roundover) | HONORED | CRITICAL | Roundover bit boundary-following pass; unavailable tooling or unsupported geometry errors |
+| edge_feature (raised_panel) | HONORED | CRITICAL | Compound offset-pocket and matching V-bit contour plan; required depth, cell containment and tooling are enforced |
 | allowance.inside/outside/on | VALIDATED_ONLY | — | May be applied upstream by generators |
 | allowance.kerf_compensation | VALIDATED_ONLY | — | Applied via global kerf_width_mm |
 
@@ -62,7 +63,7 @@ The adapter (`adapters/removal_to_planner.py`) converts RemovalIntent to Planner
 
 ## Required Edge Machining (PC-4)
 
-A bevel, chamfer, or roundover is part of the requested finished geometry. If the
+A bevel, chamfer, roundover, or raised panel is part of the requested finished geometry. If the
 planner cannot machine it, the job must not succeed with that cut omitted.
 Missing or unknown specifications, unavailable tooling, invalid selected-tool
 angles, nonpositive cutting depths, and unsupported or collapsed geometry produce
@@ -87,8 +88,34 @@ a V-bit included angle `180 - 2a`. The tip follows the nominal edge and reaches
 `width * tan(a)` below the local surface for either retained side. The selected
 bit must reproduce the requested width within 0.001mm output precision and its
 cutting radius must accommodate that width. Do not silently substitute a
-different bevel slope or cut wider than the available cutter. Bevel/RaisedPanel
-and roundover strategies retain their separate existing behavior.
+different bevel slope or cut wider than the available cutter. Bevel and roundover
+strategies retain their separate behavior.
+
+### Raised-panel profiles
+
+RaisedPanel carries one semantic `RaisedPanelSpec` through AST, RemovalIntent,
+and typed planner input. The generator does not encode computed toolpaths or
+split it into unrelated bevel/pocket intents. The shared immutable edge plan
+contains the V-bit contour and required flat-pocket regions/tools/depths; drawing
+and machining consume that same plan.
+
+`gutter` preserves the declared total border width, using a flat-bottom gutter
+and a tool-matched inner slope. `v_groove` derives its border width from the
+included bit angle and depths. Zero field depth preserves the original face and
+emits no field pocket. Border depth is honored directly, never recalculated
+from a hidden bevel angle, and must be less than stock thickness.
+
+The selected V-bit must match the specified included angle and accommodate the
+full cutting radius at maximum depth. Insets must leave a single connected
+field and groove; the slope must preserve the declared field. The full V-bit
+cutting footprint stays inside the cell. Flat clearing uses existing offset
+pocket operations with a 0.0005mm rounded-offset arc approximation tolerance;
+the default tolerance of unrelated pocket operations is unchanged. No surface
+raster, ball-nose substitution or nearest-angle approximation is permitted.
+No fitting flat tool, an empty required pocket toolpath, holes, nonzero starting
+surfaces, or impossible geometry errors and blocks the setup. Finite cutters
+leave rounded internal corners and retained stock; no sharp-corner guarantee
+or automatic decorative dogbone is implied.
 
 ---
 

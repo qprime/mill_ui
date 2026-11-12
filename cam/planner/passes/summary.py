@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 OP_STRATEGIES = {
     "bore": "helical_bore",
     "pocket": "raster_pocket",
+    "pocket_offset": "offset_pocket",
     "profile_finish": "allowance_finish",
     "release": "onion_skin_release",
 }

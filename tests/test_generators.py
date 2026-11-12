@@ -731,7 +731,7 @@ def test_raised_panel_params_valid():
         border_width_mm=20.0,
         border_depth_mm=8.0,
         field_depth_mm=1.0,
-        angle_degrees=20.0,
+        v_angle_deg=60.0,
     )
 
 
@@ -762,52 +762,25 @@ def test_raised_panel_params_invalid_field_deeper():
 
 
 def test_raised_panel_simple():
-    """Test raised panel generator produces two items."""
     domain = Domain.from_rectangle(200, 300, center=(100, 150))
-    params = RaisedPanelParams(
-        border_width_mm=25.0,
-        border_depth_mm=6.0,
-        field_depth_mm=2.0,
-    )
-
-    items = raised_panel_generator(domain, params)
-
-    assert len(items) == 2
-
-    # First item should be border with bevel feature
-    border_item = items[0]
-    assert border_item.feature is not None
-    assert border_item.feature.type == "bevel"
-    assert border_item.feature.depth_mm == 6.0
-    assert border_item.feature.bevel_width_mm == 25.0
-    assert border_item.shape_id is not None
-    assert "border" in border_item.shape_id
-
-    # Second item should be field with pocket feature
-    field_item = items[1]
-    assert field_item.feature is not None
-    assert field_item.feature.type == "pocket"
-    assert field_item.feature.depth_mm == 2.0
-    assert field_item.shape_id is not None
-    assert "field" in field_item.shape_id
+    items = raised_panel_generator(domain, RaisedPanelParams(25, 6, 2))
+    assert len(items) == 1
+    panel = items[0]
+    assert panel.feature is not None
+    assert panel.feature.type == "raised_panel"
+    assert panel.feature.depth_mm == 6
+    assert panel.feature.raised_panel is not None
+    assert panel.feature.raised_panel.field_depth_mm == 2
+    assert panel.feature.raised_panel.border_width_mm == 25
 
 
-def test_raised_panel_border_has_hole():
-    """Test that raised panel border geometry has field as hole."""
+def test_raised_panel_keeps_one_outline_and_a_field_specification():
     domain = Domain.from_rectangle(200, 300, center=(100, 150))
-    params = RaisedPanelParams(
-        border_width_mm=30.0,
-        border_depth_mm=6.0,
-        field_depth_mm=2.0,
-    )
-
-    items = raised_panel_generator(domain, params)
-    border_item = items[0]
-
-    # Border geometry should have a hole (the field)
-    assert border_item.geometry is not None
-    assert "holes" in border_item.geometry.data
-    assert len(border_item.geometry.data["holes"]) >= 1
+    panel = raised_panel_generator(domain, RaisedPanelParams(30, 6, 2))[0]
+    assert panel.geometry is not None
+    assert "holes" not in panel.geometry.data
+    assert panel.feature is not None and panel.feature.raised_panel is not None
+    assert panel.feature.raised_panel.field_inset_mm == 30
 
 
 def test_raised_panel_domain_too_small():
@@ -823,7 +796,7 @@ def test_raised_panel_domain_too_small():
         raised_panel_generator(domain, params)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
-        assert "border_width" in str(e).lower()
+        assert "field inset" in str(e).lower()
 
 
 def test_raised_panel_allow_empty():
@@ -845,6 +818,7 @@ def test_raised_panel_disjoint_inset_raises_skip():
         border_width_mm=8.0,
         border_depth_mm=6.0,
         field_depth_mm=2.0,
+        v_angle_deg=60,
     )
 
     with pytest.raises(GeneratorSkipError, match="disjoint regions"):
@@ -857,6 +831,7 @@ def test_raised_panel_disjoint_inset_allow_empty():
         border_width_mm=8.0,
         border_depth_mm=6.0,
         field_depth_mm=2.0,
+        v_angle_deg=60,
     )
 
     items = raised_panel_generator(domain, params, allow_empty=True)
@@ -998,14 +973,8 @@ def test_split_with_raised_panels():
         )
         all_items.extend(items)
 
-    # Should have 2 items per panel x 4 panels = 8 items
-    assert len(all_items) == 8
-
-    # Verify we have equal numbers of border and field items
-    bevel_count = len([i for i in all_items if i.feature is not None and i.feature.type == "bevel"])
-    pocket_count = len([i for i in all_items if i.feature is not None and i.feature.type == "pocket"])
-    assert bevel_count == 4
-    assert pocket_count == 4
+    assert len(all_items) == 4
+    assert all(i.feature is not None and i.feature.type == "raised_panel" for i in all_items)
 
 
 def test_door_with_chamfer_and_pocket():

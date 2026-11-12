@@ -95,6 +95,7 @@ def _offset_pocket_moves(
     *,
     depth_mm: float,
     wall_allowance_mm: float,
+    arc_tolerance_mm: float | None = None,
 ) -> list[Move]:
     step_over = stepover_for_tool(tool)
     step_down = stepdown_for_tool(tool)
@@ -107,6 +108,7 @@ def _offset_pocket_moves(
             stepover=step_over,
             stepdown=step_down,
             wall_allowance_mm=wall_allowance_mm,
+            arc_tolerance_mm=arc_tolerance_mm,
         ),
     ]
 

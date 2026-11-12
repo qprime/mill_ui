@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from cam.planner.passes.tools import ToolSelection
 
 
-_EDGE_TYPES = frozenset({"bevel", "chamfer", "roundover"})
+_EDGE_TYPES = frozenset({"bevel", "chamfer", "roundover", "raised_panel"})
 
 
 @dataclass(frozen=True)
@@ -46,6 +46,7 @@ FEATURE_LAYER: dict[str, str] = {
     "engrave": "ENGRAVE_PATHS",
     "heightfield": "HEIGHTFIELD_OVERLAYS",
     "bevel": "BEVEL_CUTS",
+    "raised_panel": "BEVEL_CUTS",
     "chamfer": "CHAMFER_CUTS",
     "roundover": "ROUNDOVER_CUTS",
 }
@@ -156,7 +157,7 @@ def layoutast_to_diagram_ir(
             if target_layer:
                 if is_waste and target_layer == "PROFILE_CUTS":
                     target_layer = WASTE_LAYER
-                layer_shapes.setdefault(target_layer, []).extend(shapes)
+                _route_feature_shapes(layer_shapes, shapes, target_layer)
 
             if feature_type == "profile" and not is_waste and show_toolpaths and tool_radius > 0:
                 tp_shapes = _build_toolpath_shapes(item, tool_radius, flip_y, margin)
@@ -198,6 +199,12 @@ def layoutast_to_diagram_ir(
         dims=dims,
         metadata=metadata,
     )
+
+
+def _route_feature_shapes(layer_shapes: dict[str, list[Shape]], shapes: Sequence[Shape], target_layer: str) -> None:
+    for shape in shapes:
+        shape_layer = FEATURE_LAYER.get(shape.style_token, target_layer)
+        layer_shapes.setdefault(shape_layer, []).append(shape)
 
 
 def _edge_intent_map(intents: Sequence[RemovalIntent] | None) -> Mapping[tuple[str, str], RemovalIntent] | None:
@@ -275,7 +282,7 @@ def _drawing_context(
     return _DrawingContext(flip_y, margin, shape_id, edge_plan=plan, requested_depth_mm=depth)
 
 
-@register_feature("bevel", "chamfer", "roundover")
+@register_feature("bevel", "chamfer", "roundover", "raised_panel")
 def _handle_edge(item: Item, style_token: str, context: _DrawingContext) -> list[Shape]:
     if item.placement is None or item.geometry is None or item.feature is None:
         return []
@@ -283,13 +290,27 @@ def _handle_edge(item: Item, style_token: str, context: _DrawingContext) -> list
     if plan is None:
         shapes = _item_to_shapes(item, "edge-unplanned", context.flip_y, context.margin_mm)
         x, y = item.placement.center_xy_mm
-        label = f"{item.feature.type.capitalize()} unplanned"
+        label = f"{item.feature.type.replace('_', ' ').capitalize()} unplanned"
     else:
         points = tuple(Point2D(context.margin_mm + p.x, context.flip_y(p.y)) for p in plan.shape.points)
         shapes = [Polyline(points=points, closed=True, style_token=style_token, id=f"{context.shape_id}_edge_cut")]
+        for index, pocket in enumerate(plan.pockets):
+            shapes.extend(
+                _region_path(
+                    pocket.region, "pocket", f"{context.shape_id}_pocket_{index}", context.flip_y, context.margin_mm
+                )
+            )
         xs, ys = [p.x for p in plan.shape.points], [p.y for p in plan.shape.points]
         x, y = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
-        label = f"{item.feature.type.capitalize()} {plan.depth_mm:.3f}mm"
+        label = f"{item.feature.type.replace('_', ' ').capitalize()} {plan.depth_mm:.3f}mm"
+        spec = item.feature.raised_panel
+        if spec is not None:
+            label = f"V {spec.v_angle_deg:g}° / {plan.depth_mm:g}mm"
+            field_label = f"Field {spec.field_depth_mm:g}mm" if spec.field_depth_mm > 0 else "Field unchanged"
+            y += 8
+            shapes.append(
+                Text(x=context.margin_mm + x, y=context.flip_y(y - 16), content=field_label, style_token="edge-label")
+            )
     shapes.append(
         Text(
             x=context.margin_mm + x,
@@ -303,6 +324,8 @@ def _handle_edge(item: Item, style_token: str, context: _DrawingContext) -> list
 
 
 def _get_style_token(feature_type: str, is_waste: bool) -> str:
+    if feature_type == "raised_panel":
+        return "bevel"
     if feature_type == "profile":
         return "waste" if is_waste else "profile"
     return feature_type

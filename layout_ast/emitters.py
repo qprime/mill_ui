@@ -156,6 +156,8 @@ def _feature_to_dict(feature: Feature) -> dict[str, Any]:
         data["dogbone"] = _dogbone_to_dict(feature.dogbone)
     if feature.rest is not None:
         data["rest"] = _rest_to_dict(feature.rest)
+    if feature.raised_panel is not None:
+        data["raised_panel"] = feature.raised_panel.to_dict()
     _feature_optional_fields(feature, data)
     if feature.feeds_override is not None:
         feeds_dict = _feeds_override_to_dict(feature.feeds_override)

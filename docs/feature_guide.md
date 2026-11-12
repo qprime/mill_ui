@@ -176,9 +176,9 @@ Spec: [pml/syntax_spec.md#roundover](../pml/syntax_spec.md#roundover)
 
 Recipes: [edge_treatments](recipes/panels/edge_treatments/)
 
-### Raised-panel bevel
+### Raised-panel profiles
 
-A bevelled border around a raised field.
+Flat gutters with V-bit slopes, V-grooves with pocketed fields, and plain V-grooves.
 
 Spec: [pml/syntax_spec.md#raisedpanel](../pml/syntax_spec.md#raisedpanel)
 

@@ -17,6 +17,7 @@ from core.constants import (
 )
 from core.geometry import chamfer_included_angle, engraving_paths, extract_shape_geometry, pocket_region, polygon_region
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
+from layout_ast.raised_panel import RaisedPanelSpec
 from validation.core import ValidationResult
 
 _WEB_TOLERANCE_MM = 1e-6
@@ -179,6 +180,14 @@ def check_edge_feature(  # noqa: C901 — edge validation dispatcher
                 sheet_thickness_mm=sheet_thickness_mm,
             )
 
+    if isinstance(spec, RaisedPanelSpec) and spec.border_depth_mm >= sheet_thickness_mm:
+        result.add_error(
+            f"RaisedPanel border depth ({spec.border_depth_mm:.2f}mm) must be less than sheet thickness ({sheet_thickness_mm:.2f}mm)",
+            region_id=intent.region_id,
+            border_depth_mm=spec.border_depth_mm,
+            sheet_thickness_mm=sheet_thickness_mm,
+        )
+
     if available_v_angles is not None and len(available_v_angles) > 0 and isinstance(spec, (BevelSpec, ChamferSpec)):
         desired_included = (
             chamfer_included_angle(spec.angle_deg) if isinstance(spec, ChamferSpec) else spec.angle_deg * 2.0
@@ -335,13 +344,28 @@ def _is_nested_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
 
 
 def _is_compatible_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
-    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.CHAMFER, FeatureType.ROUNDOVER))
+    match = _match_feature_types(
+        a, b, FeatureType.PROFILE, (FeatureType.CHAMFER, FeatureType.ROUNDOVER, FeatureType.RAISED_PANEL)
+    )
     if match is None:
         return False
     profile, edge = match
     if profile.side not in ("inside", "outside") or profile.depth_profile.z_top != 0 or edge.depth_profile.z_top != 0:
         return False
     spec = edge.edge_feature
+    if isinstance(spec, RaisedPanelSpec):
+        outer = _profile_containment_region(profile)
+        inner = _profile_containment_region(edge)
+        return (
+            profile.side == "outside"
+            and edge.depth_mm() < profile.depth_mm() - _OVERLAP_CLEARANCE_TOLERANCE_MM
+            and outer is not None
+            and inner is not None
+            and outer.is_valid
+            and inner.is_valid
+            and outer.contains(inner)
+            and outer.boundary.distance(inner) > _OVERLAP_CLEARANCE_TOLERANCE_MM
+        )
     if not isinstance(spec, (ChamferSpec, RoundoverSpec)):
         return False
     if isinstance(spec, ChamferSpec) and (spec.width_mm <= 0 or not 0 < spec.angle_deg < 90):

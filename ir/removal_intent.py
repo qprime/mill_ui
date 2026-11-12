@@ -5,6 +5,7 @@ from typing import Any
 
 from domains.domain import Bounds2D
 from layout_ast.layout import DogboneSpec, FeedsOverride, RestSpec
+from layout_ast.raised_panel import RaisedPanelSpec
 
 
 @dataclass(frozen=True)
@@ -46,7 +47,7 @@ class RoundoverSpec:
         }
 
 
-EdgeFeatureSpec = BevelSpec | ChamferSpec | RoundoverSpec
+EdgeFeatureSpec = BevelSpec | ChamferSpec | RoundoverSpec | RaisedPanelSpec
 
 
 @dataclass(frozen=True)

@@ -34,6 +34,11 @@ The full protocol:
 
 The error-semantics table covers where this is caught. The key convention is: resolver handlers never let `GeneratorSkipError` propagate — they swallow it.
 
+Required RaisedPanel requests are an explicit exception: the resolver uses
+`allow_empty=False` and propagates an impossible field, rather than silently
+omitting requested milling. The programmatic generator keeps the opt-in empty
+result for callers that explicitly allow it.
+
 ## Dispatch Patterns
 
 - **Feature-type dispatch in adapters**: `@register_feature` decorator populates `FEATURE_HANDLERS` dict; handler looked up via `FEATURE_HANDLERS.get(feature_type)`. Layer routing uses `FEATURE_LAYER` dict (feature_type → layer name), with `WASTE_LAYER` override for waste items. Both registries live in `adapters/layoutast_to_ir.py`. New feature types can pass `layer=` to `@register_feature` to register both handler and layer in one call.
@@ -152,6 +157,12 @@ edge G-code generation and blueprint adaptation. Blueprint drawing passes throug
 RemovalIntent, honors the caller's intents/tool set, and marks failed requests as
 unplanned references. Keep planner geometry out of semantic Feature/RemovalIntent
 fields; the computed plan belongs to the planner and drawing context.
+
+RaisedPanel extends this shared plan with typed `PocketCutPlan` entries for its
+gutter/field. `RaisedPanelSpec` lives in the dependency-light `layout_ast` package
+and stores only profile dimensions and included angle. Computed Shapely regions
+remain in the planner. Reuse offset-pocket and closed-profile operations for the
+actual moves; do not introduce a second relief/surface implementation.
 
 ## Test Organization
 

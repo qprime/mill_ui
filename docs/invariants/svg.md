@@ -68,6 +68,12 @@ the current planner's contour and depth, not a verified 3D finished surface.
 Existing edge-machining geometry errors must stay visible until fixed separately.
 Diagram bounds may expand to show a problematic plan without relaxing CAM checks.
 
+RaisedPanel uses that same compound edge plan: flat-pocket regions enter
+POCKET_REGIONS and its V-tip contour enters BEVEL_CUTS, with angle/depth and
+field-height labels. Region fills preserve holes and draw beneath centerlines.
+They describe intended clearing regions, not finite-cutter corner coverage;
+actual-NC cross-sections and footprint proofs document that separately.
+
 Defined in `adapters/layoutast_to_ir.py`:
 
 | Feature Type | DiagramIR Layer |
@@ -77,6 +83,7 @@ Defined in `adapters/layoutast_to_ir.py`:
 | hole | HOLES |
 | engrave | ENGRAVE_PATHS |
 | bevel | BEVEL_CUTS |
+| raised_panel | BEVEL_CUTS and POCKET_REGIONS |
 | chamfer | CHAMFER_CUTS |
 | roundover | ROUNDOVER_CUTS |
 | Unmachinable edge request | UNPLANNED_EDGES |

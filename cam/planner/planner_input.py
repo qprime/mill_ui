@@ -468,6 +468,7 @@ class PlannerInput:
 
         def parse_edge_feature_input(ef: dict[str, Any]) -> EdgeFeatureInput:
             from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec
+            from layout_ast.raised_panel import RaisedPanelSpec
 
             shape = str(ef.get("shape", "Rect"))
             geometry = parse_geometry(ef.get("geometry", {}), shape)
@@ -476,7 +477,9 @@ class PlannerInput:
             edge_feature: EdgeFeatureSpec | None = None
             if isinstance(ef_spec_raw, dict):
                 ef_type = ef_spec_raw.get("type")
-                if ef_type == "bevel":
+                if ef_type == "raised_panel":
+                    edge_feature = RaisedPanelSpec.from_dict(ef_spec_raw)
+                elif ef_type == "bevel":
                     edge_feature = BevelSpec(
                         width_mm=float(ef_spec_raw.get("width_mm", 0.0)),
                         angle_deg=float(ef_spec_raw.get("angle_deg", 45.0)),

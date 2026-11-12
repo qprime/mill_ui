@@ -11,6 +11,7 @@ from generators.core import BaseParams, resolve_major_spacing, resolve_minor_spa
 from generators.params.measurement_base import MeasurementParamsBase
 from generators.radial_utils import closest_pair_distance, spiral_positions
 from layout_ast.layout import RestSpec
+from layout_ast.raised_panel import RaisedPanelSpec
 
 _SPIRAL_TOLERANCE_MM = 1e-9
 
@@ -49,25 +50,19 @@ class GridParams(BaseParams):
 
 @dataclass(frozen=True)
 class RaisedPanelParams(BaseParams):
-    border_width_mm: float
+    border_width_mm: float | None
     border_depth_mm: float
     field_depth_mm: float
-    angle_degrees: float = 15.0
+    profile: Literal["gutter", "v_groove"] = "gutter"
+    v_angle_deg: float = 90.0
 
     def __post_init__(self) -> None:
-        if self.border_width_mm <= 0:
-            raise ValueError(f"RaisedPanelParams: border_width_mm must be positive, got {self.border_width_mm}")
-        if self.border_depth_mm <= 0:
-            raise ValueError(f"RaisedPanelParams: border_depth_mm must be positive, got {self.border_depth_mm}")
-        if self.field_depth_mm < 0:
-            raise ValueError(f"RaisedPanelParams: field_depth_mm must be non-negative, got {self.field_depth_mm}")
-        if self.field_depth_mm >= self.border_depth_mm:
-            raise ValueError(
-                f"RaisedPanelParams: field_depth_mm ({self.field_depth_mm}) must be less than "
-                f"border_depth_mm ({self.border_depth_mm}) for raised effect"
-            )
-        if self.angle_degrees <= 0 or self.angle_degrees >= 90:
-            raise ValueError(f"RaisedPanelParams: angle_degrees must be between 0 and 90, got {self.angle_degrees}")
+        self.to_spec()
+
+    def to_spec(self) -> RaisedPanelSpec:
+        return RaisedPanelSpec(
+            self.border_depth_mm, self.field_depth_mm, self.border_width_mm, self.profile, self.v_angle_deg
+        )
 
 
 @dataclass(frozen=True)

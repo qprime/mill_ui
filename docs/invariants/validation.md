@@ -83,7 +83,16 @@ the retained side. For a chamfer on a distinct inner outline, its expanded
 width envelope must remain strictly inside the containing outside profile.
 Use actual Rect/Polygon geometry and leave missing-tool errors to the required
 edge planner. Nonzero starting surfaces, full-depth edges, modified boundaries,
-unproven containment and Bevel/RaisedPanel features retain existing checks.
+unproven containment and Bevel features retain existing checks.
+
+A compound RaisedPanel can coexist with a deeper outside profile only when
+its whole actual cell is strictly contained in the profile's valid Rect/Polygon
+outline, with positive boundary clearance. Its planner separately proves that
+cutting stays inside the cell. Inside profiles, touching/crossing outlines,
+full-depth cuts, nonzero starts and modified boundaries retain overlap reports.
+This is a geometry rule, not a recipe-name or region-ID waiver.
+RaisedPanel border depth must remain below stock thickness; a through recess
+is a hard error.
 
 A circular hole may continue through a pocket floor when both features have
 constant depth, start at the original surface and the hole ends strictly below
@@ -117,7 +126,9 @@ combined depth may not exceed `thickness − min_web`, or the two cuts break
 through into each other. `check_cross_face_web` enforces this, erroring
 strictly beyond the budget — equality passes.
 
-Only area features participate (pocket, hole, engrave). Profiles are excluded:
+Only area features participate (pocket, hole, engrave, raised_panel). Raised-panel
+cells conservatively use their maximum border depth over the cell bounds.
+Profiles are excluded:
 their bounds cover the whole part and would flag every job that has any back
 feature at all. `min_web: 0` on the Sheet disables the check.
 

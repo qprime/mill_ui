@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1273.175 975.175" width="1273.1750000000002mm" height="975.175mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1273.175 963.175" width="1273.1750000000002mm" height="963.175mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="1273.1750000000002" height="975.175" fill="#1a1a1a" />
+  <rect x="-21.5875" y="-61.5875" width="1273.1750000000002" height="963.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="1100.000" height="800.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="1100.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
@@ -58,73 +58,44 @@
     <path d="M 593.413 751.587 L 1046.588 751.587 L 1046.588 223.413 L 996.526 223.413 L 996.044 211.145 L 994.415 197.375 L 991.710 183.776 L 987.946 170.431 L 983.147 157.422 L 977.342 144.830 L 970.567 132.733 L 962.863 121.204 L 954.279 110.315 L 944.867 100.133 L 934.685 90.721 L 923.796 82.137 L 912.267 74.433 L 900.170 67.658 L 887.578 61.853 L 874.569 57.054 L 861.224 53.290 L 847.625 50.585 L 833.855 48.956 L 820.000 48.411 L 806.145 48.956 L 792.375 50.585 L 778.776 53.290 L 765.431 57.054 L 752.422 61.853 L 739.830 67.658 L 727.733 74.433 L 716.204 82.137 L 705.315 90.721 L 695.133 100.133 L 685.721 110.315 L 677.137 121.204 L 669.433 132.733 L 662.658 144.830 L 656.853 157.422 L 652.054 170.431 L 648.290 183.776 L 645.585 197.375 L 643.956 211.145 L 643.474 223.413 L 593.413 223.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_5_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 140.000 665.000 L 230.000 665.000 L 230.000 450.000 L 140.000 450.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_1_field" />
-    <path d="M 330.000 665.000 L 420.000 665.000 L 420.000 450.000 L 330.000 450.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_2_field" />
-    <path d="M 140.000 350.000 L 230.000 350.000 L 230.000 135.000 L 140.000 135.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_3_field" />
-    <path d="M 330.000 350.000 L 420.000 350.000 L 420.000 135.000 L 330.000 135.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_raised_panel_4_field" />
-    <path d="M 680.000 665.000 L 960.000 665.000 L 960.000 310.000 L 913.274 310.000 L 909.657 217.944 L 908.827 210.931 L 907.450 204.005 L 905.533 197.209 L 903.089 190.584 L 900.132 184.171 L 896.682 178.009 L 892.758 172.138 L 888.387 166.592 L 883.593 161.407 L 878.408 156.613 L 872.862 152.242 L 866.991 148.318 L 860.829 144.868 L 854.416 141.911 L 847.791 139.467 L 840.995 137.550 L 834.069 136.173 L 827.056 135.343 L 820.000 135.066 L 812.944 135.343 L 805.931 136.173 L 799.005 137.550 L 792.209 139.467 L 785.584 141.911 L 779.171 144.868 L 773.009 148.318 L 767.138 152.242 L 761.592 156.613 L 756.407 161.407 L 751.613 166.592 L 747.242 172.138 L 743.318 178.009 L 739.868 184.171 L 736.911 190.584 L 734.467 197.209 L 732.550 204.005 L 731.173 210.931 L 730.343 217.944 L 726.726 310.000 L 680.000 310.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_arch_raised_panel_6_field" />
+    <path d="M 115.000 425.000 L 255.000 425.000 L 255.000 690.000 L 115.000 690.000 Z M 234.000 669.000 L 234.000 446.000 L 136.000 446.000 L 136.000 669.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_1_panel_pocket_0" />
+    <path d="M 140.000 665.000 L 140.000 450.000 L 230.000 450.000 L 230.000 665.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_1_panel_pocket_1" />
+    <path d="M 305.000 425.000 L 445.000 425.000 L 445.000 690.000 L 305.000 690.000 Z M 422.309 667.309 L 422.309 447.691 L 327.691 447.691 L 327.691 667.309 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_2_panel_pocket_0" />
+    <path d="M 330.000 665.000 L 330.000 450.000 L 420.000 450.000 L 420.000 665.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_2_panel_pocket_1" />
+    <path d="M 310.774 369.226 L 310.774 115.774 L 439.226 115.774 L 439.226 369.226 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_4_panel_pocket_0" />
+    <path d="M 655.000 285.000 L 702.689 285.000 L 705.401 215.981 L 706.462 207.017 L 708.222 198.165 L 710.673 189.477 L 713.797 181.009 L 717.575 172.812 L 721.986 164.937 L 727.000 157.432 L 732.589 150.344 L 738.715 143.715 L 745.344 137.589 L 752.432 132.000 L 759.937 126.986 L 767.812 122.575 L 776.009 118.797 L 784.477 115.673 L 793.165 113.222 L 802.017 111.462 L 810.981 110.401 L 820.000 110.046 L 829.019 110.401 L 837.983 111.462 L 846.835 113.222 L 855.523 115.673 L 863.991 118.797 L 872.188 122.575 L 880.063 126.986 L 887.568 132.000 L 894.656 137.589 L 901.285 143.715 L 907.411 150.344 L 913.000 157.432 L 918.014 164.937 L 922.425 172.812 L 926.203 181.009 L 929.327 189.477 L 931.778 198.165 L 933.538 207.017 L 934.599 215.981 L 937.311 285.000 L 985.000 285.000 L 985.000 690.000 L 655.000 690.000 Z M 964.000 669.000 L 964.000 306.000 L 917.120 306.000 L 913.648 217.630 L 912.781 210.305 L 911.342 203.071 L 909.340 195.972 L 906.787 189.052 L 903.699 182.353 L 900.095 175.918 L 895.997 169.785 L 891.431 163.992 L 886.424 158.576 L 881.008 153.569 L 875.215 149.003 L 869.082 144.905 L 862.647 141.301 L 855.948 138.213 L 849.028 135.660 L 841.929 133.658 L 834.695 132.219 L 827.370 131.352 L 820.000 131.062 L 812.630 131.352 L 805.305 132.219 L 798.071 133.658 L 790.972 135.660 L 784.052 138.213 L 777.353 141.301 L 770.918 144.905 L 764.785 149.003 L 758.992 153.569 L 753.576 158.576 L 748.569 163.992 L 744.003 169.785 L 739.905 175.918 L 736.301 182.353 L 733.213 189.052 L 730.660 195.972 L 728.658 203.071 L 727.219 210.305 L 726.352 217.630 L 722.880 306.000 L 676.000 306.000 L 676.000 669.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_6_panel_pocket_0" />
+    <path d="M 680.000 665.000 L 680.000 310.000 L 726.726 310.000 L 730.343 217.944 L 731.173 210.931 L 732.550 204.005 L 734.467 197.209 L 736.911 190.584 L 739.868 184.171 L 743.318 178.009 L 747.242 172.138 L 751.613 166.592 L 756.407 161.407 L 761.592 156.613 L 767.138 152.242 L 773.009 148.318 L 779.171 144.868 L 785.584 141.911 L 792.209 139.467 L 799.005 137.550 L 805.931 136.173 L 812.944 135.343 L 820.000 135.066 L 827.056 135.343 L 834.069 136.173 L 840.995 137.550 L 847.791 139.467 L 854.416 141.911 L 860.829 144.868 L 866.991 148.318 L 872.862 152.242 L 878.408 156.613 L 883.593 161.407 L 888.387 166.592 L 892.758 172.138 L 896.682 178.009 L 900.132 184.171 L 903.089 190.584 L 905.533 197.209 L 907.450 204.005 L 908.827 210.931 L 909.657 217.944 L 913.274 310.000 L 960.000 310.000 L 960.000 665.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_raised_panel_6_panel_pocket_1" />
   </g>
   <g id="BEVEL_CUTS" class="bevel-cuts">
-    <path d="M 111.132 693.868 L 258.868 693.868 L 258.868 421.132 L 111.132 421.132 L 111.132 693.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_1_border_edge_cut" />
-    <text x="185.000" y="557.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_1_border_edge_depth">Bevel 6.699mm</text>
-    <path d="M 301.132 693.868 L 448.868 693.868 L 448.868 421.132 L 301.132 421.132 L 301.132 693.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_2_border_edge_cut" />
-    <text x="375.000" y="557.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_2_border_edge_depth">Bevel 6.699mm</text>
-    <path d="M 111.132 378.868 L 258.868 378.868 L 258.868 106.132 L 111.132 106.132 L 111.132 378.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_3_border_edge_cut" />
-    <text x="185.000" y="242.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_3_border_edge_depth">Bevel 6.699mm</text>
-    <path d="M 301.132 378.868 L 448.868 378.868 L 448.868 106.132 L 301.132 106.132 L 301.132 378.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_4_border_edge_cut" />
-    <text x="375.000" y="242.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_4_border_edge_depth">Bevel 6.699mm</text>
-    <path d="M 651.132 693.868 L 988.868 693.868 L 988.868 281.132 L 941.030 281.132 L 938.458 215.677 L 937.361 206.412 L 935.541 197.261 L 933.009 188.281 L 929.779 179.528 L 925.873 171.055 L 921.314 162.915 L 916.131 155.157 L 910.355 147.830 L 904.021 140.979 L 897.170 134.645 L 889.843 128.869 L 882.085 123.686 L 873.945 119.127 L 865.472 115.221 L 856.719 111.991 L 847.739 109.459 L 838.588 107.639 L 829.323 106.542 L 820.000 106.176 L 810.677 106.542 L 801.412 107.639 L 792.261 109.459 L 783.281 111.991 L 774.528 115.221 L 766.055 119.127 L 757.915 123.686 L 750.157 128.869 L 742.830 134.645 L 735.979 140.979 L 729.645 147.830 L 723.869 155.157 L 718.686 162.915 L 714.127 171.055 L 710.221 179.528 L 706.991 188.281 L 704.459 197.261 L 702.639 206.412 L 701.542 215.677 L 698.970 281.132 L 651.132 281.132 L 651.132 693.868 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_arch_raised_panel_6_border_edge_cut" />
-    <text x="820.000" y="400.022" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_arch_raised_panel_6_border_edge_depth">Bevel 6.699mm</text>
+    <path d="M 136.000 669.000 L 136.000 446.000 L 234.000 446.000 L 234.000 669.000 L 136.000 669.000 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_1_panel_edge_cut" />
+    <text x="185.000" y="565.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px">Field 2mm</text>
+    <text x="185.000" y="549.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_1_panel_edge_depth">V 90° / 6mm</text>
+    <path d="M 327.691 667.309 L 327.691 447.691 L 422.309 447.691 L 422.309 667.309 L 327.691 667.309 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_2_panel_edge_cut" />
+    <text x="375.000" y="565.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px">Field 2mm</text>
+    <text x="375.000" y="549.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_2_panel_edge_depth">V 60° / 6mm</text>
+    <path d="M 121.000 369.000 L 121.000 116.000 L 249.000 116.000 L 249.000 369.000 L 121.000 369.000 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_3_panel_edge_cut" />
+    <text x="185.000" y="250.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px">Field unchanged</text>
+    <text x="185.000" y="234.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_3_panel_edge_depth">V 90° / 6mm</text>
+    <path d="M 308.464 371.536 L 308.464 113.464 L 441.536 113.464 L 441.536 371.536 L 308.464 371.536 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_4_panel_edge_cut" />
+    <text x="375.000" y="250.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px">Field 2mm</text>
+    <text x="375.000" y="234.500" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_4_panel_edge_depth">V 60° / 6mm</text>
+    <path d="M 676.000 669.000 L 676.000 306.000 L 722.880 306.000 L 726.352 217.630 L 727.219 210.305 L 728.658 203.071 L 730.660 195.972 L 733.213 189.052 L 736.301 182.353 L 739.905 175.918 L 744.003 169.785 L 748.569 163.992 L 753.576 158.576 L 758.992 153.569 L 764.785 149.003 L 770.918 144.905 L 777.353 141.301 L 784.052 138.213 L 790.972 135.660 L 798.071 133.658 L 805.305 132.219 L 812.630 131.352 L 820.000 131.062 L 827.370 131.352 L 834.695 132.219 L 841.929 133.658 L 849.028 135.660 L 855.948 138.213 L 862.647 141.301 L 869.082 144.905 L 875.215 149.003 L 881.008 153.569 L 886.424 158.576 L 891.431 163.992 L 895.997 169.785 L 900.095 175.918 L 903.699 182.353 L 906.787 189.052 L 909.340 195.972 L 911.342 203.071 L 912.781 210.305 L 913.648 217.630 L 917.120 306.000 L 964.000 306.000 L 964.000 669.000 L 676.000 669.000 Z" stroke="#ffb454" fill="none" stroke-width="1.5" id="generated_raised_panel_6_panel_edge_cut" />
+    <text x="820.000" y="408.031" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px">Field 2mm</text>
+    <text x="820.000" y="392.031" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_raised_panel_6_panel_edge_depth">V 90° / 6mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="680.0" y1="135.06558248125486" x2="680.0" y2="115.06558248125486" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="960.0" y1="135.06558248125486" x2="960.0" y2="115.06558248125486" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="680.0" y1="115.06558248125486" x2="960.0" y2="115.06558248125486" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="680.0,115.06558248125486 683.0,112.06558248125486 683.0,118.06558248125486" fill="#5ab9ea" />
-    <polygon points="960.0,115.06558248125486 957.0,112.06558248125486 957.0,118.06558248125486" fill="#5ab9ea" />
-    <text x="820.0" y="110.06558248125486" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">280.0mm</text>
-    <line x1="960.0" y1="135.06558248125486" x2="980.0" y2="135.06558248125486" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="960.0" y1="665.0" x2="980.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="980.0" y1="135.06558248125486" x2="980.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="980.0,135.06558248125486 977.0,138.06558248125486 983.0,138.06558248125486" fill="#5ab9ea" />
-    <polygon points="980.0,665.0 977.0,662.0 983.0,662.0" fill="#5ab9ea" />
-    <text x="985.0" y="400.03279124062743" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 985.0 400.03279124062743)" fill="#5ab9ea" font-family="monospace" font-size="10px">529.9mm</text>
-    <line x1="960.0" y1="310.0" x2="1000.0" y2="310.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="960.0" y1="665.0" x2="1000.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="1000.0" y1="310.0" x2="1000.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="1000.0,310.0 997.0,313.0 1003.0,313.0" fill="#5ab9ea" />
-    <polygon points="1000.0,665.0 997.0,662.0 1003.0,662.0" fill="#5ab9ea" />
-    <text x="1005.0" y="487.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 1005.0 487.5)" fill="#5ab9ea" font-family="monospace" font-size="10px">355.0mm</text>
-    <line x1="913.274076614397" y1="310.0" x2="913.274076614397" y2="270.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="960.0" y1="310.0" x2="960.0" y2="270.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="913.274076614397" y1="270.0" x2="960.0" y2="270.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="913.274076614397,270.0 916.274076614397,267.0 916.274076614397,273.0" fill="#5ab9ea" />
-    <polygon points="960.0,270.0 957.0,267.0 957.0,273.0" fill="#5ab9ea" />
-    <text x="936.6370383071985" y="265.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">46.7mm</text>
-    <line x1="140.0" y1="450.0" x2="140.0" y2="430.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="230.0" y1="450.0" x2="230.0" y2="430.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="140.0" y1="430.0" x2="230.0" y2="430.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="140.0,430.0 143.0,427.0 143.0,433.0" fill="#5ab9ea" />
-    <polygon points="230.0,430.0 227.0,427.0 227.0,433.0" fill="#5ab9ea" />
-    <text x="185.0" y="425.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">90.0mm</text>
-    <line x1="230.0" y1="450.0" x2="290.0" y2="450.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="230.0" y1="665.0" x2="290.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="290.0" y1="450.0" x2="290.0" y2="665.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="290.0,450.0 287.0,453.0 293.0,453.0" fill="#5ab9ea" />
-    <polygon points="290.0,665.0 287.0,662.0 293.0,662.0" fill="#5ab9ea" />
-    <text x="295.0" y="557.5" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 295.0 557.5)" fill="#5ab9ea" font-family="monospace" font-size="10px">215.0mm</text>
-    <line x1="55.0" y1="50.0" x2="55.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="505.0" y1="50.0" x2="505.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="55.0" y1="10.0" x2="505.0" y2="10.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="55.0,10.0 58.0,7.0 58.0,13.0" fill="#5ab9ea" />
-    <polygon points="505.0,10.0 502.0,7.0 502.0,13.0" fill="#5ab9ea" />
-    <text x="280.0" y="5.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">450.0mm</text>
-    <line x1="505.0" y1="50.0" x2="585.0" y2="50.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="505.0" y1="750.0" x2="585.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="585.0" y1="50.0" x2="585.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="585.0,50.0 582.0,53.0 588.0,53.0" fill="#5ab9ea" />
-    <polygon points="585.0,750.0 582.0,747.0 588.0,747.0" fill="#5ab9ea" />
-    <text x="590.0" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 590.0 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">700.0mm</text>
+    <line x1="55.0" y1="50.0" x2="55.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="505.0" y1="50.0" x2="505.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="55.0" y1="30.0" x2="505.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="55.0,30.0 58.0,27.0 58.0,33.0" fill="#5ab9ea" />
+    <polygon points="505.0,30.0 502.0,27.0 502.0,33.0" fill="#5ab9ea" />
+    <text x="280.0" y="25.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">450.0mm</text>
+    <line x1="505.0" y1="50.0" x2="525.0" y2="50.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="505.0" y1="750.0" x2="525.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="525.0" y1="50.0" x2="525.0" y2="750.0" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="525.0,50.0 522.0,53.0 528.0,53.0" fill="#5ab9ea" />
+    <polygon points="525.0,750.0 522.0,747.0 528.0,747.0" fill="#5ab9ea" />
+    <text x="530.0" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 530.0 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">700.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
@@ -148,9 +119,8 @@
   <g id="NOTES" class="notes">
     <text x="20.0" y="831.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="843.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1100.0 × 800.0 × 19.0mm</text>
-    <text x="20.0" y="855.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 5 bevels, 5 pockets, 2 profiles</text>
+    <text x="20.0" y="855.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 2 profiles, 5 raised_panels</text>
     <text x="20.0" y="867.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="879.5875" fill="#cccccc" font-family="monospace" font-size="10px">• bevel: 6.699mm</text>
-    <text x="30.0" y="891.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 2.0mm</text>
+    <text x="30.0" y="879.5875" fill="#cccccc" font-family="monospace" font-size="10px">• raised_panel: 6.000mm</text>
   </g>
 </svg>

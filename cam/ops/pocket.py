@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 
 import shapely
@@ -63,13 +64,20 @@ def pocket_offset_loops(
     stepover: float,
     stepdown: float,
     wall_allowance_mm: float = 0.0,
+    arc_tolerance_mm: float | None = None,
 ) -> list[Move]:
+    if arc_tolerance_mm is not None and (not math.isfinite(arc_tolerance_mm) or arc_tolerance_mm <= 0):
+        raise ValueError("Pocket arc tolerance must be finite and positive")
     tool_radius = float(setup.tool.diameter) / 2.0
     step = min(float(stepover), tool_radius)
     moves: list[Move] = []
     level = 0
     while True:
-        offset_region = region.buffer(-(tool_radius + wall_allowance_mm + level * step), join_style="round")
+        inset = tool_radius + wall_allowance_mm + level * step
+        segments = 16
+        if arc_tolerance_mm is not None and inset > arc_tolerance_mm:
+            segments = max(segments, math.ceil(math.pi / (4 * math.acos(1 - arc_tolerance_mm / inset))))
+        offset_region = region.buffer(-inset, quad_segs=segments, join_style="round")
         if offset_region.is_empty:
             return moves
         moves += _contour_moves(offset_region, setup, depth_mm=depth_mm, stepdown=stepdown)

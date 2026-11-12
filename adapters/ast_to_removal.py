@@ -157,6 +157,16 @@ def _dispatch_feature_intent(  # noqa: C901 — feature-type dispatcher
         intent = heightfield_hint_to_removal_intent(hint)
         return replace(intent, item_type=item.type, feature_type=item.feature.type, shape_id=item.shape_id)
 
+    elif item.feature.type == FeatureType.RAISED_PANEL:
+        spec = item.feature.raised_panel
+        return _build_edge_feature_intent(
+            hint,
+            item,
+            FeatureType.RAISED_PANEL,
+            spec.border_depth_mm if spec is not None else _resolve_depth(item.feature, sheet_thickness_mm),
+            edge_feature=spec,
+        )
+
     elif item.feature.type == FeatureType.BEVEL:
         bevel_width = item.feature.bevel_width_mm or 0.0
         bevel_angle = item.feature.bevel_angle_deg or 45.0

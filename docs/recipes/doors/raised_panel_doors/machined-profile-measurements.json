@@ -1,0 +1,114 @@
+{
+  "baseline_commit": "f9bcbffd804e284d28e6ae9dee11d09dec4ff215",
+  "nc_sha256": {
+    "pocket_offset-12.70mm.nc": "583102ffaf9a8cd0ea601b6da67994b0736b8236f636485d96984425a624928a",
+    "edge-12.70mm-60deg.nc": "cb321eda11793230e6f85a63350aff1c83fae84aa0632d06ed6d80a3cde4ae02",
+    "profile-3.17mm.nc": "424ba2af82d0d2ba1698385f76702b5335ff12e52f5e23fbceebd54bc4318483",
+    "edge-12.70mm-90deg.nc": "4275d4cc45abadc6386be1f40dcb6852244cbc10eb07172e90a4e9dfc1b81427"
+  },
+  "source_pml_sha256": "c7af6767f6dc9d39ccabfe6a002f416da2627c7dd0ac487501369cec95ebaf5e",
+  "rounding_tolerance_mm": 0.004,
+  "surface_definition": "Ideal flat gutter/field plus matching V-bit swept along the planned contour; finite cutter corner remnants are measured separately.",
+  "surface_sample_pitch_mm": 1,
+  "profile_sample_pitch_mm": 0.025,
+  "cells": [
+    {
+      "id": "raised_panel_generated_raised_panel_1_panel",
+      "profile": "gutter",
+      "v_angle_deg": 90.0,
+      "border_depth_mm": 6,
+      "field_depth_mm": 2.0,
+      "field_inset_mm": 25.0,
+      "groove_inset_mm": 21.0,
+      "profile_max_error_mm": 1.1102230246251565e-14,
+      "surface_samples": 37100,
+      "max_sampled_overcut_mm": 4.440892098500626e-16,
+      "max_corner_residual_mm": 6.0,
+      "residual_over_0_05_mm_sample_count": 64,
+      "measured_center_depth_mm": 2.0,
+      "max_measured_depth_mm": 6.0
+    },
+    {
+      "id": "raised_panel_generated_raised_panel_2_panel",
+      "profile": "gutter",
+      "v_angle_deg": 60.0,
+      "border_depth_mm": 6,
+      "field_depth_mm": 2.0,
+      "field_inset_mm": 25.0,
+      "groove_inset_mm": 22.690598923241495,
+      "profile_max_error_mm": 0.0006946853234577333,
+      "surface_samples": 37100,
+      "max_sampled_overcut_mm": 0.0006946853234701678,
+      "max_corner_residual_mm": 6.0,
+      "residual_over_0_05_mm_sample_count": 64,
+      "measured_center_depth_mm": 2.0,
+      "max_measured_depth_mm": 6.0
+    },
+    {
+      "id": "raised_panel_generated_raised_panel_3_panel",
+      "profile": "v_groove",
+      "v_angle_deg": 90.0,
+      "border_depth_mm": 6,
+      "field_depth_mm": 0.0,
+      "field_inset_mm": 11.999999999999998,
+      "groove_inset_mm": 5.999999999999999,
+      "profile_max_error_mm": 1.3322676295501878e-14,
+      "surface_samples": 37100,
+      "max_sampled_overcut_mm": 0.0,
+      "max_corner_residual_mm": 0.0,
+      "residual_over_0_05_mm_sample_count": 0,
+      "measured_center_depth_mm": 0.0,
+      "max_measured_depth_mm": 5.5
+    },
+    {
+      "id": "raised_panel_generated_raised_panel_4_panel",
+      "profile": "v_groove",
+      "v_angle_deg": 60.0,
+      "border_depth_mm": 6,
+      "field_depth_mm": 2.0,
+      "field_inset_mm": 5.773502691896257,
+      "groove_inset_mm": 3.4641016151377544,
+      "profile_max_error_mm": 0.00017600258145078485,
+      "surface_samples": 37100,
+      "max_sampled_overcut_mm": 0.0002489052375995726,
+      "max_corner_residual_mm": 2.0,
+      "residual_over_0_05_mm_sample_count": 24,
+      "measured_center_depth_mm": 2.0,
+      "max_measured_depth_mm": 5.937646170927617
+    },
+    {
+      "id": "raised_panel_generated_raised_panel_6_panel",
+      "profile": "gutter",
+      "v_angle_deg": 90.0,
+      "border_depth_mm": 6,
+      "field_depth_mm": 2.0,
+      "field_inset_mm": 25.0,
+      "groove_inset_mm": 21.0,
+      "profile_max_error_mm": 4.6629367034256575e-14,
+      "surface_samples": 168330,
+      "max_sampled_overcut_mm": 7.608771764822109e-05,
+      "max_corner_residual_mm": 6.0,
+      "residual_over_0_05_mm_sample_count": 80,
+      "measured_center_depth_mm": 2.0,
+      "max_measured_depth_mm": 6.0
+    }
+  ],
+  "complete_cutting_footprints": {
+    "pocket_offset-12.70mm.nc": {
+      "all_cutting_depths_checked": true,
+      "maximum_material_cutting_radius_mm": 6.35,
+      "contained_in_cells": true
+    },
+    "edge-12.70mm-90deg.nc": {
+      "all_cutting_depths_checked": true,
+      "maximum_material_cutting_radius_mm": 6,
+      "contained_in_cells": true
+    },
+    "edge-12.70mm-60deg.nc": {
+      "all_cutting_depths_checked": true,
+      "maximum_material_cutting_radius_mm": 3.4641016151377544,
+      "contained_in_cells": true
+    }
+  },
+  "outline_profile_unchanged": true
+}

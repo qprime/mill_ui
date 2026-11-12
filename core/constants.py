@@ -66,6 +66,7 @@ class MetadataKeys:
 
 
 class FeatureType:
+    RAISED_PANEL = "raised_panel"
     PROFILE = "profile"
     POCKET = "pocket"
     HOLE = "hole"
@@ -81,7 +82,7 @@ class FeatureType:
 
 BACK_FACE_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
 BACK_FACE_DEPTH_MODES = ("constant", "v_carve")
-WEB_CHECK_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE)
+WEB_CHECK_FEATURE_TYPES = (FeatureType.POCKET, FeatureType.HOLE, FeatureType.ENGRAVE, FeatureType.RAISED_PANEL)
 BACK_SVG_SUFFIX = ".back.svg"
 RAPID_XY_MM_MIN = 5000.0
 RAPID_Z_MM_MIN = 1000.0

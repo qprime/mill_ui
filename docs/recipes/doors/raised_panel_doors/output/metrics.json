@@ -12,23 +12,28 @@
     }
   },
   "complexity": {
-    "total_moves": 3460,
-    "rapid_moves": 90,
-    "cut_moves": 2983,
-    "rapid_ratio": 0.026
+    "total_moves": 12395,
+    "rapid_moves": 120,
+    "cut_moves": 11763,
+    "rapid_ratio": 0.01
   },
   "fidelity": {
-    "tool_changes": 3,
+    "tool_changes": 4,
     "passes": [
       {
-        "name": "pocket",
+        "name": "pocket_offset",
         "tool_diameter_mm": 12.7,
-        "move_count": 2034
+        "move_count": 11045
       },
       {
         "name": "edge",
         "tool_diameter_mm": 12.7,
-        "move_count": 557
+        "move_count": 387
+      },
+      {
+        "name": "edge",
+        "tool_diameter_mm": 12.7,
+        "move_count": 94
       },
       {
         "name": "profile",
@@ -38,16 +43,20 @@
     ]
   },
   "output_size": {
-    "total_bytes": 92437,
-    "total_lines": 3282,
+    "total_bytes": 351148,
+    "total_lines": 12198,
     "files": {
-      "pocket-12.70mm": {
-        "bytes": 53584,
-        "lines": 1873
+      "pocket_offset-12.70mm": {
+        "bytes": 314251,
+        "lines": 10844
       },
-      "edge-12.70mm": {
-        "bytes": 14868,
-        "lines": 528
+      "edge-12.70mm-90deg": {
+        "bytes": 10480,
+        "lines": 379
+      },
+      "edge-12.70mm-60deg": {
+        "bytes": 2432,
+        "lines": 94
       },
       "profile-3.17mm": {
         "bytes": 23985,
@@ -55,25 +64,8 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_1_border",
-    "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_2_border",
-    "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_3_border",
-    "Overlapping regions detected: profile_generated_profile_0 and bevel_generated_raised_panel_4_border",
-    "Overlapping regions detected: bevel_generated_raised_panel_1_border and pocket_generated_raised_panel_1_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_2_border and pocket_generated_raised_panel_2_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_3_border and pocket_generated_raised_panel_3_field",
-    "Overlapping regions detected: bevel_generated_raised_panel_4_border and pocket_generated_raised_panel_4_field",
-    "Overlapping regions detected: profile_generated_profile_5 and bevel_generated_arch_raised_panel_6_border",
-    "Overlapping regions detected: bevel_generated_arch_raised_panel_6_border and pocket_generated_arch_raised_panel_6_field"
-  ],
-  "warnings": [
-    "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]",
-    "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]",
-    "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]",
-    "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]",
-    "No V-bit with included angle near 30\u00b0 available. Available: [60.0, 90.0]"
-  ],
+  "errors": [],
+  "warnings": [],
   "build": {
     "kerf_mm": 3.175,
     "theme": "dark",

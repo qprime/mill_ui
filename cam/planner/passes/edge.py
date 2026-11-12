@@ -5,11 +5,15 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from shapely.geometry.base import BaseGeometry
+
+from cam.moves import CutMove
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import EdgeFeatureInput
 from cam.shape import Shape2D
 from core.geometry import chamfer_included_angle
 from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec
+from layout_ast.raised_panel import RaisedPanelSpec
 
 from .profile import (
     offset_circle_shape,
@@ -24,6 +28,7 @@ if TYPE_CHECKING:
     from cam.planner.passes import PassAccumulator
 
 _CHAMFER_DIMENSION_TOLERANCE_MM = 1e-3
+_RAISED_PANEL_ARC_TOLERANCE_MM = 5e-4
 
 
 def vbit_cut_depth(width_mm: float, chamfer_angle_deg: float) -> float:
@@ -38,13 +43,30 @@ def vbit_effective_radius(depth_mm: float, v_angle_deg: float) -> float:
 
 
 @dataclass(frozen=True)
-class EdgeCutPlan:
-    shape: Shape2D
+class PocketCutPlan:
+    region: BaseGeometry
     tool: ToolSelection
     depth_mm: float
 
 
+@dataclass(frozen=True)
+class EdgeCutPlan:
+    shape: Shape2D
+    tool: ToolSelection
+    depth_mm: float
+    pockets: tuple[PocketCutPlan, ...] = ()
+
+
 def build_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[ToolSelection]) -> EdgeCutPlan:
+    spec = entry.edge_feature
+    if isinstance(spec, RaisedPanelSpec):
+        from .raised_panel import build_raised_panel_plan
+
+        return build_raised_panel_plan(entry, tool_db)
+    return _build_standard_edge_cut_plan(entry, tool_db)
+
+
+def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[ToolSelection]) -> EdgeCutPlan:
     spec = entry.edge_feature
     if spec is None:
         raise ValueError(f"Edge feature '{entry.id}': no edge_feature spec")
@@ -108,11 +130,32 @@ def plan_edge_feature_passes(
     edge_features: tuple[EdgeFeatureInput, ...], *, accumulator: PassAccumulator, tool_db: Sequence[ToolSelection]
 ) -> None:
     for entry in edge_features:
+        if isinstance(entry.edge_feature, RaisedPanelSpec) and entry.depth_mm >= accumulator.stock.thickness:
+            accumulator.add_error(
+                f"RaisedPanel '{entry.id}': border depth {entry.depth_mm}mm must be less than stock thickness {accumulator.stock.thickness}mm"
+            )
+            continue
         try:
             plan = build_edge_cut_plan(entry, tool_db)
         except ValueError as exc:
             accumulator.add_error(str(exc))
             continue
+        from .pocket import _offset_pocket_moves
+
+        for pocket in plan.pockets:
+            pocket_record = accumulator.get_record("pocket_offset", pocket.tool)
+            pocket_moves = _offset_pocket_moves(
+                pocket.region,
+                pocket.tool,
+                pocket_record.setup,
+                depth_mm=pocket.depth_mm,
+                wall_allowance_mm=0,
+                arc_tolerance_mm=_RAISED_PANEL_ARC_TOLERANCE_MM,
+            )
+            if not any(isinstance(move, CutMove) for move in pocket_moves):
+                accumulator.add_error(f"RaisedPanel '{entry.id}': required pocket produced no cutting moves")
+                continue
+            pocket_record.add_moves(pocket_moves, increment=1)
         record = accumulator.get_record("edge", plan.tool)
         moves = profile_outline(plan.shape, record.setup, plan.depth_mm, step_down=stepdown_for_tool(plan.tool))
         record.add_moves(moves, increment=1)

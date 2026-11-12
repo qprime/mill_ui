@@ -124,6 +124,10 @@ class PassAccumulator:
         self._errors.append(message)
 
     @property
+    def stock(self) -> Stock:
+        return self._stock
+
+    @property
     def errors(self) -> list[str]:
         return list(self._errors)
 

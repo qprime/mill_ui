@@ -172,14 +172,14 @@ class TestDomainAwareDispatch:
         assert profile_intent.bounds.height == pytest.approx(300)
         assert profile_intent.depth_profile.z_bottom == -19
         arch_domain = Domain.from_arch(200, 300, 80, center=center)
-        assert len(intents) == 3
+        assert len(intents) == 2
         for intent in intents:
             footprint = pocket_region(intent.shape, intent.shape_geometry, intent.bounds.center)
             assert footprint is not None
             assert footprint.difference(arch_domain.polygon).area < 1e-8
-        field = next(intent for intent in intents if intent.hint_type == "pocket")
+        field = next(intent for intent in intents if intent.hint_type == "raised_panel")
         assert field.bounds.center[0] == pytest.approx(center[0])
-        assert field.depth_profile.z_bottom == -2
+        assert field.depth_profile.z_bottom == -6
 
     def test_profile_on_rounded_rect_via_dispatch(self):
         flat = _resolve_pml(

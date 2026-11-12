@@ -203,9 +203,11 @@ class PocketGen:
 
 @dataclass(frozen=True)
 class RaisedPanelGen:
-    border_width_mm: float
+    border_width_mm: float | None
     border_depth_mm: float
     field_depth_mm: float
+    profile: Literal["gutter", "v_groove"] = "gutter"
+    v_angle_deg: float = 90.0
 
 
 @dataclass(frozen=True)

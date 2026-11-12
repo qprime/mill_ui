@@ -1037,19 +1037,14 @@ class LayoutResolver:
             border_width_mm=node.border_width_mm,
             border_depth_mm=node.border_depth_mm,
             field_depth_mm=node.field_depth_mm,
+            profile=node.profile,
+            v_angle_deg=node.v_angle_deg,
         )
 
         shape_id_prefix = self._next_shape_id("raised_panel")
-        try:
-            generated_items = raised_panel_generator(
-                domain,
-                generator_params,
-                allow_empty=True,
-                shape_id_prefix=shape_id_prefix,
-            )
-            items.extend(generated_items)
-        except GeneratorSkipError:
-            pass
+        items.extend(
+            raised_panel_generator(domain, generator_params, allow_empty=False, shape_id_prefix=shape_id_prefix)
+        )
 
     def _handle_chamfer_gen(
         self,
@@ -2441,24 +2436,12 @@ class LayoutResolver:
 
                 for frame_child in child.children:
                     if isinstance(frame_child, RaisedPanelGen):
-                        generator_params = RaisedPanelParams(
-                            border_width_mm=frame_child.border_width_mm,
-                            border_depth_mm=frame_child.border_depth_mm,
-                            field_depth_mm=frame_child.field_depth_mm,
+                        self._handle_raised_panel_gen(
+                            frame_child,
+                            inset_region,
+                            items,
+                            {**params, "domain": inset_domain, "domain_center": inset_region.center},
                         )
-                        shape_id_prefix = self._next_shape_id("arch_raised_panel")
-                        try:
-                            from generators.area.raised_panel import raised_panel_generator
-
-                            generated_items = raised_panel_generator(
-                                inset_domain,
-                                generator_params,
-                                allow_empty=True,
-                                shape_id_prefix=shape_id_prefix,
-                            )
-                            items.extend(generated_items)
-                        except GeneratorSkipError:
-                            pass
                     else:
                         stripped = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
                         self._resolve_node(frame_child, inset_region, items, stripped)

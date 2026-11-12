@@ -78,8 +78,17 @@ current build outputs; consumers must use the current metrics and output list.
 
 Tool-library entries must describe available shop tools. Do not invent a tool or
 substitute another machining strategy to make a failing recipe appear successful.
-Tool selection retains its existing angle/radius matching policies; this invariant
-requires selection and planning failures to be surfaced rather than warned away.
+The tool selectors retain nearest-angle/radius lookup. A selected tool must also
+be able to produce the requested geometry; selection and planning failures must
+be surfaced rather than warned away.
+
+Chamfers specify a slope from the stock surface. A surface angle `a` requires
+a V-bit included angle `180 - 2a`. The tip follows the nominal edge and reaches
+`width * tan(a)` below the local surface for either retained side. The selected
+bit must reproduce the requested width within 0.001mm output precision and its
+cutting radius must accommodate that width. Do not silently substitute a
+different bevel slope or cut wider than the available cutter. Bevel/RaisedPanel
+and roundover strategies retain their separate existing behavior.
 
 ---
 

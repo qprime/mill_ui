@@ -56,7 +56,7 @@
     <path d="M 613.413 351.587 L 856.587 351.587 L 856.587 48.413 L 613.413 48.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_4_toolpath" />
   </g>
   <g id="CHAMFER_CUTS" class="chamfer-cuts">
-    <path d="M 39.000 356.000 L 291.000 356.000 L 291.000 44.000 L 39.000 44.000 L 39.000 356.000 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
+    <path d="M 45.000 350.000 L 285.000 350.000 L 285.000 50.000 L 45.000 50.000 L 45.000 350.000 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
     <text x="165.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_1_edge_depth">Chamfer 6.000mm</text>
   </g>
   <g id="UNPLANNED_EDGES" class="unplanned-edges">

@@ -50,10 +50,7 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: profile_generated_profile_0 and chamfer_generated_chamfer_2",
-    "Overlapping regions detected: profile_generated_profile_1 and chamfer_generated_chamfer_2"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

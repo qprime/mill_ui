@@ -179,6 +179,10 @@ def calculate_angled_depth(width: float, angle_deg: float, fallback: float = 0.0
     return fallback if fallback > 0.0 else width
 
 
+def chamfer_included_angle(surface_angle_deg: float) -> float:
+    return 180.0 - 2.0 * surface_angle_deg
+
+
 def bounds_overlap(a: Bounds2D, b: Bounds2D, epsilon: float = 0.0) -> bool:
     x_overlap = not (a.x_max <= b.x_min + epsilon or b.x_max <= a.x_min + epsilon)
     y_overlap = not (a.y_max <= b.y_min + epsilon or b.y_max <= a.y_min + epsilon)

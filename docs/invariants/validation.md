@@ -77,6 +77,14 @@ other side combinations, missing/unsupported outer geometry and boundary
 modifiers retain the existing overlap checks. Containment in a bounding box
 alone does not establish containment in a concave part.
 
+A shallower chamfer or roundover on the same nominal outline as an inside or
+outside profile is a compatible finishing operation. Roundovers must agree on
+the retained side. For a chamfer on a distinct inner outline, its expanded
+width envelope must remain strictly inside the containing outside profile.
+Use actual Rect/Polygon geometry and leave missing-tool errors to the required
+edge planner. Nonzero starting surfaces, full-depth edges, modified boundaries,
+unproven containment and Bevel/RaisedPanel features retain existing checks.
+
 ---
 
 ## Cross-Face Web (VL-8)

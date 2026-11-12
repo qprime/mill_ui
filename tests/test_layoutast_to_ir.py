@@ -532,14 +532,14 @@ def test_beam_labels_on_items():
 
 
 @pytest.mark.parametrize(
-    "kind,fields,depth",
+    "kind,fields,depth,left_x",
     [
-        ("chamfer", {"chamfer_width_mm": 2.0, "chamfer_angle_deg": 45.0}, 2.0),
-        ("bevel", {"bevel_width_mm": 2.0, "bevel_angle_deg": 45.0, "bevel_inner_depth_mm": 1.0}, 2.0),
-        ("roundover", {"roundover_radius_mm": 6.0}, 6.0),
+        ("chamfer", {"chamfer_width_mm": 2.0, "chamfer_angle_deg": 45.0}, 2.0, 85),
+        ("bevel", {"bevel_width_mm": 2.0, "bevel_angle_deg": 45.0, "bevel_inner_depth_mm": 1.0}, 2.0, 83),
+        ("roundover", {"roundover_radius_mm": 6.0}, 6.0, 79),
     ],
 )
-def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, depth):
+def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, depth, left_x):
     from cam.planner.passes.tools import normalize_tool_entries
 
     item = replace(_make_profile_item("edge", 50, 30, 100, 80), feature=Feature(type=kind, depth_mm=9, **fields))
@@ -554,7 +554,7 @@ def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, dept
 
     layer = next(layer for layer in diagram.layers if layer.name == f"{kind.upper()}_CUTS")
     path = next(shape for shape in layer.items if isinstance(shape, Polyline))
-    assert min(p.x for p in path.points) == pytest.approx(85 - depth)
+    assert min(p.x for p in path.points) == pytest.approx(left_x)
     assert path.style_token == kind and path.closed
     assert f"{kind}: {depth:.3f}mm" in diagram.metadata["depth_info"]
     assert any(isinstance(s, Text) and f"{depth:.3f}mm" in s.content for s in layer.items)
@@ -562,13 +562,13 @@ def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, dept
 
 @pytest.mark.parametrize("origin", ["front", "back"])
 @pytest.mark.parametrize("inside", [False, True])
-def test_edge_drawing_uses_actual_selected_angle_and_side(origin, inside):
+def test_chamfer_drawing_follows_nominal_edge_for_both_sides(origin, inside):
     from cam.planner.passes.tools import normalize_tool_entries
 
     item = replace(
         _make_profile_item("edge", 50, 30, 100, 80),
         feature=Feature(
-            type="chamfer", depth_mm=2, side="inside" if inside else "outside", chamfer_width_mm=2, chamfer_angle_deg=30
+            type="chamfer", depth_mm=2, side="inside" if inside else "outside", chamfer_width_mm=2, chamfer_angle_deg=45
         ),
     )
     tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
@@ -577,11 +577,23 @@ def test_edge_drawing_uses_actual_selected_angle_and_side(origin, inside):
     )
     layer = next(layer for layer in diagram.layers if layer.name == "CHAMFER_CUTS")
     path = next(shape for shape in layer.items if isinstance(shape, Polyline))
-    actual_radius = 2 / (3**0.5)
-    sign = -1 if inside else 1
-    assert min(p.x for p in path.points) == pytest.approx(85 - sign * actual_radius)
-    expected_min_y = (75 if origin == "front" else 95) - sign * actual_radius
+    assert min(p.x for p in path.points) == pytest.approx(85)
+    expected_min_y = 75 if origin == "front" else 95
     assert min(p.y for p in path.points) == pytest.approx(expected_min_y)
+
+
+def test_bevel_drawing_retains_selected_angle_offset():
+    from cam.planner.passes.tools import normalize_tool_entries
+
+    item = replace(
+        _make_profile_item("edge", 50, 30, 100, 80),
+        feature=Feature(type="bevel", depth_mm=2, bevel_width_mm=2, bevel_angle_deg=30, bevel_inner_depth_mm=1),
+    )
+    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+    diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools)
+    layer = next(layer for layer in diagram.layers if layer.name == "BEVEL_CUTS")
+    path = next(shape for shape in layer.items if isinstance(shape, Polyline))
+    assert min(p.x for p in path.points) == pytest.approx(85 - 2 / 3**0.5)
 
 
 def test_missing_edge_tool_is_drawn_as_unplanned_reference():
@@ -621,5 +633,5 @@ def test_edge_drawing_honors_supplied_removal_intent_and_start_depth(other_face)
 
     layer = next(layer for layer in diagram.layers if layer.name == "CHAMFER_CUTS")
     path = next(s for s in layer.items if isinstance(s, Polyline))
-    assert min(p.x for p in path.points) == pytest.approx(87)
+    assert min(p.x for p in path.points) == pytest.approx(85)
     assert "chamfer: 5.000mm" in diagram.metadata["depth_info"]

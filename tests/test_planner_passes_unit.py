@@ -22,7 +22,7 @@ from cam.ops.face import face_zigzag
 from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator, plan_passes
-from cam.planner.passes.edge import plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
+from cam.planner.passes.edge import build_edge_cut_plan, plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
 from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges, merge_rect_profiles
 from cam.planner.passes.pocket import (
     plan_engrave_passes,
@@ -1438,6 +1438,42 @@ class TestPickToolForEdge:
 
 
 class TestPlanEdgeFeaturePasses:
+    @pytest.mark.parametrize("side", ["inside", "outside"])
+    def test_chamfer_tip_follows_nominal_edge_and_reaches_declared_cross_section(self, side):
+        entry = _edge_feature(
+            "Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 6, ChamferSpec(width_mm=6, angle_deg=45), side=side
+        )
+        plan = build_edge_cut_plan(entry, TOOLS_WITH_TWO_VBITS)
+        assert plan.tool.v_angle_deg == 90
+        assert plan.depth_mm == pytest.approx(6)
+        assert min(p.x for p in plan.shape.points) == pytest.approx(75)
+        assert max(p.x for p in plan.shape.points) == pytest.approx(125)
+        assert vbit_effective_radius(plan.depth_mm, plan.tool.v_angle_deg) == pytest.approx(6)
+
+    def test_chamfer_angle_is_measured_from_the_stock_surface(self):
+        tools = normalize_tool_entries([VBIT_60, VBIT_90, {**VBIT_90, "name": "120deg_v", "v_angle_deg": 120}])
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 2, ChamferSpec(width_mm=2, angle_deg=30))
+        plan = build_edge_cut_plan(entry, tools)
+        assert plan.tool.v_angle_deg == 120
+        assert plan.depth_mm == pytest.approx(2 / 3**0.5)
+        assert vbit_effective_radius(plan.depth_mm, plan.tool.v_angle_deg) == pytest.approx(2)
+
+    def test_chamfer_rejects_nearest_bit_that_would_change_width(self):
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 2, ChamferSpec(width_mm=2, angle_deg=30))
+        with pytest.raises(ValueError, match="cannot cut requested chamfer"):
+            build_edge_cut_plan(entry, TOOLS_WITH_TWO_VBITS)
+
+    def test_chamfer_must_fit_the_selected_cutter_radius(self):
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 8, ChamferSpec(width_mm=8, angle_deg=45))
+        with pytest.raises(ValueError, match="exceeds cutter radius"):
+            build_edge_cut_plan(entry, TOOLS_WITH_VBIT)
+
+    @pytest.mark.parametrize("angle", [0, 90, -5])
+    def test_chamfer_rejects_invalid_surface_angle(self, angle):
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 2, ChamferSpec(width_mm=2, angle_deg=angle))
+        with pytest.raises(ValueError, match="chamfer angle"):
+            build_edge_cut_plan(entry, TOOLS_WITH_VBIT)
+
     def test_chamfer_produces_edge_record(self):
         acc = _accumulator()
         entries = (

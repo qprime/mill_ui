@@ -14,7 +14,7 @@ from core.constants import (
     WEB_CHECK_FEATURE_TYPES,
     FeatureType,
 )
-from core.geometry import engraving_paths, extract_shape_geometry, pocket_region, polygon_region
+from core.geometry import chamfer_included_angle, engraving_paths, extract_shape_geometry, pocket_region, polygon_region
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
@@ -179,7 +179,9 @@ def check_edge_feature(  # noqa: C901 — edge validation dispatcher
             )
 
     if available_v_angles is not None and len(available_v_angles) > 0 and isinstance(spec, (BevelSpec, ChamferSpec)):
-        desired_included = spec.angle_deg * 2.0
+        desired_included = (
+            chamfer_included_angle(spec.angle_deg) if isinstance(spec, ChamferSpec) else spec.angle_deg * 2.0
+        )
         matching = [a for a in available_v_angles if abs(a - desired_included) < 5.0]
         if not matching:
             result.add_warning(
@@ -331,6 +333,42 @@ def _is_nested_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
     )
 
 
+def _is_compatible_profile_edge(a: RemovalIntent, b: RemovalIntent) -> bool:
+    match = _match_feature_types(a, b, FeatureType.PROFILE, (FeatureType.CHAMFER, FeatureType.ROUNDOVER))
+    if match is None:
+        return False
+    profile, edge = match
+    if profile.side not in ("inside", "outside") or profile.depth_profile.z_top != 0 or edge.depth_profile.z_top != 0:
+        return False
+    spec = edge.edge_feature
+    if not isinstance(spec, (ChamferSpec, RoundoverSpec)):
+        return False
+    if isinstance(spec, ChamferSpec) and (spec.width_mm <= 0 or not 0 < spec.angle_deg < 90):
+        return False
+    if isinstance(spec, RoundoverSpec) and spec.radius_mm <= 0:
+        return False
+    depth = (
+        spec.radius_mm if isinstance(spec, RoundoverSpec) else spec.width_mm * math.tan(math.radians(spec.angle_deg))
+    )
+    if not math.isclose(edge.depth_mm(), depth, rel_tol=0, abs_tol=_OVERLAP_CLEARANCE_TOLERANCE_MM):
+        return False
+    if depth >= profile.depth_mm() - _OVERLAP_CLEARANCE_TOLERANCE_MM:
+        return False
+    profile_region = _profile_containment_region(profile)
+    edge_region = _profile_containment_region(edge)
+    if profile_region is None or edge_region is None or not profile_region.is_valid or not edge_region.is_valid:
+        return False
+    if profile_region.equals(edge_region):
+        return isinstance(spec, ChamferSpec) or profile.side == (edge.side or "outside")
+    if profile.side != "outside" or not isinstance(spec, ChamferSpec):
+        return False
+    envelope = edge_region.buffer(spec.width_mm, join_style="mitre")
+    return (
+        profile_region.contains(envelope)
+        and profile_region.boundary.distance(envelope) > _OVERLAP_CLEARANCE_TOLERANCE_MM
+    )
+
+
 def _pocket_overlap_region(intent: RemovalIntent) -> BaseGeometry | None:
     if intent.hint_type != FeatureType.POCKET or _has_boundary_modifiers(intent):
         return None
@@ -393,6 +431,8 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
                 if _are_sibling_features(intent_a, intent_b):
                     continue
                 if _is_nested_inside_profile(intent_a, intent_b):
+                    continue
+                if _is_compatible_profile_edge(intent_a, intent_b):
                     continue
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue

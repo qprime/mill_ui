@@ -30,7 +30,7 @@
       "max_depth_mm": 5.0,
       "feature_count": 1,
       "strategy": "edge",
-      "estimated_runtime_min": 7.4
+      "estimated_runtime_min": 7.0
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -47,7 +47,7 @@
       "estimated_runtime_min": 67.0
     }
   ],
-  "total_runtime_min": 119.5,
+  "total_runtime_min": 119.1,
   "feature_counts": {
     "chamfer": 1,
     "pocket": 2,

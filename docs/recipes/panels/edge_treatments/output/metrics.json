@@ -43,8 +43,6 @@
     "files": {}
   },
   "errors": [
-    "Overlapping regions detected: profile_generated_profile_0 and chamfer_generated_chamfer_1",
-    "Overlapping regions detected: profile_generated_profile_2 and roundover_generated_roundover_3",
     "Edge feature 'roundover_generated_roundover_3': no roundover bit with 6.0mm radius available"
   ],
   "warnings": [],

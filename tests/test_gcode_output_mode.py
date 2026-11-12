@@ -436,7 +436,7 @@ children:
     id: b
     at: {x: 375mm, y: 150mm, width: 150mm, height: 150mm}
     children:
-    - Chamfer: {width: 6.93mm, depth: 4mm}
+    - Chamfer: {width: 4mm, depth: 6.928mm}
 """
 
 

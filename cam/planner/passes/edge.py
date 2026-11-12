@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import EdgeFeatureInput
 from cam.shape import Shape2D
+from core.geometry import chamfer_included_angle
 from ir.removal_intent import BevelSpec, ChamferSpec, RoundoverSpec
 
 from .profile import (
@@ -21,6 +22,8 @@ from .tools import ToolSelection, pick_tool_for_edge, pick_tool_for_roundover, s
 
 if TYPE_CHECKING:
     from cam.planner.passes import PassAccumulator
+
+_CHAMFER_DIMENSION_TOLERANCE_MM = 1e-3
 
 
 def vbit_cut_depth(width_mm: float, chamfer_angle_deg: float) -> float:
@@ -46,7 +49,13 @@ def build_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[ToolSelection
     if spec is None:
         raise ValueError(f"Edge feature '{entry.id}': no edge_feature spec")
     if isinstance(spec, (ChamferSpec, BevelSpec)):
-        desired_angle = spec.angle_deg * 2.0
+        if isinstance(spec, ChamferSpec) and not 0 < spec.angle_deg < 90:
+            raise ValueError(
+                f"Edge feature '{entry.id}': chamfer angle must be between 0 and 90°, got {spec.angle_deg}"
+            )
+        desired_angle = (
+            chamfer_included_angle(spec.angle_deg) if isinstance(spec, ChamferSpec) else spec.angle_deg * 2.0
+        )
         try:
             tool = pick_tool_for_edge(tool_db, angle_deg=desired_angle)
         except ValueError as exc:
@@ -59,7 +68,24 @@ def build_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[ToolSelection
             raise ValueError(
                 f"Edge feature '{entry.id}': V-bit '{tool.name}': v_angle_deg must be positive, got {angle}"
             )
-        offset = vbit_effective_radius(depth, angle)
+        if isinstance(spec, ChamferSpec):
+            radius = tool.diameter / 2
+            if not math.isfinite(radius) or radius <= 0:
+                raise ValueError(f"Edge feature '{entry.id}': invalid cutter radius {radius}mm")
+            if spec.width_mm > radius + _CHAMFER_DIMENSION_TOLERANCE_MM:
+                raise ValueError(
+                    f"Edge feature '{entry.id}': chamfer width {spec.width_mm}mm exceeds cutter radius {radius}mm"
+                )
+            if not math.isclose(
+                vbit_effective_radius(depth, angle), spec.width_mm, rel_tol=0, abs_tol=_CHAMFER_DIMENSION_TOLERANCE_MM
+            ):
+                raise ValueError(
+                    f"Edge feature '{entry.id}': V-bit '{tool.name}' ({angle}°) cannot cut requested chamfer "
+                    f"width {spec.width_mm}mm and depth {depth}mm; requires {desired_angle}°"
+                )
+            offset = 0.0
+        else:
+            offset = vbit_effective_radius(depth, angle)
     elif isinstance(spec, RoundoverSpec):
         try:
             tool = pick_tool_for_roundover(tool_db, radius_mm=spec.radius_mm)

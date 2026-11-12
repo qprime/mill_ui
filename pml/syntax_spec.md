@@ -458,8 +458,15 @@ Beveled edge treatment:
 ```yaml
 - Chamfer:
     width: 5mm
-    depth: 3mm
+    depth: 5mm
 ```
+
+Width and depth describe the finished bevel; its slope is measured from the
+stock surface. The tip follows the nominal edge. Equal width and depth require
+a 90° V-bit. Other slopes require the complementary included angle
+`180 - 2 * atan(depth / width)`. A nearest available bit that cannot reproduce
+the dimensions within 0.001mm, or whose radius is smaller than the width, is an
+error. The same nominal-edge path applies to outer edges and opening rims.
 
 #### Roundover
 

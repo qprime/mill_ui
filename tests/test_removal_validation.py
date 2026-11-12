@@ -220,6 +220,107 @@ def _profile_intent(name, shape, geometry, center, side):
     )
 
 
+def _edge_intent(reference, spec, depth):
+    from dataclasses import replace
+
+    return replace(
+        reference,
+        region_id="edge_" + reference.region_id,
+        hint_type=spec.to_dict()["type"],
+        edge_feature=spec,
+        depth_profile=DepthProfile.constant(0, -depth),
+    )
+
+
+@pytest.mark.parametrize("side", ["outside", "inside"])
+def test_profile_and_its_chamfer_are_compatible_edge_operations(side):
+    from ir.removal_intent import ChamferSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], side)
+    edge = _edge_intent(profile, ChamferSpec(5, 45), 5)
+    assert check_overlap([profile, edge]).is_valid()
+    assert check_overlap([edge, profile]).is_valid()
+
+
+def test_profile_and_its_roundover_are_compatible_independently_of_tool_availability():
+    from ir.removal_intent import RoundoverSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    assert check_overlap([profile, _edge_intent(profile, RoundoverSpec(6), 6)]).is_valid()
+
+
+def test_chamfer_envelope_inside_outer_profile_does_not_conflict():
+    from ir.removal_intent import ChamferSpec
+
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 60, "h_mm": 40}, [150, 150], "inside")
+    edge = _edge_intent(inner, ChamferSpec(5, 45), 5)
+    assert check_overlap([outer, inner, edge]).is_valid()
+
+
+@pytest.mark.parametrize("width", [5, 6])
+def test_chamfer_envelope_touching_or_crossing_outer_boundary_still_reports(width):
+    from ir.removal_intent import ChamferSpec
+
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    reference = _profile_intent("edge", "Rect", {"w_mm": 40, "h_mm": 40}, [205, 150], "inside")
+    assert len(check_overlap([outer, _edge_intent(reference, ChamferSpec(width, 45), width)]).errors) == 1
+
+
+def test_bevel_overlap_remains_unresolved_by_chamfer_compatibility():
+    from ir.removal_intent import BevelSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    assert len(check_overlap([profile, _edge_intent(profile, BevelSpec(5, 45, 2), 5)]).errors) == 1
+
+
+def test_full_depth_chamfer_is_not_exempt_from_profile_overlap():
+    from ir.removal_intent import ChamferSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    assert len(check_overlap([profile, _edge_intent(profile, ChamferSpec(19, 45), 19)]).errors) == 1
+
+
+def test_chamfer_validation_uses_the_complementary_included_tool_angle():
+    from ir.removal_intent import ChamferSpec
+    from validation.removal_checks import check_edge_feature
+
+    reference = _profile_intent("edge", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    edge = _edge_intent(reference, ChamferSpec(2, 30), 2 / 3**0.5)
+    result = check_edge_feature(edge, 19, available_v_angles=[120])
+    assert not result.has_issues()
+
+
+def test_roundover_with_opposite_retained_side_remains_an_overlap():
+    from dataclasses import replace
+
+    from ir.removal_intent import RoundoverSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "inside")
+    edge = replace(_edge_intent(profile, RoundoverSpec(6), 6), side="outside")
+    assert len(check_overlap([profile, edge]).errors) == 1
+
+
+def test_chamfer_containment_uses_the_actual_concave_part():
+    from ir.removal_intent import ChamferSpec
+
+    profile = _profile_intent(
+        "part", "Polygon", {"points": [[0, 0], [100, 0], [100, 30], [30, 30], [30, 100], [0, 100]]}, [50, 50], "outside"
+    )
+    reference = _profile_intent("edge", "Rect", {"w_mm": 20, "h_mm": 80}, [85, 100], "inside")
+    assert len(check_overlap([profile, _edge_intent(reference, ChamferSpec(5, 45), 5)]).errors) == 1
+
+
+def test_edge_starting_below_the_surface_keeps_conservative_overlap_check():
+    from dataclasses import replace
+
+    from ir.removal_intent import ChamferSpec
+
+    profile = _profile_intent("part", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    edge = replace(_edge_intent(profile, ChamferSpec(5, 45), 5), depth_profile=DepthProfile.constant(-2, -7))
+    assert len(check_overlap([profile, edge]).errors) == 1
+
+
 @pytest.mark.parametrize("shape, geometry", [("Rect", {"w_mm": 40, "h_mm": 30}), ("Circle", {"diameter_mm": 40})])
 @pytest.mark.parametrize("reverse", [False, True])
 def test_inside_profile_cutouts_do_not_conflict_with_the_containing_outside_profile(shape, geometry, reverse):

@@ -90,8 +90,64 @@ class TestBoxPrimitive:
     def test_bottom_dimensions_account_for_side_thickness(self):
         assembly = box(width=200, length=150, height=100, thickness=6)
         bottom = assembly.panels["bottom"]
-        assert bottom.width_mm == 200 - 2 * 6
-        assert bottom.height_mm == 150 - 2 * 6
+        assert bottom.width_mm == 194
+        assert bottom.height_mm == 144
+
+    @pytest.mark.parametrize(
+        "cap_joinery, span, wall_height",
+        [
+            (Butt(), (138, 88), 80),
+            (Finger(), (150, 100), 80),
+            (Captured(), (144, 94), 80),
+            (Captured(dado_depth_mm=1.5), (141, 91), 80),
+            (Captured(receiving="b"), (150, 100), 74),
+            (Captured(receiving="b", dado_depth_mm=1.5), (150, 100), 71),
+        ],
+    )
+    def test_cap_joints_preserve_the_outside_box_dimensions(self, cap_joinery, span, wall_height):
+        assembly = box(width=150, length=100, height=80, thickness=6, top=cap_joinery, bottom=cap_joinery)
+        for name in ("bottom", "top"):
+            cap = assembly.panels[name]
+            assert (cap.width_mm, cap.height_mm) == span
+        for name in ("front", "back", "left_side", "right_side"):
+            assert assembly.panels[name].height_mm == wall_height
+
+    @pytest.mark.parametrize("top", ["none", Finger(), Captured()])
+    def test_one_receiving_cap_accounts_for_its_single_wall_extension(self, top):
+        assembly = box(width=150, length=100, height=80, thickness=6, top=top, bottom=Captured(receiving="b"))
+        assert assembly.panels["front"].height_mm == 77
+
+    def test_finger_cap_edges_match_their_explicit_wall_interfaces(self):
+        assembly = box(width=150, length=100, height=80, thickness=6, top=Finger(), bottom=Finger())
+        edges = {"top": Edge.TOP, "bottom": Edge.BOTTOM, "left": Edge.LEFT, "right": Edge.RIGHT}
+        for interface in assembly.interfaces:
+            assert assembly.panels[interface.panel_a].edge_length(edges[interface.edge_a]) == assembly.panels[
+                interface.panel_b
+            ].edge_length(edges[interface.edge_b])
+
+    @pytest.mark.parametrize("depth", [0, -1, 7])
+    def test_captured_cap_depth_must_fit_the_receiving_stock(self, depth):
+        with pytest.raises(ValueError, match="cap groove depth"):
+            box(width=150, length=100, height=80, thickness=6, bottom=Captured(dado_depth_mm=depth))
+
+    def test_receiving_cap_inset_requires_explicit_wall_placement(self):
+        with pytest.raises(ValueError, match=r"receiving='b'.*inset"):
+            box(width=150, length=100, height=80, thickness=6, bottom=Captured(receiving="b", inset_mm=2))
+
+    def test_receiving_caps_must_leave_a_positive_wall_height(self):
+        with pytest.raises(ValueError, match="wall height"):
+            box(
+                width=150,
+                length=100,
+                height=6,
+                thickness=6,
+                top=Captured(receiving="b"),
+                bottom=Captured(receiving="b"),
+            )
+
+    def test_cap_joints_must_leave_a_positive_panel_span(self):
+        with pytest.raises(ValueError, match="cap span"):
+            box(width=6, length=100, height=80, thickness=6)
 
     def test_side_to_side_interfaces(self):
         assembly = box(width=200, length=150, height=100, thickness=6)

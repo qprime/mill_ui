@@ -70,12 +70,12 @@
     <path d="M 136.350 383.655 L 136.350 343.655 L 81.350 343.655 L 81.350 383.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_back_30_back_outer" />
     <path d="M 30.350 333.655 L 30.350 293.655 L 16.350 293.655 L 16.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_32_left_side_outer" />
     <path d="M 54.350 333.655 L 54.350 293.655 L 40.350 293.655 L 40.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_34_right_side_outer" />
-    <path d="M 83.350 333.655 L 83.350 319.655 L 64.350 319.655 L 64.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_36_bottom_outer" />
+    <path d="M 101.350 333.655 L 101.350 301.655 L 64.350 301.655 L 64.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_36_bottom_outer" />
     <path d="M 211.350 383.655 L 211.350 343.655 L 156.350 343.655 L 156.350 383.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_front_37_front_outer" />
     <path d="M 276.350 383.655 L 276.350 343.655 L 221.350 343.655 L 221.350 383.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_back_39_back_outer" />
     <path d="M 170.350 333.655 L 170.350 293.655 L 156.350 293.655 L 156.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_41_left_side_outer" />
     <path d="M 194.350 333.655 L 194.350 293.655 L 180.350 293.655 L 180.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_43_right_side_outer" />
-    <path d="M 223.350 333.655 L 223.350 319.655 L 204.350 319.655 L 204.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_45_bottom_outer" />
+    <path d="M 241.350 333.655 L 241.350 301.655 L 204.350 301.655 L 204.350 333.655 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_45_bottom_outer" />
     <path d="M 380.350 383.650 L 380.350 323.650 L 296.350 323.650 L 296.350 383.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_top_46_top_outer" />
     <path d="M 474.350 383.650 L 474.350 323.650 L 390.350 323.650 L 390.350 383.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_48_bottom_outer" />
     <path d="M 544.350 383.650 L 544.350 263.650 L 484.350 263.650 L 484.350 383.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_50_left_side_outer" />
@@ -104,12 +104,12 @@
     <path d="M 137.938 385.243 L 137.938 342.067 L 79.762 342.067 L 79.762 385.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_back_30_back_outer_toolpath" />
     <path d="M 31.938 335.243 L 31.938 292.067 L 14.762 292.067 L 14.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_left_side_32_left_side_outer_toolpath" />
     <path d="M 55.938 335.243 L 55.938 292.067 L 38.763 292.067 L 38.763 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_right_side_34_right_side_outer_toolpath" />
-    <path d="M 84.938 335.243 L 84.938 318.067 L 62.763 318.067 L 62.763 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_36_bottom_outer_toolpath" />
+    <path d="M 102.938 335.243 L 102.938 300.067 L 62.762 300.067 L 62.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_36_bottom_outer_toolpath" />
     <path d="M 212.938 385.243 L 212.938 342.067 L 154.762 342.067 L 154.762 385.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_front_37_front_outer_toolpath" />
     <path d="M 277.938 385.243 L 277.938 342.067 L 219.762 342.067 L 219.762 385.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_back_39_back_outer_toolpath" />
     <path d="M 171.938 335.243 L 171.938 292.067 L 154.762 292.067 L 154.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_left_side_41_left_side_outer_toolpath" />
     <path d="M 195.938 335.243 L 195.938 292.067 L 178.762 292.067 L 178.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_right_side_43_right_side_outer_toolpath" />
-    <path d="M 224.938 335.243 L 224.938 318.067 L 202.762 318.067 L 202.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_45_bottom_outer_toolpath" />
+    <path d="M 242.938 335.243 L 242.938 300.067 L 202.762 300.067 L 202.762 335.243 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_45_bottom_outer_toolpath" />
     <path d="M 381.938 385.238 L 381.938 322.062 L 294.763 322.062 L 294.763 385.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_top_46_top_outer_toolpath" />
     <path d="M 475.938 385.238 L 475.938 322.062 L 388.763 322.062 L 388.763 385.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_bottom_48_bottom_outer_toolpath" />
     <path d="M 545.938 385.238 L 545.938 262.062 L 482.763 262.062 L 482.763 385.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_left_side_50_left_side_outer_toolpath" />
@@ -166,12 +166,12 @@
     <text x="108.850" y="363.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_back_30_back_outer_label">BACK</text>
     <text x="23.350" y="313.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_32_left_side_outer_label">LEFT SIDE</text>
     <text x="47.350" y="313.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_34_right_side_outer_label">RIGHT SIDE</text>
-    <text x="73.850" y="326.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_36_bottom_outer_label">BOTTOM</text>
+    <text x="82.850" y="317.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_36_bottom_outer_label">BOTTOM</text>
     <text x="183.850" y="363.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_front_37_front_outer_label">FRONT</text>
     <text x="248.850" y="363.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_back_39_back_outer_label">BACK</text>
     <text x="163.350" y="313.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_41_left_side_outer_label">LEFT SIDE</text>
     <text x="187.350" y="313.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_43_right_side_outer_label">RIGHT SIDE</text>
-    <text x="213.850" y="326.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_45_bottom_outer_label">BOTTOM</text>
+    <text x="222.850" y="317.655" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_45_bottom_outer_label">BOTTOM</text>
     <text x="338.350" y="353.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_top_46_top_outer_label">TOP</text>
     <text x="432.350" y="353.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_bottom_48_bottom_outer_label">BOTTOM</text>
     <text x="514.350" y="323.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_50_left_side_outer_label">LEFT SIDE</text>
@@ -276,18 +276,18 @@
     <polygon points="176.35,90.315 173.35,93.315 179.35,93.315" fill="#5ab9ea" />
     <polygon points="176.35,130.315 173.35,127.315 179.35,127.315" fill="#5ab9ea" />
     <text x="181.35" y="110.315" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 181.35 110.315)" fill="#5ab9ea" font-family="monospace" font-size="10px">40.0mm</text>
-    <line x1="64.35" y1="319.655" x2="64.35" y2="259.655" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="83.35" y1="319.655" x2="83.35" y2="259.655" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="64.35" y1="259.655" x2="83.35" y2="259.655" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="64.35,259.655 67.35,256.655 67.35,262.655" fill="#5ab9ea" />
-    <polygon points="83.35,259.655 80.35,256.655 80.35,262.655" fill="#5ab9ea" />
-    <text x="73.85" y="254.65499999999997" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">19.0mm</text>
-    <line x1="83.35" y1="319.655" x2="183.35" y2="319.655" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="83.35" y1="333.655" x2="183.35" y2="333.655" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="183.35" y1="319.655" x2="183.35" y2="333.655" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="183.35,319.655 180.35,322.655 186.35,322.655" fill="#5ab9ea" />
-    <polygon points="183.35,333.655 180.35,330.655 186.35,330.655" fill="#5ab9ea" />
-    <text x="188.35" y="326.655" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 188.35 326.655)" fill="#5ab9ea" font-family="monospace" font-size="10px">14.0mm</text>
+    <line x1="64.35" y1="301.655" x2="64.35" y2="241.65499999999997" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="101.35" y1="301.655" x2="101.35" y2="241.65499999999997" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="64.35" y1="241.65499999999997" x2="101.35" y2="241.65499999999997" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="64.35,241.65499999999997 67.35,238.65499999999997 67.35,244.65499999999997" fill="#5ab9ea" />
+    <polygon points="101.35,241.65499999999997 98.35,238.65499999999997 98.35,244.65499999999997" fill="#5ab9ea" />
+    <text x="82.85" y="236.65499999999997" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">37.0mm</text>
+    <line x1="101.35" y1="301.655" x2="201.35" y2="301.655" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="101.35" y1="333.655" x2="201.35" y2="333.655" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="201.35" y1="301.655" x2="201.35" y2="333.655" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="201.35,301.655 198.35,304.655 204.35,304.655" fill="#5ab9ea" />
+    <polygon points="201.35,333.655 198.35,330.655 204.35,330.655" fill="#5ab9ea" />
+    <text x="206.35" y="317.655" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 206.35 317.655)" fill="#5ab9ea" font-family="monospace" font-size="10px">32.0mm</text>
     <line x1="390.35" y1="323.65" x2="390.35" y2="263.65" stroke="#5ab9ea" stroke-width="1" />
     <line x1="474.35" y1="323.65" x2="474.35" y2="263.65" stroke="#5ab9ea" stroke-width="1" />
     <line x1="390.35" y1="263.65" x2="474.35" y2="263.65" stroke="#5ab9ea" stroke-width="1" />

@@ -197,6 +197,9 @@ class Captured:
         }
     )
 
+    def groove_depth_mm(self, inserted_thickness_mm: float) -> float:
+        return self.dado_depth_mm if self.dado_depth_mm is not None else inserted_thickness_mm / 2
+
     def apply(
         self,
         interface: Interface,
@@ -217,7 +220,7 @@ class Captured:
 
         if self.receiving == "a":
             edge = interface.edge_a
-            depth = self.dado_depth_mm if self.dado_depth_mm else panel_b.thickness_mm / 2
+            depth = self.groove_depth_mm(panel_b.thickness_mm)
             width = self.dado_width_mm if self.dado_width_mm else panel_b.thickness_mm
             dado = DadoSpec(
                 position_from_edge_mm=position,
@@ -230,7 +233,7 @@ class Captured:
             return (panel_a.with_dados((dado,)), panel_b)
         else:
             edge = interface.edge_b
-            depth = self.dado_depth_mm if self.dado_depth_mm else panel_a.thickness_mm / 2
+            depth = self.groove_depth_mm(panel_a.thickness_mm)
             width = self.dado_width_mm if self.dado_width_mm else panel_a.thickness_mm
             dado = DadoSpec(
                 position_from_edge_mm=position,

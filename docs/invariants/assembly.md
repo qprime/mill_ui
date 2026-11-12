@@ -26,6 +26,7 @@
 | AJ-16 | HARD | TOE_KICK_DADO_POSITION | bottom dado position_along_edge_a_mm = toe_kick_height (no thickness offset) |
 | AJ-17 | STRUCTURAL | DOGBONE_DEFAULT_ALL_CORNER_STRATEGIES | Dogbone fillets are default for all corner-producing strategies (Captured, Finger, HalfLap) |
 | AJ-18 | HARD | DOGBONE_DEPTH_MATCHES_PARENT | Dogbone bore depth equals the parent cut's Z depth: dado depth for a face groove, through the stock for an edge notch. Notch depth measures XY reach into the panel, not Z. |
+| AJ-19 | HARD | BOX_CAP_FIT | Box cap blanks reach their specified joints and account for exposed cap thickness without changing the declared outside dimensions. |
 
 ---
 
@@ -52,6 +53,26 @@ thicknesses before cutting the fingers shortens the assembled box. The box
 primitive establishes these blank dimensions before the strategy creates
 notches. Resolution preserves the resulting PanelSpec dimensions. Other corner
 strategies retain their existing sizing rules.
+
+## Box Cap Fit
+
+The box primitive establishes cap and wall dimensions before joinery strategies
+create removals. Finger caps span the full outside width and depth, so their
+edges match the explicit wall interfaces. Butt caps retain the inside span.
+
+For Captured receiving `a`, each cap extends into the wall grooves: its edge
+inset from the outside is wall thickness minus groove depth. For receiving `b`,
+the cap spans the outside width/depth and projects beyond the wall ends by cap
+thickness minus groove depth. Subtract each such projection from the wall height
+so the assembled outside height remains the declared box height. Top and bottom
+fits are independent. Groove depth uses the same resolution as Captured.apply;
+an explicit zero depth is invalid rather than a request for the default.
+
+Box cap groove depth must be positive and no greater than the receiving stock
+thickness. Caps must leave positive panel spans and wall height. A receiving-`b`
+box cap with nonzero groove inset requires explicit wall placement, which the
+box primitive does not model; reject it rather than guessing a wall footprint.
+Explicitly supplied panel/interface assemblies retain that placement control.
 
 ---
 

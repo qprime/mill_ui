@@ -115,8 +115,8 @@ class TestBoxAssembly:
         assert left.width_mm == 150
         assert left.height_mm == 100
 
-        assert bottom.width_mm == 200 - 12
-        assert bottom.height_mm == 150 - 12
+        assert bottom.width_mm == 194
+        assert bottom.height_mm == 144
 
     def test_validates_successfully(self):
         assembly = box(

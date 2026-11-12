@@ -1,10 +1,32 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Literal, cast
 
 from assembly.core import Assembly, Interface, InterfaceType, MemberSpec, RemovalKind
 from assembly.joinery import Butt, Captured, Finger, HalfLap, JoineryStrategy
 from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
+
+
+@dataclass(frozen=True)
+class _BoxCapFit:
+    edge_inset_mm: float = 0.0
+    wall_extension_mm: float = 0.0
+
+
+def _box_cap_fit(joinery: JoineryStrategy | Literal["none"] | None, thickness: float) -> _BoxCapFit:
+    if joinery is None or joinery == "none" or isinstance(joinery, Finger):
+        return _BoxCapFit()
+    if isinstance(joinery, Captured):
+        depth = joinery.groove_depth_mm(thickness)
+        if not 0 < depth <= thickness:
+            raise ValueError(f"Box cap groove depth must be positive and at most {thickness}mm, got {depth}mm")
+        if joinery.receiving == "a":
+            return _BoxCapFit(edge_inset_mm=thickness - depth)
+        if joinery.inset_mm != 0:
+            raise ValueError("Box caps with receiving='b' and nonzero inset require explicit wall placement")
+        return _BoxCapFit(wall_extension_mm=thickness - depth)
+    return _BoxCapFit(edge_inset_mm=thickness)
 
 
 def box(
@@ -24,32 +46,39 @@ def box(
         top = default_cap_joinery
     if bottom is None:
         bottom = default_cap_joinery
+    top_fit = _box_cap_fit(top, thickness)
+    bottom_fit = _box_cap_fit(bottom, thickness)
+    wall_height = height - top_fit.wall_extension_mm - bottom_fit.wall_extension_mm
+    if wall_height <= 0:
+        raise ValueError(f"Box cap joints leave no positive wall height: {wall_height}mm")
+    if min(width, length) <= 2 * max(top_fit.edge_inset_mm, bottom_fit.edge_inset_mm):
+        raise ValueError("Box dimensions leave no positive cap span")
     side_width = length if isinstance(side_joinery, Finger) else length - 2 * thickness
     front = PanelSpec(
         name="front",
         width_mm=width,
-        height_mm=height,
+        height_mm=wall_height,
         thickness_mm=thickness,
         role=PanelRole.FRONT,
     )
     back_panel = PanelSpec(
         name="back",
         width_mm=width,
-        height_mm=height,
+        height_mm=wall_height,
         thickness_mm=thickness,
         role=PanelRole.BACK,
     )
     left = PanelSpec(
         name="left_side",
         width_mm=side_width,
-        height_mm=height,
+        height_mm=wall_height,
         thickness_mm=thickness,
         role=PanelRole.LEFT,
     )
     right = PanelSpec(
         name="right_side",
         width_mm=side_width,
-        height_mm=height,
+        height_mm=wall_height,
         thickness_mm=thickness,
         role=PanelRole.RIGHT,
     )
@@ -69,8 +98,8 @@ def box(
     ]
 
     if bottom is not None and bottom != "none":
-        bottom_x = width - 2 * thickness
-        bottom_y = length - 2 * thickness
+        bottom_x = width - 2 * bottom_fit.edge_inset_mm
+        bottom_y = length - 2 * bottom_fit.edge_inset_mm
         bottom_panel = PanelSpec(
             name="bottom",
             width_mm=bottom_x,
@@ -86,8 +115,8 @@ def box(
         interfaces.append(Interface(InterfaceType.BOTTOM, "right_side", "bottom", "bottom", "right", bottom))
 
     if top is not None and top != "none":
-        top_x = width - 2 * thickness
-        top_y = length - 2 * thickness
+        top_x = width - 2 * top_fit.edge_inset_mm
+        top_y = length - 2 * top_fit.edge_inset_mm
         top_panel = PanelSpec(
             name="top",
             width_mm=top_x,

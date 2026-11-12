@@ -389,6 +389,51 @@ class TestDadoDogboneThroughPipeline:
 
 
 class TestNotchDogboneThroughPipeline:
+    @pytest.mark.parametrize(
+        "cap, span, wall_height",
+        [
+            ("finger", (150, 100), 80),
+            ("{joinery: captured, receiving: a, dado_depth: 3mm, inset: 6mm}", (144, 94), 80),
+            ("{joinery: dado, receiving: a, dado_depth: 3mm, inset: 6mm}", (144, 94), 80),
+            ("{joinery: captured, receiving: b, dado_depth: 3mm, inset: 0mm}", (150, 100), 74),
+        ],
+    )
+    def test_box_caps_resolve_to_fitting_profiles_without_overlapping_reliefs(self, cap, span, wall_height):
+        from pml.yaml_parser import parse_pml_yaml
+        from resolution.layout_resolver import resolve_layout
+        from validation import check_overlap
+
+        ast = resolve_layout(
+            parse_pml_yaml(f"""Sheet:
+  physical_width: 600mm
+  physical_height: 400mm
+  thickness: 6mm
+  margin: 10mm
+children:
+  - Assembly:
+      type: box
+      width: 150mm
+      depth: 100mm
+      height: 80mm
+      thickness: 6mm
+      joinery: finger
+      finger_width: 12mm
+      clearance: 0.12mm
+      layout_gap: 10mm
+      top: {cap}
+      bottom: {cap}
+""")
+        )
+        intents = ast_to_removal_intents(ast)
+        profiles = [i for i in intents if i.hint_type == "profile"]
+        assert len(profiles) == 6
+        for profile in profiles:
+            if any(f"assembly_{name}_" in profile.region_id for name in ("bottom", "top")):
+                assert (profile.bounds.width, profile.bounds.height) == pytest.approx(span)
+            else:
+                assert profile.bounds.height == pytest.approx(wall_height)
+        assert check_overlap(intents).is_valid()
+
     def test_small_finger_box_has_full_size_sides_and_separate_notch_reliefs(self):
         from pml.yaml_parser import parse_pml_yaml
         from resolution.layout_resolver import resolve_layout

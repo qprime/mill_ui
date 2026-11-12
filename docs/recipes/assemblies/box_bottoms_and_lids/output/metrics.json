@@ -7,10 +7,10 @@
     }
   },
   "complexity": {
-    "total_moves": 11464,
+    "total_moves": 11560,
     "rapid_moves": 568,
-    "cut_moves": 9320,
-    "rapid_ratio": 0.05
+    "cut_moves": 9416,
+    "rapid_ratio": 0.049
   },
   "fidelity": {
     "tool_changes": 3,
@@ -28,13 +28,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 4624
+        "move_count": 4720
       }
     ]
   },
   "output_size": {
-    "total_bytes": 251084,
-    "total_lines": 10800,
+    "total_bytes": 253986,
+    "total_lines": 10896,
     "files": {
       "pocket-3.17mm": {
         "bytes": 20585,
@@ -45,15 +45,12 @@
         "lines": 5616
       },
       "profile-3.17mm": {
-        "bytes": 131171,
-        "lines": 4472
+        "bytes": 134073,
+        "lines": 4568
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: pocket_assembly_bottom_notch_dogbone_163 and pocket_assembly_top_notch_dogbone_182",
-    "Overlapping regions detected: pocket_assembly_bottom_notch_dogbone_170 and pocket_assembly_top_notch_dogbone_189"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

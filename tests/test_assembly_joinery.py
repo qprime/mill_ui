@@ -5,6 +5,16 @@ from assembly.joinery import Butt, Captured, Finger, HalfLap
 from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
+@pytest.mark.parametrize("receiving", ["a", "b"])
+def test_captured_zero_depth_is_not_replaced_by_the_default(receiving):
+    strategy = Captured(receiving=receiving, dado_depth_mm=0)
+    wall = PanelSpec("wall", 150, 80, 6)
+    cap = PanelSpec("cap", 144, 94, 6)
+    interface = Interface(InterfaceType.BOTTOM, "wall", "bottom", "cap", "top", strategy)
+    with pytest.raises(ValueError, match="depth_mm must be positive"):
+        strategy.apply(interface, wall, cap)
+
+
 class TestButtJoinery:
     def test_valid_for_all_interfaces(self):
         strategy = Butt()

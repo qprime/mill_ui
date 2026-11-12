@@ -19,6 +19,10 @@ depths and clearance are unchanged; the corrected pieces fit their existing cell
 The proof checks both side profiles using the actual 3.175mm cutter, including
 the through-profile and corner-relief programs, within 0.004mm NC rounding.
 
+The captured-bottom and dado-bottom samples now use 37 × 32mm caps, reaching
+their 9mm wall grooves. The [cap-fit proof](../../assemblies/box_bottoms_and_lids/cap-fit-proof.svg)
+shows the same engagement rule on the 6mm box examples.
+
 Sheet 600 × 400 × 18mm mdf.
 
 - `pocket-12.70mm.nc`: pocket, 12.7mm tool, 12 feature(s), to 9mm

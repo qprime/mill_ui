@@ -7,9 +7,9 @@
     }
   },
   "complexity": {
-    "total_moves": 5970,
+    "total_moves": 5922,
     "rapid_moves": 144,
-    "cut_moves": 4980,
+    "cut_moves": 4932,
     "rapid_ratio": 0.024
   },
   "fidelity": {
@@ -33,13 +33,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 3928
+        "move_count": 3880
       }
     ]
   },
   "output_size": {
-    "total_bytes": 144931,
-    "total_lines": 5470,
+    "total_bytes": 143243,
+    "total_lines": 5422,
     "files": {
       "pocket-12.70mm": {
         "bytes": 8951,
@@ -54,8 +54,8 @@
         "lines": 604
       },
       "profile-3.17mm": {
-        "bytes": 106984,
-        "lines": 3464
+        "bytes": 105296,
+        "lines": 3416
       }
     }
   },

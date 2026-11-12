@@ -28,8 +28,8 @@ front recess and tabbed outline. Back features mirror about the sheet center;
 the door therefore appears toward the upper-left in the back setup. Keep the
 sheet registration and use each setup's stated stock-surface Z zero.
 
-The placement preference is accepted; the door construction and hardware
-choices remain for the owner's intent review.
+The owner accepted the illustrated recipe design on 2026-11-12 after reviewing
+the placement, door section and hinge-cup layout.
 [Measurements and source/NC hashes](placement-measurements.json) verify the
 translated front programs and mirrored back coordinates, unchanged part-relative
 cup positions, depths, XY cup extents and full cutter-radius margin clearance.

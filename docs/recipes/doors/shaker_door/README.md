@@ -24,8 +24,8 @@ face. The center pocket is 300 × 500mm, 6mm deep, leaving 13mm of material belo
 it and approximately R6.35 inside corners. The surrounding 50mm frame stays at
 full thickness. Four 3mm-high tabs retain the outside profile.
 
-Placement follows the owner's production-layout preference. The door's
-construction and machining design remain subject to the owner's intent review.
+The owner accepted the illustrated placement, construction and machining design
+on 2026-11-12 after reviewing the diagram and computational checks.
 [Measurements and source/NC hashes](placement-measurements.json) verify the
 translated programs, nominal spans, pocket extent, tabs and full cutter-radius
 clearance. Z depths, feeds, RPM and other non-XY program words are unchanged;

@@ -72,7 +72,7 @@
       "maximum_depth_mm": 19.2
     }
   },
-  "intent_status": "Placement accepted by owner. Door construction and machining design still awaiting owner review.",
+  "intent_status": "Owner accepted the illustrated recipe design on 2026-11-12 after reviewing placement, construction and machining. Software geometry/NC checks agree; no physical cut trial is recorded.",
   "hinge_cups": [
     {
       "back_setup_center_physical_mm": [
@@ -136,5 +136,5 @@
       6.350000000000023
     ]
   },
-  "scope": "Actual NC coordinate translation, cutter-radius envelopes, profile/pocket spans, tab lifts and cup XY extents/depths. Pocket inside corners retain the flat cutter radius; cup helices are tessellated. This is computational evidence, not a physical cut test or approval of the door design."
+  "scope": "Actual NC coordinate translation, cutter-radius envelopes, profile/pocket spans, tab lifts and cup XY extents/depths. Pocket inside corners retain the flat cutter radius; cup helices are tessellated. This is computational evidence, not a physical cut test. Owner design acceptance is recorded separately in intent_status."
 }

@@ -13,7 +13,7 @@
   <rect x="-10" y="-50.0" width="1250.0" height="1160.0" fill="#fff" />
   <g id="DOOR_INTENT_REVIEW" class="door-intent-review">
     <text x="20.000" y="30.000" text-anchor="start" dominant-baseline="middle" fill="#0f172a" stroke="none" font-size="20px" font-weight="bold" font-family="sans-serif">Door intent review: production placement on the declared sheet</text>
-    <text x="20.000" y="58.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Placement accepted. The one-piece door construction shown below still needs your design review.</text>
+    <text x="20.000" y="58.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Owner accepted the illustrated placement and one-piece door design on 2026-11-12.</text>
     <text x="30.000" y="96.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Shaker door · front</text>
     <text x="30.000" y="118.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">500 × 700 × 19 mm sheet; 400 × 600 mm door</text>
     <rect x="30.000" y="140.000" width="275.000" height="385.000" fill="#ffedd5" stroke="#475569" stroke-width=".7" />
@@ -59,7 +59,7 @@
     <text x="20.000" y="918.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Hinge version: two Ø35 × 13 mm back cups, centers 22.5 mm from the left door edge and 100 mm from each end.</text>
     <text x="20.000" y="942.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Back bores run first; flip the whole sheet about X, then machine the front recess and tabbed outline.</text>
     <text x="20.000" y="972.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Actual NC verifies translation, depths, spans, tabs and full cutter clearance. Blank sizes and all non-XY program words are unchanged.</text>
-    <text x="20.000" y="995.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">This is computational evidence. Door construction approval and physical hardware fit are not implied.</text>
+    <text x="20.000" y="995.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Geometry and NC checks agree with the accepted design. No physical cut or hardware-fit trial is recorded.</text>
     <text x="20.000" y="1018.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Measurements and source/NC hashes: placement-measurements.json beside each recipe. Orange margin must remain uncut.</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from shapely.geometry import Polygon
 
 from assembly.notches import build_notched_polygon
 from assembly.panel import Edge, NotchSpec
@@ -124,6 +125,29 @@ class TestBuildNotchedPolygonAreaConservation:
 
 
 class TestBuildNotchedPolygonEdgeCases:
+    @pytest.mark.parametrize("edge", list(Edge))
+    def test_notches_removing_the_whole_panel_raise(self, edge):
+        length, depth = (100, 50) if edge in (Edge.BOTTOM, Edge.TOP) else (50, 100)
+        with pytest.raises(ValueError, match="remove the entire"):
+            build_notched_polygon(100, 50, (50, 25), [_notch(edge, 0, length, depth)])
+
+    @pytest.mark.parametrize("center", [(0, 0), (156.35, 306.35)])
+    @pytest.mark.parametrize("edge", list(Edge))
+    def test_notch_splitting_a_panel_raises_instead_of_selecting_a_fragment(self, edge, center):
+        depth = 50 if edge in (Edge.BOTTOM, Edge.TOP) else 100
+        with pytest.raises(ValueError, match="2 disconnected pieces"):
+            build_notched_polygon(100, 50, center, [_notch(edge, 25, 10, depth)])
+
+    def test_opposing_notches_that_meet_also_raise(self):
+        with pytest.raises(ValueError, match="2 disconnected pieces"):
+            build_notched_polygon(100, 50, (0, 0), [_notch(Edge.BOTTOM, 25, 10, 25), _notch(Edge.TOP, 25, 10, 25)])
+
+    def test_a_thin_connected_web_is_preserved(self):
+        points = build_notched_polygon(
+            100, 50, (0, 0), [_notch(Edge.BOTTOM, 25, 10, 24.999), _notch(Edge.TOP, 25, 10, 24.999)]
+        )
+        assert Polygon(points).area == pytest.approx(4500.02)
+
     def test_zero_length_notch_rejected_by_spec(self):
         with pytest.raises(ValueError, match="positive"):
             NotchSpec(edge=Edge.BOTTOM, u_start_mm=10.0, u_len_mm=0.0, depth_mm=5.0)
@@ -143,14 +167,15 @@ class TestBuildNotchedPolygonEdgeCases:
         pts = build_notched_polygon(100, 50, (50, 25), notches=[notch])
         assert len(pts) == 4
 
-    def test_notch_clamped_to_panel(self):
+    def test_overdeep_notch_clamps_to_the_panel_when_one_piece_remains(self):
         pts = build_notched_polygon(
             100,
             50,
             (50, 25),
-            notches=[_notch(Edge.BOTTOM, u_start=0, u_len=100, depth=100)],
+            notches=[_notch(Edge.BOTTOM, u_start=0, u_len=20, depth=100)],
         )
-        assert len(pts) >= 4
+        assert Polygon(pts).bounds == (20, 0, 100, 50)
+        assert Polygon(pts).area == 4000
 
     def test_tuple_notches_accepted(self):
         pts = build_notched_polygon(

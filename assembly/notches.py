@@ -188,17 +188,23 @@ def build_notched_polygon(
     else:
         geom = base
 
-    geom = orient(geom, sign=1.0)
-
     if geom.is_empty:
-        return tuple(cast(tuple[float, float], c) for c in base.exterior.coords[:-1])
+        raise ValueError(
+            f"Notches remove the entire {width_mm:g} x {height_mm:g}mm panel; expected one connected panel"
+        )
 
     if isinstance(geom, MultiPolygon):
-        geom = max(geom.geoms, key=lambda g: g.area)
+        raise ValueError(
+            f"Notches split the {width_mm:g} x {height_mm:g}mm panel into {len(geom.geoms)} disconnected pieces; "
+            "expected one connected panel"
+        )
 
     if not isinstance(geom, Polygon):
-        return tuple(cast(tuple[float, float], c) for c in base.exterior.coords[:-1])
+        raise ValueError(
+            f"Notches leave {geom.geom_type} for the {width_mm:g} x {height_mm:g}mm panel; expected one connected Polygon"
+        )
 
+    geom = orient(geom, sign=1.0)
     return tuple(cast(tuple[float, float], c) for c in geom.exterior.coords[:-1])
 
 

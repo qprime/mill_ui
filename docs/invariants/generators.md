@@ -81,6 +81,9 @@ If `tab_count == 0`, tab dimensions are ignored.
   behavior. Gutter widths must contain the full specified V-bit geometry;
   V-groove widths are derived from angle and depths.
 - For ConcentricBorder in pocket mode: sorted `insets_mm` differ by at least `groove_width_mm`; rings exactly `groove_width_mm` apart touch. Insets are distinct in both modes.
+- For required notched panels: empty or disconnected subtraction results raise
+  `ValueError` naming the member, even with `allow_empty=True`. Required assembly
+  members cannot be silently omitted; see assembly invariant AJ-25.
 - For Voronoi: `min_spacing_mm` is optional and > 0 when given. In pocket mode adjacent pockets are at least `line_width_mm` apart, because each cell is inset by `line_width_mm / 2`.
 
 ---

@@ -55,12 +55,15 @@ def notched_panel_generator(
 
     items: list[Item] = []
 
-    outer = build_notched_polygon(
-        width_mm=params.width_mm,
-        height_mm=params.height_mm,
-        center=(0.0, 0.0),
-        notches=params.notches,
-    )
+    try:
+        outer = build_notched_polygon(
+            width_mm=params.width_mm,
+            height_mm=params.height_mm,
+            center=(0.0, 0.0),
+            notches=params.notches,
+        )
+    except ValueError as exc:
+        raise ValueError(f"Notched panel '{params.part_name or shape_id}': {exc}") from exc
 
     polygon_points = [[x, y] for x, y in outer]
     profile_item = Item(

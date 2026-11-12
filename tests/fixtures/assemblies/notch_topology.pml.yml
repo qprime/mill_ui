@@ -1,0 +1,19 @@
+project: notch_topology
+Sheet:
+  width: 400mm
+  height: 300mm
+  thickness: 18mm
+  margin: 10mm
+children:
+  - Assembly:
+      type: box
+      width: 30mm
+      depth: 100mm
+      height: 50mm
+      thickness: 18mm
+      joinery: finger
+      finger_count: 3
+      clearance: 0mm
+      top: none
+      bottom: none
+      show_labels: true

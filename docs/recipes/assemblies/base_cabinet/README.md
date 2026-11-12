@@ -74,6 +74,29 @@ blank spans and the overhang/rear leg are preserved. Source and NC hashes are in
 This is computational proof. The existing recipe's outputs are byte-identical;
 the fixture covers the previously missing interface-free case.
 
+### Invalid notch-result topology
+
+![Rejected notch layouts and legacy NC profiles](notch-topology-proof.svg)
+
+The shared notch builder now rejects subtraction that removes the whole panel
+or splits it into disconnected pieces. The old fallbacks restored the original
+rectangle or kept only the largest fragment. None of the 33 current recipes
+triggered those fallbacks in the audit; this cabinet's outputs remain unchanged.
+
+The deliberately invalid
+[PML fixture](../../../../tests/fixtures/assemblies/notch_topology.pml.yml)
+uses a 30mm-wide box with 18mm finger joints. Its front splits into two pieces;
+an extreme-clearance variant removes it entirely. The comparison reconstructs
+the legacy profile program using the actual cutter. Those old jobs already
+reported other design errors, but still wrote the fallback profiles. The current
+CLI rejects both during resolution, names the member, and writes no NC programs.
+Its normal cleanup also removes stale programs.
+
+[Measurements and source/NC hashes](notch-topology-measurements.json) record the
+comparison and CLI results. This is computational evidence for rejecting invalid
+layouts, not an approved machining example. Valid clipping and thin connected
+webs retain their existing geometry.
+
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
 - `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 feature(s), to 9mm

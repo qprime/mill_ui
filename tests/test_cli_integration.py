@@ -220,6 +220,23 @@ def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
     assert (out_dir / "part.pml.svg").exists()
 
 
+@pytest.mark.parametrize("clearance, error", [(0, "2 disconnected pieces"), (100, "remove the entire")])
+def test_notch_topology_errors_reach_the_cli_and_remove_stale_programs(tmp_path: Path, clearance, error):
+    fixture = Path(__file__).parent / "fixtures/assemblies/notch_topology.pml.yml"
+    text = fixture.read_text()
+    source = tmp_path / "part.pml.yml"
+    source.write_text(text.replace("width: 30mm", "width: 100mm"))
+    out_dir = tmp_path / "out"
+    args = ["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)]
+    _run_cli(args)
+    assert list(out_dir.glob("*.nc"))
+    source.write_text(text.replace("clearance: 0mm", f"clearance: {clearance}mm"))
+    result = _run_cli(args, check=False)
+    assert result.returncode == 1
+    assert error in result.stderr and "front" in result.stderr
+    assert not list(out_dir.glob("*.nc"))
+
+
 def test_missing_roundover_tool_exits_3_and_replaces_old_gcode_with_diagnostics(tmp_path: Path):
     source = _write_simple_profile(tmp_path)
     out_dir = tmp_path / "out"

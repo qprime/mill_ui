@@ -1563,6 +1563,11 @@ The current sheet thickness must match every assembly panel, including its back.
 Mixed-thickness parts require separate matching-stock jobs. Unsupported back
 placement, conflicting insets and groove depth/stock mismatches are errors.
 
+Member notches must leave one connected panel. Removing the whole blank or
+splitting it into separate pieces errors with the member name; the builder does
+not restore the blank or select a fragment. Declare separate members when
+separate parts are intended.
+
 **Cubby Parameters:**
 
 | Parameter | Required | Default | Description |

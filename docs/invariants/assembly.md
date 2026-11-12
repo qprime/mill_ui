@@ -32,6 +32,7 @@
 | AJ-22 | HARD | CARCASS_CAP_AND_SHELF_FIT | Carcass cap and shelf spans include their groove engagement; cap exposure preserves the declared height, and shelf positions leave equal clear openings between actual cap faces. |
 | AJ-23 | HARD | CARCASS_BACK_AND_TOE_FIT | Carcass back spans, stock, depth placement and groove contacts share the actual inside frame; mirrored inside faces preserve the front toe recess and its overhang. |
 | AJ-24 | HARD | ORIGINAL_REMOVALS_PRESERVED | Assembly resolution keeps each original notch/dado once and appends each interface's new cuts, including members with no interfaces. |
+| AJ-25 | HARD | NOTCH_RESULT_SINGLE_PANEL | Notch subtraction must leave one connected panel; empty or disconnected results error instead of restoring stock or selecting a fragment. |
 
 ---
 
@@ -212,6 +213,19 @@ Edges are indexed counter-clockwise starting from bottom:
 - `depth_mm > 0` (notch depth)
 - `u_start + u_len <= edge_length` (fits on edge)
 - Adjacent notches cannot overlap
+
+`build_notched_polygon()` requires one nonempty Polygon after subtraction.
+Empty results error with the panel dimensions; disconnected results also report
+the number of pieces. Other geometry types error explicitly. Valid connected
+results retain the existing clipping and counterclockwise exterior orientation,
+including thin surviving webs. The builder does not buffer, repair, restore the
+original rectangle or choose one fragment.
+
+The notched-panel generator adds the member name to this error and propagates it
+even with `allow_empty=True`: a required assembly member cannot disappear.
+The normal CLI fails during resolution before writing current programs, and its
+normal clean step removes stale programs. `--no-clean` retains its existing
+behavior.
 
 ---
 

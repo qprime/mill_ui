@@ -1,0 +1,68 @@
+{
+  "baseline_commit": "ff1bd038369fb10da0795dad8d7f7eb219b0f2a6",
+  "source_fixture": "tests/fixtures/assemblies/notch_topology.pml.yml",
+  "fixture_sha256": "502d160ead5013756cbbc242d694f896cc7c842a2bdde0e2611f5f64b5f57416",
+  "rounding_tolerance_mm": 0.004,
+  "cases": {
+    "split": {
+      "input_overrides": {
+        "clearance_mm": 0
+      },
+      "input_sha256": "502d160ead5013756cbbc242d694f896cc7c842a2bdde0e2611f5f64b5f57416",
+      "nominal_front_span_mm": [
+        30,
+        50
+      ],
+      "requested_remaining_geometry": "MultiPolygon",
+      "requested_remaining_area_mm2": 1000.0,
+      "requested_fragment_areas_mm2": [
+        500.00000000000006,
+        499.99999999999994
+      ],
+      "legacy_profile_measured_span_mm": [
+        29.999999999999943,
+        16.666999999999998
+      ],
+      "legacy_profile_material_area_mm2": 500.00999999999897,
+      "legacy_cli_exit": 3,
+      "legacy_other_design_error_count": 2,
+      "legacy_nc_sha256": {
+        "dogbone-3.17mm.nc": "8d0f8bc538f9f62369e290a4085ab50db6501085bb363d21404b966221eaed50",
+        "profile-6.35mm.nc": "1a5cd15d869118aab623d5f7d7412c523e16e1ff41da7968f33e515c475811b4"
+      },
+      "current_cli_exit": 1,
+      "current_error": "Error: Notched panel 'front': Notches split the 30 x 50mm panel into 2 disconnected pieces; expected one connected panel",
+      "current_nc_count": 0,
+      "stale_programs_removed": true
+    },
+    "empty": {
+      "input_overrides": {
+        "clearance_mm": 100
+      },
+      "input_sha256": "9b95a2fa55c37179cf3587b60ce3a6cddb0f4b4d51d618f79aa5a635612fedbc",
+      "nominal_front_span_mm": [
+        30,
+        50
+      ],
+      "requested_remaining_geometry": "Polygon",
+      "requested_remaining_area_mm2": 0.0,
+      "requested_fragment_areas_mm2": [],
+      "legacy_profile_measured_span_mm": [
+        29.999999999999943,
+        50.00000000000001
+      ],
+      "legacy_profile_material_area_mm2": 1499.9999999999975,
+      "legacy_cli_exit": 3,
+      "legacy_other_design_error_count": 6,
+      "legacy_nc_sha256": {
+        "dogbone-3.17mm.nc": "3fbf06dae09537c6bdf4170b9beeb566380ed797a89037005e6a72cb20071191",
+        "profile-6.35mm.nc": "20d59a9755707662f6c5a5d8be5a07837b5fb0d26c17de0094b817731b2c264b"
+      },
+      "current_cli_exit": 1,
+      "current_error": "Error: Notched panel 'front': Notches remove the entire 30 x 50mm panel; expected one connected panel",
+      "current_nc_count": 0,
+      "stale_programs_removed": true
+    }
+  },
+  "verification_scope": "Legacy profile program cutter sweeps and current real CLI rejections. Legacy jobs already had separate design errors; these old programs are not approved machining output. No current program is emitted for invalid topology."
+}

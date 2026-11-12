@@ -31,6 +31,18 @@ class TestNotchedPanelParams:
 
 
 class TestNotchedPanelGenerator:
+    @pytest.mark.parametrize("allow_empty", [False, True])
+    @pytest.mark.parametrize("start, length, error", [(0, 100, "remove the entire"), (25, 10, "disconnected pieces")])
+    def test_invalid_topology_errors_with_the_part_name(self, allow_empty, start, length, error):
+        params = NotchedPanelParams(
+            width_mm=100,
+            height_mm=50,
+            notches=(NotchSpec(Edge.BOTTOM, start, length, 50),),
+            part_name="named_member",
+        )
+        with pytest.raises(ValueError, match=rf"named_member.*{error}"):
+            notched_panel_generator(params, allow_empty=allow_empty)
+
     @pytest.mark.parametrize("center", [(0, 0), (156.35, 306.35), (438.35, 742.35), (1030.35, 306.35)])
     def test_local_notched_outline_is_valid_and_independent_of_placement(self, center):
         from shapely.geometry import Polygon

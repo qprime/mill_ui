@@ -637,6 +637,12 @@ Angular pattern placement around a center point. A single `Radial` key with an `
 | `radius` | No | domain-derived | Distance from center |
 | `depth` | Yes | — | Engrave/pocket depth |
 
+Angles are absolute, counter-clockwise from +X. `end_angle` defaults to 360°,
+independently of `start_angle`. For a full circle starting at 45°, set
+`start_angle: 45` and `end_angle: 405`; for clock labels starting at the top,
+use 90°–450°. A 360° span omits the repeated endpoint. A partial arc includes
+both endpoints, so 45°–360° is a 315° arc rather than a rotated full circle.
+
 **Element: pocket** — pocketed wedge regions between rays:
 
 ```yaml

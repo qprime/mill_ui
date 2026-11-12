@@ -29,6 +29,7 @@ children:
         - Radial:
             rays: 12
             start_angle: 90
+            end_angle: 450
             radius: 92mm
             depth: 0.5mm
             element:
@@ -59,6 +60,7 @@ children:
         - Radial:
             rays: 4
             start_angle: 45
+            end_angle: 405
             radius: 40mm
             depth: 0.5mm
             element:
@@ -70,6 +72,7 @@ children:
         - Radial:
             rays: 4
             start_angle: 90
+            end_angle: 450
             radius: 120mm
             depth: 0.5mm
             element:

@@ -27,7 +27,7 @@
     ]
   },
   "output_size": {
-    "total_bytes": 149698,
+    "total_bytes": 149720,
     "total_lines": 5825,
     "files": {
       "pocket-12.70mm": {
@@ -35,7 +35,7 @@
         "lines": 786
       },
       "engrave-1.00mm": {
-        "bytes": 29472,
+        "bytes": 29494,
         "lines": 1660
       },
       "profile-3.17mm": {
@@ -44,12 +44,7 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: engrave_generated_radial_svg_4_001 and engrave_generated_radial_svg_5_006",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_004 and engrave_generated_radial_svg_5_002",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_006 and engrave_generated_radial_svg_5_004",
-    "Overlapping regions detected: engrave_generated_radial_svg_4_006 and engrave_generated_radial_svg_5_005"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

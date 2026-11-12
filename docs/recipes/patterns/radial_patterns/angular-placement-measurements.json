@@ -1,0 +1,87 @@
+{
+  "baseline_commit": "fd222b9abfea11988eefd85b10591e9765c482ee",
+  "tool_diameter_mm": 1,
+  "depth_mm": 0.5,
+  "nc_rounding_tolerance_mm": 0.002,
+  "before_short_ray_degrees": [
+    45,
+    150,
+    255,
+    360
+  ],
+  "after_short_ray_degrees": [
+    45,
+    135,
+    225,
+    315
+  ],
+  "before_clock_span_degrees": [
+    90,
+    360
+  ],
+  "after_clock_span_degrees": [
+    90,
+    450
+  ],
+  "nc_sha256": {
+    "before": "fb6fe15f11bc204bf5e237c02422f533c3d503cb9c0b362ae9ed73e1e7c40591",
+    "after": "23c99b64c8029992a3bb534a4f6c05e4c6b22abfaff7e2a619ed64b6ca9b68f1"
+  },
+  "reported_pairs": [
+    {
+      "a": "engrave_generated_radial_svg_4_001",
+      "b": "engrave_generated_radial_svg_5_006",
+      "before": {
+        "centerline_distance_mm": 0.0,
+        "conservative_cutter_overlap_mm2": 8.416022972614114
+      },
+      "after": {
+        "centerline_distance_mm": 7.070999999999998,
+        "conservative_cutter_overlap_mm2": 0.0
+      }
+    },
+    {
+      "a": "engrave_generated_radial_svg_4_004",
+      "b": "engrave_generated_radial_svg_5_002",
+      "before": {
+        "centerline_distance_mm": 0.0,
+        "conservative_cutter_overlap_mm2": 6.966824841969607
+      },
+      "after": {
+        "centerline_distance_mm": 5.796108590520308,
+        "conservative_cutter_overlap_mm2": 0.0
+      }
+    },
+    {
+      "a": "engrave_generated_radial_svg_4_006",
+      "b": "engrave_generated_radial_svg_5_004",
+      "before": {
+        "centerline_distance_mm": 0.0,
+        "conservative_cutter_overlap_mm2": 4.050664191223257
+      },
+      "after": {
+        "centerline_distance_mm": 5.796108590520345,
+        "conservative_cutter_overlap_mm2": 0.0
+      }
+    },
+    {
+      "a": "engrave_generated_radial_svg_4_006",
+      "b": "engrave_generated_radial_svg_5_005",
+      "before": {
+        "centerline_distance_mm": 0.0,
+        "conservative_cutter_overlap_mm2": 10.699087795948836
+      },
+      "after": {
+        "centerline_distance_mm": 5.796108590520345,
+        "conservative_cutter_overlap_mm2": 0.0
+      }
+    }
+  ],
+  "after_cross_array_min_centerline_distance_mm": 5.796108590520308,
+  "after_all_distinct_motifs_min_distance_mm": 5.796108590520308,
+  "unchanged_files": [
+    "pocket-12.70mm.nc",
+    "profile-3.17mm.nc",
+    "machining_summary.json"
+  ]
+}

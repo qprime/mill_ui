@@ -113,7 +113,8 @@ children:
     grid: [3, 2]
     perimeter_joinery: finger
     internal_joinery: half_lap
-    back: captured""",
+    back: captured
+    back_thickness: 18mm""",
         ],
         ids=["single_sheet_shelves", "multiple_sheet_dividers"],
     )

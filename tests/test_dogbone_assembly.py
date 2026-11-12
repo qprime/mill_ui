@@ -389,6 +389,20 @@ class TestDadoDogboneThroughPipeline:
 
 
 class TestNotchDogboneThroughPipeline:
+    @pytest.mark.parametrize("edge", [Edge.BOTTOM, Edge.RIGHT, Edge.TOP, Edge.LEFT])
+    def test_assembly_relief_reference_is_inside_the_notch_cutout(self, edge):
+        from layout_ast.compositional import CompositionalLayoutAST
+
+        sheet = Sheet(width_mm=500, height_mm=500, thickness_mm=18, margin_mm=0)
+        resolver = LayoutResolver(CompositionalLayoutAST(sheet=sheet))
+        panel = PanelSpec("notched", 200, 300, 18, notches=(NotchSpec(edge, 30, 40, 20, dogbone=DogboneSpec()),))
+        items = resolver._panels_to_items([(panel, 10, 10)], show_labels=False, show_edge_colors=False)
+        intents = ast_to_removal_intents(LayoutAST(sheet=sheet, items=tuple(items)))
+        relief = next(i for i in intents if i.dogbone_corners is not None)
+        assert relief.dogbone_reference_point == relief.bounds.center
+        planner = removal_intents_to_planner_input(intents)
+        assert planner.dogbones[0].reference_point == relief.bounds.center
+
     @pytest.mark.parametrize("columns", [2, 3])
     def test_cubby_back_grooves_and_perimeter_reliefs_are_compatible(self, columns):
         from core.geometry import polygon_region

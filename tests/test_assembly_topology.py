@@ -177,19 +177,19 @@ class TestCubbyAssembly:
             cols=3,
         )
 
-        assert assembly.panels["top"].width_mm == width - 2 * thickness
+        assert assembly.panels["top"].width_mm == width
         assert assembly.panels["top"].height_mm == depth
-        assert assembly.panels["bottom"].width_mm == width - 2 * thickness
+        assert assembly.panels["bottom"].width_mm == width
         assert assembly.panels["bottom"].height_mm == depth
         assert assembly.panels["left_side"].width_mm == depth
         assert assembly.panels["left_side"].height_mm == height
         assert assembly.panels["right_side"].width_mm == depth
         assert assembly.panels["right_side"].height_mm == height
 
-        assert assembly.panels["shelf_1"].width_mm == width - 2 * thickness
+        assert assembly.panels["shelf_1"].width_mm == width - thickness
         assert assembly.panels["shelf_1"].height_mm == depth
         assert assembly.panels["partition_1"].width_mm == depth
-        assert assembly.panels["partition_1"].height_mm == height - 2 * thickness
+        assert assembly.panels["partition_1"].height_mm == height - thickness
 
     def test_cubby_half_lap_interfaces_have_both_positions(self):
         assembly = cubby(
@@ -214,9 +214,6 @@ class TestCubbyAssembly:
         rows = 3
         cols = 3
 
-        cell_width = (width - 2 * thickness) / cols
-        cell_height = (height - 2 * thickness) / rows
-
         assembly = cubby(
             width=width,
             length=200,
@@ -238,10 +235,10 @@ class TestCubbyAssembly:
             [i.position_along_edge_b_mm for i in half_lap_interfaces if i.position_along_edge_b_mm is not None]
         )
 
-        expected_partition_1_pos = cell_width - thickness / 2
-        expected_partition_2_pos = 2 * cell_width - thickness / 2
-        expected_shelf_1_pos = cell_height - thickness / 2
-        expected_shelf_2_pos = 2 * cell_height - thickness / 2
+        expected_partition_1_pos = 135
+        expected_partition_2_pos = 279
+        expected_shelf_1_pos = 135
+        expected_shelf_2_pos = 279
 
         assert expected_partition_1_pos in positions_a
         assert expected_partition_2_pos in positions_a
@@ -254,9 +251,6 @@ class TestCubbyAssembly:
         thickness = 18
         rows = 2
         cols = 3
-
-        cell_width = (width - 2 * thickness) / cols
-        cell_height = (height - 2 * thickness) / rows
 
         assembly = cubby(
             width=width,
@@ -276,12 +270,12 @@ class TestCubbyAssembly:
             assert interface.position_along_edge_a_mm != interface.position_along_edge_b_mm
 
         positions_a = {i.position_along_edge_a_mm for i in half_lap_interfaces}
-        expected_pos_on_shelf_1 = cell_width - thickness / 2
-        expected_pos_on_shelf_2 = 2 * cell_width - thickness / 2
+        expected_pos_on_shelf_1 = 285
+        expected_pos_on_shelf_2 = 579
         assert positions_a == {expected_pos_on_shelf_1, expected_pos_on_shelf_2}
 
         positions_b = {i.position_along_edge_b_mm for i in half_lap_interfaces}
-        expected_pos_on_partition = cell_height - thickness / 2
+        expected_pos_on_partition = 282
         assert positions_b == {expected_pos_on_partition}
 
     def test_cubby_validates_successfully(self):

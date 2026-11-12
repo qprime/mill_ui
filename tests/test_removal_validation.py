@@ -105,8 +105,11 @@ def _notch_and_back_groove(start: float = 20) -> list[RemovalIntent]:
 
 @pytest.mark.parametrize("start", [0, 20])
 @pytest.mark.parametrize("order", [(0, 1, 2), (2, 1, 0), (1, 2, 0)])
-def test_back_groove_may_cross_relief_of_a_proven_profile_notch(start, order):
+@pytest.mark.parametrize("reference_inside_notch", [False, True])
+def test_back_groove_may_cross_relief_of_a_proven_profile_notch(start, order, reference_inside_notch):
     intents = _notch_and_back_groove(start)
+    if reference_inside_notch:
+        intents[2] = replace(intents[2], dogbone_reference_point=intents[2].bounds.center)
     assert check_overlap([intents[index] for index in order]).is_valid()
 
 
@@ -127,7 +130,7 @@ def test_notch_relief_cannot_claim_a_profile_that_is_missing():
         (1, {"depth_profile": DepthProfile.constant(-1, -9)}),
         (2, {"dogbone_corners": None}),
         (2, {"dogbone_reference_point": None}),
-        (2, {"dogbone_reference_point": (30, 90)}),
+        (2, {"dogbone_reference_point": (130, 90)}),
         (2, {"dogbone_corners": ((20, 83), (40, 83))}),
         (2, {"depth_profile": DepthProfile.constant(0, -19)}),
         (2, {"depth_profile": DepthProfile.constant(-1, -18)}),

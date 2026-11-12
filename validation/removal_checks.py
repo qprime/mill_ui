@@ -422,7 +422,7 @@ def _is_hole_through_pocket_floor(a: RemovalIntent, b: RemovalIntent) -> bool:
     return region.contains(envelope) and region.boundary.distance(envelope) > _OVERLAP_CLEARANCE_TOLERANCE_MM
 
 
-def _notch_owner_region(profile: RemovalIntent, relief: RemovalIntent) -> BaseGeometry | None:
+def _notch_owner_region(profile: RemovalIntent, relief: RemovalIntent, notch: BaseGeometry) -> BaseGeometry | None:
     if profile.face != relief.face or profile.shape.lower() != "polygon" or profile.depth_profile.z_top != 0:
         return None
     if profile.depth_profile.mode != "constant" or not math.isclose(
@@ -430,14 +430,10 @@ def _notch_owner_region(profile: RemovalIntent, relief: RemovalIntent) -> BaseGe
     ):
         return None
     region = _profile_containment_region(profile)
-    if (
-        region is None
-        or not region.is_valid
-        or relief.dogbone_reference_point is None
-        or not region.contains(Point(relief.dogbone_reference_point))
-    ):
+    if region is None or not region.is_valid or relief.dogbone_reference_point is None:
         return None
-    return region
+    reference = Point(relief.dogbone_reference_point)
+    return region if region.contains(reference) or notch.contains(reference) else None
 
 
 def _is_groove_on_profile_notch_relief(a: RemovalIntent, b: RemovalIntent, profiles: list[RemovalIntent]) -> bool:
@@ -470,7 +466,7 @@ def _is_groove_on_profile_notch_relief(a: RemovalIntent, b: RemovalIntent, profi
     ):
         return False
     for profile in profiles:
-        region = _notch_owner_region(profile, relief)
+        region = _notch_owner_region(profile, relief, notch)
         if region is None:
             continue
         blank = box(profile.bounds.x_min, profile.bounds.y_min, profile.bounds.x_max, profile.bounds.y_max)

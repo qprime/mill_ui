@@ -23,6 +23,11 @@ The captured-bottom and dado-bottom samples now use 37 × 32mm caps, reaching
 their 9mm wall grooves. The [cap-fit proof](../../assemblies/box_bottoms_and_lids/cap-fit-proof.svg)
 shows the same engagement rule on the 6mm box examples.
 
+The cubby coupon now includes captured-member engagement and aligned, opposed
+half-laps from the same corrected factory as the
+[full-size cubby](../../assemblies/cubby_organizer/README.md). Generated notch
+relief bores use each cutout’s center to clear its mating corners.
+
 Sheet 600 × 400 × 18mm mdf.
 
 - `pocket-12.70mm.nc`: pocket, 12.7mm tool, 12 feature(s), to 9mm

@@ -97,8 +97,9 @@ containment. Hole depths remain measured from the original sheet surface;
 
 A shallow rectangular groove may meet a two-corner, relief-only notch operation
 when an outside Polygon profile proves their shared part context. The profile
-must be valid, contain the relief's reference point, and end at the same depth
-as the relief. Both feature envelopes must remain within its blank bounds. The
+must be valid and end at the same depth as the relief. The reference point may
+lie in retained material or in the proven notch cutout; it orients the bores
+rather than identifying retained stock. Both feature envelopes must remain within its blank bounds. The
 relief rectangle must open onto the blank edge, lie outside retained material,
 and have its complete inner corner edge on the actual profile boundary. This
 recognizes a back groove meeting existing perimeter finger notches without

@@ -1,0 +1,291 @@
+{
+  "sample_depths": 1060,
+  "worst": [
+    0,
+    null
+  ],
+  "collision_count": 0,
+  "collisions": [],
+  "sources": {
+    "back": {
+      "sheet": 1,
+      "profile": "profile_generated_assembly_back_0_back_outer",
+      "blank_origin": [
+        6.350000000000023,
+        6.350000000000023
+      ],
+      "nominal_span": [
+        882.0,
+        582.0
+      ]
+    },
+    "top": {
+      "sheet": 1,
+      "profile": "profile_generated_assembly_top_4_top_outer",
+      "blank_origin": [
+        6.350000000000023,
+        598.35
+      ],
+      "nominal_span": [
+        900.0,
+        300.0
+      ]
+    },
+    "partition_1": {
+      "sheet": 1,
+      "profile": "profile_generated_assembly_partition_1_28_partition_1_outer",
+      "blank_origin": [
+        898.3499999999999,
+        6.350000000000023
+      ],
+      "nominal_span": [
+        279.0,
+        582.0
+      ]
+    },
+    "bottom": {
+      "sheet": 2,
+      "profile": "profile_generated_assembly_bottom_0_bottom_outer",
+      "blank_origin": [
+        6.350000000000023,
+        6.349999999999994
+      ],
+      "nominal_span": [
+        900.0,
+        300.0
+      ]
+    },
+    "shelf_1": {
+      "sheet": 2,
+      "profile": "profile_generated_assembly_shelf_1_24_shelf_1_outer",
+      "blank_origin": [
+        6.350000000000023,
+        316.35
+      ],
+      "nominal_span": [
+        882.0,
+        279.0
+      ]
+    },
+    "partition_2": {
+      "sheet": 2,
+      "profile": "profile_generated_assembly_partition_2_27_partition_2_outer",
+      "blank_origin": [
+        898.3499999999999,
+        316.35
+      ],
+      "nominal_span": [
+        279.0,
+        582.0
+      ]
+    },
+    "left_side": {
+      "sheet": 3,
+      "profile": "profile_generated_assembly_left_side_0_left_side_outer",
+      "blank_origin": [
+        6.349999999999994,
+        6.350000000000023
+      ],
+      "nominal_span": [
+        300.0,
+        600.0
+      ]
+    },
+    "right_side": {
+      "sheet": 3,
+      "profile": "profile_generated_assembly_right_side_25_right_side_outer",
+      "blank_origin": [
+        316.35,
+        6.350000000000023
+      ],
+      "nominal_span": [
+        300.0,
+        600.0
+      ]
+    }
+  },
+  "baseline_commit": "b8e642518ff7d045d343d9e502bbf1d2adc11984",
+  "source": "current emitted G-code cutter sweeps; independently specified assembly placements",
+  "tools_mm": [
+    3.175,
+    12.7
+  ],
+  "profile_depth_mm": 18.2,
+  "notch_relief_depth_mm": 18,
+  "groove_depth_mm": 9,
+  "nc_tolerance_mm": 0.004,
+  "back_rear_gap_mm": 12,
+  "back_faces_y_mm": [
+    270,
+    288
+  ],
+  "clear_openings_mm": [
+    276,
+    273
+  ],
+  "nc_sha256": {
+    "sheet_1.dogbone-12.70mm.nc": "69e680bf323d0ab2f2a5a7e650835d15374084175162a474c9cbbad63daa5f67",
+    "sheet_1.dogbone-3.17mm.nc": "27e8d666e39bb24cafd4e621df857e0013d35f8782c17e5c697615daf27a87b1",
+    "sheet_1.pocket-12.70mm.nc": "2554819f08ad2642d49ed17108f4efaf95de7ae37dfa318d0d36afe629c6cd8d",
+    "sheet_1.profile-3.17mm.nc": "002dcbf22e230c2913cf83d3033d68a78b0481c611006348169fef86b8c6c559",
+    "sheet_2.dogbone-12.70mm.nc": "02a52dabd7adabc36c07742151bc78163c0e84ba0a30c8d7a27409f96e647da6",
+    "sheet_2.dogbone-3.17mm.nc": "69f046d945c0791d1a30876390ed5237053901734d0549c7d4e55070e7e8f614",
+    "sheet_2.pocket-12.70mm.nc": "07c8c1488ca36317694433de4cd43781482b46c7ef8f3be44229acb84ced6d99",
+    "sheet_2.profile-3.17mm.nc": "1a3d87f301b8f346001c54684c59c1d064310769d536a231da7f0af978719a70",
+    "sheet_3.dogbone-12.70mm.nc": "3d7918fb99c28b155ce5d3e2e6d429f8aca295a09a6974eda7aaba58d7050c40",
+    "sheet_3.dogbone-3.17mm.nc": "e8c3cca6ea22274bbbb48b926e9f1e1894dce21323ad18502a26b5ff624a6f92",
+    "sheet_3.pocket-12.70mm.nc": "10c8ea25f52dcad111aba245eec2bb868b81bfc9958fb8a68befa83fa8cb25cc",
+    "sheet_3.profile-3.17mm.nc": "7a70f1c88a1c1bd40384bee619281f8575ae52076596dbbadd86d36e35aa408e"
+  },
+  "assembly_placements": {
+    "back": {
+      "kind": "back",
+      "origin_xyz_mm": [
+        9,
+        270,
+        9
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": -1
+    },
+    "top": {
+      "kind": "horizontal",
+      "origin_xyz_mm": [
+        0,
+        300,
+        582
+      ],
+      "reverse_depth_axis": true,
+      "front_normal_sign": -1
+    },
+    "partition_1": {
+      "kind": "vertical",
+      "origin_xyz_mm": [
+        294,
+        0,
+        9
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "bottom": {
+      "kind": "horizontal",
+      "origin_xyz_mm": [
+        0,
+        0,
+        0
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "shelf_1": {
+      "kind": "horizontal",
+      "origin_xyz_mm": [
+        9,
+        0,
+        291
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "partition_2": {
+      "kind": "vertical",
+      "origin_xyz_mm": [
+        588,
+        0,
+        9
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "left_side": {
+      "kind": "vertical",
+      "origin_xyz_mm": [
+        0,
+        0,
+        0
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "right_side": {
+      "kind": "vertical",
+      "origin_xyz_mm": [
+        882,
+        300,
+        0
+      ],
+      "reverse_depth_axis": true,
+      "front_normal_sign": -1
+    }
+  },
+  "sampling": {
+    "regular_y_mm": [
+      0.25,
+      299.75,
+      0.5
+    ],
+    "additional_offsets_at_nominal_depth_breaks_mm": [
+      -1.5,
+      -1,
+      -0.5,
+      -0.1,
+      -0.02,
+      0.02,
+      0.1,
+      0.5,
+      1,
+      1.5
+    ]
+  },
+  "measured_retained_bounds_mm": {
+    "back": [
+      0.0004999999999775184,
+      0.0004999999999775184,
+      882.0005,
+      582.0005
+    ],
+    "top": [
+      0.0004999999999775184,
+      0.0004999999999881766,
+      900.0005,
+      300.0005
+    ],
+    "partition_1": [
+      -0.0004999999999881766,
+      0.0004999999999775184,
+      279.0005000000001,
+      582.0005
+    ],
+    "bottom": [
+      0.0004999999999775184,
+      0.0005000000000059401,
+      900.0005,
+      300.0005
+    ],
+    "shelf_1": [
+      0.0004999999999775184,
+      0.0004999999999313332,
+      882.0005,
+      279.0005
+    ],
+    "partition_2": [
+      -0.0004999999999881766,
+      0.0004999999999313332,
+      279.0005000000001,
+      582.0005
+    ],
+    "left_side": [
+      0.0005000000000059401,
+      0.0004999999999775184,
+      300.0005,
+      600.0005
+    ],
+    "right_side": [
+      0.0004999999999313332,
+      0.0004999999999775184,
+      300.0005,
+      600.0005
+    ]
+  }
+}

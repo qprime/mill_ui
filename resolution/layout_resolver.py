@@ -3099,7 +3099,7 @@ class LayoutResolver:
                         is_through=True,
                         dogbone=notch.dogbone,
                         dogbone_corners=(c1, c2),
-                        dogbone_reference_point=panel_center,
+                        dogbone_reference_point=notch_center,
                     ),
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_notch_dogbone"),
                 )

@@ -6,19 +6,19 @@
       "source": "cubby_organizer.pml.yml",
       "sheet_index": 1,
       "job_name": "cubby_organizer_sheet_1",
-      "items": 32
+      "items": 30
     },
     {
       "source": "cubby_organizer.pml.yml",
       "sheet_index": 2,
       "job_name": "cubby_organizer_sheet_2",
-      "items": 52
+      "items": 29
     },
     {
       "source": "cubby_organizer.pml.yml",
       "sheet_index": 3,
       "job_name": "cubby_organizer_sheet_3",
-      "items": 25
+      "items": 50
     }
   ]
 }

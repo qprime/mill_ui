@@ -27,6 +27,8 @@
 | AJ-17 | STRUCTURAL | DOGBONE_DEFAULT_ALL_CORNER_STRATEGIES | Dogbone fillets are default for all corner-producing strategies (Captured, Finger, HalfLap) |
 | AJ-18 | HARD | DOGBONE_DEPTH_MATCHES_PARENT | Dogbone bore depth equals the parent cut's Z depth: dado depth for a face groove, through the stock for an edge notch. Notch depth measures XY reach into the panel, not Z. |
 | AJ-19 | HARD | BOX_CAP_FIT | Box cap blanks reach their specified joints and account for exposed cap thickness without changing the declared outside dimensions. |
+| AJ-20 | HARD | CUBBY_ASSEMBLED_FIT | Cubby blanks and interface positions derive from common assembly spans; captured members engage their grooves, the declared outside envelope is preserved, and crossing half-laps open from opposite ends. |
+| AJ-21 | HARD | NOTCH_RELIEF_REFERENCE | Generated notch relief uses the cutout center as its directional reference, so its bores clear the mating corners. |
 
 ---
 
@@ -75,6 +77,34 @@ box primitive does not model; reject it rather than guessing a wall footprint.
 Explicitly supplied panel/interface assemblies retain that placement control.
 
 ---
+
+## Cubby Assembled Fit
+
+The cubby factory owns panel spans and interface positions in a common assembly
+frame: X left to right, Y front to rear, Z bottom to top. Finger caps span the
+outside width. Captured shelves, partitions and backs extend into their
+receiving grooves; a rear setback never reduces the back's width or height.
+Equal clear openings account for divider thickness before computing positions.
+Interface positions subtract the receiving panel's origin from these shared
+planes rather than recomputing the grid in panel-local coordinates.
+
+For cubby, `back_inset` is the clear distance from the rear outside edge to the
+back panel's rear face. Its front face is another back thickness forward.
+Internal members end at that front face, plus their actual support-groove
+engagement when enabled. The back is installed during frame assembly.
+
+The inside machining face determines each panel's local orientation. Top and
+right-side depth axes run rear to front; bottom, left-side and divider depth
+axes run front to rear. Shelf half-laps open at local bottom (front) and
+partition half-laps at local right (rear). Continuous crossings require HalfLap
+and matching depth extents. Butt/Captured crossings need explicit segmented
+topology; unsupported receiving directions, conflicting insets, nonpositive
+openings and grooves deeper than receiving stock raise errors.
+
+Generated notch relief uses the notch rectangle's center, rather than the whole
+panel center, to orient its bores. This reference describes the removed void;
+it is not a point that must lie inside retained material. Explicit user-supplied
+references retain their existing semantics. Relief depth still follows AJ-18.
 
 ## Toe-Kick Dado Positioning
 

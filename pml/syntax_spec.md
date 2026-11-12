@@ -1465,7 +1465,15 @@ Grid of cubbies with perimeter and internal joinery:
 | perimeter_joinery | no | finger | Joinery for outer box |
 | internal_joinery | no | half_lap | Joinery for shelf/partition intersections |
 | back_thickness | no | - | Back panel thickness (enables captured back) |
-| back_inset | no | 0mm | Back panel setback from rear edge |
+| back_inset | no | 0mm | Clear gap from rear outside edge to the back panel’s rear face |
+
+For cubby, a 300mm depth, 18mm back and `back_inset: 12mm` place the back’s
+rear face at 288mm and front face at 270mm from the front. The back’s width
+and height include groove engagement independently of this setback. Internal
+members reach its front face plus their support-groove engagement. Grooves must
+fit the receiving stock: an 18mm divider’s default 9mm support groove cannot
+be cut into a 6mm back. Use a suitable back thickness or explicitly disable
+`back_internal_support`; depths are never silently reduced.
 
 ##### Multi-Sheet Partitioning
 

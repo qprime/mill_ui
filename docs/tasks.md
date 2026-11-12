@@ -312,6 +312,15 @@ no-cut zone) from unused working stock in review visuals. Move related features
 together in the front authoring frame; back setups retain the registered
 whole-sheet mirror. Do not shrink sheets solely to improve presentation.
 
+Manually positioned recipe groups use lower-left placement with the complete
+selected cutter sweep inside the margin. Automatic assembly/nesting layouts
+retain their packer's cutter padding. Full-bed surfacing and the production
+sheet's sheet-wide waste-cut workflow retain their intentional sheet alignment.
+The [placement audit](recipes/placement-audit.json) records subsequent layout
+translations and current artifact hashes. Earlier detailed machining proofs
+remain snapshots with their original coordinates/hashes; use the placement
+audit to relate them to the current translated layout.
+
 Part-cutting recipes explicitly declare a 10mm sheet margin and show its shaded
 no-cut border. Blueprints name the configured margin in their notes. Full-bed
 spoilboard surfacing is the explicit exception: its zero margin and edge overrun

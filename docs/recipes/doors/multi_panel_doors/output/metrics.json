@@ -28,15 +28,15 @@
     ]
   },
   "output_size": {
-    "total_bytes": 61879,
+    "total_bytes": 61717,
     "total_lines": 2224,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 44738,
+        "bytes": 44626,
         "lines": 1544
       },
       "profile-3.17mm": {
-        "bytes": 17141,
+        "bytes": 17091,
         "lines": 680
       }
     }

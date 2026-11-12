@@ -22,8 +22,8 @@ components:
 
 children:
   - AtPosition:
-      x: 220mm
-      y: 520mm
+      x: 203.2mm
+      y: 503.2mm
       width: 400mm
       height: 1000mm
       child:
@@ -43,8 +43,8 @@ children:
                             depth: 6mm
 
   - AtPosition:
-      x: 640mm
-      y: 420mm
+      x: 623.2mm
+      y: 403.2mm
       width: 360mm
       height: 800mm
       child:
@@ -65,8 +65,8 @@ children:
                             depth: 6mm
 
   - AtPosition:
-      x: 1010mm
-      y: 420mm
+      x: 993.2mm
+      y: 403.2mm
       width: 340mm
       height: 800mm
       child:

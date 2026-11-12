@@ -11,8 +11,8 @@ children:
       id: sign
       label: "Shop Sign"
       at:
-        x: 290mm
-        y: 190mm
+        x: 270.03mm
+        y: 170.03mm
         width: 540mm
         height: 340mm
       children:
@@ -33,8 +33,8 @@ children:
                   children:
                     - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 290mm
-            y: 255mm
+            x: 270.03mm
+            y: 235.03mm
             width: 400mm
             height: 10mm
             child:
@@ -44,8 +44,8 @@ children:
                 children:
                   - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 290mm
-            y: 125mm
+            x: 270.03mm
+            y: 105.03mm
             width: 400mm
             height: 10mm
             child:
@@ -55,8 +55,8 @@ children:
                 children:
                   - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 75mm
-            y: 190mm
+            x: 55.03mm
+            y: 170.03mm
             width: 10mm
             height: 110mm
             child:
@@ -66,8 +66,8 @@ children:
                 children:
                   - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 505mm
-            y: 190mm
+            x: 485.03mm
+            y: 170.03mm
             width: 10mm
             height: 110mm
             child:
@@ -77,8 +77,8 @@ children:
                 children:
                   - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 290mm
-            y: 100mm
+            x: 270.03mm
+            y: 80.03mm
             width: 360mm
             height: 30mm
             child:
@@ -89,8 +89,8 @@ children:
                 children:
                   - Engrave: {depth: 0.5mm}
         - AtPosition:
-            x: 290mm
-            y: 210mm
+            x: 270.03mm
+            y: 190.03mm
             child:
               EngraveText:
                 text: "WORKSHOP"
@@ -99,8 +99,8 @@ children:
                 font: futuram
                 alignment: center
         - AtPosition:
-            x: 290mm
-            y: 155mm
+            x: 270.03mm
+            y: 135.03mm
             child:
               EngraveText:
                 text: "EST. 2026"

@@ -7,9 +7,9 @@
     }
   },
   "complexity": {
-    "total_moves": 7182,
+    "total_moves": 7230,
     "rapid_moves": 36,
-    "cut_moves": 6792,
+    "cut_moves": 6840,
     "rapid_ratio": 0.005
   },
   "fidelity": {
@@ -18,7 +18,7 @@
       {
         "name": "pocket",
         "tool_diameter_mm": 12.7,
-        "move_count": 4756
+        "move_count": 4804
       },
       {
         "name": "edge",
@@ -33,12 +33,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 212241,
-    "total_lines": 6949,
+    "total_bytes": 214031,
+    "total_lines": 6997,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 143189,
-        "lines": 4604
+        "bytes": 144979,
+        "lines": 4652
       },
       "edge-12.70mm": {
         "bytes": 1057,

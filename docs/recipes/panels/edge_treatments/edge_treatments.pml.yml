@@ -10,7 +10,7 @@ children:
   - Rect:
       id: chamfer_edge
       label: "Chamfer Edge"
-      at: {x: 155mm, y: 190mm, width: 240mm, height: 300mm}
+      at: {x: 126.38mm, y: 156.38mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Chamfer: {width: 6mm, depth: 6mm}
@@ -18,7 +18,7 @@ children:
   - Rect:
       id: roundover_edge
       label: "Roundover Edge"
-      at: {x: 440mm, y: 190mm, width: 240mm, height: 300mm}
+      at: {x: 411.38mm, y: 156.38mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Roundover: {radius: 6mm}
@@ -26,7 +26,7 @@ children:
   - Rect:
       id: allowance_edge
       label: "Rough + Finish Edge"
-      at: {x: 725mm, y: 190mm, width: 240mm, height: 300mm}
+      at: {x: 696.38mm, y: 156.38mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Edge:

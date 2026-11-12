@@ -37,11 +37,11 @@
     ]
   },
   "output_size": {
-    "total_bytes": 240956,
+    "total_bytes": 239962,
     "total_lines": 8744,
     "files": {
       "pocket-12.70mm": {
-        "bytes": 11951,
+        "bytes": 11893,
         "lines": 426
       },
       "pocket-9.53mm": {
@@ -49,11 +49,11 @@
         "lines": 96
       },
       "pocket-3.17mm": {
-        "bytes": 56439,
+        "bytes": 56099,
         "lines": 1990
       },
       "engrave-1.00mm": {
-        "bytes": 154801,
+        "bytes": 154205,
         "lines": 5730
       },
       "profile-3.17mm": {

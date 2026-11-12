@@ -10,7 +10,7 @@ children:
   - Rect:
       id: medallion_panel
       label: "Medallion Panel"
-      at: {x: 190mm, y: 190mm, width: 320mm, height: 320mm}
+      at: {x: 163.2mm, y: 163.2mm, width: 320mm, height: 320mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -24,4 +24,4 @@ children:
                     - Island:
                         id: medallion
                         children:
-                          - Circle: {diameter: 100mm, at: {x: 190mm, y: 190mm}}
+                          - Circle: {diameter: 100mm, at: {x: 163.2mm, y: 163.2mm}}

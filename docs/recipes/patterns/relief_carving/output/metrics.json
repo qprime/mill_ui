@@ -27,19 +27,19 @@
     ]
   },
   "output_size": {
-    "total_bytes": 6876537,
+    "total_bytes": 6782685,
     "total_lines": 190339,
     "files": {
       "heightfield-rough-6.35mm": {
-        "bytes": 298849,
+        "bytes": 294793,
         "lines": 8442
       },
       "heightfield-rough-3.17mm": {
-        "bytes": 2855017,
+        "bytes": 2815621,
         "lines": 79269
       },
       "heightfield-finish-3.19mm": {
-        "bytes": 3722671,
+        "bytes": 3672271,
         "lines": 102628
       }
     }

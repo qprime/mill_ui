@@ -22,15 +22,15 @@
     ]
   },
   "output_size": {
-    "total_bytes": 278918,
+    "total_bytes": 271313,
     "total_lines": 9730,
     "files": {
       "engrave-1.00mm": {
-        "bytes": 151509,
+        "bytes": 146269,
         "lines": 5449
       },
       "profile-3.17mm": {
-        "bytes": 127409,
+        "bytes": 125044,
         "lines": 4281
       }
     }

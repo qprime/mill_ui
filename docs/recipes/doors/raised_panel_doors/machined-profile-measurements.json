@@ -110,5 +110,20 @@
       "contained_in_cells": true
     }
   },
-  "outline_profile_unchanged": true
+  "outline_profile_unchanged": true,
+  "subsequent_placement": {
+    "baseline_commit": "284cee05654a4c224a92f5d13bca475321c3fafe",
+    "translation_mm": [
+      -41.8,
+      -36.79
+    ],
+    "current_source_sha256": "abef00d071a6ee9972cefb3b31e52175afdadc9048281f609db901167bf1b52e",
+    "current_nc_sha256": {
+      "pocket_offset-12.70mm.nc": "53bd5b01e8dbbf9d85be33b213cb994bd2dafcf193ad1fcdb4a75bf6c421abbf",
+      "edge-12.70mm-90deg.nc": "28460ed72e1f23711ac0d40c3916fc517b1d770fa0dc5fd440c2015a8fc0acd6",
+      "edge-12.70mm-60deg.nc": "d4d5b788e4a2df670c31dbd878bf008036fc17a43c68973f7034cf75bcf7ab85",
+      "profile-3.17mm.nc": "489645f6b6e351ff953043bca17970286c04cf5f8b968b93032fe70d94e0091b"
+    },
+    "verification": "See ../../placement-audit.json. Original measurements and hashes above describe the preceding placement; nominal part geometry and machining parameters are preserved."
+  }
 }

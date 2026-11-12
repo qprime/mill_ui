@@ -1008,5 +1008,20 @@
     0.0
   ],
   "verification_scope": "Emitted NC and ideal declared quarter-circle cutter model; no physical cutting or verified shop inventory claim.",
-  "source_amendment": "2026-11-12: explicit 10mm sheet margin; working-frame placements rebased to preserve physical coordinates. Measured NC programs remain byte-identical."
+  "source_amendment": "2026-11-12: explicit 10mm sheet margin; working-frame placements rebased to preserve physical coordinates. Measured NC programs remain byte-identical.",
+  "subsequent_placement": {
+    "baseline_commit": "284cee05654a4c224a92f5d13bca475321c3fafe",
+    "translation_mm": [
+      -28.62,
+      -33.62
+    ],
+    "current_source_sha256": "f25258e1eba81ccb8afbee2ab1afbb53f76b0d1fb551bc8766e011c5bcf67106",
+    "current_nc_sha256": {
+      "edge-12.70mm.nc": "8e204cdf95860154e248f40772d34cbb700c38bd4a23f851d8c0f28c1f34c56e",
+      "edge-12.00mm.nc": "923778f73a4e74d13f2c77cc175a0653c954e0ed6d64fdb167264ca4627f78c2",
+      "profile-3.17mm.nc": "340d7e884aa2b60f8930c7513c6b472cf533e43125bf85d7a9cca9183d24991a",
+      "finish-3.17mm.nc": "10c597239ff9879c7cbefebeb5c5bb2a9a9ee522c64456f60f39c5c5a7cfdc70"
+    },
+    "verification": "See ../../placement-audit.json. Original measurements and hashes above describe the preceding placement; nominal part geometry and machining parameters are preserved."
+  }
 }

@@ -50,150 +50,150 @@
     <rect x="390.000" y="10.000" width="10.000" height="780.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 25.000 760.000 L 375.000 760.000 L 375.000 40.000 L 25.000 40.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+    <path d="M 13.200 786.800 L 363.200 786.800 L 363.200 66.800 L 13.200 66.800 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 23.413 761.587 L 376.587 761.587 L 376.587 38.413 L 23.413 38.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+    <path d="M 11.612 788.387 L 364.787 788.387 L 364.787 65.212 L 11.612 65.212 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="25.000" y="651.000" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_lower" />
-    <rect x="25.000" y="131.000" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_upper" />
-    <rect x="363.000" y="40.000" width="12.000" height="720.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="back_rabbet" />
+    <rect x="13.200" y="677.800" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_lower" />
+    <rect x="13.200" y="157.800" width="350.000" height="18.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="dado_upper" />
+    <rect x="351.200" y="66.800" width="12.000" height="720.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="back_rabbet" />
   </g>
   <g id="HOLES" class="holes">
-    <circle cx="62.000" cy="592.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000" />
-    <line x1="59.000" y1="592.000" x2="65.000" y2="592.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_h" />
-    <line x1="62.000" y1="589.000" x2="62.000" y2="595.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_v" />
-    <circle cx="62.000" cy="560.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001" />
-    <line x1="59.000" y1="560.000" x2="65.000" y2="560.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_h" />
-    <line x1="62.000" y1="557.000" x2="62.000" y2="563.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_v" />
-    <circle cx="62.000" cy="528.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002" />
-    <line x1="59.000" y1="528.000" x2="65.000" y2="528.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_h" />
-    <line x1="62.000" y1="525.000" x2="62.000" y2="531.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_v" />
-    <circle cx="62.000" cy="496.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003" />
-    <line x1="59.000" y1="496.000" x2="65.000" y2="496.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_h" />
-    <line x1="62.000" y1="493.000" x2="62.000" y2="499.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_v" />
-    <circle cx="62.000" cy="464.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004" />
-    <line x1="59.000" y1="464.000" x2="65.000" y2="464.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_h" />
-    <line x1="62.000" y1="461.000" x2="62.000" y2="467.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_v" />
-    <circle cx="62.000" cy="432.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005" />
-    <line x1="59.000" y1="432.000" x2="65.000" y2="432.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_h" />
-    <line x1="62.000" y1="429.000" x2="62.000" y2="435.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_v" />
-    <circle cx="62.000" cy="400.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006" />
-    <line x1="59.000" y1="400.000" x2="65.000" y2="400.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_h" />
-    <line x1="62.000" y1="397.000" x2="62.000" y2="403.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_v" />
-    <circle cx="62.000" cy="368.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007" />
-    <line x1="59.000" y1="368.000" x2="65.000" y2="368.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_h" />
-    <line x1="62.000" y1="365.000" x2="62.000" y2="371.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_v" />
-    <circle cx="62.000" cy="336.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008" />
-    <line x1="59.000" y1="336.000" x2="65.000" y2="336.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_h" />
-    <line x1="62.000" y1="333.000" x2="62.000" y2="339.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_v" />
-    <circle cx="62.000" cy="304.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009" />
-    <line x1="59.000" y1="304.000" x2="65.000" y2="304.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_h" />
-    <line x1="62.000" y1="301.000" x2="62.000" y2="307.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_v" />
-    <circle cx="62.000" cy="272.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010" />
-    <line x1="59.000" y1="272.000" x2="65.000" y2="272.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_h" />
-    <line x1="62.000" y1="269.000" x2="62.000" y2="275.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_v" />
-    <circle cx="62.000" cy="240.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011" />
-    <line x1="59.000" y1="240.000" x2="65.000" y2="240.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_h" />
-    <line x1="62.000" y1="237.000" x2="62.000" y2="243.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_v" />
-    <circle cx="62.000" cy="208.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012" />
-    <line x1="59.000" y1="208.000" x2="65.000" y2="208.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_h" />
-    <line x1="62.000" y1="205.000" x2="62.000" y2="211.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_v" />
-    <circle cx="326.000" cy="592.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000" />
-    <line x1="323.000" y1="592.000" x2="329.000" y2="592.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_h" />
-    <line x1="326.000" y1="589.000" x2="326.000" y2="595.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_v" />
-    <circle cx="326.000" cy="560.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001" />
-    <line x1="323.000" y1="560.000" x2="329.000" y2="560.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_h" />
-    <line x1="326.000" y1="557.000" x2="326.000" y2="563.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_v" />
-    <circle cx="326.000" cy="528.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002" />
-    <line x1="323.000" y1="528.000" x2="329.000" y2="528.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_h" />
-    <line x1="326.000" y1="525.000" x2="326.000" y2="531.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_v" />
-    <circle cx="326.000" cy="496.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003" />
-    <line x1="323.000" y1="496.000" x2="329.000" y2="496.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_h" />
-    <line x1="326.000" y1="493.000" x2="326.000" y2="499.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_v" />
-    <circle cx="326.000" cy="464.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004" />
-    <line x1="323.000" y1="464.000" x2="329.000" y2="464.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_h" />
-    <line x1="326.000" y1="461.000" x2="326.000" y2="467.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_v" />
-    <circle cx="326.000" cy="432.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005" />
-    <line x1="323.000" y1="432.000" x2="329.000" y2="432.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_h" />
-    <line x1="326.000" y1="429.000" x2="326.000" y2="435.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_v" />
-    <circle cx="326.000" cy="400.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006" />
-    <line x1="323.000" y1="400.000" x2="329.000" y2="400.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_h" />
-    <line x1="326.000" y1="397.000" x2="326.000" y2="403.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_v" />
-    <circle cx="326.000" cy="368.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007" />
-    <line x1="323.000" y1="368.000" x2="329.000" y2="368.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_h" />
-    <line x1="326.000" y1="365.000" x2="326.000" y2="371.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_v" />
-    <circle cx="326.000" cy="336.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008" />
-    <line x1="323.000" y1="336.000" x2="329.000" y2="336.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_h" />
-    <line x1="326.000" y1="333.000" x2="326.000" y2="339.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_v" />
-    <circle cx="326.000" cy="304.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009" />
-    <line x1="323.000" y1="304.000" x2="329.000" y2="304.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_h" />
-    <line x1="326.000" y1="301.000" x2="326.000" y2="307.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_v" />
-    <circle cx="326.000" cy="272.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010" />
-    <line x1="323.000" y1="272.000" x2="329.000" y2="272.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_h" />
-    <line x1="326.000" y1="269.000" x2="326.000" y2="275.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_v" />
-    <circle cx="326.000" cy="240.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011" />
-    <line x1="323.000" y1="240.000" x2="329.000" y2="240.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_h" />
-    <line x1="326.000" y1="237.000" x2="326.000" y2="243.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_v" />
-    <circle cx="326.000" cy="208.000" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012" />
-    <line x1="323.000" y1="208.000" x2="329.000" y2="208.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_h" />
-    <line x1="326.000" y1="205.000" x2="326.000" y2="211.000" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_v" />
+    <circle cx="50.200" cy="618.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000" />
+    <line x1="47.200" y1="618.800" x2="53.200" y2="618.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_h" />
+    <line x1="50.200" y1="615.800" x2="50.200" y2="621.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_000_cross_v" />
+    <circle cx="50.200" cy="586.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001" />
+    <line x1="47.200" y1="586.800" x2="53.200" y2="586.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_h" />
+    <line x1="50.200" y1="583.800" x2="50.200" y2="589.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_001_cross_v" />
+    <circle cx="50.200" cy="554.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002" />
+    <line x1="47.200" y1="554.800" x2="53.200" y2="554.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_h" />
+    <line x1="50.200" y1="551.800" x2="50.200" y2="557.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_002_cross_v" />
+    <circle cx="50.200" cy="522.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003" />
+    <line x1="47.200" y1="522.800" x2="53.200" y2="522.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_h" />
+    <line x1="50.200" y1="519.800" x2="50.200" y2="525.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_003_cross_v" />
+    <circle cx="50.200" cy="490.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004" />
+    <line x1="47.200" y1="490.800" x2="53.200" y2="490.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_h" />
+    <line x1="50.200" y1="487.800" x2="50.200" y2="493.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_004_cross_v" />
+    <circle cx="50.200" cy="458.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005" />
+    <line x1="47.200" y1="458.800" x2="53.200" y2="458.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_h" />
+    <line x1="50.200" y1="455.800" x2="50.200" y2="461.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_005_cross_v" />
+    <circle cx="50.200" cy="426.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006" />
+    <line x1="47.200" y1="426.800" x2="53.200" y2="426.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_h" />
+    <line x1="50.200" y1="423.800" x2="50.200" y2="429.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_006_cross_v" />
+    <circle cx="50.200" cy="394.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007" />
+    <line x1="47.200" y1="394.800" x2="53.200" y2="394.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_h" />
+    <line x1="50.200" y1="391.800" x2="50.200" y2="397.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_007_cross_v" />
+    <circle cx="50.200" cy="362.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008" />
+    <line x1="47.200" y1="362.800" x2="53.200" y2="362.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_h" />
+    <line x1="50.200" y1="359.800" x2="50.200" y2="365.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_008_cross_v" />
+    <circle cx="50.200" cy="330.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009" />
+    <line x1="47.200" y1="330.800" x2="53.200" y2="330.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_h" />
+    <line x1="50.200" y1="327.800" x2="50.200" y2="333.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_009_cross_v" />
+    <circle cx="50.200" cy="298.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010" />
+    <line x1="47.200" y1="298.800" x2="53.200" y2="298.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_h" />
+    <line x1="50.200" y1="295.800" x2="50.200" y2="301.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_010_cross_v" />
+    <circle cx="50.200" cy="266.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011" />
+    <line x1="47.200" y1="266.800" x2="53.200" y2="266.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_h" />
+    <line x1="50.200" y1="263.800" x2="50.200" y2="269.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_011_cross_v" />
+    <circle cx="50.200" cy="234.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012" />
+    <line x1="47.200" y1="234.800" x2="53.200" y2="234.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_h" />
+    <line x1="50.200" y1="231.800" x2="50.200" y2="237.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_1_012_cross_v" />
+    <circle cx="314.200" cy="618.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000" />
+    <line x1="311.200" y1="618.800" x2="317.200" y2="618.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_h" />
+    <line x1="314.200" y1="615.800" x2="314.200" y2="621.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_000_cross_v" />
+    <circle cx="314.200" cy="586.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001" />
+    <line x1="311.200" y1="586.800" x2="317.200" y2="586.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_h" />
+    <line x1="314.200" y1="583.800" x2="314.200" y2="589.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_001_cross_v" />
+    <circle cx="314.200" cy="554.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002" />
+    <line x1="311.200" y1="554.800" x2="317.200" y2="554.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_h" />
+    <line x1="314.200" y1="551.800" x2="314.200" y2="557.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_002_cross_v" />
+    <circle cx="314.200" cy="522.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003" />
+    <line x1="311.200" y1="522.800" x2="317.200" y2="522.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_h" />
+    <line x1="314.200" y1="519.800" x2="314.200" y2="525.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_003_cross_v" />
+    <circle cx="314.200" cy="490.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004" />
+    <line x1="311.200" y1="490.800" x2="317.200" y2="490.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_h" />
+    <line x1="314.200" y1="487.800" x2="314.200" y2="493.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_004_cross_v" />
+    <circle cx="314.200" cy="458.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005" />
+    <line x1="311.200" y1="458.800" x2="317.200" y2="458.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_h" />
+    <line x1="314.200" y1="455.800" x2="314.200" y2="461.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_005_cross_v" />
+    <circle cx="314.200" cy="426.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006" />
+    <line x1="311.200" y1="426.800" x2="317.200" y2="426.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_h" />
+    <line x1="314.200" y1="423.800" x2="314.200" y2="429.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_006_cross_v" />
+    <circle cx="314.200" cy="394.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007" />
+    <line x1="311.200" y1="394.800" x2="317.200" y2="394.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_h" />
+    <line x1="314.200" y1="391.800" x2="314.200" y2="397.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_007_cross_v" />
+    <circle cx="314.200" cy="362.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008" />
+    <line x1="311.200" y1="362.800" x2="317.200" y2="362.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_h" />
+    <line x1="314.200" y1="359.800" x2="314.200" y2="365.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_008_cross_v" />
+    <circle cx="314.200" cy="330.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009" />
+    <line x1="311.200" y1="330.800" x2="317.200" y2="330.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_h" />
+    <line x1="314.200" y1="327.800" x2="314.200" y2="333.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_009_cross_v" />
+    <circle cx="314.200" cy="298.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010" />
+    <line x1="311.200" y1="298.800" x2="317.200" y2="298.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_h" />
+    <line x1="314.200" y1="295.800" x2="314.200" y2="301.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_010_cross_v" />
+    <circle cx="314.200" cy="266.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011" />
+    <line x1="311.200" y1="266.800" x2="317.200" y2="266.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_h" />
+    <line x1="314.200" y1="263.800" x2="314.200" y2="269.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_011_cross_v" />
+    <circle cx="314.200" cy="234.800" r="2.500" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012" />
+    <line x1="311.200" y1="234.800" x2="317.200" y2="234.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_h" />
+    <line x1="314.200" y1="231.800" x2="314.200" y2="237.800" stroke="#e8e8e8" fill="none" stroke-width="1.5" id="generated_hole_2_012_cross_v" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="200.000" y="660.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_lower_label">Lower Shelf Dado</text>
-    <text x="200.000" y="140.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_upper_label">Upper Shelf Dado</text>
-    <text x="369.000" y="400.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="back_rabbet_label">Back Rabbet</text>
+    <text x="188.200" y="686.800" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_lower_label">Lower Shelf Dado</text>
+    <text x="188.200" y="166.800" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="dado_upper_label">Upper Shelf Dado</text>
+    <text x="357.200" y="426.800" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="back_rabbet_label">Back Rabbet</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="363.0" y1="40.0" x2="363.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="40.0" x2="375.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="363.0" y1="20.0" x2="375.0" y2="20.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="363.0,20.0 366.0,17.0 366.0,23.0" fill="#5ab9ea" />
-    <polygon points="375.0,20.0 372.0,17.0 372.0,23.0" fill="#5ab9ea" />
-    <text x="369.0" y="15.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">12.0mm</text>
-    <line x1="375.0" y1="40.0" x2="395.0" y2="40.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="760.0" x2="395.0" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="395.0" y1="40.0" x2="395.0" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="395.0,40.0 392.0,43.0 398.0,43.0" fill="#5ab9ea" />
-    <polygon points="395.0,760.0 392.0,757.0 398.0,757.0" fill="#5ab9ea" />
-    <text x="400.0" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 400.0 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
-    <line x1="25.0" y1="651.0" x2="25.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="651.0" x2="375.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="25.0" y1="611.0" x2="375.0" y2="611.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="25.0,611.0 28.0,608.0 28.0,614.0" fill="#5ab9ea" />
-    <polygon points="375.0,611.0 372.0,608.0 372.0,614.0" fill="#5ab9ea" />
-    <text x="200.0" y="606.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
-    <line x1="375.0" y1="651.0" x2="415.0" y2="651.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="669.0" x2="415.0" y2="669.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="415.0" y1="651.0" x2="415.0" y2="669.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="415.0,651.0 412.0,654.0 418.0,654.0" fill="#5ab9ea" />
-    <polygon points="415.0,669.0 412.0,666.0 418.0,666.0" fill="#5ab9ea" />
-    <text x="420.0" y="660.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 420.0 660.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.0mm</text>
-    <line x1="25.0" y1="40.0" x2="25.0" y2="-20.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="40.0" x2="375.0" y2="-20.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="25.0" y1="-20.0" x2="375.0" y2="-20.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="25.0,-20.0 28.0,-23.0 28.0,-17.0" fill="#5ab9ea" />
-    <polygon points="375.0,-20.0 372.0,-23.0 372.0,-17.0" fill="#5ab9ea" />
-    <text x="200.0" y="-25.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
-    <line x1="375.0" y1="40.0" x2="421.5875" y2="40.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="375.0" y1="760.0" x2="421.5875" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="421.5875" y1="40.0" x2="421.5875" y2="760.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="421.5875,40.0 418.5875,43.0 424.5875,43.0" fill="#5ab9ea" />
-    <polygon points="421.5875,760.0 418.5875,757.0 424.5875,757.0" fill="#5ab9ea" />
-    <text x="426.5875" y="400.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 426.5875 400.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
-    <line x1="62.0" y1="208.0" x2="62.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="326.0" y1="208.0" x2="326.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="62.0" y1="188.0" x2="326.0" y2="188.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="62.0,188.0 65.0,185.0 65.0,191.0" fill="#5ab9ea" />
-    <polygon points="326.0,188.0 323.0,185.0 323.0,191.0" fill="#5ab9ea" />
-    <text x="194.0" y="183.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">264.0mm</text>
-    <line x1="62.0" y1="208.0" x2="102.0" y2="208.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="62.0" y1="240.0" x2="102.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="102.0" y1="208.0" x2="102.0" y2="240.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="102.0,208.0 99.0,211.0 105.0,211.0" fill="#5ab9ea" />
-    <polygon points="102.0,240.0 99.0,237.0 105.0,237.0" fill="#5ab9ea" />
-    <text x="107.0" y="224.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 107.0 224.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">32.0mm</text>
+    <line x1="351.2" y1="66.79999999999995" x2="351.2" y2="46.799999999999955" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="66.79999999999995" x2="363.2" y2="46.799999999999955" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="351.2" y1="46.799999999999955" x2="363.2" y2="46.799999999999955" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="351.2,46.799999999999955 354.2,43.799999999999955 354.2,49.799999999999955" fill="#5ab9ea" />
+    <polygon points="363.2,46.799999999999955 360.2,43.799999999999955 360.2,49.799999999999955" fill="#5ab9ea" />
+    <text x="357.2" y="41.799999999999955" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">12.0mm</text>
+    <line x1="363.2" y1="66.79999999999995" x2="383.2" y2="66.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="786.8" x2="383.2" y2="786.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="383.2" y1="66.79999999999995" x2="383.2" y2="786.8" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="383.2,66.79999999999995 380.2,69.79999999999995 386.2,69.79999999999995" fill="#5ab9ea" />
+    <polygon points="383.2,786.8 380.2,783.8 386.2,783.8" fill="#5ab9ea" />
+    <text x="388.2" y="426.79999999999995" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 388.2 426.79999999999995)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
+    <line x1="13.199999999999989" y1="677.8" x2="13.199999999999989" y2="637.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="677.8" x2="363.2" y2="637.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="13.199999999999989" y1="637.8" x2="363.2" y2="637.8" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="13.199999999999989,637.8 16.19999999999999,634.8 16.19999999999999,640.8" fill="#5ab9ea" />
+    <polygon points="363.2,637.8 360.2,634.8 360.2,640.8" fill="#5ab9ea" />
+    <text x="188.2" y="632.8" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
+    <line x1="363.2" y1="677.8" x2="403.2" y2="677.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="695.8" x2="403.2" y2="695.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="403.2" y1="677.8" x2="403.2" y2="695.8" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="403.2,677.8 400.2,680.8 406.2,680.8" fill="#5ab9ea" />
+    <polygon points="403.2,695.8 400.2,692.8 406.2,692.8" fill="#5ab9ea" />
+    <text x="408.2" y="686.8" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 408.2 686.8)" fill="#5ab9ea" font-family="monospace" font-size="10px">18.0mm</text>
+    <line x1="13.199999999999989" y1="66.79999999999995" x2="13.199999999999989" y2="6.7999999999999545" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="66.79999999999995" x2="363.2" y2="6.7999999999999545" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="13.199999999999989" y1="6.7999999999999545" x2="363.2" y2="6.7999999999999545" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="13.199999999999989,6.7999999999999545 16.19999999999999,3.7999999999999545 16.19999999999999,9.799999999999955" fill="#5ab9ea" />
+    <polygon points="363.2,6.7999999999999545 360.2,3.7999999999999545 360.2,9.799999999999955" fill="#5ab9ea" />
+    <text x="188.2" y="1.7999999999999545" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">350.0mm</text>
+    <line x1="363.2" y1="66.79999999999995" x2="421.5875" y2="66.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="363.2" y1="786.8" x2="421.5875" y2="786.8" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="421.5875" y1="66.79999999999995" x2="421.5875" y2="786.8" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="421.5875,66.79999999999995 418.5875,69.79999999999995 424.5875,69.79999999999995" fill="#5ab9ea" />
+    <polygon points="421.5875,786.8 418.5875,783.8 424.5875,783.8" fill="#5ab9ea" />
+    <text x="426.5875" y="426.79999999999995" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 426.5875 426.79999999999995)" fill="#5ab9ea" font-family="monospace" font-size="10px">720.0mm</text>
+    <line x1="50.19999999999999" y1="234.79999999999995" x2="50.19999999999999" y2="214.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="314.2" y1="234.79999999999995" x2="314.2" y2="214.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="50.19999999999999" y1="214.79999999999995" x2="314.2" y2="214.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="50.19999999999999,214.79999999999995 53.19999999999999,211.79999999999995 53.19999999999999,217.79999999999995" fill="#5ab9ea" />
+    <polygon points="314.2,214.79999999999995 311.2,211.79999999999995 311.2,217.79999999999995" fill="#5ab9ea" />
+    <text x="182.2" y="209.79999999999995" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">264.0mm</text>
+    <line x1="50.199999999999996" y1="234.79999999999995" x2="90.19999999999999" y2="234.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="50.199999999999996" y1="266.79999999999995" x2="90.19999999999999" y2="266.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="90.19999999999999" y1="234.79999999999995" x2="90.19999999999999" y2="266.79999999999995" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="90.19999999999999,234.79999999999995 87.19999999999999,237.79999999999995 93.19999999999999,237.79999999999995" fill="#5ab9ea" />
+    <polygon points="90.19999999999999,266.79999999999995 87.19999999999999,263.79999999999995 93.19999999999999,263.79999999999995" fill="#5ab9ea" />
+    <text x="95.19999999999999" y="250.79999999999995" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 95.19999999999999 250.79999999999995)" fill="#5ab9ea" font-family="monospace" font-size="10px">32.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>

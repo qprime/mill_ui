@@ -43,19 +43,19 @@
     ]
   },
   "output_size": {
-    "total_bytes": 351148,
+    "total_bytes": 349369,
     "total_lines": 12198,
     "files": {
       "pocket_offset-12.70mm": {
-        "bytes": 314251,
+        "bytes": 312591,
         "lines": 10844
       },
       "edge-12.70mm-90deg": {
-        "bytes": 10480,
+        "bytes": 10386,
         "lines": 379
       },
       "edge-12.70mm-60deg": {
-        "bytes": 2432,
+        "bytes": 2407,
         "lines": 94
       },
       "profile-3.17mm": {

@@ -50,36 +50,36 @@
     <rect x="890.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 45.000 350.000 L 285.000 350.000 L 285.000 50.000 L 45.000 50.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
-    <path d="M 330.000 350.000 L 570.000 350.000 L 570.000 50.000 L 330.000 50.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_2" />
-    <path d="M 615.000 350.000 L 855.000 350.000 L 855.000 50.000 L 615.000 50.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_4" />
+    <path d="M 16.380 383.620 L 256.380 383.620 L 256.380 83.620 L 16.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+    <path d="M 301.380 383.620 L 541.380 383.620 L 541.380 83.620 L 301.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_2" />
+    <path d="M 586.380 383.620 L 826.380 383.620 L 826.380 83.620 L 586.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_4" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 43.413 351.587 L 286.587 351.587 L 286.587 48.413 L 43.413 48.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
-    <path d="M 328.413 351.587 L 571.587 351.587 L 571.587 48.413 L 328.413 48.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_2_toolpath" />
-    <path d="M 613.413 351.587 L 856.587 351.587 L 856.587 48.413 L 613.413 48.413 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_4_toolpath" />
+    <path d="M 14.792 385.207 L 257.967 385.207 L 257.967 82.033 L 14.792 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+    <path d="M 299.793 385.207 L 542.967 385.207 L 542.967 82.033 L 299.793 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_2_toolpath" />
+    <path d="M 584.793 385.207 L 827.967 385.207 L 827.967 82.033 L 584.793 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_4_toolpath" />
   </g>
   <g id="CHAMFER_CUTS" class="chamfer-cuts">
-    <path d="M 45.000 350.000 L 285.000 350.000 L 285.000 50.000 L 45.000 50.000 L 45.000 350.000 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
-    <text x="165.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_1_edge_depth">Chamfer 6.000mm</text>
+    <path d="M 16.380 383.620 L 256.380 383.620 L 256.380 83.620 L 16.380 83.620 L 16.380 383.620 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
+    <text x="136.380" y="233.620" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_1_edge_depth">Chamfer 6.000mm</text>
   </g>
   <g id="ROUNDOVER_CUTS" class="roundover-cuts">
-    <path d="M 330.000 350.000 L 570.000 350.000 L 570.000 50.000 L 330.000 50.000 L 330.000 350.000 Z" stroke="#cba6f7" fill="none" stroke-width="1.5" stroke-dasharray="2,2" id="generated_roundover_3_edge_cut" />
-    <text x="450.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover 6.000mm</text>
+    <path d="M 301.380 383.620 L 541.380 383.620 L 541.380 83.620 L 301.380 83.620 L 301.380 383.620 Z" stroke="#cba6f7" fill="none" stroke-width="1.5" stroke-dasharray="2,2" id="generated_roundover_3_edge_cut" />
+    <text x="421.380" y="233.620" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover 6.000mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="45.0" y1="50.0" x2="45.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="285.0" y1="50.0" x2="285.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="45.0" y1="30.0" x2="285.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="45.0,30.0 48.0,27.0 48.0,33.0" fill="#5ab9ea" />
-    <polygon points="285.0,30.0 282.0,27.0 282.0,33.0" fill="#5ab9ea" />
-    <text x="165.0" y="25.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">240.0mm</text>
-    <line x1="285.0" y1="50.0" x2="305.0" y2="50.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="285.0" y1="350.0" x2="305.0" y2="350.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="305.0" y1="50.0" x2="305.0" y2="350.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="305.0,50.0 302.0,53.0 308.0,53.0" fill="#5ab9ea" />
-    <polygon points="305.0,350.0 302.0,347.0 308.0,347.0" fill="#5ab9ea" />
-    <text x="310.0" y="200.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 310.0 200.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <line x1="16.379999999999995" y1="83.62" x2="16.379999999999995" y2="63.620000000000005" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="256.38" y1="83.62" x2="256.38" y2="63.620000000000005" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.379999999999995" y1="63.620000000000005" x2="256.38" y2="63.620000000000005" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.379999999999995,63.620000000000005 19.379999999999995,60.620000000000005 19.379999999999995,66.62" fill="#5ab9ea" />
+    <polygon points="256.38,63.620000000000005 253.38,60.620000000000005 253.38,66.62" fill="#5ab9ea" />
+    <text x="136.38" y="58.620000000000005" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">240.0mm</text>
+    <line x1="256.38" y1="83.62" x2="276.38" y2="83.62" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="256.38" y1="383.62" x2="276.38" y2="383.62" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="276.38" y1="83.62" x2="276.38" y2="383.62" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="276.38,83.62 273.38,86.62 279.38,86.62" fill="#5ab9ea" />
+    <polygon points="276.38,383.62 273.38,380.62 279.38,380.62" fill="#5ab9ea" />
+    <text x="281.38" y="233.62" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 281.38 233.62)" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>

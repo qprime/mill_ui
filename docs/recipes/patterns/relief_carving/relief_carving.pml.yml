@@ -11,8 +11,8 @@ children:
       id: relief_panel
       label: "Relief Panel"
       at:
-        x: 140mm
-        y: 140mm
+        x: 100.03mm
+        y: 100.03mm
         width: 200mm
         height: 200mm
       children:

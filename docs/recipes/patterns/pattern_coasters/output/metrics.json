@@ -42,31 +42,31 @@
     ]
   },
   "output_size": {
-    "total_bytes": 650348,
+    "total_bytes": 624409,
     "total_lines": 20911,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 1013,
+        "bytes": 995,
         "lines": 52
       },
       "pocket-12.70mm": {
-        "bytes": 3189,
+        "bytes": 3140,
         "lines": 141
       },
       "pocket-3.17mm": {
-        "bytes": 57851,
+        "bytes": 56319,
         "lines": 1958
       },
       "bore-3.17mm": {
-        "bytes": 478727,
+        "bytes": 456517,
         "lines": 14896
       },
       "engrave-1.00mm": {
-        "bytes": 7566,
+        "bytes": 7490,
         "lines": 436
       },
       "profile-3.17mm": {
-        "bytes": 102002,
+        "bytes": 99948,
         "lines": 3428
       }
     }

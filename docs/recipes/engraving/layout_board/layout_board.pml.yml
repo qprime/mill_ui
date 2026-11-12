@@ -11,8 +11,8 @@ children:
       id: board
       label: "Layout Board"
       at:
-        x: 190mm
-        y: 140mm
+        x: 180.03mm
+        y: 130.03mm
         width: 360mm
         height: 260mm
       children:

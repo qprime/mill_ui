@@ -7,8 +7,8 @@ Sheet:
   material: mdf
 children:
   - AtPosition:
-      x: 295mm
-      y: 195mm
+      x: 290mm
+      y: 190mm
       width: 580mm
       height: 380mm
       child:
@@ -35,8 +35,8 @@ children:
           show_labels: true
           show_edge_colors: true
   - AtPosition:
-      x: 885mm
-      y: 195mm
+      x: 880mm
+      y: 190mm
       width: 580mm
       height: 380mm
       child:
@@ -63,8 +63,8 @@ children:
           show_labels: true
           show_edge_colors: true
   - AtPosition:
-      x: 295mm
-      y: 585mm
+      x: 290mm
+      y: 580mm
       width: 580mm
       height: 380mm
       child:
@@ -89,8 +89,8 @@ children:
           show_labels: true
           show_edge_colors: true
   - AtPosition:
-      x: 885mm
-      y: 585mm
+      x: 880mm
+      y: 580mm
       width: 580mm
       height: 380mm
       child:

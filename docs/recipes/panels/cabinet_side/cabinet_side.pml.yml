@@ -10,27 +10,27 @@ children:
   - Rect:
       id: cabinet_side
       label: "Cabinet Side"
-      at: {x: 190mm, y: 390mm, width: 350mm, height: 720mm}
+      at: {x: 178.2mm, y: 363.2mm, width: 350mm, height: 720mm}
       children:
         - Profile: {side: outside, depth: through}
         - Rect:
             id: dado_lower
             label: "Lower Shelf Dado"
-            at: {x: 190mm, y: 130mm, width: 350mm, height: 18mm}
+            at: {x: 178.2mm, y: 103.2mm, width: 350mm, height: 18mm}
             feature: {type: pocket, depth: 6mm}
         - Rect:
             id: dado_upper
             label: "Upper Shelf Dado"
-            at: {x: 190mm, y: 650mm, width: 350mm, height: 18mm}
+            at: {x: 178.2mm, y: 623.2mm, width: 350mm, height: 18mm}
             feature: {type: pocket, depth: 6mm}
         - Rect:
             id: back_rabbet
             label: "Back Rabbet"
-            at: {x: 359mm, y: 390mm, width: 12mm, height: 720mm}
+            at: {x: 347.2mm, y: 363.2mm, width: 12mm, height: 720mm}
             feature: {type: pocket, depth: 9mm}
         - AtPosition:
-            x: 184mm
-            y: 390mm
+            x: 172.2mm
+            y: 363.2mm
             width: 274mm
             height: 400mm
             child:

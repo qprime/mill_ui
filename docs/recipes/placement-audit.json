@@ -1,0 +1,1343 @@
+{
+  "baseline_commit": "284cee05654a4c224a92f5d13bca475321c3fafe",
+  "scope": "Recipe group translations only. Resolved 7478 item bounds and machining parameters checked; pattern-coaster string-art segments compared without generated ordering. NC checks compare sampled linear cut traces (endpoints and midpoints) with a 0.004mm rounding allowance, full cutter endpoint envelopes, tool/depth/feed settings and hashes. Earlier detailed proofs retain their original hashes; this report maps later placement changes. Not a physical cutting test. Changed clearing-order pockets additionally compare maximum-depth floor coverage using 96-segment-quadrant cutter buffers. Entry ramps may differ; this does not assert identical motions.",
+  "recipes": {
+    "box_bottoms_and_lids": {
+      "source": "docs/recipes/assemblies/box_bottoms_and_lids/box_bottoms_and_lids.pml.yml",
+      "source_sha256": "984bf1d3d21f2e3ac85f717a5b4de1064f4f2eb4870682de51f73e93a4858655",
+      "translation_mm": [
+        -5.0,
+        -5.0
+      ],
+      "programs": {
+        "pocket-3.17mm.nc": {
+          "baseline_sha256": "e70ad39f99daf5ce2374e8bc40f1a065f08f07b39a5eb544a1da685e99d5617b",
+          "current_sha256": "70dc0a2fee130a1a86b0f30defbac41a63237189a5de5b3b757fbeea3b13e8ed",
+          "max_cut_trace_sample_distance_mm": 0.0010000000000047748,
+          "cutting_tool_envelope_bounds_mm": [
+            16.349500000000003,
+            22.3505,
+            1136.3495,
+            590.3505
+          ],
+          "max_depth_mm": 3.0,
+          "swept_coverage_check": null,
+          "old_moves": 651,
+          "current_moves": 651
+        },
+        "dogbone-3.17mm.nc": {
+          "baseline_sha256": "0d710719d8e3348bfa6b9e55c1d5fa690b3d35e7327b02892cd75176ff458126",
+          "current_sha256": "39135695ad06bd0ef2e42981a53bfca37600158f695cb5dacfe336528287a51c",
+          "max_cut_trace_sample_distance_mm": 0,
+          "cutting_tool_envelope_bounds_mm": [
+            15.885499999999999,
+            15.885499999999999,
+            1136.8145000000002,
+            596.8145
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 5379,
+          "current_moves": 5379
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "318556914dc94bf5c362eee1098af719d0479fc8037b2e81c11a511a38ff5e1f",
+          "current_sha256": "bfa02989d190dc8fe341d0df342b8859c010a83ffdc76d1a1aea3bca614a0b26",
+          "max_cut_trace_sample_distance_mm": 1.1368683772161605e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            13.1745,
+            13.1745,
+            1139.5255000000002,
+            599.5255
+          ],
+          "max_depth_mm": 6.2,
+          "swept_coverage_check": null,
+          "old_moves": 4531,
+          "current_moves": 4531
+        }
+      },
+      "runtime_min": {
+        "baseline": 145.0,
+        "current": 145.0
+      }
+    },
+    "decorated_shaker_door": {
+      "source": "docs/recipes/doors/decorated_shaker_door/decorated_shaker_door.pml.yml",
+      "source_sha256": "ad73d5594cf99b57122cfe9f0f5441f544f521df97a3475fe5f08f87e3dc6743",
+      "translation_mm": [
+        -36.79,
+        -36.79
+      ],
+      "programs": {
+        "pocket-3.17mm.nc": {
+          "baseline_sha256": "4eb722351cc64fd28b52b9fa06ceb0db3aaa207b222112ceaf861af5e3849c1b",
+          "current_sha256": "4e7d944d0044a67a378a855331a24ebabbc7afd4cf2781c17eb7c24f438ff34b",
+          "max_cut_trace_sample_distance_mm": 0.001414213562420042,
+          "cutting_tool_envelope_bounds_mm": [
+            28.209500000000002,
+            28.209500000000002,
+            398.2095,
+            598.2094999999999
+          ],
+          "max_depth_mm": 3.0,
+          "swept_coverage_check": null,
+          "old_moves": 159,
+          "current_moves": 159
+        },
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "64011ac6096d2679905f197a5a56affd5f5e6b5da7debe9e0314535e0e466d7c",
+          "current_sha256": "827db2e9da78be7bbc17e562417ecb499c5a28d1c0993ba92025491c6c120d7f",
+          "max_cut_trace_sample_distance_mm": 1.1368683772161603e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            63.21,
+            63.21,
+            363.21000000000004,
+            563.21
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 300,
+          "current_moves": 300
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "f742fbb28866c8d7c780976b15d9741af6122a9b90176b494337074f0d951145",
+          "current_sha256": "4b3010ee007033465cac3a34dbaf827c226c7225fd6a37b157ddf273bbc8adcd",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623798477,
+          "cutting_tool_envelope_bounds_mm": [
+            10.035499999999999,
+            10.035499999999999,
+            416.3855,
+            616.3855
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 168,
+          "current_moves": 168
+        }
+      },
+      "runtime_min": {
+        "baseline": 72.3,
+        "current": 72.3
+      }
+    },
+    "multi_panel_doors": {
+      "source": "docs/recipes/doors/multi_panel_doors/multi_panel_doors.pml.yml",
+      "source_sha256": "fafde62a55fcc4a17a8a3e80bd743ac49401cbfe9cfadb0d5e7fadaa38b88a01",
+      "translation_mm": [
+        -16.8,
+        -16.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "d4f74b9ab61cd6c54f7b28ae6337be562bc28382adc8d8ab02477982e9d3e479",
+          "current_sha256": "04e7c341388ad46f59df09d5cfcc59eb020fe08d2917e308713cf9d9ab5045ab",
+          "max_cut_trace_sample_distance_mm": 2.5400000000000773,
+          "cutting_tool_envelope_bounds_mm": [
+            63.199999999999996,
+            63.199999999999996,
+            1123.1999999999998,
+            963.2
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": {
+            "two_way_area_outside_0_004mm_tolerance_mm2": 0.0,
+            "entry_or_offset_trace_changed": true
+          },
+          "old_moves": 1507,
+          "current_moves": 1507,
+          "floor_coverage_check": {
+            "depth_mm": 6.0,
+            "two_way_area_outside_0_004mm_tolerance_mm2": 0.0,
+            "buffer_quad_segs": 96
+          }
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "5522163fd104456d6e8599c3ae23d7ec9f0d50794009abfd07fbb5ff94659774",
+          "current_sha256": "7ea1789b30c41bf5ad815f5fea0f55998d60f1fc36215aba509ea22d7352abcc",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623396532,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0255,
+            1176.3755,
+            1016.3755
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 663,
+          "current_moves": 663
+        }
+      },
+      "runtime_min": {
+        "baseline": 229.6,
+        "current": 230.0
+      }
+    },
+    "raised_panel_doors": {
+      "source": "docs/recipes/doors/raised_panel_doors/raised_panel_doors.pml.yml",
+      "source_sha256": "abef00d071a6ee9972cefb3b31e52175afdadc9048281f609db901167bf1b52e",
+      "translation_mm": [
+        -41.8,
+        -36.79
+      ],
+      "programs": {
+        "pocket_offset-12.70mm.nc": {
+          "baseline_sha256": "583102ffaf9a8cd0ea601b6da67994b0736b8236f636485d96984425a624928a",
+          "current_sha256": "53bd5b01e8dbbf9d85be33b213cb994bd2dafcf193ad1fcdb4a75bf6c421abbf",
+          "max_cut_trace_sample_distance_mm": 1.9500103241018797e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            73.2,
+            73.21000000000001,
+            943.2,
+            653.159
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 10693,
+          "current_moves": 10693
+        },
+        "edge-12.70mm-90deg.nc": {
+          "baseline_sha256": "4275d4cc45abadc6386be1f40dcb6852244cbc10eb07172e90a4e9dfc1b81427",
+          "current_sha256": "28460ed72e1f23711ac0d40c3916fc517b1d770fa0dc5fd440c2015a8fc0acd6",
+          "max_cut_trace_sample_distance_mm": 1.6077746776921858e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            72.85000000000001,
+            87.86,
+            928.5500000000001,
+            653.5600000000001
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 363,
+          "current_moves": 363
+        },
+        "edge-12.70mm-60deg.nc": {
+          "baseline_sha256": "cb321eda11793230e6f85a63350aff1c83fae84aa0632d06ed6d80a3cde4ae02",
+          "current_sha256": "d4d5b788e4a2df670c31dbd878bf008036fc17a43c68973f7034cf75bcf7ab85",
+          "max_cut_trace_sample_distance_mm": 5.684341886080802e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            260.31399999999996,
+            89.551,
+            406.086,
+            656.096
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 79,
+          "current_moves": 79
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "424ba2af82d0d2ba1698385f76702b5335ff12e52f5e23fbceebd54bc4318483",
+          "current_sha256": "489645f6b6e351ff953043bca17970286c04cf5f8b968b93032fe70d94e0091b",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623798477,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.035499999999999,
+            1006.3755,
+            716.3865
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 866,
+          "current_moves": 866
+        }
+      },
+      "runtime_min": {
+        "baseline": 144.6,
+        "current": 144.6
+      }
+    },
+    "layout_board": {
+      "source": "docs/recipes/engraving/layout_board/layout_board.pml.yml",
+      "source_sha256": "def4c9699ea2712e320b88461d9514ba941b7f75fcf0901e125b53e344c8670f",
+      "translation_mm": [
+        -9.97,
+        -9.97
+      ],
+      "programs": {
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "7cca9101ddb91b8c77ff49db483b72d102009bf499488840e11e76225bf07676",
+          "current_sha256": "eded06db70ad6dbd7ef17547270dfd4656fa9bdc541558db20051f58b8264931",
+          "max_cut_trace_sample_distance_mm": 8.038873388460929e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            21.13,
+            19.63,
+            358.93,
+            260.43
+          ],
+          "max_depth_mm": 0.4,
+          "swept_coverage_check": null,
+          "old_moves": 12575,
+          "current_moves": 12575
+        }
+      },
+      "runtime_min": {
+        "baseline": 309.4,
+        "current": 309.4
+      }
+    },
+    "shop_ruler": {
+      "source": "docs/recipes/engraving/shop_ruler/shop_ruler.pml.yml",
+      "source_sha256": "7597d523fd7643dfabd0fe7a5bb8c086003c1b5fe3b627a690b28d2616dfe021",
+      "translation_mm": [
+        -16.8,
+        -76.79
+      ],
+      "programs": {
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "9476cdf09725c09d47ac3190b40a95696b7fd88055b01d1df185cccd29a90fb4",
+          "current_sha256": "b70f539073f9d837f1a0bf45d5be50bbd16829fef6cb7dcde1be7cc95cbd3ea0",
+          "max_cut_trace_sample_distance_mm": 1.1368683772161603e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            31.533,
+            35.71,
+            638.117,
+            78.26
+          ],
+          "max_depth_mm": 0.4,
+          "swept_coverage_check": null,
+          "old_moves": 12255,
+          "current_moves": 12255
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "a66721f87e5ff47b7483530be39573f0c1942e4ac4f38e7417de7f91af3bfe96",
+          "current_sha256": "aec06ac457f4d3166060ec2db6c9152c8e18102e511602086c9217c23b529f09",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999994458,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0255,
+            10.035499999999999,
+            656.3755,
+            86.38550000000001
+          ],
+          "max_depth_mm": 18.2,
+          "swept_coverage_check": null,
+          "old_moves": 83,
+          "current_moves": 83
+        }
+      },
+      "runtime_min": {
+        "baseline": 244.4,
+        "current": 244.4
+      }
+    },
+    "sign": {
+      "source": "docs/recipes/engraving/sign/sign.pml.yml",
+      "source_sha256": "f68a71e46ae0a5e70b41e4be23704e3a4f9a623cd620d8e144e7ec5c02a49dbc",
+      "translation_mm": [
+        -19.97,
+        -19.97
+      ],
+      "programs": {
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "334a5642fcdcfc2a1ef018feb7632305d9a3ea63db82f7425a4110024b177d7a",
+          "current_sha256": "76786783db02f5706314f3d5ab562b8aaae80bce8334faae11caccf99567dd80",
+          "max_cut_trace_sample_distance_mm": 0.0003180273515298993,
+          "cutting_tool_envelope_bounds_mm": [
+            24.53,
+            24.53,
+            535.53,
+            335.53
+          ],
+          "max_depth_mm": 1.0,
+          "swept_coverage_check": null,
+          "old_moves": 1540,
+          "current_moves": 1540
+        }
+      },
+      "runtime_min": {
+        "baseline": 39.9,
+        "current": 39.9
+      }
+    },
+    "svg_artwork": {
+      "source": "docs/recipes/engraving/svg_artwork/svg_artwork.pml.yml",
+      "source_sha256": "9a092a44c43ddf234b1a542e2dd8ad45e1cb2073893f9d9bdb1647c458643946",
+      "translation_mm": [
+        -14.47,
+        -129.97
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "9b63e3698567abdf783f68269cdf5f03c68aedd14e8d47526674d9e51bd6bb12",
+          "current_sha256": "ea4e88acd49fd44971915c83998fee8e95468bab94df3ced92f30ead7d30a7c0",
+          "max_cut_trace_sample_distance_mm": 8.519371478921262e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            200.544,
+            32.525,
+            358.483,
+            101.082
+          ],
+          "max_depth_mm": 4.0,
+          "swept_coverage_check": null,
+          "old_moves": 1073,
+          "current_moves": 1073
+        },
+        "pocket-9.53mm.nc": {
+          "baseline_sha256": "1b800263b3672d22ee3fcf5840b576b7a02734c676b86d1cec9d50e656e74161",
+          "current_sha256": "4e81a50c2bdaea7dc9c4f9d04764ba3aa823aceebfa3794cb8b975abc4f7cfe6",
+          "max_cut_trace_sample_distance_mm": 5.845158610047658e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            280.8275,
+            97.8455,
+            292.1365,
+            109.1275
+          ],
+          "max_depth_mm": 4.0,
+          "swept_coverage_check": null,
+          "old_moves": 24,
+          "current_moves": 24
+        },
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "a090ff5828a49b9aac0adcbc15dd99125442705ca8f5da4723b7d33bb4d07bb6",
+          "current_sha256": "4191f9fd0b8e3825284c7e517de9340918a3460c64fe581044a57e4687840997",
+          "max_cut_trace_sample_distance_mm": 1.9963588750658696e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            10.03,
+            30.433,
+            181.03,
+            109.627
+          ],
+          "max_depth_mm": 0.5,
+          "swept_coverage_check": null,
+          "old_moves": 104,
+          "current_moves": 104
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "6040ab9bdf09e059a538f36b63578f0416123e735581aedc11354000bd56006c",
+          "current_sha256": "261bfcfc98efdd30d32d67078b2eb39a27d9dbb2b06c09f2a09c1fa00fa1bbe2",
+          "max_cut_trace_sample_distance_mm": 1.1171093717199303e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            388.9425,
+            29.3455,
+            562.1175,
+            110.7145
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 1767,
+          "current_moves": 1767
+        }
+      },
+      "runtime_min": {
+        "baseline": 11.1,
+        "current": 11.1
+      }
+    },
+    "cabinet_side": {
+      "source": "docs/recipes/panels/cabinet_side/cabinet_side.pml.yml",
+      "source_sha256": "cb8bcbc878e9e72dcf69e759cce732c3a5470b5e2c4993f5955da5f2d9a927a0",
+      "translation_mm": [
+        -11.8,
+        -26.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "0724900075c42f145420b065514494c27c1dea1e6739acb781c358e82bc179dc",
+          "current_sha256": "2481465a4a39bab60585479696394069f4ed428cd84d32fa1fe5a115b2a4c9dd",
+          "max_cut_trace_sample_distance_mm": 1.2710574864626038e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            13.200000000000001,
+            104.2,
+            363.20000000000005,
+            642.2
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 37,
+          "current_moves": 37
+        },
+        "pocket-9.53mm.nc": {
+          "baseline_sha256": "a9cd957af36309500d4a32e0ad0b80bf6f09bd2580128462e025058e8afe8d00",
+          "current_sha256": "4b35681acfcd26bcbe91163bf0f55eb5eae55f07bdcc514a3c999c9c24a4392b",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            351.1995,
+            13.200500000000002,
+            363.2005,
+            733.2005
+          ],
+          "max_depth_mm": 9.0,
+          "swept_coverage_check": null,
+          "old_moves": 20,
+          "current_moves": 20
+        },
+        "bore-3.17mm.nc": {
+          "baseline_sha256": "5987538ac4c974d0293581e2cb551865c4edefb7d187dde146ee5fc065987399",
+          "current_sha256": "8ed8b51c13ddd4821b5701d51eddb75098902989f94304006f682ce14bebb543",
+          "max_cut_trace_sample_distance_mm": 0.0010000000000331966,
+          "cutting_tool_envelope_bounds_mm": [
+            47.6995,
+            178.7005,
+            316.7005,
+            567.7005
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 22259,
+          "current_moves": 22259
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "c06276c95d978ab52e7f44f7cc37fa539398179ff20a509a1da8ca7833fe17a0",
+          "current_sha256": "04c535e82ca1829d4ea8995775eebd48758c952aca83f40823070cf79982cc3b",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623798477,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0255,
+            366.3755,
+            736.3755
+          ],
+          "max_depth_mm": 18.2,
+          "swept_coverage_check": null,
+          "old_moves": 83,
+          "current_moves": 83
+        }
+      },
+      "runtime_min": {
+        "baseline": 31.5,
+        "current": 31.5
+      }
+    },
+    "decorative_panel_faces": {
+      "source": "docs/recipes/panels/decorative_panel_faces/decorative_panel_faces.pml.yml",
+      "source_sha256": "10a148f4f66e6b8b1ccd9ff252c9b95a0abf4cc97efa275a9d7e064b403dc08f",
+      "translation_mm": [
+        -26.8,
+        -11.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "768ea54517201992e9704bf69339a4a36a31cbb87cf376a8a97d3031ede3168a",
+          "current_sha256": "e7d5530a10409ce1075f7c3e5382f25f156fe279e9faf6bf63a9731140153dc3",
+          "max_cut_trace_sample_distance_mm": 1.265254495101455e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            73.2,
+            523.1999999999999,
+            253.2,
+            803.2
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 365,
+          "current_moves": 365
+        },
+        "pocket-9.53mm.nc": {
+          "baseline_sha256": "793406434e0a611ab2afb18b0c75b4eeb79571dabd8d5799672de51c8f27cd58",
+          "current_sha256": "bef741df6af3de1ff0cfe81eb9e2e7eff08b09cdcb0e2f36262c897d53fce3d0",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            413.1995,
+            528.0885,
+            633.2005,
+            798.3115
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 67,
+          "current_moves": 67
+        },
+        "pocket-3.17mm.nc": {
+          "baseline_sha256": "f4d9fe52d0008751665f5e1cebb509bc12c9189185917749c9ab5d5e3bbb26df",
+          "current_sha256": "954d6130bcba31d5877cd5cc64a6bc95e2736e3729dd68d33315ed03c9983fca",
+          "max_cut_trace_sample_distance_mm": 0.001414213562420042,
+          "cutting_tool_envelope_bounds_mm": [
+            43.1995,
+            33.2005,
+            1013.1995,
+            393.2005
+          ],
+          "max_depth_mm": 3.0,
+          "swept_coverage_check": null,
+          "old_moves": 1859,
+          "current_moves": 1859
+        },
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "a7d6dd009eca37f9e4ce6119c7a13f592f4a1c664bc62a48745a698569fed434",
+          "current_sha256": "6b80ca0edfc3b48afb50e6928b858badeb3403ff3c2df9e60b1864f7ee1219b8",
+          "max_cut_trace_sample_distance_mm": 1.288338403088091e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            372.7,
+            32.7,
+            1003.7,
+            833.7
+          ],
+          "max_depth_mm": 4.0,
+          "swept_coverage_check": null,
+          "old_moves": 5515,
+          "current_moves": 5515
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "46c81ba62af412bc227449135ecb1aad283af3a9cf3fa59d103a91862ae2e7be",
+          "current_sha256": "9be29af2cf6766d84fd76871f59e884272318c3abdb575f6da9ac44ca8611f62",
+          "max_cut_trace_sample_distance_mm": 0.001414213562420042,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0245,
+            1036.3755,
+            866.3755
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 483,
+          "current_moves": 483
+        }
+      },
+      "runtime_min": {
+        "baseline": 246.7,
+        "current": 246.7
+      }
+    },
+    "edge_treatments": {
+      "source": "docs/recipes/panels/edge_treatments/edge_treatments.pml.yml",
+      "source_sha256": "f25258e1eba81ccb8afbee2ab1afbb53f76b0d1fb551bc8766e011c5bcf67106",
+      "translation_mm": [
+        -28.62,
+        -33.62
+      ],
+      "programs": {
+        "edge-12.70mm.nc": {
+          "baseline_sha256": "a0d70cb2118a5411bd8a3f63115f0fcf1939f19cf40066410ee2f3ede557119d",
+          "current_sha256": "8e204cdf95860154e248f40772d34cbb700c38bd4a23f851d8c0f28c1f34c56e",
+          "max_cut_trace_sample_distance_mm": 3.552713678800501e-15,
+          "cutting_tool_envelope_bounds_mm": [
+            10.03,
+            10.03,
+            262.73,
+            322.73
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 41,
+          "current_moves": 41
+        },
+        "edge-12.00mm.nc": {
+          "baseline_sha256": "45e07eb5e6b31309462c2918c98feb876cbb5736e6bdce6393f5f89350f9553c",
+          "current_sha256": "923778f73a4e74d13f2c77cc175a0653c954e0ed6d64fdb167264ca4627f78c2",
+          "max_cut_trace_sample_distance_mm": 3.552713678800501e-15,
+          "cutting_tool_envelope_bounds_mm": [
+            295.38,
+            10.379999999999999,
+            547.38,
+            322.38
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 41,
+          "current_moves": 41
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "c26dfd05d9e79410b002785ba4e5269064b0e1701f45b41093d1fc4b77ae77c5",
+          "current_sha256": "340d7e884aa2b60f8930c7513c6b472cf533e43125bf85d7a9cca9183d24991a",
+          "max_cut_trace_sample_distance_mm": 1.7763568394002505e-15,
+          "cutting_tool_envelope_bounds_mm": [
+            13.2045,
+            12.2045,
+            830.5545,
+            320.55449999999996
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 243,
+          "current_moves": 243
+        },
+        "finish-3.17mm.nc": {
+          "baseline_sha256": "30cc0f2ecc1ebb83ab059b98e31d1c32f150b54847ba4d0c9f056aa7ff6f9fa9",
+          "current_sha256": "10c597239ff9879c7cbefebeb5c5bb2a9a9ee522c64456f60f39c5c5a7cfdc70",
+          "max_cut_trace_sample_distance_mm": 3.552713678800502e-15,
+          "cutting_tool_envelope_bounds_mm": [
+            583.0045,
+            13.0055,
+            829.7555,
+            319.7555
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 83,
+          "current_moves": 83
+        }
+      },
+      "runtime_min": {
+        "baseline": 71.8,
+        "current": 71.8
+      }
+    },
+    "frames_and_trays": {
+      "source": "docs/recipes/panels/frames_and_trays/frames_and_trays.pml.yml",
+      "source_sha256": "cf90bf50fcfce25aa2fa866565a882bcfafd525a3e72e6c59adee798f8d3ca49",
+      "translation_mm": [
+        -16.8,
+        -43.54
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "5d05b3bfdc5509f2acd9b944fa1c6f18210ba7d2fb04d2d1c56280ba901fee25",
+          "current_sha256": "1c9c4bb9ec0696cbb450e740f30d3092514e869c50f56cd17db32188885b9ee7",
+          "max_cut_trace_sample_distance_mm": 1.9873863521579452e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            333.2,
+            446.46,
+            923.178,
+            606.46
+          ],
+          "max_depth_mm": 12.0,
+          "swept_coverage_check": null,
+          "old_moves": 4561,
+          "current_moves": 4609,
+          "floor_coverage_check": {
+            "depth_mm": 12.0,
+            "two_way_area_outside_0_004mm_tolerance_mm2": 0.0,
+            "buffer_quad_segs": 96
+          }
+        },
+        "edge-12.70mm.nc": {
+          "baseline_sha256": "f07583cc53b7d93a49005ca3d12e25cf077a2f29d7cfd569fee6b030d6a7e872",
+          "current_sha256": "3165e17b92fa6ac35110fafd6340432970c7da66d2b7841b440ed566b99d29a6",
+          "max_cut_trace_sample_distance_mm": 0.0,
+          "cutting_tool_envelope_bounds_mm": [
+            66.85000000000001,
+            340.10999999999996,
+            219.54999999999998,
+            572.8100000000001
+          ],
+          "max_depth_mm": 5.0,
+          "swept_coverage_check": null,
+          "old_moves": 35,
+          "current_moves": 35
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "f057dddf8f749ac5414703ea3d453b4160a9b75fa5d77df1bea9616cfc316011",
+          "current_sha256": "c9b35bc1a6e89310c6b92a71fdb5c125a35da159ab3ba9110042901d45226b7d",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623798477,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0255,
+            946.3795,
+            629.6355
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 2277,
+          "current_moves": 2277
+        }
+      },
+      "runtime_min": {
+        "baseline": 119.1,
+        "current": 119.1
+      }
+    },
+    "pocket_with_island": {
+      "source": "docs/recipes/panels/pocket_with_island/pocket_with_island.pml.yml",
+      "source_sha256": "9e5861a6db5a4b9a98b1102dfea63f4a0a8b5cfec584d44204c7b65ba7a1d002",
+      "translation_mm": [
+        -26.8,
+        -26.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "6ade3265392f8d1babc4eacc6dc938aeb1b5e6e76aabd703c770e27700473751",
+          "current_sha256": "e3d5ad8de625f5bb9e705616b5a8ed9ecfcc51bf020e7783bc329141e61395ab",
+          "max_cut_trace_sample_distance_mm": 8.038873388460929e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            53.199999999999996,
+            53.199999999999996,
+            293.20000000000005,
+            293.20000000000005
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 1093,
+          "current_moves": 1093
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "6177215827ffa99890bb206033395e37ba83acd6e51479f745b28c96d395995b",
+          "current_sha256": "ce2f256277ea2af7ac8c8fa7201351cbb7b867f0c013f40349788bc8e6463c8f",
+          "max_cut_trace_sample_distance_mm": 0.001414213562420042,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0245,
+            336.3755,
+            336.3755
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 83,
+          "current_moves": 83
+        }
+      },
+      "runtime_min": {
+        "baseline": 29.5,
+        "current": 29.5
+      }
+    },
+    "recessed_mounting_plate": {
+      "source": "docs/recipes/panels/recessed_mounting_plate/recessed_mounting_plate.pml.yml",
+      "source_sha256": "c453a63dc9217df06cd8e320e72231f3841e3608adcc409ed56cbe03ba766a1e",
+      "translation_mm": [
+        -26.8,
+        -26.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "1a4d4e83b5d22985adad5cd320a50ad6e84a7d8494157ff0cc673441dfe9dcd1",
+          "current_sha256": "bfab4211c177e5583a8267b0e4a6e31f95885877a812bae6985d920c2bfa508a",
+          "max_cut_trace_sample_distance_mm": 4.0194366942304644e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            38.199999999999996,
+            38.199999999999996,
+            208.2,
+            158.2
+          ],
+          "max_depth_mm": 3.0,
+          "swept_coverage_check": null,
+          "old_moves": 61,
+          "current_moves": 61
+        },
+        "bore-3.17mm.nc": {
+          "baseline_sha256": "fcac9bc5e1626885b33cd4867673bb935ce22c058324ee714db7719c033e3b8d",
+          "current_sha256": "0996438e0406928147b036557963f9c757cb2fa60279fbe23d312738b5b61d11",
+          "max_cut_trace_sample_distance_mm": 0.0010000000000047748,
+          "cutting_tool_envelope_bounds_mm": [
+            60.2005,
+            60.2005,
+            186.1995,
+            136.2005
+          ],
+          "max_depth_mm": 19.0,
+          "swept_coverage_check": null,
+          "old_moves": 6355,
+          "current_moves": 6355
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "088450371a26b8701765bb29e23891b3308f9be1a2ce7d554b9b374a55ec170c",
+          "current_sha256": "202f3a776b55163636b32121230b107d2d6c5cdd563cca27ab3b63b3437f3572",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0245,
+            236.3745,
+            186.3745
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 83,
+          "current_moves": 83
+        }
+      },
+      "runtime_min": {
+        "baseline": 13.1,
+        "current": 13.1
+      }
+    },
+    "curve_coasters": {
+      "source": "docs/recipes/patterns/curve_coasters/curve_coasters.pml.yml",
+      "source_sha256": "683950e561c68609cf2da54311fa9befa2833007bfeea32fa7c5e1696b583c78",
+      "translation_mm": [
+        -16.79,
+        -66.79
+      ],
+      "programs": {
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "49dbd222c6ad638349da809ca912e527529ae52a87a15d102dc3b1e891f49f3a",
+          "current_sha256": "538c713934d347e1c5620e96fa21d2285b3e7f69f361aebc8637cab5805280c2",
+          "max_cut_trace_sample_distance_mm": 1.7112313748709984e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            28.419,
+            21.784,
+            633.079,
+            104.636
+          ],
+          "max_depth_mm": 0.5,
+          "swept_coverage_check": null,
+          "old_moves": 5422,
+          "current_moves": 5422
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "30723f9230f61229624f6b55b7919779485ffdc3bd49c0357a975bf3061bd9cd",
+          "current_sha256": "d904e5bcaeb61f2693b5a9d23e8670d6bbd7391cefcbae5bf35e90d651e79360",
+          "max_cut_trace_sample_distance_mm": 1.1457157353758233e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0335,
+            10.0335,
+            656.3865,
+            116.38650000000001
+          ],
+          "max_depth_mm": 12.2,
+          "swept_coverage_check": null,
+          "old_moves": 4263,
+          "current_moves": 4263
+        }
+      },
+      "runtime_min": {
+        "baseline": 43.3,
+        "current": 43.3
+      }
+    },
+    "pattern_coasters": {
+      "source": "docs/recipes/patterns/pattern_coasters/pattern_coasters.pml.yml",
+      "source_sha256": "9d5ad963641fc9ccdcbf564be9e8dafeae9625c482bae7a091a7033de36f2873",
+      "translation_mm": [
+        -46.79,
+        -66.79
+      ],
+      "programs": {
+        "pocket-9.53mm.nc": {
+          "baseline_sha256": "e7915dab23e2544cc67416233626e76afb50a33e2a8ffa4a02a93cb123eb179c",
+          "current_sha256": "4b9a6ee36b5f49bd24f2cfec8cbb7a797b13f6d181d18dcef726eb9e887c6558",
+          "max_cut_trace_sample_distance_mm": 2.929642751054232e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            181.21550000000002,
+            33.7425,
+            208.55949999999999,
+            79.8615
+          ],
+          "max_depth_mm": 2.0,
+          "swept_coverage_check": null,
+          "old_moves": 27,
+          "current_moves": 27
+        },
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "1dab4b3a41dffd69179b18451bf6b12de24ce3a8e459d86e53bb30d30b32249b",
+          "current_sha256": "c2c342bf7aae1cf215c22fc91daa92e0764575949929fb0fb12a6439c1f10bdf",
+          "max_cut_trace_sample_distance_mm": 5.684341886080802e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            193.55700000000002,
+            21.287,
+            263.03200000000004,
+            103.857
+          ],
+          "max_depth_mm": 2.0,
+          "swept_coverage_check": null,
+          "old_moves": 84,
+          "current_moves": 84
+        },
+        "pocket-3.17mm.nc": {
+          "baseline_sha256": "e0c5d29baa69f8c302d3d705d4679f100231b55a9cec2710ab354a10f19767a7",
+          "current_sha256": "d8041947f97c0b8539bac607cd66836bb23eaeab4e51914375fa143ae156212f",
+          "max_cut_trace_sample_distance_mm": 0.00100000000009004,
+          "cutting_tool_envelope_bounds_mm": [
+            496.20950000000005,
+            16.2105,
+            590.2094999999999,
+            110.21050000000001
+          ],
+          "max_depth_mm": 2.0,
+          "swept_coverage_check": null,
+          "old_moves": 1927,
+          "current_moves": 1927
+        },
+        "bore-3.17mm.nc": {
+          "baseline_sha256": "f6276650736158a5f19eb29356cd9c7254241adbdf9c24812d01790cb085f008",
+          "current_sha256": "e27316197e1407554585e9b2680f0d189b5992a363626fc94a17518c953ce996",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999976694,
+          "cutting_tool_envelope_bounds_mm": [
+            21.3125,
+            22.2105,
+            102.98150000000001,
+            101.44850000000001
+          ],
+          "max_depth_mm": 4.0,
+          "swept_coverage_check": null,
+          "old_moves": 14723,
+          "current_moves": 14723
+        },
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "fac7e14347630141348d1421b7e4a2782bea115e7b74699032c0f585db3471f4",
+          "current_sha256": "fec1e0b86540ac7a2d43f6b83a28f93d4d64c41e1a55add71b1e22b3c22e0799",
+          "max_cut_trace_sample_distance_mm": 5.859285502108464e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            337.71,
+            17.71,
+            428.71,
+            108.71
+          ],
+          "max_depth_mm": 0.3,
+          "swept_coverage_check": null,
+          "old_moves": 283,
+          "current_moves": 283
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "a357e68dfa215c180077f5bb2d2ce9265fac9f419868211e307972dfb81a18d5",
+          "current_sha256": "b78a4bee1d322bc7b1ed293708a2acd60334f101843fae787c482d7c51d8b4e3",
+          "max_cut_trace_sample_distance_mm": 1.1388283062218048e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0335,
+            10.0335,
+            596.3865,
+            116.38650000000001
+          ],
+          "max_depth_mm": 12.2,
+          "swept_coverage_check": null,
+          "old_moves": 3411,
+          "current_moves": 3411
+        }
+      },
+      "runtime_min": {
+        "baseline": 35.6,
+        "current": 35.5
+      }
+    },
+    "radial_patterns": {
+      "source": "docs/recipes/patterns/radial_patterns/radial_patterns.pml.yml",
+      "source_sha256": "5f03e50c2dae29c2967936b9766b822dd1e173b458674f23095d0d2bc3113365",
+      "translation_mm": [
+        -26.79,
+        -46.79
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "13fb0f0d611739213fa861494bc2c1ede557869cbf839d2693597e4a42ea7281",
+          "current_sha256": "56e5ac57f6672085fa4910b281121e49e90492e25db4e81ef660cbb33aa6e281",
+          "max_cut_trace_sample_distance_mm": 1.2710574864626038e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            674.635,
+            34.635,
+            911.785,
+            271.785
+          ],
+          "max_depth_mm": 4.0,
+          "swept_coverage_check": null,
+          "old_moves": 645,
+          "current_moves": 645
+        },
+        "engrave-1.00mm.nc": {
+          "baseline_sha256": "23c99b64c8029992a3bb534a4f6c05e4c6b22abfaff7e2a619ed64b6ca9b68f1",
+          "current_sha256": "3c0b32606f3e737ceb60a4d07dc3711993f966584fe4fbd8261eead9ee162399",
+          "max_cut_trace_sample_distance_mm": 1.1368683772161603e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            27.71,
+            24.71,
+            598.662,
+            281.71
+          ],
+          "max_depth_mm": 0.5,
+          "swept_coverage_check": null,
+          "old_moves": 1107,
+          "current_moves": 1107
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "25900f3f007670b6aa583bd49a3b61a230d9acbf555bee9a3de7bdacc030cf48",
+          "current_sha256": "a14c00a9186b9e113d043304941bc58a9e4f8ab12ec6f9d5b2c2670f1ccb4d3b",
+          "max_cut_trace_sample_distance_mm": 1.191892820610452e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0335,
+            10.0335,
+            936.3865,
+            296.38649999999996
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 3363,
+          "current_moves": 3363
+        }
+      },
+      "runtime_min": {
+        "baseline": 69.9,
+        "current": 69.9
+      }
+    },
+    "relief_carving": {
+      "source": "docs/recipes/patterns/relief_carving/relief_carving.pml.yml",
+      "source_sha256": "f2076c7ccdd742b52a154eea1d0a0effbe36c066fd689e66c687fb6b8a88733b",
+      "translation_mm": [
+        -39.97,
+        -39.97
+      ],
+      "programs": {
+        "heightfield-rough-6.35mm.nc": {
+          "baseline_sha256": "d144a8ed51d92d0b71bd3311d3df38bb961ff26e63966436ae0ce8ad2407b506",
+          "current_sha256": "8bb6353d7a2d74a2a3c7166733cb1987c4ea940d6ee0637723c22d76c8030c4b",
+          "max_cut_trace_sample_distance_mm": 2.0097183471152322e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            26.855,
+            26.855,
+            193.205,
+            193.205
+          ],
+          "max_depth_mm": 5.7,
+          "swept_coverage_check": null,
+          "old_moves": 8430,
+          "current_moves": 8430
+        },
+        "heightfield-rough-3.17mm.nc": {
+          "baseline_sha256": "61c502dfad1c31f8e2ceaa399d35fe07655ccaa34662517f7d81478c6dc70d99",
+          "current_sha256": "6544d4d0022be79dc248c2620bb200c21e9c717c1667f88b50535f1500791b35",
+          "max_cut_trace_sample_distance_mm": 2.0097183471152322e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            28.442500000000003,
+            28.442500000000003,
+            191.6175,
+            191.6175
+          ],
+          "max_depth_mm": 5.7,
+          "swept_coverage_check": null,
+          "old_moves": 79257,
+          "current_moves": 79257
+        },
+        "heightfield-finish-3.19mm.nc": {
+          "baseline_sha256": "e473a9e0aab92f52063a20444c99b128076b2546a34b9bf395398f37ad40d862",
+          "current_sha256": "b82471e26049375678f8ed45773d24ac6382c1fc1b3a1509e2cbefd95f7b7ceb",
+          "max_cut_trace_sample_distance_mm": 2.842170943040401e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            28.435000000000002,
+            28.435000000000002,
+            191.625,
+            191.625
+          ],
+          "max_depth_mm": 4.405,
+          "swept_coverage_check": null,
+          "old_moves": 102616,
+          "current_moves": 102616
+        }
+      },
+      "runtime_min": {
+        "baseline": 240.3,
+        "current": 240.3
+      }
+    },
+    "calibration_coupon": {
+      "source": "docs/recipes/shop/calibration_coupon/calibration_coupon.pml.yml",
+      "source_sha256": "35a5b9f90e938964f5dddbfc9cdf6c3347e4eab2e5e31ff2faa66bb600162afe",
+      "translation_mm": [
+        -16.8,
+        -16.8
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "b59c2d22172d73c76758efbffa8bbfc94418bcee844060448d764ead32001cfc",
+          "current_sha256": "2092b09d728f7748c870a2ad5603c0ce77c25c866ddc0742ef0163db3cd7d83f",
+          "max_cut_trace_sample_distance_mm": 0.0005292188759506188,
+          "cutting_tool_envelope_bounds_mm": [
+            28.199999999999996,
+            108.2,
+            178.2,
+            138.2
+          ],
+          "max_depth_mm": 5.0,
+          "swept_coverage_check": null,
+          "old_moves": 666,
+          "current_moves": 666
+        },
+        "bore-3.17mm.nc": {
+          "baseline_sha256": "3b6c077faf598fe1edffc9ff2447f2ba7eeb7636531d4d0cd670faa4b597d896",
+          "current_sha256": "13e1015efbd8fe0f4745bb72cd1953fc1c8487e335d00005c1752dbb12527beb",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            30.0255,
+            170.0245,
+            36.3745,
+            176.3745
+          ],
+          "max_depth_mm": 19.0,
+          "swept_coverage_check": null,
+          "old_moves": 1591,
+          "current_moves": 1591
+        },
+        "pocket-3.17mm.nc": {
+          "baseline_sha256": "3c38fc3b1e46880d193d3ebe0cbb88e998fa2d2cb10b3192091f3458baeaaffb",
+          "current_sha256": "f0a2cd9695f7714fd7e90cbb303f3c63dea16e56a24bbbbae5318ccaac3f44db",
+          "max_cut_trace_sample_distance_mm": 0.0010000000000047748,
+          "cutting_tool_envelope_bounds_mm": [
+            58.2005,
+            163.1995,
+            153.1995,
+            183.1995
+          ],
+          "max_depth_mm": 19.0,
+          "swept_coverage_check": null,
+          "old_moves": 19548,
+          "current_moves": 19548
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "ea9c4778ab4071d68c76fa90e4723fbf932dab370a3df49aad9eac5db4b039d6",
+          "current_sha256": "5a87832661a13b38d8b1304e7fd2c8d16a4666d319df88ad56ebef089356d02e",
+          "max_cut_trace_sample_distance_mm": 0.0014142135623647749,
+          "cutting_tool_envelope_bounds_mm": [
+            10.0245,
+            10.0245,
+            256.3745,
+            206.3745
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 1511,
+          "current_moves": 1511
+        }
+      },
+      "runtime_min": {
+        "baseline": 34.5,
+        "current": 34.4
+      }
+    },
+    "clamp_keepouts": {
+      "source": "docs/recipes/shop/clamp_keepouts/clamp_keepouts.pml.yml",
+      "source_sha256": "54586240707401ee2a744a76277353a2e4a845cd9fa6dae4e3a71afebf303ef8",
+      "translation_mm": [
+        -4.97,
+        -4.97
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "ea0dbc139a8b0ff83f8303848900b584690c7422b783e0706b8bb7088b7bda73",
+          "current_sha256": "f6da3dd64d79ca3c3baeaa470c576745de9f79bd17a8fea8fe5f73f769a15376",
+          "max_cut_trace_sample_distance_mm": 2.0097183471152322e-14,
+          "cutting_tool_envelope_bounds_mm": [
+            65.03,
+            55.03,
+            245.03,
+            175.03
+          ],
+          "max_depth_mm": 6.0,
+          "swept_coverage_check": null,
+          "old_moves": 899,
+          "current_moves": 899
+        },
+        "profile-3.17mm.nc": {
+          "baseline_sha256": "95d07340b5d414cf67f6a73ebd1008244e971e4d84f8805c3c9c0d9c5d7addbe",
+          "current_sha256": "376c38391ff5ccff42e44bafcdf83380f89982ae568376db6ce684375727841f",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            61.8545,
+            51.8545,
+            528.2044999999999,
+            338.2045
+          ],
+          "max_depth_mm": 19.2,
+          "swept_coverage_check": null,
+          "old_moves": 1330,
+          "current_moves": 1330
+        }
+      },
+      "runtime_min": {
+        "baseline": 31.1,
+        "current": 31.1
+      }
+    },
+    "pocket_corner_test": {
+      "source": "docs/recipes/shop/pocket_corner_test/pocket_corner_test.pml.yml",
+      "source_sha256": "dc62fc63be0673f13c8503425513de80e130fe49b337537f685dec3ee85ff1da",
+      "translation_mm": [
+        -39.97,
+        -96.79
+      ],
+      "programs": {
+        "pocket-12.70mm.nc": {
+          "baseline_sha256": "c04ee6cf72d861e2ac359944ae4faa853318f6b145c196a5e2da5a5e77708bcd",
+          "current_sha256": "a2db0970ff1c9f6496c0880e3749471a6f78c3a54eba0d887d403bf1917878be",
+          "max_cut_trace_sample_distance_mm": 1.156679772130055e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            10.03,
+            13.209999999999999,
+            904.53,
+            93.21
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 754,
+          "current_moves": 754
+        },
+        "pocket_rest-3.17mm.nc": {
+          "baseline_sha256": "61a9bea4051e86107d6a431770596f88c1ae9c826949d50443e5e7403c04293d",
+          "current_sha256": "60dfe97324bf2620a549905f39eccbaa6fc086214edd84b25ee17b5daf79f917",
+          "max_cut_trace_sample_distance_mm": 0.0009999999999763531,
+          "cutting_tool_envelope_bounds_mm": [
+            630.0295,
+            13.2105,
+            750.0295,
+            93.21050000000001
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 383,
+          "current_moves": 383
+        },
+        "finish-12.70mm.nc": {
+          "baseline_sha256": "cfe754a6b888102937a960feefae5524c490a0bbf7d324291893d400bac0eca7",
+          "current_sha256": "d8e5cb285b5e51975d40b482428b4697492fae41f46ebb20a5304d6ce23e6671",
+          "max_cut_trace_sample_distance_mm": 1.1374233532693354e-13,
+          "cutting_tool_envelope_bounds_mm": [
+            785.13,
+            13.31,
+            904.9300000000001,
+            93.11
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 23,
+          "current_moves": 23
+        },
+        "corner_cleanup-3.17mm.nc": {
+          "baseline_sha256": "0e83c105e969c2f0f3453adab11ae1313239c3c3950266ee01cc983f37e6c14c",
+          "current_sha256": "07421d00d5004006fad4c11d68f3af3d803987350239ac8b60914431ca8effcd",
+          "max_cut_trace_sample_distance_mm": 0.0010000000000047748,
+          "cutting_tool_envelope_bounds_mm": [
+            161.8545,
+            10.035499999999999,
+            288.2045,
+            96.38550000000001
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 5479,
+          "current_moves": 5479
+        },
+        "dogbone-12.70mm.nc": {
+          "baseline_sha256": "15f22238195167902578149402cf0497912e73d010f888f4eb287c34680665df",
+          "current_sha256": "c175e4318ef2a2e7b247f3582b9550eec4f07fd2f141e9756ee56c9e6a389332",
+          "max_cut_trace_sample_distance_mm": 0,
+          "cutting_tool_envelope_bounds_mm": [
+            318.16999999999996,
+            11.35,
+            441.89000000000004,
+            95.07
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 51,
+          "current_moves": 51
+        },
+        "dogbone-6.35mm.nc": {
+          "baseline_sha256": "e0a312a00f61d9293842fae2a8e772cb3c86bf67999452293f37c3daeb66b178",
+          "current_sha256": "8f938e4719dc204cc74aec05ab125cee6085f915d548382665a948b01873e473",
+          "max_cut_trace_sample_distance_mm": 0,
+          "cutting_tool_envelope_bounds_mm": [
+            475.03,
+            10.035,
+            595.03,
+            96.38499999999999
+          ],
+          "max_depth_mm": 10.0,
+          "swept_coverage_check": null,
+          "old_moves": 51,
+          "current_moves": 51
+        }
+      },
+      "runtime_min": {
+        "baseline": 35.2,
+        "current": 35.2
+      }
+    }
+  },
+  "failures": [],
+  "retained_layouts": {
+    "shaker_door": "previously accepted lower-left placement",
+    "hinge_cup_door": "previously accepted placement and registered back setup",
+    "finger_jointed_box": "automatic assembly cutter padding",
+    "long_spliced_rail": "automatic beam packing",
+    "side_table_frame": "factory beam placement starts at working-area origin; internal cutter padding retained",
+    "joinery_test_coupons": "factory assembly placement starts at working-area origin; internal cutter padding retained",
+    "base_cabinet": "multi-sheet automatic packing",
+    "bookcase": "multi-sheet automatic packing",
+    "cubby_organizer": "multi-sheet automatic packing",
+    "nested_cabinet_job": "automatic nesting",
+    "spoilboard_surfacing": "owner-approved full-bed surfacing",
+    "production_sheet": "intentional whole-sheet waste-cut workflow"
+  },
+  "resolved_items_checked": 7478,
+  "artifact_changes": {
+    "changed_output_counts": {
+      ".svg": 21,
+      ".nc": 67,
+      ".json": 22
+    },
+    "unchanged_outputs": 108,
+    "unchanged_nc": 46
+  }
+}

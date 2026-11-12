@@ -69,7 +69,7 @@
       "max_depth_mm": 0.3,
       "feature_count": 70,
       "strategy": "engrave",
-      "estimated_runtime_min": 15.8
+      "estimated_runtime_min": 15.7
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -86,7 +86,7 @@
       "estimated_runtime_min": 11.5
     }
   ],
-  "total_runtime_min": 35.6,
+  "total_runtime_min": 35.5,
   "feature_counts": {
     "engrave": 70,
     "hole": 40,

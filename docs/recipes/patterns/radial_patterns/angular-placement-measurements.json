@@ -83,5 +83,19 @@
     "pocket-12.70mm.nc",
     "profile-3.17mm.nc",
     "machining_summary.json"
-  ]
+  ],
+  "subsequent_placement": {
+    "baseline_commit": "284cee05654a4c224a92f5d13bca475321c3fafe",
+    "translation_mm": [
+      -26.79,
+      -46.79
+    ],
+    "current_source_sha256": "5f03e50c2dae29c2967936b9766b822dd1e173b458674f23095d0d2bc3113365",
+    "current_nc_sha256": {
+      "pocket-12.70mm.nc": "56e5ac57f6672085fa4910b281121e49e90492e25db4e81ef660cbb33aa6e281",
+      "engrave-1.00mm.nc": "3c0b32606f3e737ceb60a4d07dc3711993f966584fe4fbd8261eead9ee162399",
+      "profile-3.17mm.nc": "a14c00a9186b9e113d043304941bc58a9e4f8ab12ec6f9d5b2c2670f1ccb4d3b"
+    },
+    "verification": "See ../../placement-audit.json. Original measurements and hashes above describe the preceding placement; nominal part geometry and machining parameters are preserved."
+  }
 }

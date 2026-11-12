@@ -289,5 +289,18 @@
       ]
     }
   ],
-  "scope": "Actual final-pass cutter-axis positions and heights. Nominal blank spans reconstructed from outside contour and cutter diameter. Computational evidence, not a physical cut test or complete 3D stock simulation."
+  "scope": "Actual final-pass cutter-axis positions and heights. Nominal blank spans reconstructed from outside contour and cutter diameter. Computational evidence, not a physical cut test or complete 3D stock simulation.",
+  "subsequent_placement": {
+    "baseline_commit": "284cee05654a4c224a92f5d13bca475321c3fafe",
+    "translation_mm": [
+      -16.8,
+      -16.8
+    ],
+    "current_source_sha256": "fafde62a55fcc4a17a8a3e80bd743ac49401cbfe9cfadb0d5e7fadaa38b88a01",
+    "current_nc_sha256": {
+      "pocket-12.70mm.nc": "04e7c341388ad46f59df09d5cfcc59eb020fe08d2917e308713cf9d9ab5045ab",
+      "profile-3.17mm.nc": "7ea1789b30c41bf5ad815f5fea0f55998d60f1fc36215aba509ea22d7352abcc"
+    },
+    "verification": "See ../../placement-audit.json. Original measurements and hashes above describe the preceding placement; nominal part geometry and machining parameters are preserved."
+  }
 }

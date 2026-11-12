@@ -11,8 +11,8 @@ children:
       id: engraved_panel
       label: "Engraved"
       at:
-        x: 100mm
-        y: 190mm
+        x: 85.53mm
+        y: 60.03mm
         width: 170mm
         height: 120mm
       children:
@@ -25,8 +25,8 @@ children:
       id: pocketed_panel
       label: "Pocketed"
       at:
-        x: 290mm
-        y: 190mm
+        x: 275.53mm
+        y: 60.03mm
         width: 170mm
         height: 120mm
       children:
@@ -39,8 +39,8 @@ children:
       id: cut_through_panel
       label: "Cut Through"
       at:
-        x: 480mm
-        y: 190mm
+        x: 465.53mm
+        y: 60.03mm
         width: 170mm
         height: 120mm
       children:

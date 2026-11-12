@@ -50,78 +50,78 @@
     <rect x="590.000" y="10.000" width="10.000" height="380.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 70.000 340.000 L 250.000 340.000 L 250.000 220.000 L 70.000 220.000 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
-    <rect x="70.000" y="60.000" width="180.000" height="120.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="plain_plate" />
-    <circle cx="430.000" cy="200.000" r="100.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="disc" />
+    <path d="M 65.030 344.970 L 245.030 344.970 L 245.030 224.970 L 65.030 224.970 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+    <rect x="65.030" y="64.970" width="180.000" height="120.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="plain_plate" />
+    <circle cx="425.030" cy="204.970" r="100.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="disc" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 68.412 341.587 L 251.588 341.587 L 251.588 218.412 L 68.412 218.412 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
-    <rect x="68.412" y="58.413" width="183.175" height="123.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="plain_plate_toolpath" />
-    <circle cx="430.000" cy="200.000" r="101.588" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="disc_toolpath" />
+    <path d="M 63.443 346.558 L 246.618 346.558 L 246.618 223.382 L 63.443 223.382 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+    <rect x="63.442" y="63.383" width="183.175" height="123.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="plain_plate_toolpath" />
+    <circle cx="425.030" cy="204.970" r="101.588" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="disc_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 70.000 340.000 L 70.000 220.000 L 250.000 220.000 L 250.000 340.000 Z M 190.000 260.000 L 130.000 260.000 L 130.000 300.000 L 190.000 300.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="island_plate" />
+    <path d="M 65.030 344.970 L 65.030 224.970 L 245.030 224.970 L 245.030 344.970 Z M 185.030 264.970 L 125.030 264.970 L 125.030 304.970 L 185.030 304.970 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="island_plate" />
   </g>
   <g id="KEEPOUT_ZONES" class="keepout-zones">
-    <rect x="15.000" y="345.000" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_bottom_left" />
-    <rect x="545.000" y="345.000" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_bottom_right" />
-    <rect x="15.000" y="15.000" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_top_left" />
-    <rect x="545.000" y="15.000" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_top_right" />
-    <circle cx="300.000" cy="200.000" r="10.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="hold_down_screw" />
+    <rect x="10.030" y="349.970" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_bottom_left" />
+    <rect x="540.030" y="349.970" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_bottom_right" />
+    <rect x="10.030" y="19.970" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_top_left" />
+    <rect x="540.030" y="19.970" width="40.000" height="40.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="clamp_top_right" />
+    <circle cx="295.030" cy="204.970" r="10.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="hold_down_screw" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="100.000" y="280.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="island_plate_label">Island plate</text>
-    <text x="160.000" y="120.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="plain_plate_label">Plain plate</text>
-    <text x="430.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="disc_label">Disc</text>
-    <text x="35.000" y="365.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_bottom_left_label">clamp_bottom_left</text>
-    <text x="565.000" y="365.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_bottom_right_label">clamp_bottom_right</text>
-    <text x="35.000" y="35.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_top_left_label">clamp_top_left</text>
-    <text x="565.000" y="35.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_top_right_label">clamp_top_right</text>
-    <text x="300.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hold_down_screw_label">hold_down_screw</text>
+    <text x="95.030" y="284.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="island_plate_label">Island plate</text>
+    <text x="155.030" y="124.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="plain_plate_label">Plain plate</text>
+    <text x="425.030" y="204.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="disc_label">Disc</text>
+    <text x="30.030" y="369.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_bottom_left_label">clamp_bottom_left</text>
+    <text x="560.030" y="369.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_bottom_right_label">clamp_bottom_right</text>
+    <text x="30.030" y="39.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_top_left_label">clamp_top_left</text>
+    <text x="560.030" y="39.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_top_right_label">clamp_top_right</text>
+    <text x="295.030" y="204.970" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="hold_down_screw_label">hold_down_screw</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="70.0" y1="220.0" x2="70.0" y2="200.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="220.0" x2="250.0" y2="200.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="70.0" y1="200.0" x2="250.0" y2="200.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="70.0,200.0 73.0,197.0 73.0,203.0" fill="#5ab9ea" />
-    <polygon points="250.0,200.0 247.0,197.0 247.0,203.0" fill="#5ab9ea" />
-    <text x="160.0" y="195.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
-    <line x1="250.0" y1="220.0" x2="270.0" y2="220.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="340.0" x2="270.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="270.0" y1="220.0" x2="270.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="270.0,220.0 267.0,223.0 273.0,223.0" fill="#5ab9ea" />
-    <polygon points="270.0,340.0 267.0,337.0 273.0,337.0" fill="#5ab9ea" />
-    <text x="275.0" y="280.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 275.0 280.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
-    <line x1="330.0" y1="100.0" x2="330.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="530.0" y1="100.0" x2="530.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="330.0" y1="80.0" x2="530.0" y2="80.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="330.0,80.0 333.0,77.0 333.0,83.0" fill="#5ab9ea" />
-    <polygon points="530.0,80.0 527.0,77.0 527.0,83.0" fill="#5ab9ea" />
-    <text x="430.0" y="75.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀200.0mm</text>
-    <line x1="70.0" y1="220.0" x2="70.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="220.0" x2="250.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="70.0" y1="180.0" x2="250.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="70.0,180.0 73.0,177.0 73.0,183.0" fill="#5ab9ea" />
-    <polygon points="250.0,180.0 247.0,177.0 247.0,183.0" fill="#5ab9ea" />
-    <text x="160.0" y="175.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
-    <line x1="250.0" y1="220.0" x2="290.0" y2="220.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="340.0" x2="290.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="290.0" y1="220.0" x2="290.0" y2="340.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="290.0,220.0 287.0,223.0 293.0,223.0" fill="#5ab9ea" />
-    <polygon points="290.0,340.0 287.0,337.0 293.0,337.0" fill="#5ab9ea" />
-    <text x="295.0" y="280.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 295.0 280.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
-    <line x1="70.0" y1="60.0" x2="70.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="60.0" x2="250.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="70.0" y1="0.0" x2="250.0" y2="0.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="70.0,0.0 73.0,-3.0 73.0,3.0" fill="#5ab9ea" />
-    <polygon points="250.0,0.0 247.0,-3.0 247.0,3.0" fill="#5ab9ea" />
-    <text x="160.0" y="-5.0" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
-    <line x1="250.0" y1="60.0" x2="310.0" y2="60.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="250.0" y1="180.0" x2="310.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="310.0" y1="60.0" x2="310.0" y2="180.0" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="310.0,60.0 307.0,63.0 313.0,63.0" fill="#5ab9ea" />
-    <polygon points="310.0,180.0 307.0,177.0 313.0,177.0" fill="#5ab9ea" />
-    <text x="315.0" y="120.0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 315.0 120.0)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
+    <line x1="65.03" y1="224.97000000000003" x2="65.03" y2="204.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="224.97000000000003" x2="245.03" y2="204.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="65.03" y1="204.97000000000003" x2="245.03" y2="204.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="65.03,204.97000000000003 68.03,201.97000000000003 68.03,207.97000000000003" fill="#5ab9ea" />
+    <polygon points="245.03,204.97000000000003 242.03,201.97000000000003 242.03,207.97000000000003" fill="#5ab9ea" />
+    <text x="155.03" y="199.97000000000003" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
+    <line x1="245.03" y1="224.97000000000003" x2="265.03" y2="224.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="344.97" x2="265.03" y2="344.97" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="265.03" y1="224.97000000000003" x2="265.03" y2="344.97" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="265.03,224.97000000000003 262.03,227.97000000000003 268.03,227.97000000000003" fill="#5ab9ea" />
+    <polygon points="265.03,344.97 262.03,341.97 268.03,341.97" fill="#5ab9ea" />
+    <text x="270.03" y="284.97" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 270.03 284.97)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
+    <line x1="325.03" y1="104.97000000000003" x2="325.03" y2="84.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="525.03" y1="104.97000000000003" x2="525.03" y2="84.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="325.03" y1="84.97000000000003" x2="525.03" y2="84.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="325.03,84.97000000000003 328.03,81.97000000000003 328.03,87.97000000000003" fill="#5ab9ea" />
+    <polygon points="525.03,84.97000000000003 522.03,81.97000000000003 522.03,87.97000000000003" fill="#5ab9ea" />
+    <text x="425.03" y="79.97000000000003" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀200.0mm</text>
+    <line x1="65.03" y1="224.97" x2="65.03" y2="184.97" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="224.97" x2="245.03" y2="184.97" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="65.03" y1="184.97" x2="245.03" y2="184.97" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="65.03,184.97 68.03,181.97 68.03,187.97" fill="#5ab9ea" />
+    <polygon points="245.03,184.97 242.03,181.97 242.03,187.97" fill="#5ab9ea" />
+    <text x="155.03" y="179.97" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
+    <line x1="245.03" y1="224.97" x2="285.03" y2="224.97" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="344.97" x2="285.03" y2="344.97" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="285.03" y1="224.97" x2="285.03" y2="344.97" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="285.03,224.97 282.03,227.97 288.03,227.97" fill="#5ab9ea" />
+    <polygon points="285.03,344.97 282.03,341.97 288.03,341.97" fill="#5ab9ea" />
+    <text x="290.03" y="284.97" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 290.03 284.97)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
+    <line x1="65.03" y1="64.97000000000003" x2="65.03" y2="4.970000000000027" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="64.97000000000003" x2="245.03" y2="4.970000000000027" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="65.03" y1="4.970000000000027" x2="245.03" y2="4.970000000000027" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="65.03,4.970000000000027 68.03,1.9700000000000273 68.03,7.970000000000027" fill="#5ab9ea" />
+    <polygon points="245.03,4.970000000000027 242.03,1.9700000000000273 242.03,7.970000000000027" fill="#5ab9ea" />
+    <text x="155.03" y="-0.029999999999972715" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">180.0mm</text>
+    <line x1="245.03" y1="64.97000000000003" x2="305.03" y2="64.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="245.03" y1="184.97000000000003" x2="305.03" y2="184.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="305.03" y1="64.97000000000003" x2="305.03" y2="184.97000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="305.03,64.97000000000003 302.03,67.97000000000003 308.03,67.97000000000003" fill="#5ab9ea" />
+    <polygon points="305.03,184.97000000000003 302.03,181.97000000000003 308.03,181.97000000000003" fill="#5ab9ea" />
+    <text x="310.03" y="124.97000000000003" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 310.03 124.97000000000003)" fill="#5ab9ea" font-family="monospace" font-size="10px">120.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>

@@ -11,8 +11,8 @@ children:
       id: ruler
       label: "600mm Ruler"
       at:
-        x: 340mm
-        y: 115mm
+        x: 323.2mm
+        y: 38.21mm
         width: 640mm
         height: 70mm
       children:
@@ -36,8 +36,8 @@ children:
                   label_start: 0
                   depth: 0.4mm
               - AtPosition:
-                  x: 340mm
-                  y: 107mm
+                  x: 323.2mm
+                  y: 30.21mm
                   child:
                     EngraveText:
                       text: "SHOP RULE  600 MM"

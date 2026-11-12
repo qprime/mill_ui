@@ -11,7 +11,7 @@ children:
       id: rose_coaster
       label: "Rose"
       diameter: 100mm
-      at: {x: 70mm, y: 120mm}
+      at: {x: 53.21mm, y: 53.21mm}
       children:
         - Profile:
             side: outside
@@ -26,7 +26,7 @@ children:
       id: spirograph_coaster
       label: "Spirograph"
       diameter: 100mm
-      at: {x: 205mm, y: 120mm}
+      at: {x: 188.21mm, y: 53.21mm}
       children:
         - Profile:
             side: outside
@@ -45,7 +45,7 @@ children:
       id: lissajous_coaster
       label: "Lissajous"
       diameter: 100mm
-      at: {x: 340mm, y: 120mm}
+      at: {x: 323.21mm, y: 53.21mm}
       children:
         - Profile:
             side: outside
@@ -63,7 +63,7 @@ children:
       id: superformula_coaster
       label: "Superformula"
       diameter: 100mm
-      at: {x: 475mm, y: 120mm}
+      at: {x: 458.21mm, y: 53.21mm}
       children:
         - Profile:
             side: outside
@@ -81,7 +81,7 @@ children:
       id: harmonograph_coaster
       label: "Harmonograph"
       diameter: 100mm
-      at: {x: 610mm, y: 120mm}
+      at: {x: 593.21mm, y: 53.21mm}
       children:
         - Profile:
             side: outside

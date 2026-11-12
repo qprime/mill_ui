@@ -11,7 +11,7 @@ children:
   - Rect:
       id: plain
       label: "Plain"
-      at: {x: 100mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 60.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       feature:
         type: pocket
         depth: 10mm
@@ -19,7 +19,7 @@ children:
   - Rect:
       id: corner_cleanup
       label: "Corner Cleanup"
-      at: {x: 255mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 215.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       feature:
         type: pocket
         depth: 10mm
@@ -28,7 +28,7 @@ children:
   - Rect:
       id: dogbone
       label: "Dogbone"
-      at: {x: 410mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 370.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       feature:
         type: pocket
         depth: 10mm
@@ -37,7 +37,7 @@ children:
   - Rect:
       id: t_bone
       label: "T-Bone"
-      at: {x: 565mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 525.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       feature:
         type: pocket
         depth: 10mm
@@ -48,7 +48,7 @@ children:
   - Rect:
       id: rest
       label: "Rest"
-      at: {x: 720mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 680.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       feature:
         type: pocket
         depth: 10mm
@@ -57,7 +57,7 @@ children:
   - Rect:
       id: allowance
       label: "Rough + Finish"
-      at: {x: 875mm, y: 140mm, width: 120mm, height: 80mm}
+      at: {x: 835.03mm, y: 43.21mm, width: 120mm, height: 80mm}
       children:
         - Pocket:
             depth: 10mm

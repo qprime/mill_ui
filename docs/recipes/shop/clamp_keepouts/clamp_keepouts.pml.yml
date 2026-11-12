@@ -9,42 +9,42 @@ children:
   - Rect:
       id: island_plate
       label: Island plate
-      at: {x: 150mm, y: 110mm, width: 180mm, height: 120mm}
+      at: {x: 145.03mm, y: 105.03mm, width: 180mm, height: 120mm}
       feature: {type: pocket, depth: 6mm}
       children:
         - Profile: {side: outside, depth: through, tab_count: 4, tab_height: 3mm}
         - Island:
             id: boss
             children:
-              - Rect: {at: {x: 150mm, y: 110mm, width: 60mm, height: 40mm}}
+              - Rect: {at: {x: 145.03mm, y: 105.03mm, width: 60mm, height: 40mm}}
   - Rect:
       id: plain_plate
       label: Plain plate
-      at: {x: 150mm, y: 270mm, width: 180mm, height: 120mm}
+      at: {x: 145.03mm, y: 265.03mm, width: 180mm, height: 120mm}
       feature: {type: profile, side: outside, depth: through, tab_count: 4, tab_height: 3mm}
   - Circle:
       id: disc
       label: Disc
       diameter: 200mm
-      at: {x: 420mm, y: 190mm}
+      at: {x: 415.03mm, y: 185.03mm}
       feature: {type: profile, side: outside, depth: through, tab_count: 4, tab_height: 3mm}
   - Keepout:
       id: clamp_bottom_left
       children:
-        - Rect: {at: {x: 25mm, y: 25mm, width: 40mm, height: 40mm}}
+        - Rect: {at: {x: 20.03mm, y: 20.03mm, width: 40mm, height: 40mm}}
   - Keepout:
       id: clamp_bottom_right
       children:
-        - Rect: {at: {x: 555mm, y: 25mm, width: 40mm, height: 40mm}}
+        - Rect: {at: {x: 550.03mm, y: 20.03mm, width: 40mm, height: 40mm}}
   - Keepout:
       id: clamp_top_left
       children:
-        - Rect: {at: {x: 25mm, y: 355mm, width: 40mm, height: 40mm}}
+        - Rect: {at: {x: 20.03mm, y: 350.03mm, width: 40mm, height: 40mm}}
   - Keepout:
       id: clamp_top_right
       children:
-        - Rect: {at: {x: 555mm, y: 355mm, width: 40mm, height: 40mm}}
+        - Rect: {at: {x: 550.03mm, y: 350.03mm, width: 40mm, height: 40mm}}
   - Keepout:
       id: hold_down_screw
       children:
-        - Circle: {at: {x: 290mm, y: 190mm}, diameter: 20mm}
+        - Circle: {at: {x: 285.03mm, y: 185.03mm}, diameter: 20mm}

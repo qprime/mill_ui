@@ -11,7 +11,7 @@ children:
       id: clock_face
       label: "Clock Face"
       diameter: 280mm
-      at: {x: 170mm, y: 190mm}
+      at: {x: 143.21mm, y: 143.21mm}
       children:
         - Profile:
             side: outside
@@ -41,7 +41,7 @@ children:
       id: compass_rose
       label: "Compass Rose"
       diameter: 280mm
-      at: {x: 490mm, y: 190mm}
+      at: {x: 463.21mm, y: 143.21mm}
       children:
         - Profile:
             side: outside
@@ -84,7 +84,7 @@ children:
       id: sunburst
       label: "Sunburst"
       diameter: 280mm
-      at: {x: 810mm, y: 190mm}
+      at: {x: 783.21mm, y: 143.21mm}
       children:
         - Profile:
             side: outside

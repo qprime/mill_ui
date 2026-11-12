@@ -12,8 +12,8 @@ children:
       id: coupon
       label: "Coupon 180x190"
       at:
-        x: 110mm
-        y: 115mm
+        x: 93.2mm
+        y: 98.2mm
         width: 180mm
         height: 190mm
       children:
@@ -25,62 +25,62 @@ children:
             id: hole_6_35
             label: "Hole 6.35"
             diameter: 6.35mm
-            at: {x: 40mm, y: 180mm}
+            at: {x: 23.2mm, y: 163.2mm}
             feature: {type: hole, depth: through}
         - Circle:
             id: hole_10
             label: "Hole 10"
             diameter: 10mm
-            at: {x: 70mm, y: 180mm}
+            at: {x: 53.2mm, y: 163.2mm}
             feature: {type: hole, depth: through}
         - Circle:
             id: hole_12_7
             label: "Hole 12.7"
             diameter: 12.7mm
-            at: {x: 105mm, y: 180mm}
+            at: {x: 88.2mm, y: 163.2mm}
             feature: {type: hole, depth: through}
         - Circle:
             id: hole_20
             label: "Hole 20"
             diameter: 20mm
-            at: {x: 150mm, y: 180mm}
+            at: {x: 133.2mm, y: 163.2mm}
             feature: {type: hole, depth: through}
 
         - Rect:
             id: pocket_40x20
             label: "Pocket 40x20x5"
-            at: {x: 55mm, y: 130mm, width: 40mm, height: 20mm}
+            at: {x: 38.2mm, y: 113.2mm, width: 40mm, height: 20mm}
             feature: {type: pocket, depth: 5mm}
         - Circle:
             id: pocket_d30
             label: "Pocket D30x5"
             diameter: 30mm
-            at: {x: 125mm, y: 130mm}
+            at: {x: 108.2mm, y: 113.2mm}
             feature: {type: pocket, depth: 5mm}
         - Rect:
             id: pocket_20x20
             label: "Pocket 20x20x5"
-            at: {x: 175mm, y: 130mm, width: 20mm, height: 20mm}
+            at: {x: 158.2mm, y: 113.2mm, width: 20mm, height: 20mm}
             feature: {type: pocket, depth: 5mm}
 
         - Rect:
             id: window_50x30
             label: "Window 50x30"
-            at: {x: 60mm, y: 65mm, width: 50mm, height: 30mm}
+            at: {x: 43.2mm, y: 48.2mm, width: 50mm, height: 30mm}
             feature: {type: profile, side: inside, depth: through}
         - Circle:
             id: window_d40
             label: "Window D40"
             diameter: 40mm
-            at: {x: 145mm, y: 65mm}
+            at: {x: 128.2mm, y: 48.2mm}
             feature: {type: profile, side: inside, depth: through}
 
   - Rect:
       id: block_40
       label: "Block 40x40"
       at:
-        x: 240mm
-        y: 115mm
+        x: 223.2mm
+        y: 98.2mm
         width: 40mm
         height: 40mm
       children:

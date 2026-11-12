@@ -9,6 +9,8 @@ Sheet:
 
 components:
   door:
+    params:
+      tab_height: 3mm
     body:
       Rect:
         children:
@@ -16,7 +18,7 @@ components:
               side: outside
               depth: through
               tab_count: 4
-              tab_height: 3mm
+              tab_height: ${tab_height}
 
 children:
   - AtPosition:
@@ -50,6 +52,8 @@ children:
           children:
             - UseComponent:
                 name: door
+                args:
+                  tab_height: 4mm
             - Inset:
                 distance: 50mm
                 children:

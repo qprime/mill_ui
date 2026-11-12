@@ -4,13 +4,14 @@ from pathlib import Path
 
 import pytest
 
+from adapters.ast_to_removal import ast_to_removal_intents
 from layout_ast.compositional import (
     Panel,
     Rect,
 )
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import PMLParseError, parse_pml_yaml
-from resolution.layout_resolver import resolve_layout
+from resolution.layout_resolver import resolve_layout, resolve_layout_multi
 
 
 def approx_eq(a, b, rel=1e-6):
@@ -183,6 +184,230 @@ children:
     flat = resolve_layout(ast)
     assert len(flat.items) == 1
     assert flat.items[0].shape_id == "panel"
+
+
+def _parameterized_component_pml():
+    return """
+Sheet: {width: 400mm, height: 300mm, thickness: 19mm}
+components:
+  door:
+    params: {inset: 20mm, depth: 3mm, count: 2, label: default}
+    body:
+      Inset:
+        distance: ${inset}
+        children:
+          - SplitVertical:
+              count: ${count}
+              gap: 10mm
+              children:
+                - Rect:
+                    label: panel_${label}
+                    feature: {type: pocket, depth: '${depth}'}
+children:
+  - SplitHorizontal:
+      count: 2
+      gap: 20mm
+      children:
+        - UseComponent: {name: door}
+        - UseComponent:
+            name: door
+            args: {inset: 30, depth: 6mm, count: 3, label: custom}
+"""
+
+
+def test_component_parameters_bind_independently_before_dimension_parsing():
+    ast = parse_pml_yaml(_parameterized_component_pml())
+    flat = resolve_layout(ast)
+    assert len(flat.items) == 5
+    depths, widths, heights = [], [], []
+    for item in flat.items:
+        assert item.feature is not None and item.geometry is not None
+        depths.append(item.feature.depth_mm)
+        widths.append(item.geometry.data["w_mm"])
+        heights.append(item.geometry.data["h_mm"])
+    assert depths == [3, 3, 6, 6, 6]
+    assert widths == pytest.approx([175, 175, 320 / 3, 320 / 3, 320 / 3])
+    assert heights == [100, 100, 80, 80, 80]
+    assert [item.label for item in flat.items] == ["panel_default"] * 2 + ["panel_custom"] * 3
+    intents = ast_to_removal_intents(flat)
+    assert len(intents) == 5
+    assert [-intent.depth_profile.z_bottom for intent in intents] == [3, 3, 6, 6, 6]
+    assert resolve_layout(ast) == flat
+
+
+def test_component_parameter_references_and_overrides_survive_round_trip():
+    ast = parse_pml_yaml(_parameterized_component_pml())
+    formatted = format_pml_yaml(ast)
+    assert "${inset}" in formatted and "${depth}" in formatted
+    assert "UseComponent:" in formatted and "custom" in formatted
+    reparsed = parse_pml_yaml(formatted)
+    assert reparsed == ast
+    assert resolve_layout(reparsed) == resolve_layout(ast)
+    assert format_pml_yaml(reparsed) == formatted
+
+
+@pytest.mark.parametrize(
+    "original,replacement,error",
+    [
+        ("distance: ${inset}", "distance: ${missing}", "Unknown component parameter.*missing"),
+        ("distance: ${inset}", "distance: ${inset + 1}", "Invalid component parameter reference"),
+        ("inset: 30,", "inset_typo: 30,", "Unknown arguments.*inset_typo"),
+        ("depth: 6mm,", "depth: invalid,", "door.*invalid bound values"),
+        ("count: 3,", "count: [2, 3],", "count.*must be a scalar"),
+        ("inset: 30,", "inset: '${inset}',", "inset.*concrete value"),
+    ],
+)
+def test_invalid_component_bindings_fail_explicitly(original, replacement, error):
+    source = _parameterized_component_pml().replace(original, replacement)
+    with pytest.raises(PMLParseError, match=error):
+        parse_pml_yaml(source)
+
+
+def test_nested_components_forward_parameters_without_cross_instance_leaks():
+    source = """
+Sheet: {width: 200mm, height: 100mm, thickness: 19mm}
+components:
+  outer:
+    params: {depth: 3mm}
+    body:
+      - UseComponent: {name: inner, args: {depth: '${depth}'}}
+  inner:
+    params: {depth: 2mm}
+    body:
+      Pocket: {depth: '${depth}'}
+children:
+  - SplitVertical:
+      count: 3
+      gap: 10mm
+      children:
+        - UseComponent: {name: outer, args: {depth: 5}}
+        - UseComponent: {name: inner}
+        - UseComponent: {name: outer}
+"""
+    ast = parse_pml_yaml(source)
+    intents = ast_to_removal_intents(resolve_layout(ast))
+    assert [-intent.depth_profile.z_bottom for intent in intents] == [5, 2, 3]
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+@pytest.mark.parametrize("name", ["loop", "missing"])
+def test_component_cycles_and_unknown_names_fail_before_resolution(name):
+    source = f"""
+Sheet: {{width: 200mm, height: 100mm, thickness: 19mm}}
+components:
+  loop:
+    body:
+      UseComponent: {{name: {name}}}
+children:
+  - UseComponent: {{name: loop}}
+"""
+    with pytest.raises(PMLParseError, match=r"Recursive component use|Unknown component"):
+        parse_pml_yaml(source)
+
+
+def test_component_string_values_cannot_inject_yaml_nodes():
+    source = _parameterized_component_pml().replace("label: custom", 'label: "custom\\nchildren: []"')
+    ast = parse_pml_yaml(source)
+    flat = resolve_layout(ast)
+    assert len(flat.items) == 5
+    assert flat.items[-1].label == "panel_custom\nchildren: []"
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_parameterized_component_assembly_retains_multi_sheet_partitioning():
+    source = """
+Sheet: {width: 150mm, height: 150mm, thickness: 10mm}
+components:
+  box:
+    params: {height: 120mm, labels: false}
+    body:
+      Assembly:
+        type: box
+        width: 100mm
+        depth: 100mm
+        height: ${height}
+        thickness: 10mm
+        joinery: butt
+        top: none
+        bottom: none
+        show_labels: ${labels}
+children:
+  - UseComponent: {name: box}
+"""
+    sheets = resolve_layout_multi(parse_pml_yaml(source))
+    assert len(sheets) == 4
+    for sheet in sheets:
+        intents = ast_to_removal_intents(sheet)
+        assert len(intents) == 1
+        assert intents[0].bounds.height == 120
+
+
+def test_component_tab_heights_reach_removal_constraints():
+    source = """
+Sheet: {width: 400mm, height: 300mm, thickness: 19mm}
+components:
+  outline:
+    params: {tab_height: 3mm, side: outside}
+    body:
+      Rect:
+        children:
+          - Profile:
+              side: ${side}
+              depth: through
+              tab_count: 4
+              tab_height: ${tab_height}
+children:
+  - SplitVertical:
+      count: 2
+      gap: 20mm
+      children:
+        - UseComponent: {name: outline}
+        - UseComponent: {name: outline, args: {tab_height: 4}}
+"""
+    ast = parse_pml_yaml(source)
+    intents = ast_to_removal_intents(resolve_layout(ast))
+    assert len(intents) == 2
+    for intent, height in zip(intents, (3, 4), strict=True):
+        assert intent.side == "outside"
+        assert intent.depth_profile.z_bottom == -19
+        assert intent.constraints.tabs is not None
+        assert intent.constraints.tabs.count == 4
+        assert intent.constraints.tabs.height_mm == height
+        assert intent.bounds.width == 190
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_bound_component_preserves_its_parent_shape_domain():
+    source = """
+Sheet: {width: 400mm, height: 300mm, thickness: 19mm}
+components:
+  recess:
+    params: {depth: 3mm}
+    body:
+      Pocket: {depth: '${depth}'}
+children:
+  - Circle:
+      diameter: 100mm
+      children:
+        - UseComponent: {name: recess}
+"""
+    intents = ast_to_removal_intents(resolve_layout(parse_pml_yaml(source)))
+    assert len(intents) == 1
+    assert intents[0].shape == "Polygon"
+    assert intents[0].bounds.width == pytest.approx(100)
+    assert intents[0].bounds.height == pytest.approx(100)
+    assert intents[0].depth_profile.z_bottom == -3
+
+
+@pytest.mark.parametrize("field", ["args", "params"])
+def test_component_binding_requires_parameter_mappings(field):
+    source = _parameterized_component_pml()
+    if field == "args":
+        source = source.replace("args: {inset: 30, depth: 6mm, count: 3, label: custom}", "args: [3, 4]")
+    else:
+        source = source.replace("params: {inset: 20mm, depth: 3mm, count: 2, label: default}", "params: [3, 4]")
+    with pytest.raises(PMLParseError, match=f"{field} must be a mapping"):
+        parse_pml_yaml(source)
 
 
 def test_place_with_components():

@@ -1,0 +1,293 @@
+{
+  "baseline_commit": "f27e3b1643e1ee2855513e59312cb494bb519ba3",
+  "source": "docs/recipes/doors/multi_panel_doors/multi_panel_doors.pml.yml",
+  "source_sha256": "6976c513987acea12e344322fb0255dd2288d5615f684335798012d18fda63b8",
+  "legacy_nc_sha256": "3952dea309aeb6d04702ca4648c0eca68d6895e9da781ac6385b3f38743c01a7",
+  "current_nc_sha256": "5522163fd104456d6e8599c3ae23d7ec9f0d50794009abfd07fbb5ff94659774",
+  "stock_thickness_mm": 19,
+  "tool_diameter_mm": 3.175,
+  "nc_rounding_tolerance_mm": 0.004,
+  "profiles": [
+    {
+      "index": 1,
+      "nominal_span_mm": [
+        400.0,
+        1000.0
+      ],
+      "measured_span_mm": [
+        400.0,
+        1000.0
+      ],
+      "max_depth_mm": 19.2,
+      "expected_tab_height_mm": 3,
+      "legacy_tab_height_mm": 3,
+      "unchanged_xy": true,
+      "legacy_block_identical": true,
+      "tabs": [
+        {
+          "start_xy_mm": [
+            376.825,
+            28.413
+          ],
+          "end_xy_mm": [
+            383.175,
+            28.413
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        },
+        {
+          "start_xy_mm": [
+            431.587,
+            676.825
+          ],
+          "end_xy_mm": [
+            431.587,
+            683.175
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            83.175,
+            1031.588
+          ],
+          "end_xy_mm": [
+            76.825,
+            1031.588
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999994
+        },
+        {
+          "start_xy_mm": [
+            28.412,
+            383.175
+          ],
+          "end_xy_mm": [
+            28.412,
+            376.825
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "nominal_span_mm": [
+        360.0,
+        800.0
+      ],
+      "measured_span_mm": [
+        359.99899999999997,
+        799.999
+      ],
+      "max_depth_mm": 19.2,
+      "expected_tab_height_mm": 4,
+      "legacy_tab_height_mm": 3,
+      "unchanged_xy": true,
+      "legacy_block_identical": false,
+      "tabs": [
+        {
+          "start_xy_mm": [
+            756.825,
+            28.413
+          ],
+          "end_xy_mm": [
+            763.175,
+            28.413
+          ],
+          "axis_z_mm": -15.0,
+          "remaining_height_mm": 4.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            831.587,
+            536.825
+          ],
+          "end_xy_mm": [
+            831.587,
+            543.175
+          ],
+          "axis_z_mm": -15.0,
+          "remaining_height_mm": 4.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            543.175,
+            831.587
+          ],
+          "end_xy_mm": [
+            536.825,
+            831.587
+          ],
+          "axis_z_mm": -15.0,
+          "remaining_height_mm": 4.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            468.413,
+            323.175
+          ],
+          "end_xy_mm": [
+            468.413,
+            316.825
+          ],
+          "axis_z_mm": -15.0,
+          "remaining_height_mm": 4.0,
+          "axis_span_mm": 6.350000000000023
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "nominal_span_mm": [
+        160.0,
+        800.0
+      ],
+      "measured_span_mm": [
+        159.99899999999997,
+        799.999
+      ],
+      "max_depth_mm": 19.2,
+      "expected_tab_height_mm": 3,
+      "legacy_tab_height_mm": 3,
+      "unchanged_xy": true,
+      "legacy_block_identical": true,
+      "tabs": [
+        {
+          "start_xy_mm": [
+            1011.587,
+            103.65
+          ],
+          "end_xy_mm": [
+            1011.587,
+            110.0
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999994
+        },
+        {
+          "start_xy_mm": [
+            1011.587,
+            586.825
+          ],
+          "end_xy_mm": [
+            1011.587,
+            593.175
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            848.413,
+            756.35
+          ],
+          "end_xy_mm": [
+            848.413,
+            750.0
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        },
+        {
+          "start_xy_mm": [
+            848.413,
+            273.175
+          ],
+          "end_xy_mm": [
+            848.413,
+            266.825
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "nominal_span_mm": [
+        160.0,
+        800.0
+      ],
+      "measured_span_mm": [
+        160.00099999999992,
+        799.999
+      ],
+      "max_depth_mm": 19.2,
+      "expected_tab_height_mm": 3,
+      "legacy_tab_height_mm": 3,
+      "unchanged_xy": true,
+      "legacy_block_identical": true,
+      "tabs": [
+        {
+          "start_xy_mm": [
+            1191.588,
+            103.65
+          ],
+          "end_xy_mm": [
+            1191.588,
+            110.0
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999994
+        },
+        {
+          "start_xy_mm": [
+            1191.588,
+            586.825
+          ],
+          "end_xy_mm": [
+            1191.588,
+            593.175
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.349999999999909
+        },
+        {
+          "start_xy_mm": [
+            1028.412,
+            756.35
+          ],
+          "end_xy_mm": [
+            1028.412,
+            750.0
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        },
+        {
+          "start_xy_mm": [
+            1028.412,
+            273.175
+          ],
+          "end_xy_mm": [
+            1028.412,
+            266.825
+          ],
+          "axis_z_mm": -16.0,
+          "remaining_height_mm": 3.0,
+          "axis_span_mm": 6.350000000000023
+        }
+      ]
+    }
+  ],
+  "scope": "Actual final-pass cutter-axis positions and heights. Nominal blank spans reconstructed from outside contour and cutter diameter. Computational evidence, not a physical cut test or complete 3D stock simulation."
+}

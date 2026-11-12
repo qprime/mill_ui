@@ -22,6 +22,8 @@
 | PM-12 | STRUCTURAL | CENTER_COORDS | at.x and at.y specify part CENTER |
 | PM-13 | HARD | FACE_BACK_SCOPE | `face: back` valid only on pocket/hole/engrave with a finite depth |
 | PM-14 | HARD | ISLAND_UNDER_POCKET_RECT | Island must be a direct child of a Rect with a pocket feature; unsupported placements raise |
+| PM-15 | HARD | COMPONENT_BIND_BEFORE_PARSE | Bind each component use's arguments over its defaults before parsing parameterized body dimensions and counts. |
+| PM-16 | HARD | COMPONENT_BINDING_ROUND_TRIP | Formatting preserves component templates, defaults and per-use arguments; reparsing recreates equal concrete instances. |
 
 ---
 
@@ -93,6 +95,37 @@ Each PML node must have exactly one uppercase key identifying its type:
 Beam primitives carry a separate `FaceFeature.face` (`assembly/beam.py`) naming a face of a beam blank. It selects which end of the lamination stack the feature depth counts inward from — `front` starts at layer 0, `back` at the last layer — and is consumed entirely by `BeamSpec.layers_reached`. It does not select a machining setup and must not be routed into the panel face mechanism; every item emitted from a beam feature carries `Feature.face == "front"`, because each layer panel lies flat on the sheet and is machined from one side.
 
 ---
+
+## Reusable PML Components
+
+These are reusable layout definitions, distinct from assembly members in
+`components.md`. A definition containing parameter references keeps a
+`ComponentTemplate` with its structured source. Each `UseComponent` becomes a
+`ComponentInstance` pairing the original use with a separately parsed concrete
+body. Binding happens at the PML boundary; the resolver receives typed dimensions
+and counts and never imports the PML parser. Top-level instances remain
+transparent to assembly sheet partitioning. The inherited layout/domain context
+passes through an instance to its concrete body.
+
+Arguments override declared defaults for that use only. Nested uses receive
+their own defaults and explicit arguments; callers forward values through
+`args`. A whole-value `${name}` preserves the scalar's type, including bare
+numeric counts and booleans. References embedded in text interpolate strings.
+Substitution walks values in the loaded YAML tree, never serialized YAML, so a
+string cannot inject nodes. Keys and arithmetic expressions are not substituted.
+Parameter values must be concrete scalars; default-to-default references and
+expression evaluation are not supported.
+
+Unknown references, undeclared arguments, malformed references, non-mapping
+parameter blocks, recursive uses and invalid bound dimensions/counts error
+explicitly. A parameterized body is parsed and validated when instantiated.
+Definitions and other instances are not mutated by binding or resolution.
+
+The formatter emits an instance's original `UseComponent` and the definition's
+template, defaults and arguments. Its concrete body is compiler-derived and is
+recreated by parsing those inputs, rather than emitted as independent syntax.
+Semantic AST equality and resolved machining intents survive this round trip.
+External `Template:` files retain their existing separate loader contract.
 
 ## Sheet Dimensions
 

@@ -85,6 +85,7 @@ from layout_ast.compositional import (
     Cell,
     ChamferGen,
     Circle,
+    ComponentInstance,
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
@@ -634,6 +635,15 @@ class LayoutResolver:
         resolved_params = {**comp_def.params, **node.args}
 
         self._resolve_node(comp_def.body, region, items, resolved_params)
+
+    def _handle_component_instance(
+        self,
+        node: ComponentInstance,
+        region: ResolvedRegion,
+        items: list[Item],
+        params: dict[str, Any],
+    ) -> None:
+        self._resolve_node(node.body, region, items, params)
 
     def _handle_place(
         self,
@@ -3472,6 +3482,7 @@ class LayoutResolver:
                 Split: LayoutResolver._handle_split,
                 Cell: LayoutResolver._handle_cell,
                 UseComponent: LayoutResolver._handle_use_component,
+                ComponentInstance: LayoutResolver._handle_component_instance,
                 Place: LayoutResolver._handle_place,
                 Rect: LayoutResolver._handle_rect,
                 Circle: LayoutResolver._handle_circle,
@@ -3556,21 +3567,23 @@ def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> Layout
     return results[0]
 
 
+def _top_level_nodes(root: Any) -> tuple[Any, ...]:
+    if isinstance(root, ComponentInstance):
+        return _top_level_nodes(root.body)
+    if isinstance(root, Panel):
+        nodes: list[Any] = []
+        for child in root.children:
+            nodes.extend(_top_level_nodes(child))
+        return tuple(nodes)
+    return () if root is None else (root,)
+
+
 def _find_assembly_node(root: Any) -> AssemblyDecl | None:
-    if isinstance(root, AssemblyDecl):
-        return root
-    children = getattr(root, "children", ())
-    for child in children:
-        if isinstance(child, AssemblyDecl):
-            return child
-    return None
+    return next((node for node in _top_level_nodes(root) if isinstance(node, AssemblyDecl)), None)
 
 
 def _has_beam_content(root: Any) -> bool:
-    if isinstance(root, BeamDecl):
-        return True
-    children = getattr(root, "children", ())
-    return any(isinstance(child, BeamDecl) for child in children)
+    return any(isinstance(node, BeamDecl) for node in _top_level_nodes(root))
 
 
 def resolve_layout_multi(
@@ -3610,7 +3623,7 @@ def resolve_layout_multi(
             + ", ".join(f"{n} ({d})" for n, d in zip(names, dims, strict=True))
         )
 
-    standalone_assembly = ast.root is assembly_node or getattr(ast.root, "children", ()) == (assembly_node,)
+    standalone_assembly = _top_level_nodes(ast.root) == (assembly_node,)
     if len(partition.sheets) <= 1 and not standalone_assembly:
         return [resolver.resolve()]
 

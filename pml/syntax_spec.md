@@ -2229,7 +2229,7 @@ components:
           - Frame:
               width: ${stile_width}  # Parameter reference
               children:
-                - Pocket: {depth: ${panel_depth}}
+                - Pocket: {depth: '${panel_depth}'}
 
 children:
   - UseComponent:
@@ -2238,6 +2238,28 @@ children:
         stile_width: 65mm
         panel_depth: 8mm
 ```
+
+Each use binds its `args` over the definition's `params` before parsing the body.
+The example therefore produces a 65mm frame with an 8mm-deep pocket; another use
+without arguments keeps the 57mm/6mm defaults. Definitions and other uses remain
+unchanged. Bodies may be a node or a list of nodes.
+
+References replace values, not YAML keys. A value consisting only of `${name}`
+keeps the supplied scalar type: `3` stays a number for a count, `false` stays a
+boolean, and `6mm` is parsed as a dimension. References inside text, such as
+`label: door_${style}`, interpolate text. Quote references used inside YAML flow
+maps, for example `Pocket: {depth: '${panel_depth}'}`.
+
+Nested components have their own defaults. Forward an outer value explicitly
+with `args: {panel_depth: '${panel_depth}'}`. Unknown arguments or references,
+recursive component use and invalid bound values are errors. Parameter values
+must be concrete strings, numbers or booleans; arithmetic and references between
+default values are unsupported. Formatting preserves references and per-use
+overrides, so subsequent edits can still adjust the reusable design.
+
+The [multi-panel door recipe](../docs/recipes/doors/multi_panel_doors/README.md)
+demonstrates a default 3mm tab height and a 4mm override on its second door,
+including a comparison measured from the emitted G-code.
 
 ## JSON Schema
 

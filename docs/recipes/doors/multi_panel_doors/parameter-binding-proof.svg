@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10.000 -50.000 1250.000 1070.000" width="1250.0mm" height="1070.0mm">
+  <style>.title { fill: #0f172a; stroke: none; font-size: 20px; font-weight: bold; font-family: sans-serif; }
+.text { fill: #334155; stroke: none; font-size: 13px; font-family: sans-serif; }
+.small { fill: #475569; stroke: none; font-size: 11px; font-family: sans-serif; }
+.outline { fill: none; stroke: #64748b; stroke-width: 1; }
+.guide { fill: none; stroke: #94a3b8; stroke-width: .7; stroke-dasharray: 3,2; }
+.default { fill: none; stroke: #2563eb; stroke-width: 5; }
+.override { fill: none; stroke: #c2410c; stroke-width: 5; }
+.default_stock { fill: #dbeafe; stroke: #2563eb; stroke-width: 1; }
+.override_stock { fill: #ffedd5; stroke: #c2410c; stroke-width: 1; }</style>
+  <rect x="-10" y="-50.0" width="1250.0" height="1070.0" fill="#fff" />
+  <g id="COMPONENT_PARAMETERS" class="component-parameters">
+    <text x="20.000" y="30.000" text-anchor="start" dominant-baseline="middle" fill="#0f172a" stroke="none" font-size="20px" font-weight="bold" font-family="sans-serif">One reusable outline: per-door parameters reach the actual G-code</text>
+    <text x="20.000" y="60.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Blue: default tab_height 3 mm. Orange: the second use overrides tab_height to 4 mm.</text>
+    <text x="35.000" y="100.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Door 1: 3 mm tabs</text>
+    <text x="35.000" y="122.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">400 × 1000 mm</text>
+    <rect x="35.000" y="140.000" width="140.000" height="350.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <polyline points="34.444,490.555 34.444,482.541 34.444,490.555 156.389,490.555 156.389,490.555 158.611,490.555 158.611,490.555 175.555,490.555 175.555,263.611 175.555,263.611 175.555,261.389 175.555,261.389 175.555,139.444 53.611,139.444 53.611,139.444 51.389,139.444 51.389,139.444 34.445,139.444 34.444,366.389 34.444,366.389 34.444,368.611 34.444,368.611 34.444,490.555" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="156.389" y1="490.555" x2="158.611" y2="490.555" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="175.555" y1="263.611" x2="175.555" y2="261.389" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="53.611" y1="139.444" x2="51.389" y2="139.444" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="34.444" y1="366.389" x2="34.444" y2="368.611" fill="none" stroke="#2563eb" stroke-width="5" />
+    <text x="35.000" y="530.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Across one measured tab:</text>
+    <rect x="70.000" y="606.000" width="114.300" height="54.000" fill="#dbeafe" stroke="#2563eb" stroke-width="1" />
+    <polyline points="50.000,663.600 70.000,663.600 70.000,606.000 184.300,606.000 184.300,663.600 204.300,663.600" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="35.000" y1="660.000" x2="255.000" y2="660.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <text x="35.000" y="695.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">19 mm stock; tab Z = -16 mm</text>
+    <text x="35.000" y="718.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Four 3 mm-high tabs; 6.35 mm axis spans</text>
+    <text x="295.000" y="100.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Door 2: 4 mm tabs</text>
+    <text x="295.000" y="122.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">360 × 800 mm</text>
+    <rect x="295.000" y="140.000" width="126.000" height="280.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <polyline points="294.445,420.555 294.445,412.541 294.445,420.555 395.389,420.555 395.389,420.555 397.611,420.555 397.611,420.555 421.555,420.555 421.555,242.611 421.555,242.611 421.555,240.389 421.555,240.389 421.555,139.445 320.611,139.445 320.611,139.445 318.389,139.445 318.389,139.445 294.445,139.445 294.445,317.389 294.445,317.389 294.445,319.611 294.445,319.611 294.445,420.555" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="395.389" y1="420.555" x2="397.611" y2="420.555" fill="none" stroke="#c2410c" stroke-width="5" />
+    <line x1="421.555" y1="242.611" x2="421.555" y2="240.389" fill="none" stroke="#c2410c" stroke-width="5" />
+    <line x1="320.611" y1="139.445" x2="318.389" y2="139.445" fill="none" stroke="#c2410c" stroke-width="5" />
+    <line x1="294.445" y1="317.389" x2="294.445" y2="319.611" fill="none" stroke="#c2410c" stroke-width="5" />
+    <text x="295.000" y="530.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Across one measured tab:</text>
+    <rect x="330.000" y="588.000" width="114.300" height="72.000" fill="#ffedd5" stroke="#c2410c" stroke-width="1" />
+    <polyline points="310.000,663.600 330.000,663.600 330.000,588.000 444.300,588.000 444.300,663.600 464.300,663.600" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="295.000" y1="660.000" x2="515.000" y2="660.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <line x1="330.000" y1="606.000" x2="444.300" y2="606.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <text x="295.000" y="570.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Dashed: old 3 mm height</text>
+    <text x="295.000" y="695.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">19 mm stock; tab Z = -15 mm</text>
+    <text x="295.000" y="718.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Four 4 mm-high tabs; 6.35 mm axis spans</text>
+    <text x="555.000" y="100.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Door 3: 3 mm tabs</text>
+    <text x="555.000" y="122.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">160 × 800 mm</text>
+    <rect x="555.000" y="140.000" width="56.000" height="280.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <polyline points="554.445,420.555 554.445,412.541 554.445,420.555 611.555,420.555 611.555,394.223 611.555,394.223 611.555,392.000 611.555,392.000 611.555,225.111 611.555,225.111 611.555,222.889 611.555,222.889 611.555,139.445 554.445,139.445 554.445,165.778 554.445,165.778 554.445,168.000 554.445,168.000 554.445,334.889 554.445,334.889 554.445,337.111 554.445,337.111 554.445,420.555" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="611.555" y1="394.223" x2="611.555" y2="392.000" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="611.555" y1="225.111" x2="611.555" y2="222.889" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="554.445" y1="165.778" x2="554.445" y2="168.000" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="554.445" y1="334.889" x2="554.445" y2="337.111" fill="none" stroke="#2563eb" stroke-width="5" />
+    <text x="555.000" y="530.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Across one measured tab:</text>
+    <rect x="590.000" y="606.000" width="114.300" height="54.000" fill="#dbeafe" stroke="#2563eb" stroke-width="1" />
+    <polyline points="570.000,663.600 590.000,663.600 590.000,606.000 704.300,606.000 704.300,663.600 724.300,663.600" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="555.000" y1="660.000" x2="775.000" y2="660.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <text x="555.000" y="695.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">19 mm stock; tab Z = -16 mm</text>
+    <text x="555.000" y="718.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Four 3 mm-high tabs; 6.35 mm axis spans</text>
+    <text x="815.000" y="100.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Door 4: 3 mm tabs</text>
+    <text x="815.000" y="122.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">160 × 800 mm</text>
+    <rect x="815.000" y="140.000" width="56.000" height="280.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <polyline points="814.444,420.555 814.444,412.541 814.444,420.555 871.556,420.555 871.556,394.223 871.556,394.223 871.556,392.000 871.556,392.000 871.556,225.111 871.556,225.111 871.556,222.889 871.556,222.889 871.556,139.445 814.444,139.445 814.444,165.778 814.444,165.778 814.444,168.000 814.444,168.000 814.444,334.889 814.444,334.889 814.444,337.111 814.444,337.111 814.444,420.555" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="871.556" y1="394.223" x2="871.556" y2="392.000" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="871.556" y1="225.111" x2="871.556" y2="222.889" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="814.444" y1="165.778" x2="814.444" y2="168.000" fill="none" stroke="#2563eb" stroke-width="5" />
+    <line x1="814.444" y1="334.889" x2="814.444" y2="337.111" fill="none" stroke="#2563eb" stroke-width="5" />
+    <text x="815.000" y="530.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Across one measured tab:</text>
+    <rect x="850.000" y="606.000" width="114.300" height="54.000" fill="#dbeafe" stroke="#2563eb" stroke-width="1" />
+    <polyline points="830.000,663.600 850.000,663.600 850.000,606.000 964.300,606.000 964.300,663.600 984.300,663.600" fill="none" stroke="#64748b" stroke-width="1" />
+    <line x1="815.000" y1="660.000" x2="1035.000" y2="660.000" fill="none" stroke="#94a3b8" stroke-width=".7" stroke-dasharray="3,2" />
+    <text x="815.000" y="695.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">19 mm stock; tab Z = -16 mm</text>
+    <text x="815.000" y="718.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Four 3 mm-high tabs; 6.35 mm axis spans</text>
+    <text x="20.000" y="770.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Measured from the emitted final profile pass: 19.2 mm through depth; 3.175 mm cutter.</text>
+    <text x="20.000" y="800.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">Only the second door’s tab Z lifts change. All XY moves and the other three profile blocks are unchanged.</text>
+    <text x="20.000" y="830.000" text-anchor="start" dominant-baseline="middle" fill="#334155" stroke="none" font-size="13px" font-family="sans-serif">The pocket program is unchanged. All measured blank spans match nominal dimensions within 0.004 mm.</text>
+    <text x="20.000" y="875.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Evidence: actual cutter-axis heights and blank spans reconstructed from the outside contour and cutter diameter.</text>
+    <text x="20.000" y="899.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">This is computational proof, not a complete 3D stock simulation or a physical cut test.</text>
+    <text x="20.000" y="923.000" text-anchor="start" dominant-baseline="middle" fill="#475569" stroke="none" font-size="11px" font-family="sans-serif">Source/NC hashes and measurements: parameter-binding-measurements.json.</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="0.0" y="-36.0" fill="#0f172a" stroke="none" font-size="20px" font-weight="bold" font-family="sans-serif">BLUEPRINT PROOF DRAWING</text>
+    <text x="0.0" y="-22.0" stroke="#0f172a" fill="none" stroke-width="1">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="1108.0" y="-36.0" stroke="#0f172a" fill="none" stroke-width="1" font-weight="bold">LEGEND</text>
+    <line x1="1108.0" y1="-18.0" x2="1123.0" y2="-18.0" stroke="#0f172a" stroke-width="1" />
+    <text x="1128.0" y="-15.0" stroke="#0f172a" fill="none" stroke-width="1">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="970.0" stroke="#0f172a" fill="none" stroke-width="1" font-weight="bold">NOTES</text>
+  </g>
+</svg>

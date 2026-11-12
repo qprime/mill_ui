@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
+from dataclasses import fields, is_dataclass, replace
 from typing import Any, Literal
 
 from ruamel.yaml import YAML
@@ -14,6 +15,8 @@ from layout_ast.compositional import (
     ChamferGen,
     Circle,
     ComponentDef,
+    ComponentInstance,
+    ComponentTemplate,
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
@@ -1007,6 +1010,9 @@ def _parse_string_art_node(node_data: dict, path: str) -> StringArtGen:
 
 
 def _validate_zones(node: Any, path: str, parent: Any = None, in_zone: bool = False) -> None:
+    if isinstance(node, ComponentInstance):
+        _validate_zones(node.body, f"{path}.body", parent, in_zone)
+        return
     is_zone = isinstance(node, (Island, Keepout))
     if is_zone:
         if in_zone:
@@ -1516,9 +1522,12 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         return _parse_assembly_node(node_data, children, path)
 
     elif node_type == "UseComponent":
+        args = node_data.get("args", {})
+        if not isinstance(args, dict):
+            raise PMLParseError("UseComponent args must be a mapping", f"{path}.UseComponent")
         return UseComponent(
             component_name=_require(node_data, "name", f"{path}.UseComponent"),
-            args=node_data.get("args", {}),
+            args=args,
         )
 
     elif node_type == "Engrave":
@@ -1576,6 +1585,110 @@ def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
         cool_every=cool_every,
         cool_dwell_s=cool_dwell_s,
     )
+
+
+def _substitute_component_values(value: Any, params: dict[str, Any], path: str) -> Any:
+    if isinstance(value, dict):
+        mapping = {}
+        for key, item in value.items():
+            mapping[key] = _substitute_component_values(item, params, f"{path}.{key}")
+        return mapping
+    if isinstance(value, list):
+        sequence = []
+        for index, item in enumerate(value):
+            sequence.append(_substitute_component_values(item, params, f"{path}[{index}]"))
+        return sequence
+    if not isinstance(value, str):
+        return value
+
+    def parameter(name: str) -> Any:
+        if name not in params:
+            raise PMLParseError(f"Unknown component parameter: ${{{name}}}", path)
+        result = params[name]
+        if not isinstance(result, (str, int, float, bool)):
+            raise PMLParseError(f"Component parameter '{name}' must be a scalar, got {result!r}", path)
+        if isinstance(result, str) and "${" in result:
+            raise PMLParseError(f"Component parameter '{name}' must have a concrete value, got {result!r}", path)
+        return result
+
+    match = re.fullmatch(r"\$\{(\w+)\}", value)
+    if match:
+        return parameter(match.group(1))
+    result = re.sub(r"\$\{(\w+)\}", lambda match: str(parameter(match.group(1))), value)
+    if "${" in result:
+        raise PMLParseError(f"Invalid component parameter reference: {value!r}", path)
+    return result
+
+
+def _contains_component_reference(value: Any) -> bool:
+    if isinstance(value, dict):
+        return any(_contains_component_reference(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_contains_component_reference(item) for item in value)
+    return isinstance(value, str) and "${" in value
+
+
+def _bind_component_uses(value: Any, components: dict[str, ComponentDef], stack: tuple[str, ...] = ()) -> Any:
+    if isinstance(value, UseComponent):
+        name = value.component_name
+        path = " -> ".join((*stack, name))
+        if name not in components:
+            raise PMLParseError(f"Unknown component: {name}", path)
+        if name in stack:
+            raise PMLParseError(f"Recursive component use: {path}")
+        definition = components[name]
+        unknown = set(value.args) - set(definition.params)
+        if unknown:
+            raise PMLParseError(f"Unknown arguments for component '{name}': {', '.join(sorted(unknown))}", path)
+        body = definition.body
+        if isinstance(body, ComponentTemplate):
+            params = {**definition.params, **value.args}
+            bound_source = _substitute_component_values(body.source, params, f"components.{name}.body")
+            try:
+                body = (
+                    Panel(children=parse_children(bound_source, path))
+                    if isinstance(bound_source, list)
+                    else parse_node(bound_source, path)
+                )
+            except ValueError as exc:
+                raise PMLParseError(f"Component '{name}' has invalid bound values: {exc}", path) from exc
+        return ComponentInstance(use=value, body=_bind_component_uses(body, components, (*stack, name)))
+    if isinstance(value, tuple):
+        bound_items = []
+        for item in value:
+            bound_items.append(_bind_component_uses(item, components, stack))
+        return tuple(bound_items)
+    if is_dataclass(value) and not isinstance(value, type):
+        updates = {}
+        for field in fields(value):
+            current = getattr(value, field.name)
+            if is_dataclass(current) or isinstance(current, tuple):
+                updates[field.name] = _bind_component_uses(current, components, stack)
+        return replace(value, **updates)
+    return value
+
+
+def _parse_components(data: dict[str, Any]) -> dict[str, ComponentDef]:
+    components: dict[str, ComponentDef] = {}
+    for name, comp_data in data.items():
+        path = f"components.{name}"
+        if not isinstance(comp_data, dict):
+            raise PMLParseError("Component definition must be a mapping", path)
+        params = comp_data.get("params", {})
+        if not isinstance(params, dict):
+            raise PMLParseError("Component params must be a mapping", path)
+        body_data = comp_data.get("body")
+        body: Any = None
+        if body_data:
+            if _contains_component_reference(body_data):
+                body = ComponentTemplate(source=body_data)
+            elif isinstance(body_data, list):
+                body = Panel(children=parse_children(body_data, f"{path}.body"))
+            else:
+                body = parse_node(body_data, f"{path}.body")
+        _validate_zones(body, f"{path}.body")
+        components[name] = ComponentDef(name=name, params=params, body=body)
+    return components
 
 
 def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
@@ -1640,25 +1753,16 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
 
     surface = _parse_surface_block(data.get("Surface"))
 
-    components: dict[str, ComponentDef] = {}
     components_block = data.get("components", {})
-    for name, comp_data in components_block.items():
-        params = comp_data.get("params", {})
-        body_data = comp_data.get("body")
-        if body_data:
-            if isinstance(body_data, list):
-                body = Panel(children=parse_children(body_data, f"components.{name}.body"))
-            else:
-                body = parse_node(body_data, f"components.{name}.body")
-        else:
-            body = None
-        _validate_zones(body, f"components.{name}.body")
-        components[name] = ComponentDef(name=name, params=params, body=body)
+    if not isinstance(components_block, dict):
+        raise PMLParseError("Components must be a mapping", "components")
+    components = _parse_components(components_block)
 
     children_data = data.get("children", [])
     children = parse_children(children_data, "root")
 
     root = Panel(children=children) if children else None
+    root = _bind_component_uses(root, components)
     _validate_zones(root, "root")
 
     return CompositionalLayoutAST(

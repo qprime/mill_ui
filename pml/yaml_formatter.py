@@ -15,6 +15,8 @@ from layout_ast.compositional import (
     Cell,
     ChamferGen,
     Circle,
+    ComponentInstance,
+    ComponentTemplate,
     CompositionalLayoutAST,
     ConcentricBorderGen,
     Edge,
@@ -990,6 +992,9 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["children"] = [format_node(c) for c in node.children]
         return {"Assembly": result}
 
+    elif isinstance(node, ComponentInstance):
+        return format_node(node.use)
+
     elif isinstance(node, UseComponent):
         result: dict[str, Any] = {"name": node.component_name}
         if node.args:
@@ -1153,7 +1158,9 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
             if comp.params:
                 comp_data["params"] = comp.params
             if comp.body:
-                comp_data["body"] = format_node(comp.body)
+                comp_data["body"] = (
+                    comp.body.source if isinstance(comp.body, ComponentTemplate) else format_node(comp.body)
+                )
             data["components"][name] = comp_data
 
     if ast.root and ast.root.children:

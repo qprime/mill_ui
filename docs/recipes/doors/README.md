@@ -20,7 +20,7 @@ Two-sided machining: features cut on the back of the sheet after a flip.
 
 <img src="multi_panel_doors/output/multi_panel_doors.svg" width="240">
 
-A reusable door component with the split layouts: Split, SplitGrid, SplitHorizontal and SplitVertical.
+A reusable door component with parameter defaults and per-use overrides, plus the split layouts: Split, SplitGrid, SplitHorizontal and SplitVertical.
 
 ## [Raised-panel doors](raised_panel_doors/)
 

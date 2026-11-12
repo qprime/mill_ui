@@ -62,6 +62,17 @@ class UseComponent:
 
 
 @dataclass(frozen=True)
+class ComponentTemplate:
+    source: dict[str, Any] | list[Any]
+
+
+@dataclass(frozen=True)
+class ComponentInstance:
+    use: UseComponent
+    body: Any
+
+
+@dataclass(frozen=True)
 class Place:
     layout: Any
     children: tuple[Any, ...] = ()

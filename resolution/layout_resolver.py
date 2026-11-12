@@ -157,6 +157,7 @@ if TYPE_CHECKING:
     from assembly.beam import BeamSpec, Cutout, EdgeFeature, FaceFeature
 
 NodeHandler = Callable[["LayoutResolver", Any, ResolvedRegion, list[Item], dict[str, Any]], None]
+_STOCK_THICKNESS_TOLERANCE_MM = 1e-6
 
 
 def _feature_from_profile_gen(node: ProfileGen) -> Feature:
@@ -2903,6 +2904,11 @@ class LayoutResolver:
         result_items: list[Item] = []
 
         for spec, x_cursor, y_cursor in panel_positions:
+            if abs(spec.thickness_mm - self.ast.sheet.thickness_mm) > _STOCK_THICKNESS_TOLERANCE_MM:
+                raise ValueError(
+                    f"Assembly panel '{spec.name}' thickness {spec.thickness_mm}mm does not match sheet thickness "
+                    f"{self.ast.sheet.thickness_mm}mm; use matching stock for each panel"
+                )
             panel_width = spec.width_mm
             panel_height = spec.height_mm
 
@@ -3003,21 +3009,22 @@ class LayoutResolver:
             result_items.extend(panel_items)
 
             for dado in spec.dados:
+                span_start, span_end = dado.span_for_panel(panel_width, panel_height)
                 if dado.orientation == "vertical":
                     if dado.edge == "right":
                         dado_x = x_cursor + panel_width - dado.position_from_edge_mm - dado.width_mm / 2
                     else:
                         dado_x = x_cursor + dado.position_from_edge_mm + dado.width_mm / 2
-                    dado_center = (dado_x, y_cursor + panel_height / 2)
+                    dado_center = (dado_x, y_cursor + (span_start + span_end) / 2)
                     dado_w = dado.width_mm
-                    dado_h = panel_height
+                    dado_h = span_end - span_start
                 else:
                     if dado.edge == "bottom":
                         dado_y = y_cursor + dado.position_from_edge_mm + dado.width_mm / 2
                     else:
                         dado_y = y_cursor + panel_height - dado.position_from_edge_mm - dado.width_mm / 2
-                    dado_center = (x_cursor + panel_width / 2, dado_y)
-                    dado_w = panel_width
+                    dado_center = (x_cursor + (span_start + span_end) / 2, dado_y)
+                    dado_w = span_end - span_start
                     dado_h = dado.width_mm
 
                 dado_item = Item(
@@ -3290,7 +3297,7 @@ class LayoutResolver:
             role=role,
         )
 
-        if abs(beam_spec.thickness_mm - self.ast.sheet.thickness_mm) > 1e-6:
+        if abs(beam_spec.thickness_mm - self.ast.sheet.thickness_mm) > _STOCK_THICKNESS_TOLERANCE_MM:
             raise ResolutionAssertionError(
                 f"Beam '{node.name}' layer thickness {beam_spec.thickness_mm}mm does not match sheet thickness "
                 f"{self.ast.sheet.thickness_mm}mm; layer panels are cut from the sheet, so a beam laminated "

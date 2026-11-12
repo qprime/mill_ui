@@ -599,9 +599,9 @@ children:
             back_thickness=6,
         )
         assert "back" in assembly.panels
-        assert assembly.panels["back"].thickness_mm == 18
+        assert assembly.panels["back"].thickness_mm == 6
 
-    def test_back_inset_affects_back_dimensions(self):
+    def test_back_spans_include_grooves_independently_of_rear_setback(self):
         assembly = carcass(
             width=600,
             length=400,
@@ -612,8 +612,8 @@ children:
             back_inset=18,
         )
         back = assembly.panels["back"]
-        assert back.width_mm == 600 - 2 * 18
-        assert back.height_mm == 500 - 2 * 18
+        assert back.width_mm == 600 - 2 * 18 + 2 * 3
+        assert back.height_mm == 500 - 2 * 18 + 2 * 3
 
 
 class TestCarcassResolve:

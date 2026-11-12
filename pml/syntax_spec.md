@@ -1517,7 +1517,7 @@ Grid of cubbies with perimeter and internal joinery:
 | bottom | no | captured | Bottom panel joinery |
 | back | no | none | Back panel joinery strategy |
 | back_thickness | no | - | Back panel thickness (enables captured back) |
-| back_inset | no | 0mm | Back panel setback from rear edge |
+| back_inset | no | 0mm | Clear gap from rear outside edge to the back panel's rear face |
 | back_joinery | no | - | Alternative back joinery specification |
 | back_rabbet_depth | no | - | Depth of rabbet/dado for back panel |
 | back_internal_support | no | true | Internal bracing for back panel |
@@ -1544,6 +1544,24 @@ clear openings after allowing for shelf thickness. Captured cap receiving `a`
 requires `cap_style: between_sides`; receiving `b` requires `over_sides`.
 `shelf_dado_depth` and `partition_dado_depth` supply the groove-depth defaults;
 an explicit `dado_depth` in the corresponding joinery object takes precedence.
+
+Carcass backs use their actual `back_thickness`. Width and height include groove
+engagement from the side/cap inside faces; the rear setback changes depth
+placement only. The supported back joints are Butt and Captured receiving `a`.
+A 560mm depth, 18mm back and 12mm setback put the back at depth 530–548mm.
+Shelves end at 530mm, or extend by the specified back-support groove depth.
+Support groove height is measured from the back's bottom, including a raised
+toe-kick floor.
+
+With a toe kick, the bottom's lower face stays at `toe_kick_height`; its front
+starts at `toe_kick_depth`. Its side grooves cover only that contact length,
+preserving the overhang above the cutout. Side blanks are mirrored because both
+are machined inside-face up. Shortened toe bottoms support Butt or between-side
+Captured joints; incompatible full-length finger/over-side layouts error.
+
+The current sheet thickness must match every assembly panel, including its back.
+Mixed-thickness parts require separate matching-stock jobs. Unsupported back
+placement, conflicting insets and groove depth/stock mismatches are errors.
 
 **Cubby Parameters:**
 

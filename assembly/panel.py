@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 from enum import Enum, auto
 from typing import Any, Literal
@@ -57,6 +58,7 @@ class DadoSpec:
     edge: Literal["top", "bottom", "left", "right"]
     orientation: Literal["horizontal", "vertical"] = "horizontal"
     dogbone: DogboneSpec | None = None
+    span_mm: tuple[float, float] | None = None
 
     def __post_init__(self) -> None:
         if self.position_from_edge_mm < 0:
@@ -71,6 +73,17 @@ class DadoSpec:
         valid_orientations = ("horizontal", "vertical")
         if self.orientation not in valid_orientations:
             raise ValueError(f"DadoSpec: orientation must be one of {valid_orientations}, got '{self.orientation}'")
+        if self.span_mm is not None:
+            start, end = self.span_mm
+            if not all(math.isfinite(v) for v in (start, end)) or not 0 <= start < end:
+                raise ValueError(f"DadoSpec: span must be finite with 0 <= start < end, got {self.span_mm}")
+
+    def span_for_panel(self, width_mm: float, height_mm: float) -> tuple[float, float]:
+        limit = height_mm if self.orientation == "vertical" else width_mm
+        start, end = self.span_mm if self.span_mm is not None else (0.0, limit)
+        if end > limit:
+            raise ValueError(f"DadoSpec: span {self.span_mm} exceeds receiving panel length {limit}mm")
+        return start, end
 
 
 @dataclass(frozen=True)

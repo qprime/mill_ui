@@ -6,15 +6,54 @@
 
 ## What gets cut
 
-A 600mm frameless base cabinet with captured top, bottom and back, one fixed shelf, and a toe kick, split across 1220 × 1220 sheets.
+A 600 × 560 × 720mm frameless cabinet with captured top, bottom and back, one
+fixed shelf, and an open toe recess, cut from two 1220 × 1220 × 18mm MDF sheets.
 
-Captured caps and the shelf now include their side-groove engagement in their
-blank widths; the shelf level accounts for the raised toe-kick bottom. These
-shared carcass rules are illustrated in the [bookcase fit proof](../bookcase/carcass-shelf-fit-proof.svg).
-The cabinet's back placement and complete toe-kick assembly still require a
-separate fit audit; this recipe's passing gate does not establish that full fit.
+| Member | Quantity | Blank dimensions |
+|--------|----------|------------------|
+| Sides | 2 | 560 × 720mm, with mirrored 75 × 100mm front toe cutouts |
+| Top | 1 | 582 × 560mm |
+| Bottom | 1 | 582 × 485mm |
+| Back | 1 | 582 × 602mm |
+| Fixed shelf | 1 | 582 × 530mm |
 
-3 sheets.
+Caps, shelf and back engage their specified 9mm grooves. The bottom's lower face
+is 100mm above the cabinet bottom; its inside face is at 118mm. The shelf starts
+at 401mm and the top's inside face is at 702mm, leaving two 283mm clear openings.
+Bottom side grooves start at the rear of the toe recess, preserving the front
+overhang. The cutout's internal corner retains the normal cutter radius.
+
+The back occupies depth 530–548mm: `back_inset: 12mm` is clear space behind its
+rear face. Its height fits the raised bottom and top, and its width fits the side
+grooves. The shelf stops at the back's front face; back shelf support is disabled.
+There is no toe-cover panel. Every panel uses the specified 18mm stock.
+
+Machine the inside faces upward. The right-side blank is mirrored; the top's
+depth direction is also reversed, placing its rear groove at the correct edge.
+Corrected parts pack onto two sheets; the earlier oversized back required three.
+
+## Assembled-fit proof
+
+![Assembly sections reconstructed from actual NC](assembled-fit-proof.svg)
+
+The proof reconstructs retained panels from the emitted profile, pocket and
+dogbone cutter sweeps. It checks all six blank spans and 1,911 assembled depth
+sections with no material interference beyond the 0.004mm NC rounding allowance.
+That allowance erodes measured profile boundaries and expands groove boundaries
+in their machining planes; stock thickness and cut depths remain exact. The
+mirrored toe cutouts, intact overhang, back plane and 9mm engagement are checked
+explicitly. This is computational verification, not a physical assembly trial.
+Source/NC hashes, placements and measurements are in
+[assembled-fit-measurements.json](assembled-fit-measurements.json).
+
+The former back measured 576 × 696mm and the shelf extended 18mm into its intended
+plane. These defects were not reported by the recipe gate. The proof verifies
+the corrected 582 × 602mm back and 530mm-deep shelf. The
+[bookcase proof](../bookcase/carcass-shelf-fit-proof.svg) covers the shared cap and
+shelf-width rules separately.
+
+Estimated runtime: 206.9 minutes. Tooling, feeds, stock, outside dimensions and
+the source recipe are unchanged.
 
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
@@ -24,15 +63,9 @@ Sheet 1: 1220 × 1220 × 18mm mdf.
 
 Sheet 2: 1220 × 1220 × 18mm mdf.
 
-- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 9mm
-- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 4 feature(s), to 9mm
-- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 18.2mm
-
-Sheet 3: 1220 × 1220 × 18mm mdf.
-
-- `sheet_3.pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 9mm
-- `sheet_3.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 4 feature(s), to 9mm
-- `sheet_3.profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 18.2mm
+- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 feature(s), to 9mm
+- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 8 feature(s), to 9mm
+- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 4 feature(s), to 18.2mm
 
 ## Run
 
@@ -42,7 +75,6 @@ Sheet 3: 1220 × 1220 × 18mm mdf.
 
 - `base_cabinet_sheet_1.svg`
 - `base_cabinet_sheet_2.svg`
-- `base_cabinet_sheet_3.svg`
 - `machining_summary.json`
 - `manifest.json`
 - `metrics.json`
@@ -52,6 +84,3 @@ Sheet 3: 1220 × 1220 × 18mm mdf.
 - `sheet_2.dogbone-12.70mm.nc`
 - `sheet_2.pocket-12.70mm.nc`
 - `sheet_2.profile-3.17mm.nc`
-- `sheet_3.dogbone-12.70mm.nc`
-- `sheet_3.pocket-12.70mm.nc`
-- `sheet_3.profile-3.17mm.nc`

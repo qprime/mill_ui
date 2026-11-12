@@ -249,6 +249,27 @@ class TestHalfLapJoinery:
 
 
 class TestCapturedJoinery:
+    def test_explicit_contact_span_is_preserved_for_a_stopped_groove(self):
+        side = PanelSpec("side", 560, 720, 18)
+        bottom = PanelSpec("bottom", 582, 485, 18)
+        joint = Captured(dado_depth_mm=9)
+        interface = Interface(
+            InterfaceType.BOTTOM, "side", "bottom", "bottom", "left", joint, 100, contact_span_mm=(75, 560)
+        )
+        result, _ = joint.apply(interface, side, bottom)
+        assert result.dados[0].span_for_panel(560, 720) == (75, 560)
+
+    @pytest.mark.parametrize("span", [(-1, 20), (10, 10), (0, 561)])
+    def test_invalid_contact_spans_cannot_cut_outside_the_receiving_member(self, span):
+        side = PanelSpec("side", 560, 720, 18)
+        bottom = PanelSpec("bottom", 582, 485, 18)
+        joint = Captured(dado_depth_mm=9)
+        interface = Interface(
+            InterfaceType.BOTTOM, "side", "bottom", "bottom", "left", joint, 100, contact_span_mm=span
+        )
+        with pytest.raises(ValueError, match="span"):
+            joint.apply(interface, side, bottom)
+
     def test_creates_dado_on_side_panel(self):
         panel_a = PanelSpec("left_side", 400, 300, 18)
         panel_b = PanelSpec("bottom", 500, 400, 18, role=PanelRole.BOTTOM)

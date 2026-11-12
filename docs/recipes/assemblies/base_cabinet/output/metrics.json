@@ -1,5 +1,5 @@
 {
-  "total_sheets": 3,
+  "total_sheets": 2,
   "sheets": [
     {
       "source": "base_cabinet.pml.yml",
@@ -39,19 +39,19 @@
         ]
       },
       "output_size": {
-        "total_bytes": 20504,
+        "total_bytes": 20528,
         "total_lines": 878,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 6816,
+            "bytes": 6837,
             "lines": 240
           },
           "dogbone-12.70mm": {
-            "bytes": 7092,
+            "bytes": 7096,
             "lines": 408
           },
           "profile-3.17mm": {
-            "bytes": 6596,
+            "bytes": 6595,
             "lines": 230
           }
         }
@@ -66,15 +66,15 @@
       "constraint_audit": {
         "dogbone": {
           "status": "honored",
-          "count": 1,
+          "count": 2,
           "safety_critical": false
         }
       },
       "complexity": {
-        "total_moves": 372,
-        "rapid_moves": 10,
-        "cut_moves": 294,
-        "rapid_ratio": 0.027
+        "total_moves": 552,
+        "rapid_moves": 18,
+        "cut_moves": 432,
+        "rapid_ratio": 0.033
       },
       "fidelity": {
         "tool_changes": 3,
@@ -82,93 +82,35 @@
           {
             "name": "pocket",
             "tool_diameter_mm": 12.7,
-            "move_count": 33
+            "move_count": 66
           },
           {
             "name": "dogbone",
             "tool_diameter_mm": 12.7,
-            "move_count": 51
+            "move_count": 102
           },
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 288
+            "move_count": 384
           }
         ]
       },
       "output_size": {
-        "total_bytes": 9664,
-        "total_lines": 366,
+        "total_bytes": 13950,
+        "total_lines": 526,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 954,
-            "lines": 43
+            "bytes": 1815,
+            "lines": 72
           },
           "dogbone-12.70mm": {
-            "bytes": 977,
-            "lines": 64
+            "bytes": 1862,
+            "lines": 114
           },
           "profile-3.17mm": {
-            "bytes": 7733,
-            "lines": 259
-          }
-        }
-      },
-      "errors": [],
-      "warnings": []
-    },
-    {
-      "source": "base_cabinet.pml.yml",
-      "sheet_index": 3,
-      "job_name": "base_cabinet_sheet_3",
-      "constraint_audit": {
-        "dogbone": {
-          "status": "honored",
-          "count": 1,
-          "safety_critical": false
-        }
-      },
-      "complexity": {
-        "total_moves": 180,
-        "rapid_moves": 8,
-        "cut_moves": 138,
-        "rapid_ratio": 0.044
-      },
-      "fidelity": {
-        "tool_changes": 3,
-        "passes": [
-          {
-            "name": "pocket",
-            "tool_diameter_mm": 12.7,
-            "move_count": 33
-          },
-          {
-            "name": "dogbone",
-            "tool_diameter_mm": 12.7,
-            "move_count": 51
-          },
-          {
-            "name": "profile",
-            "tool_diameter_mm": 3.175,
-            "move_count": 96
-          }
-        ]
-      },
-      "output_size": {
-        "total_bytes": 4441,
-        "total_lines": 203,
-        "files": {
-          "pocket-12.70mm": {
-            "bytes": 908,
-            "lines": 43
-          },
-          "dogbone-12.70mm": {
-            "bytes": 969,
-            "lines": 64
-          },
-          "profile-3.17mm": {
-            "bytes": 2564,
-            "lines": 96
+            "bytes": 10273,
+            "lines": 340
           }
         }
       },

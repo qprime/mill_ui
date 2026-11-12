@@ -36,6 +36,7 @@ class Interface:
     joinery: JoineryStrategy
     position_along_edge_a_mm: float | None = None
     position_along_edge_b_mm: float | None = None
+    contact_span_mm: tuple[float, float] | None = None
 
     def validate(self) -> None:
         if self.type not in self.joinery.valid_interfaces:

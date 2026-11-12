@@ -229,7 +229,9 @@ class Captured:
                 edge=edge,
                 orientation=_dado_orientation(edge),
                 dogbone=self.dogbone,
+                span_mm=interface.contact_span_mm,
             )
+            dado.span_for_panel(panel_a.width_mm, panel_a.height_mm)
             return (panel_a.with_dados((dado,)), panel_b)
         else:
             edge = interface.edge_b
@@ -242,7 +244,9 @@ class Captured:
                 edge=edge,
                 orientation=_dado_orientation(edge),
                 dogbone=self.dogbone,
+                span_mm=interface.contact_span_mm,
             )
+            dado.span_for_panel(panel_b.width_mm, panel_b.height_mm)
             return (panel_a, panel_b.with_dados((dado,)))
 
 

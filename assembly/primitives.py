@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, replace
 from typing import Literal, cast
 
-from assembly.core import Assembly, Interface, InterfaceType, MemberSpec, RemovalKind
+from assembly.core import Assembly, EdgeName, Interface, InterfaceType, MemberSpec, RemovalKind
 from assembly.cubby import cubby
 from assembly.joinery import Butt, Captured, Finger, JoineryStrategy
 from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
@@ -51,6 +52,62 @@ def _carcass_inside_offset(joinery: JoineryStrategy | Literal["none"] | None, fi
         return 0.0
     inset = joinery.inset_mm if isinstance(joinery, Captured) and joinery.receiving == "a" else 0.0
     return thickness - fit.wall_extension_mm + inset
+
+
+@dataclass(frozen=True)
+class _CarcassBackFit:
+    panel: PanelSpec
+    joinery: JoineryStrategy
+    x_mm: float
+    z_mm: float
+    front_mm: float
+
+
+def _carcass_back_fit(
+    joint: JoineryStrategy | Literal["none"] | None,
+    inside_x: tuple[float, float],
+    inside_z: tuple[float, float],
+    *,
+    length: float,
+    thickness: float,
+    back_thickness: float | None,
+    setback: float,
+    caps: tuple[bool, bool],
+) -> _CarcassBackFit | None:
+    if not math.isfinite(setback) or setback < 0:
+        raise ValueError("Carcass back setback must be finite and nonnegative")
+    if joint is None or joint == "none":
+        return None
+    stock = thickness if back_thickness is None else back_thickness
+    if not math.isfinite(stock) or stock <= 0:
+        raise ValueError("Carcass back thickness must be finite and positive")
+    depth = 0.0
+    if isinstance(joint, Captured) and joint.receiving == "a":
+        depth = joint.groove_depth_mm(stock)
+        if not 0 < depth <= thickness:
+            raise ValueError(f"Carcass back groove depth must fit {thickness}mm receiving stock, got {depth}mm")
+        if joint.inset_mm not in (0, setback):
+            raise ValueError("Carcass back joint inset conflicts with back_inset rear-face setback")
+        if joint.dado_width_mm is not None and not math.isclose(joint.dado_width_mm, stock, rel_tol=0, abs_tol=1e-9):
+            raise ValueError("Carcass back groove width must match the back thickness")
+        joint = replace(joint, dado_width_mm=stock)
+    elif not isinstance(joint, Butt):
+        raise ValueError("Carcass back fit requires Butt or Captured(receiving='a')")
+    front = length - setback - stock
+    if front <= 0:
+        raise ValueError("Carcass back setback and thickness leave no interior depth")
+    x = inside_x[0] - depth
+    z = inside_z[0] - (depth if caps[0] else 0)
+    panel = PanelSpec(
+        "back",
+        inside_x[1] + depth - x,
+        inside_z[1] + (depth if caps[1] else 0) - z,
+        stock,
+        role=PanelRole.BACK,
+    )
+    if min(panel.width_mm, panel.height_mm) <= 0:
+        raise ValueError("Carcass back must leave positive panel spans")
+    return _CarcassBackFit(panel, joint, x, z, front)
 
 
 def box(
@@ -179,6 +236,10 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
     toe_kick_style: Literal["between_sides", "over_sides"] = "between_sides",
     toe_kick_cover: bool = True,
 ) -> Assembly:
+    if any(not math.isfinite(v) or v <= 0 for v in (width, length, height, thickness)):
+        raise ValueError("Carcass dimensions must be finite and positive")
+    if width <= 2 * thickness or fixed_shelves < 0:
+        raise ValueError("Carcass must have positive interior width and nonnegative shelf count")
     if side_joinery is None:
         side_joinery = Butt()
     if shelf_joinery is None:
@@ -197,6 +258,34 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
     if width <= 2 * max(top_fit.edge_inset_mm, bottom_fit.edge_inset_mm):
         raise ValueError("Carcass dimensions leave no positive cap span")
     cap_width = width - 2 * thickness if cap_style == "between_sides" else width
+    has_bottom, has_top = bottom is not None and bottom != "none", top is not None and top != "none"
+    kick_height = toe_kick_height if toe_kick_height is not None else 0.0
+    kick_setback = toe_kick_setback if toe_kick_setback is not None else (50.0 if kick_height > 0 else 0.0)
+    if not math.isfinite(kick_height) or not 0 <= kick_height < side_height:
+        raise ValueError("Carcass toe kick height must be finite, nonnegative and below the side height")
+    if not math.isfinite(kick_setback) or not 0 <= kick_setback < length or (kick_height > 0 and kick_setback == 0):
+        raise ValueError("Carcass toe kick setback must leave positive depth behind the cutout")
+    if kick_height > 0 and bottom_fit.wall_extension_mm > 0:
+        raise ValueError("Carcass raised toe-kick bottom requires a between-side cap")
+    if kick_height > 0 and has_bottom and not isinstance(bottom, (Butt, Captured)):
+        raise ValueError("Carcass toe-kick bottom requires Butt or Captured(receiving='a')")
+    bottom_offset = _carcass_inside_offset(bottom, bottom_fit, thickness)
+    if kick_height > 0 and has_bottom:
+        bottom_offset = kick_height + thickness
+    top_offset = _carcass_inside_offset(top, top_fit, thickness)
+    if bottom_offset >= side_height - top_offset:
+        raise ValueError("Carcass caps and toe kick leave no positive interior height")
+    side_z = bottom_fit.wall_extension_mm
+    back_fit = _carcass_back_fit(
+        back,
+        (thickness, width - thickness),
+        (side_z + bottom_offset, side_z + side_height - top_offset),
+        length=length,
+        thickness=thickness,
+        back_thickness=back_thickness,
+        setback=back_inset,
+        caps=(has_bottom, has_top),
+    )
 
     left = PanelSpec(
         name="left_side",
@@ -232,23 +321,20 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
         interfaces.append(Interface(InterfaceType.TOP, "left_side", "top", "top", "left", top))
         interfaces.append(Interface(InterfaceType.TOP, "right_side", "top", "top", "right", top))
 
-    effective_toe_kick_setback = (
-        toe_kick_setback if toe_kick_setback is not None else (50.0 if toe_kick_height else 0.0)
-    )
-    effective_toe_kick_height = toe_kick_height if toe_kick_height is not None else 0.0
-
-    if effective_toe_kick_height > 0:
+    if kick_height > 0:
         kick_notch = NotchSpec(
             edge=Edge.BOTTOM,
             u_start_mm=0.0,
-            u_len_mm=effective_toe_kick_setback,
-            depth_mm=effective_toe_kick_height,
+            u_len_mm=kick_setback,
+            depth_mm=kick_height,
         )
         panels["left_side"] = cast(PanelSpec, panels["left_side"]).with_notches((kick_notch,))
-        panels["right_side"] = cast(PanelSpec, panels["right_side"]).with_notches((kick_notch,))
+        panels["right_side"] = cast(PanelSpec, panels["right_side"]).with_notches(
+            (replace(kick_notch, u_start_mm=length - kick_setback),)
+        )
 
     if bottom is not None and bottom != "none":
-        bottom_len = length - effective_toe_kick_setback if effective_toe_kick_height > 0 else length
+        bottom_len = length - kick_setback if kick_height > 0 else length
         bottom_panel = PanelSpec(
             name="bottom",
             width_mm=width - 2 * bottom_fit.edge_inset_mm,
@@ -257,7 +343,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
             role=PanelRole.BOTTOM,
         )
         panels["bottom"] = bottom_panel
-        bottom_dado_position = effective_toe_kick_height if effective_toe_kick_height > 0 else None
+        bottom_dado_position = kick_height if kick_height > 0 else None
         interfaces.append(
             Interface(
                 InterfaceType.BOTTOM,
@@ -267,6 +353,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                 "left",
                 bottom,
                 position_along_edge_a_mm=bottom_dado_position,
+                contact_span_mm=(length - bottom_len, length),
             )
         )
         interfaces.append(
@@ -278,58 +365,74 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                 "right",
                 bottom,
                 position_along_edge_a_mm=bottom_dado_position,
+                contact_span_mm=(0, bottom_len),
             )
         )
 
-    if effective_toe_kick_height > 0 and toe_kick_cover:
+    if kick_height > 0 and toe_kick_cover:
         kick_cover_width = cap_width if toe_kick_style == "between_sides" else width
         kick_cover = PanelSpec(
             name="toe_kick_cover",
             width_mm=kick_cover_width,
-            height_mm=effective_toe_kick_height,
+            height_mm=kick_height,
             thickness_mm=thickness,
             role=PanelRole.FRONT,
         )
         panels["toe_kick_cover"] = kick_cover
 
-    if back is not None and back != "none":
-        back_width = width - 2 * back_inset if back_inset else width
-        back_height = height - 2 * back_inset if back_inset else height
-        back_panel = PanelSpec(
-            name="back",
-            width_mm=back_width,
-            height_mm=back_height,
-            thickness_mm=thickness,
-            role=PanelRole.BACK,
+    if back_fit is not None:
+        panels["back"] = back_fit.panel
+        side_edges: tuple[tuple[str, EdgeName, EdgeName], ...] = (
+            ("left_side", "right", "left"),
+            ("right_side", "left", "right"),
         )
-        panels["back"] = back_panel
-        back_joinery: JoineryStrategy
-        if back_thickness and isinstance(back, Captured):
-            back_joinery = Captured(
-                dado_depth_mm=back.dado_depth_mm,
-                dado_width_mm=back_thickness,
-                inset_mm=back.inset_mm,
-                fitment_mm=back.fitment_mm,
+        for name, edge, back_edge in side_edges:
+            interfaces.append(
+                Interface(
+                    InterfaceType.SIDE_TO_SIDE,
+                    name,
+                    edge,
+                    "back",
+                    back_edge,
+                    back_fit.joinery,
+                    position_along_edge_a_mm=back_inset,
+                    contact_span_mm=(back_fit.z_mm - side_z, back_fit.z_mm + back_fit.panel.height_mm - side_z),
+                )
             )
-        else:
-            back_joinery = back
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "left_side", "right", "back", "left", back_joinery))
-        interfaces.append(Interface(InterfaceType.SIDE_TO_SIDE, "right_side", "left", "back", "right", back_joinery))
-        if back_joinery.removal_kind == RemovalKind.FACE:
-            if "top" in panels:
-                interfaces.append(Interface(InterfaceType.TOP, "top", "top", "back", "top", back_joinery))
-            if "bottom" in panels:
-                interfaces.append(Interface(InterfaceType.BOTTOM, "bottom", "bottom", "back", "bottom", back_joinery))
+        if back_fit.joinery.removal_kind == RemovalKind.FACE:
+            cap_edges: tuple[tuple[EdgeName, InterfaceType, EdgeName, _CapFit], ...] = (
+                ("top", InterfaceType.TOP, "bottom", top_fit),
+                ("bottom", InterfaceType.BOTTOM, "top", bottom_fit),
+            )
+            for name, kind, edge, cap_fit in cap_edges:
+                if name in panels:
+                    cap = cast(PanelSpec, panels[name])
+                    interfaces.append(
+                        Interface(
+                            kind,
+                            name,
+                            edge,
+                            "back",
+                            name,
+                            back_fit.joinery,
+                            position_along_edge_a_mm=back_inset,
+                            contact_span_mm=(
+                                max(0, back_fit.x_mm - cap_fit.edge_inset_mm),
+                                min(cap.width_mm, back_fit.x_mm + back_fit.panel.width_mm - cap_fit.edge_inset_mm),
+                            ),
+                        )
+                    )
 
     if fixed_shelves > 0:
         if isinstance(shelf_joinery, Captured) and shelf_joinery.receiving != "a":
             raise ValueError("Carcass shelves require Captured(receiving='a')")
         shelf_x = width - 2 * _cap_fit(shelf_joinery, thickness).edge_inset_mm
-        shelf_y = length - back_inset if back_inset else length
-        bottom_offset = _carcass_inside_offset(bottom, bottom_fit, thickness)
-        if effective_toe_kick_height > 0 and bottom is not None and bottom != "none":
-            bottom_offset = effective_toe_kick_height + thickness
-        top_offset = _carcass_inside_offset(top, top_fit, thickness)
+        shelf_y = back_fit.front_mm if back_fit is not None else length
+        if shelf_back_support and back_fit is not None and isinstance(shelf_joinery, Captured):
+            engagement = shelf_joinery.groove_depth_mm(thickness)
+            if not 0 < engagement <= back_fit.panel.thickness_mm:
+                raise ValueError("Carcass shelf support groove depth must fit the back stock")
+            shelf_y += engagement
         interior_height = side_height - top_offset - bottom_offset
         shelf_spacing = (interior_height - fixed_shelves * thickness) / (fixed_shelves + 1)
         if shelf_spacing <= 0 or min(shelf_x, shelf_y) <= 0:
@@ -354,6 +457,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                     "left",
                     shelf_joinery,
                     position_along_edge_a_mm=shelf_position,
+                    contact_span_mm=(0, shelf_y),
                 )
             )
             interfaces.append(
@@ -365,10 +469,11 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                     "right",
                     shelf_joinery,
                     position_along_edge_a_mm=shelf_position,
+                    contact_span_mm=(length - shelf_y, length),
                 )
             )
-            if shelf_back_support and "back" in panels:
-                back_shelf_position = shelf_position - back_inset
+            if shelf_back_support and back_fit is not None:
+                back_shelf_position = side_z + shelf_position - back_fit.z_mm
                 interfaces.append(
                     Interface(
                         InterfaceType.INTERNAL,
@@ -378,6 +483,10 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                         "top",
                         shelf_joinery,
                         position_along_edge_a_mm=back_shelf_position,
+                        contact_span_mm=(
+                            max(0, (width - shelf_x) / 2 - back_fit.x_mm),
+                            min(back_fit.panel.width_mm, (width + shelf_x) / 2 - back_fit.x_mm),
+                        ),
                     )
                 )
 

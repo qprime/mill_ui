@@ -160,20 +160,21 @@ class _SectionPanel:
         assert region.is_valid
         cuts = []
         for dado in panel.dados:
+            start, end = dado.span_for_panel(panel.width_mm, panel.height_mm)
             if dado.orientation == "vertical":
                 u = (
                     panel.width_mm - dado.position_from_edge_mm - dado.width_mm
                     if dado.edge == "right"
                     else dado.position_from_edge_mm
                 )
-                rect = box(u, 0, u + dado.width_mm, panel.height_mm)
+                rect = box(u, start, u + dado.width_mm, end)
             else:
                 v = (
                     panel.height_mm - dado.position_from_edge_mm - dado.width_mm
                     if dado.edge == "top"
                     else dado.position_from_edge_mm
                 )
-                rect = box(0, v, panel.width_mm, v + dado.width_mm)
+                rect = box(start, v, end, v + dado.width_mm)
             cuts.append((rect, dado.depth_mm))
         return cls(panel, placement, region, tuple(cuts))
 

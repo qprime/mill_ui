@@ -30,6 +30,7 @@
 | AJ-20 | HARD | CUBBY_ASSEMBLED_FIT | Cubby blanks and interface positions derive from common assembly spans; captured members engage their grooves, the declared outside envelope is preserved, and crossing half-laps open from opposite ends. |
 | AJ-21 | HARD | NOTCH_RELIEF_REFERENCE | Generated notch relief uses the cutout center as its directional reference, so its bores clear the mating corners. |
 | AJ-22 | HARD | CARCASS_CAP_AND_SHELF_FIT | Carcass cap and shelf spans include their groove engagement; cap exposure preserves the declared height, and shelf positions leave equal clear openings between actual cap faces. |
+| AJ-23 | HARD | CARCASS_BACK_AND_TOE_FIT | Carcass back spans, stock, depth placement and groove contacts share the actual inside frame; mirrored inside faces preserve the front toe recess and its overhang. |
 
 ---
 
@@ -99,6 +100,36 @@ The bookcase recipe is a carcass with full-width fixed shelves and no vertical
 partitions. It is not a separate named assembly type. Nonzero carcass
 `vertical_partitions` remains explicitly unsupported; cubby supplies the
 continuous grid topology with HalfLap crossings.
+
+Carcass `back_inset` is the clear gap behind the back's rear face, consistent
+with cubby. Back thickness is actual member stock, not just a groove-width hint.
+Back width and height extend from the actual inside side/cap faces into their
+specified grooves; a rear setback never reduces those spans. A raised bottom
+changes the lower receiving face. Missing caps provide no vertical engagement.
+Back fit supports Butt or Captured receiving `a`; incompatible receiving
+directions, conflicting joint inset, wrong groove width, nonpositive spans and
+grooves deeper than receiving stock error explicitly. Preserve the configured
+joint, including disabled dogbones, when supplying the inserted back thickness.
+
+Shelves stop at the back's front face, adding only their actual back-support
+engagement when requested. Support depth must fit back stock. Support groove
+height subtracts the back's bottom origin, not the rear setback. The left side
+depth axis runs front to rear; right side and top run rear to front, matching
+their inside machining faces. Bottom and shelf depth axes run front to rear.
+
+Captured interfaces may declare `contact_span_mm`, measured along the receiver's
+groove axis in panel-local coordinates. Captured passes that explicit interval
+to `DadoSpec.span_mm` without inferring assembly topology. A missing span retains
+the existing full-panel groove. Spans are finite, positive and within the
+receiver; resolution honors both endpoints through the ordinary pocket/relief
+path. Toe-kick bottom grooves start behind the front recess, and shelf grooves
+stop at the supported shelf extent. Do not remove an unsupported overhang with
+a full-length groove. Shortened toe bottoms require Butt or between-side
+Captured; full-length Finger and over-side cap interfaces need explicit topology.
+
+Assembly panel stock must match the current PML sheet. A mixed-thickness back
+requires separately prepared matching-stock jobs; do not silently cut it from
+the frame's thicker stock. This applies to every resolved assembly member.
 
 ## Cubby Assembled Fit
 

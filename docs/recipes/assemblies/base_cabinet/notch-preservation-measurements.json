@@ -1,0 +1,68 @@
+{
+  "baseline_commit": "efdf43d10b786abaa7b078ee317c8dc44a77d4b4",
+  "source_fixture": "tests/fixtures/assemblies/notched_open_sides.pml.yml",
+  "source_sha256": "2d115319b79fcbf5847e5f51dcb0a185ed2c5f82df94203af9f4f40eb72acc66",
+  "tool_diameter_mm": 6.35,
+  "profile_depth_mm": 18.2,
+  "stock_mm": 18,
+  "rounding_tolerance_mm": 0.004,
+  "nc_sha256": {
+    "before": "11e84e6254530f1e695d06edd7751dc759a4173a1246b8eb03aa3c466f89c239",
+    "after": "b10d28054ffb741a99cf805af7ac86c17380418a512eb2fdf0a6a0de9a901e60"
+  },
+  "members": {
+    "left_side": {
+      "before": {
+        "measured_span_mm": [
+          560.0,
+          720.0
+        ],
+        "toe_stock_remaining_mm2": 7500.0,
+        "toe_midpoint_has_material": true,
+        "overhang_has_material": true
+      },
+      "after": {
+        "measured_span_mm": [
+          560.0,
+          720.0
+        ],
+        "toe_stock_remaining_mm2": 2.1636739178968005,
+        "toe_midpoint_has_material": false,
+        "overhang_has_material": true
+      }
+    },
+    "right_side": {
+      "before": {
+        "measured_span_mm": [
+          560.0000000000002,
+          720.0
+        ],
+        "toe_stock_remaining_mm2": 7500.0,
+        "toe_midpoint_has_material": true,
+        "overhang_has_material": true
+      },
+      "after": {
+        "measured_span_mm": [
+          560.0000000000002,
+          720.0
+        ],
+        "toe_stock_remaining_mm2": 2.163673917905192,
+        "toe_midpoint_has_material": false,
+        "overhang_has_material": true
+      }
+    }
+  },
+  "before_max_depth_mm": 18.2,
+  "after_max_depth_mm": 18.2,
+  "mirrored_inside_faces_agree": true,
+  "source_notches_per_side": 1,
+  "resolved_notches_per_side": {
+    "before": 0,
+    "after": 1
+  },
+  "canonical_base_cabinet_notches_per_side": {
+    "before": 4,
+    "after": 1
+  },
+  "verification_scope": "Actual emitted profile cutter sweeps; computational proof, not a physical cutting trial. Finite-tool inside-corner stock is retained."
+}

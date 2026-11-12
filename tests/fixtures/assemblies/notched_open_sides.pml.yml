@@ -1,0 +1,22 @@
+project: notched_open_sides
+Sheet:
+  width: 1220mm
+  height: 1220mm
+  thickness: 18mm
+  margin: 10mm
+children:
+  - Assembly:
+      type: carcass
+      width: 600mm
+      depth: 560mm
+      height: 720mm
+      thickness: 18mm
+      joinery: butt
+      top: none
+      bottom: none
+      back: none
+      fixed_shelves: 0
+      toe_kick_height: 100mm
+      toe_kick_depth: 75mm
+      toe_kick_cover: false
+      show_labels: true

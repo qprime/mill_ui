@@ -55,6 +55,25 @@ shelf-width rules separately.
 Estimated runtime: 206.9 minutes. Tooling, feeds, stock, outside dimensions and
 the source recipe are unchanged.
 
+## Notch preservation when interfaces are absent
+
+![Original toe notch before and after resolution](notch-preservation-proof.svg)
+
+An [open-side PML fixture](../../../../tests/fixtures/assemblies/notched_open_sides.pml.yml)
+keeps the same side/toe dimensions with no top, bottom, back or joint interfaces.
+Previously assembly resolution dropped its factory-defined notches and emitted
+two rectangular profiles. The corrected reducer retains each original notch
+and dado once, then appends new joint cuts. The normal cabinet also keeps one
+source toe notch per side, rather than inheriting it four times.
+
+The before/after proof reconstructs both emitted NC programs with their actual
+6.35mm cutter. The formerly solid 75 × 100mm region is now open, with about
+2.164mm² of normal rounded inside-corner stock left by the tool. Both 560 × 720mm
+blank spans and the overhang/rear leg are preserved. Source and NC hashes are in
+[notch-preservation-measurements.json](notch-preservation-measurements.json).
+This is computational proof. The existing recipe's outputs are byte-identical;
+the fixture covers the previously missing interface-free case.
+
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
 - `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 feature(s), to 9mm

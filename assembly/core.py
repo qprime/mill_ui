@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Literal, Union
 
@@ -11,6 +11,15 @@ if TYPE_CHECKING:
 
 EdgeName = Literal["top", "bottom", "left", "right"]
 MemberSpec = Union["PanelSpec", "BeamSpec"]
+
+
+def _added_removals[T](original: tuple[T, ...], updated: tuple[T, ...], member_name: str) -> tuple[T, ...]:
+    if updated[: len(original)] != original:
+        raise ValueError(
+            f"Joinery for member '{member_name}' must preserve its {len(original)} existing removals "
+            f"before appending joint cuts; got {len(updated)} removals with a changed original prefix"
+        )
+    return updated[len(original) :]
 
 
 class InterfaceType(Enum):
@@ -128,8 +137,8 @@ class Assembly:
 
         expanded_panels, beam_expansion_map = _expand_beams(self.members, self.sheet_size)
 
-        panel_notches: dict[str, list] = {name: [] for name in expanded_panels}
-        panel_dados: dict[str, list] = {name: [] for name in expanded_panels}
+        panel_notches = {name: list(panel.notches) for name, panel in expanded_panels.items()}
+        panel_dados = {name: list(panel.dados) for name, panel in expanded_panels.items()}
 
         for interface in self.interfaces:
             member_a = self.members[interface.panel_a]
@@ -153,22 +162,18 @@ class Assembly:
                 for panel_b in joinery_panels_b:
                     updated_a, updated_b = interface.joinery.apply(interface, panel_a, panel_b)
 
-                    panel_notches[panel_a.name].extend(updated_a.notches)
-                    panel_notches[panel_b.name].extend(updated_b.notches)
-                    panel_dados[panel_a.name].extend(updated_a.dados)
-                    panel_dados[panel_b.name].extend(updated_b.dados)
+                    for original, updated in ((panel_a, updated_a), (panel_b, updated_b)):
+                        panel_notches[original.name].extend(
+                            _added_removals(original.notches, updated.notches, original.name)
+                        )
+                        panel_dados[original.name].extend(_added_removals(original.dados, updated.dados, original.name))
 
         result: list[PS] = []
         for name, panel in expanded_panels.items():
-            resolved = PS(
-                name=panel.name,
-                width_mm=panel.width_mm,
-                height_mm=panel.height_mm,
-                thickness_mm=panel.thickness_mm,
+            resolved = replace(
+                panel,
                 notches=tuple(panel_notches[name]),
                 dados=tuple(panel_dados[name]),
-                role=panel.role,
-                origin=panel.origin,
             )
             result.append(resolved)
 

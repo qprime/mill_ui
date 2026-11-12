@@ -31,10 +31,25 @@
 | AJ-21 | HARD | NOTCH_RELIEF_REFERENCE | Generated notch relief uses the cutout center as its directional reference, so its bores clear the mating corners. |
 | AJ-22 | HARD | CARCASS_CAP_AND_SHELF_FIT | Carcass cap and shelf spans include their groove engagement; cap exposure preserves the declared height, and shelf positions leave equal clear openings between actual cap faces. |
 | AJ-23 | HARD | CARCASS_BACK_AND_TOE_FIT | Carcass back spans, stock, depth placement and groove contacts share the actual inside frame; mirrored inside faces preserve the front toe recess and its overhang. |
+| AJ-24 | HARD | ORIGINAL_REMOVALS_PRESERVED | Assembly resolution keeps each original notch/dado once and appends each interface's new cuts, including members with no interfaces. |
 
 ---
 
 ## Interface Types and Valid Joinery
+
+`Assembly.resolve()` starts with the removals already defined on every expanded
+member. Each interface is evaluated independently against its original members.
+Joinery strategies return complete updated members whose original notch/dado
+tuples remain an unchanged prefix; the assembly reducer appends only the new
+suffix. Removing or rewriting that prefix is an error naming the member.
+An interface-free member therefore retains its source cuts, and multiple
+interfaces do not multiply inherited cuts. Explicit newly requested cuts keep
+their multiplicity, including cuts equal to an existing one. Geometry-based
+deduplication is not the assembly reducer's responsibility.
+
+Resolved members use `replace()` so dimensions, role, origin and other member
+metadata survive. Resolution does not mutate the source assembly or pass cuts
+from one interface into another strategy. Beam expansion uses the same rule.
 
 | Interface Type | Valid Joinery |
 |----------------|---------------|

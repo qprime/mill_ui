@@ -17,6 +17,38 @@ def _make_sheet(w: float = 200.0, h: float = 150.0, t: float = 12.0, m: float = 
     return Sheet(width_mm=w, height_mm=h, thickness_mm=t, margin_mm=m)
 
 
+@pytest.mark.parametrize("y_origin", ["back", "front"])
+@pytest.mark.parametrize("margin", [0, 10])
+@pytest.mark.parametrize("shape", ["Rect", "Polygon"])
+def test_pocket_label_avoids_preserved_island(shape, margin, y_origin):
+    geometry = (
+        {"w_mm": 100, "h_mm": 80, "islands": [{"x_min": 80, "x_max": 120, "y_min": 60, "y_max": 100}]}
+        if shape == "Rect"
+        else {
+            "points": [(-50, -40), (50, -40), (50, 40), (-50, 40)],
+            "holes": [[(-20, -20), (20, -20), (20, 20), (-20, 20)]],
+        }
+    )
+    item = Item(
+        kind="shape",
+        type=shape,
+        geometry=Geometry(data=geometry),
+        placement=Placement(center_xy_mm=(100, 80)),
+        feature=Feature(type="pocket", depth_mm=6),
+        label="Recess",
+        shape_id="recess",
+    )
+    sheet = _make_sheet(w=240, h=200, m=margin)
+    ir = layoutast_to_diagram_ir(LayoutAST(sheet=sheet, items=(item,)), y_origin=y_origin)
+    layer = next(layer for layer in ir.layers if layer.name == "LABELS")
+    (label,) = layer.items
+    assert isinstance(label, Text) and label.content == "Recess"
+    x = label.x - margin
+    y = sheet.working_height_mm - (label.y - margin) if y_origin == "back" else label.y - margin
+    assert 50 < x < 150 and 40 < y < 120
+    assert not (80 <= x <= 120 and 60 <= y <= 100)
+
+
 def _make_profile_item(shape_id: str, w: float, h: float, cx: float, cy: float) -> Item:
     return Item(
         kind="shape",

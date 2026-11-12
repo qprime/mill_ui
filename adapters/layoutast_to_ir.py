@@ -5,6 +5,9 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from shapely.geometry import Point
+from shapely.geometry.base import BaseGeometry
+
 from adapters.hints_to_removal import _geometry_dict_to_shape_geometry
 from core.constants import DepthMode, ShapeType
 from core.geometry import compute_shape_bounds, pocket_region
@@ -344,6 +347,14 @@ def _handle_pocket(item: Item, style_token: str, context: _DrawingContext) -> li
     data = item.geometry.data
     if not data.get("holes") and not data.get("islands"):
         return _item_to_shapes(item, style_token, context.flip_y, context.margin_mm)
+    region = _pocket_region_with_exclusions(item)
+    return _region_path(region, style_token, item.shape_id or "unnamed", flip_y, margin)
+
+
+def _pocket_region_with_exclusions(item: Item) -> BaseGeometry:
+    if item.geometry is None or item.placement is None:
+        raise ValueError(f"Pocket '{item.shape_id}': geometry and placement are required")
+    data = item.geometry.data
     bounds = compute_shape_bounds(item.type, data, item.placement.center_xy_mm)
     geometry = _geometry_dict_to_shape_geometry(data, item.placement.center_xy_mm, bounds)
     islands = tuple(
@@ -353,7 +364,7 @@ def _handle_pocket(item: Item, style_token: str, context: _DrawingContext) -> li
     region = pocket_region(item.type, geometry, bounds.center, islands)
     if region is None:
         raise ValueError(f"Pocket '{item.shape_id}': cannot draw holes/islands for shape '{item.type}'")
-    return _region_path(region, style_token, item.shape_id or "unnamed", flip_y, margin)
+    return region
 
 
 def _region_path(region, style_token: str, shape_id: str, flip_y: Callable, margin: float) -> list[Shape]:
@@ -832,6 +843,15 @@ def _build_label(item: Item, flip_y, margin: float) -> list:
     if not item.label or item.placement is None:
         return []
     cx, cy = item.placement.center_xy_mm
+    if item.feature is not None and item.feature.type == "pocket" and item.geometry is not None:
+        data = item.geometry.data
+        if data.get("holes") or data.get("islands"):
+            region = _pocket_region_with_exclusions(item)
+            if region.is_empty:
+                return []
+            if not region.contains(Point(cx, cy)):
+                point = region.representative_point()
+                cx, cy = point.x, point.y
     return [
         Text(
             x=margin + cx,

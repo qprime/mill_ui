@@ -70,7 +70,7 @@
     <circle cx="300.000" cy="200.000" r="10.000" stroke="#ff6b6b" fill="#ff6b6b" fill-opacity="0.15" stroke-width="1" stroke-dasharray="4,2" id="hold_down_screw" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="160.000" y="280.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="island_plate_label">Island plate</text>
+    <text x="100.000" y="280.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="island_plate_label">Island plate</text>
     <text x="160.000" y="120.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="plain_plate_label">Plain plate</text>
     <text x="430.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="disc_label">Disc</text>
     <text x="35.000" y="365.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="clamp_bottom_left_label">clamp_bottom_left</text>

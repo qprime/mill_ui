@@ -55,7 +55,7 @@
     <path d="M 80.000 320.000 L 80.000 80.000 L 320.000 80.000 L 320.000 320.000 Z M 250.000 150.000 L 150.000 150.000 L 150.000 250.000 L 250.000 250.000 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="recess" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="200.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="recess_label">Recess</text>
+    <text x="115.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="recess_label">Recess</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="80.0" y1="80.0" x2="80.0" y2="60.0" stroke="#5ab9ea" stroke-width="1" />

@@ -27,6 +27,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-9 | HARD | DETERMINISTIC_OUTPUT | Same LayoutAST always produces identical SVG |
 | SVG-10 | HARD | POCKET_REGION_FIDELITY | Pocket fills preserve all holes and islands, using the same region subtraction as machining. |
 | SVG-11 | HARD | EDGE_PLAN_FIDELITY | Edge drawings use the planner's selected-tool contour and depth; unmachinable requests are marked unplanned. |
+| SVG-12 | HARD | POCKET_LABEL_REGION | Pocket label anchors must lie in the recessed region, outside preserved holes/islands; an empty region has no label. |
 
 ---
 
@@ -54,6 +55,11 @@ calculation for both the planner and drawing adapter, including unions of
 overlapping islands, clipped edge-touching exclusions, and disconnected remnants.
 Do not paint holes with a background-colored overlay: underlying cuts must remain
 visible. Margin and Y-origin transforms apply once to every contour.
+
+Pocket labels with holes/islands use this same region. Keep the existing center
+when it is inside the recess; otherwise use a deterministic interior point.
+This places the label anchor in the material-removal region rather than on a
+preserved island. It does not guarantee that the entire text fits a narrow region.
 
 Edge centerlines and depth labels come from `build_edge_cut_plan()`, the same pure
 planner function used before G-code generation. The adapter converts through

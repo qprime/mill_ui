@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 1554.175" width="1393.1750000000002mm" height="1554.1750000000002mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 1566.175" width="1393.1750000000002mm" height="1566.1750000000002mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="1554.1750000000002" fill="#1a1a1a" />
+  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="1566.1750000000002" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
@@ -171,44 +171,45 @@
   <g id="NOTES" class="notes">
     <text x="20.0" y="1251.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="1263.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1220.0 × 1220.0 × 19.0mm</text>
-    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 8 profiles</text>
-    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (8):</text>
-    <text x="30.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L0_S0_0</text>
-    <text x="30.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L0_S1_1</text>
-    <text x="30.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S0_2</text>
-    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S1_3</text>
-    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S2_4</text>
-    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S0_5</text>
-    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S1_6</text>
-    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S2_7</text>
+    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 8 profiles</text>
+    <text x="20.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (8):</text>
+    <text x="30.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L0_S0_0</text>
+    <text x="30.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L0_S1_1</text>
+    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S0_2</text>
+    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S1_3</text>
+    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L1_S2_4</text>
+    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S0_5</text>
+    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S1_6</text>
+    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_long_rail_L2_S2_7</text>
   </g>
   <g id="BEAM_ASSEMBLIES" class="beam-assemblies">
-    <text x="20.0" y="1415.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: long_rail (RAIL)</text>
-    <text x="20.0" y="1427.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">2076 × 100 × 57mm</text>
-    <text x="18.0" y="1443.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="26.41" y="1435.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="120.09" y="1442.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (1111)</text>
-    <rect x="213.76" y="1435.59" width="149.83" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="288.68" y="1442.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (889)</text>
-    <line x1="213.76" y1="1435.59" x2="213.76" y2="1447.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
-    <text x="18.0" y="1457.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
-    <rect x="20.00" y="1449.59" width="131.31" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="85.66" y="1456.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (779)</text>
-    <rect x="151.31" y="1449.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="244.99" y="1456.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (1111)</text>
-    <rect x="338.67" y="1449.59" width="31.33" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="354.33" y="1456.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S2 (186)</text>
-    <line x1="151.31" y1="1449.59" x2="151.31" y2="1461.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
-    <line x1="338.67" y1="1449.59" x2="338.67" y2="1461.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
-    <text x="18.0" y="1471.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
-    <rect x="26.41" y="1463.59" width="62.45" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="57.63" y="1470.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (370)</text>
-    <rect x="88.86" y="1463.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="182.54" y="1470.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (1111)</text>
-    <rect x="276.22" y="1463.59" width="87.38" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="319.91" y="1470.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S2 (518)</text>
-    <line x1="88.86" y1="1463.59" x2="88.86" y2="1475.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
-    <line x1="276.22" y1="1463.59" x2="276.22" y2="1475.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
-    <text x="195.0" y="1481.5875" text-anchor="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">butt joints staggered (BM-9)</text>
+    <text x="20.0" y="1427.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: long_rail (RAIL)</text>
+    <text x="20.0" y="1439.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">2076 × 100 × 57mm</text>
+    <text x="18.0" y="1455.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="26.41" y="1447.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="120.09" y="1454.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (1111)</text>
+    <rect x="213.76" y="1447.59" width="149.83" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="288.68" y="1454.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (889)</text>
+    <line x1="213.76" y1="1447.59" x2="213.76" y2="1459.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
+    <text x="18.0" y="1469.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
+    <rect x="20.00" y="1461.59" width="131.31" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="85.66" y="1468.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (779)</text>
+    <rect x="151.31" y="1461.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="244.99" y="1468.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (1111)</text>
+    <rect x="338.67" y="1461.59" width="31.33" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="354.33" y="1468.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S2 (186)</text>
+    <line x1="151.31" y1="1461.59" x2="151.31" y2="1473.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
+    <line x1="338.67" y1="1461.59" x2="338.67" y2="1473.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
+    <text x="18.0" y="1483.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
+    <rect x="26.41" y="1475.59" width="62.45" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="57.63" y="1482.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (370)</text>
+    <rect x="88.86" y="1475.59" width="187.36" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="182.54" y="1482.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S1 (1111)</text>
+    <rect x="276.22" y="1475.59" width="87.38" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="319.91" y="1482.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S2 (518)</text>
+    <line x1="88.86" y1="1475.59" x2="88.86" y2="1487.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
+    <line x1="276.22" y1="1475.59" x2="276.22" y2="1487.59" stroke="#ff9500" fill="none" stroke-width="1.5" stroke-dasharray="4,2" />
+    <text x="195.0" y="1493.5875" text-anchor="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">butt joints staggered (BM-9)</text>
   </g>
 </svg>

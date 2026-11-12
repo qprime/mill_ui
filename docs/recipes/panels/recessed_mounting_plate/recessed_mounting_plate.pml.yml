@@ -4,19 +4,20 @@ Sheet:
   physical_width: 300mm
   physical_height: 250mm
   thickness: 19mm
+  margin: 10mm
 
 children:
   - Rect:
       id: mounting_plate
       label: "Mounting Plate"
-      at: {x: 150mm, y: 125mm, width: 220mm, height: 170mm}
+      at: {x: 140mm, y: 115mm, width: 220mm, height: 170mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
             distance: 25mm
             children:
               - Pocket: {depth: 3mm}
-              - Circle: {id: hole_bl, diameter: 6mm, at: {x: 90mm, y: 90mm}, feature: {type: hole, depth: through}}
-              - Circle: {id: hole_br, diameter: 6mm, at: {x: 210mm, y: 90mm}, feature: {type: hole, depth: through}}
-              - Circle: {id: hole_tl, diameter: 6mm, at: {x: 90mm, y: 160mm}, feature: {type: hole, depth: through}}
-              - Circle: {id: hole_tr, diameter: 6mm, at: {x: 210mm, y: 160mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_bl, diameter: 6mm, at: {x: 80mm, y: 80mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_br, diameter: 6mm, at: {x: 200mm, y: 80mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_tl, diameter: 6mm, at: {x: 80mm, y: 150mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_tr, diameter: 6mm, at: {x: 200mm, y: 150mm}, feature: {type: hole, depth: through}}

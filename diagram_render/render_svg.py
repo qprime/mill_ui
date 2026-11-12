@@ -292,7 +292,7 @@ def render_diagram_svg(
 
 
 def _estimate_notes_height(metadata: dict) -> float:
-    lines = 2
+    lines = 2 + (1 if "sheet_margin" in metadata else 0)
     if metadata.get("feature_counts"):
         lines += 1
     depth_info = metadata.get("depth_info", [])
@@ -717,6 +717,12 @@ def _render_notes_block(
             y + line_num * line_height,
             f"Sheet: {float(sheet_w):.1f} \u00d7 {float(sheet_h):.1f} \u00d7 {float(sheet_t):.1f}mm",
         )
+        line_num += 1
+
+    if "sheet_margin" in metadata:
+        margin = float(metadata["sheet_margin"])
+        label = f"Clamp margin: {margin:g}mm (shaded; no cutting)" if margin > 0 else "Clamp margin: none (0mm)"
+        _text(x, y + line_num * line_height, label)
         line_num += 1
 
     feature_counts = metadata.get("feature_counts", "")

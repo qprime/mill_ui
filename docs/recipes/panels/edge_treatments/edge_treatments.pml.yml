@@ -4,12 +4,13 @@ Sheet:
   physical_width: 900mm
   physical_height: 400mm
   thickness: 19mm
+  margin: 10mm
 
 children:
   - Rect:
       id: chamfer_edge
       label: "Chamfer Edge"
-      at: {x: 165mm, y: 200mm, width: 240mm, height: 300mm}
+      at: {x: 155mm, y: 190mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Chamfer: {width: 6mm, depth: 6mm}
@@ -17,7 +18,7 @@ children:
   - Rect:
       id: roundover_edge
       label: "Roundover Edge"
-      at: {x: 450mm, y: 200mm, width: 240mm, height: 300mm}
+      at: {x: 440mm, y: 190mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Roundover: {radius: 6mm}
@@ -25,7 +26,7 @@ children:
   - Rect:
       id: allowance_edge
       label: "Rough + Finish Edge"
-      at: {x: 735mm, y: 200mm, width: 240mm, height: 300mm}
+      at: {x: 725mm, y: 190mm, width: 240mm, height: 300mm}
       children:
         - Profile: {side: outside, depth: through}
         - Edge:

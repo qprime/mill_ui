@@ -4,12 +4,13 @@ Sheet:
   physical_width: 1000mm
   physical_height: 700mm
   thickness: 19mm
+  margin: 10mm
 
 children:
   - Rect:
       id: picture_frame
       label: "Picture Frame"
-      at: {x: 160mm, y: 500mm, width: 260mm, height: 340mm}
+      at: {x: 150mm, y: 490mm, width: 260mm, height: 340mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -22,7 +23,7 @@ children:
       id: serving_tray
       label: "Serving Tray"
       radius: 30mm
-      at: {x: 480mm, y: 570mm, width: 300mm, height: 200mm}
+      at: {x: 470mm, y: 560mm, width: 300mm, height: 200mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -37,7 +38,7 @@ children:
   - Ellipse:
       id: oval_tray
       label: "Oval Tray"
-      at: {x: 820mm, y: 570mm, width: 280mm, height: 180mm}
+      at: {x: 810mm, y: 560mm, width: 280mm, height: 180mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -52,11 +53,11 @@ children:
       id: pentagon_frame
       label: "Pentagon Frame"
       points:
-        - [180mm, 310mm]
-        - [46.85mm, 213.26mm]
-        - [97.71mm, 56.74mm]
-        - [262.29mm, 56.74mm]
-        - [313.15mm, 213.26mm]
+        - [170mm, 300mm]
+        - [36.85mm, 203.26mm]
+        - [87.71mm, 46.74mm]
+        - [252.29mm, 46.74mm]
+        - [303.15mm, 203.26mm]
       children:
         - Profile: {side: outside, depth: through}
         - Shell:
@@ -64,8 +65,8 @@ children:
             interior: profile
 
   - AtPosition:
-      x: 500mm
-      y: 170mm
+      x: 490mm
+      y: 160mm
       width: 240mm
       height: 220mm
       child:

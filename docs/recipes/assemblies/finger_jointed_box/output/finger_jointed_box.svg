@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 773.175 959.175" width="773.175mm" height="959.175mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 773.175 971.175" width="773.175mm" height="971.175mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="773.175" height="959.175" fill="#1a1a1a" />
+  <rect x="-21.5875" y="-61.5875" width="773.175" height="971.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="600.000" height="400.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="600.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
@@ -228,41 +228,42 @@
   <g id="NOTES" class="notes">
     <text x="20.0" y="431.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="443.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 600.0 × 400.0 × 6.0mm</text>
-    <text x="20.0" y="455.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 32 pockets, 5 profiles</text>
-    <text x="20.0" y="467.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm, through</text>
-    <text x="20.0" y="491.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (32):</text>
-    <text x="30.0" y="503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_dado_10</text>
-    <text x="30.0" y="515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_11</text>
-    <text x="30.0" y="527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_12</text>
-    <text x="30.0" y="539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_13</text>
-    <text x="30.0" y="551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_14</text>
-    <text x="30.0" y="563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_15</text>
-    <text x="30.0" y="575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_16</text>
-    <text x="30.0" y="587.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_dado_2</text>
-    <text x="30.0" y="599.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_3</text>
-    <text x="30.0" y="611.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_4</text>
-    <text x="30.0" y="623.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_5</text>
-    <text x="30.0" y="635.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_6</text>
-    <text x="30.0" y="647.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_7</text>
-    <text x="30.0" y="659.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_8</text>
-    <text x="30.0" y="671.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_18</text>
-    <text x="30.0" y="683.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_19</text>
-    <text x="30.0" y="695.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_20</text>
-    <text x="30.0" y="707.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_21</text>
-    <text x="30.0" y="719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_22</text>
-    <text x="30.0" y="731.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_23</text>
-    <text x="30.0" y="743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_24</text>
-    <text x="30.0" y="755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_25</text>
-    <text x="30.0" y="767.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_26</text>
-    <text x="30.0" y="779.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_28</text>
-    <text x="30.0" y="791.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_29</text>
-    <text x="30.0" y="803.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_30</text>
-    <text x="30.0" y="815.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_31</text>
-    <text x="30.0" y="827.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_32</text>
-    <text x="30.0" y="839.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_33</text>
-    <text x="30.0" y="851.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_34</text>
-    <text x="30.0" y="863.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_35</text>
-    <text x="30.0" y="875.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_36</text>
+    <text x="20.0" y="455.5875" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="467.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 32 pockets, 5 profiles</text>
+    <text x="20.0" y="479.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm, through</text>
+    <text x="20.0" y="503.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (32):</text>
+    <text x="30.0" y="515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_dado_10</text>
+    <text x="30.0" y="527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_11</text>
+    <text x="30.0" y="539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_12</text>
+    <text x="30.0" y="551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_13</text>
+    <text x="30.0" y="563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_14</text>
+    <text x="30.0" y="575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_15</text>
+    <text x="30.0" y="587.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_back_notch_dogbone_16</text>
+    <text x="30.0" y="599.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_dado_2</text>
+    <text x="30.0" y="611.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_3</text>
+    <text x="30.0" y="623.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_4</text>
+    <text x="30.0" y="635.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_5</text>
+    <text x="30.0" y="647.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_6</text>
+    <text x="30.0" y="659.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_7</text>
+    <text x="30.0" y="671.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_front_notch_dogbone_8</text>
+    <text x="30.0" y="683.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_18</text>
+    <text x="30.0" y="695.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_19</text>
+    <text x="30.0" y="707.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_20</text>
+    <text x="30.0" y="719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_21</text>
+    <text x="30.0" y="731.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_22</text>
+    <text x="30.0" y="743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_23</text>
+    <text x="30.0" y="755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_24</text>
+    <text x="30.0" y="767.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_25</text>
+    <text x="30.0" y="779.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_notch_dogbone_26</text>
+    <text x="30.0" y="791.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_28</text>
+    <text x="30.0" y="803.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_29</text>
+    <text x="30.0" y="815.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_30</text>
+    <text x="30.0" y="827.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_31</text>
+    <text x="30.0" y="839.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_32</text>
+    <text x="30.0" y="851.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_33</text>
+    <text x="30.0" y="863.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_34</text>
+    <text x="30.0" y="875.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_35</text>
+    <text x="30.0" y="887.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_notch_dogbone_36</text>
   </g>
 </svg>

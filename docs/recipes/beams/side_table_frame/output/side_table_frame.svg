@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 2521.175" width="1393.1750000000002mm" height="2521.175mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 1393.175 2533.175" width="1393.1750000000002mm" height="2533.175mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="2521.175" fill="#1a1a1a" />
+  <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="2533.175" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
@@ -245,126 +245,127 @@
   <g id="NOTES" class="notes">
     <text x="20.0" y="1251.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
     <text x="20.0" y="1263.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1220.0 × 1220.0 × 19.0mm</text>
-    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 8 holes, 24 pockets, 16 profiles</text>
-    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
-    <text x="30.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 9.5mm, through</text>
-    <text x="20.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
-    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀8.0mm</text>
-    <text x="20.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (48):</text>
-    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_32</text>
-    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_drillhole_33</text>
-    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_drillhole_34</text>
-    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_rabbet_35</text>
-    <text x="30.0" y="1407.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_36</text>
-    <text x="30.0" y="1419.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_drillhole_37</text>
-    <text x="30.0" y="1431.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_drillhole_38</text>
-    <text x="30.0" y="1443.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_rabbet_39</text>
-    <text x="30.0" y="1455.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_40</text>
-    <text x="30.0" y="1467.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_drillhole_41</text>
-    <text x="30.0" y="1479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_drillhole_42</text>
-    <text x="30.0" y="1491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_rabbet_43</text>
-    <text x="30.0" y="1503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_44</text>
-    <text x="30.0" y="1515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_drillhole_45</text>
-    <text x="30.0" y="1527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_drillhole_46</text>
-    <text x="30.0" y="1539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_rabbet_47</text>
-    <text x="30.0" y="1551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L0_0</text>
-    <text x="30.0" y="1563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L1_3</text>
-    <text x="30.0" y="1575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L2_6</text>
-    <text x="30.0" y="1587.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_cutout_5</text>
-    <text x="30.0" y="1599.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_2</text>
-    <text x="30.0" y="1611.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_4</text>
-    <text x="30.0" y="1623.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_7</text>
-    <text x="30.0" y="1635.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_squaremortise_1</text>
-    <text x="30.0" y="1647.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L0_8</text>
-    <text x="30.0" y="1659.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L1_11</text>
-    <text x="30.0" y="1671.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L2_14</text>
-    <text x="30.0" y="1683.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_cutout_13</text>
-    <text x="30.0" y="1695.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_10</text>
-    <text x="30.0" y="1707.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_12</text>
-    <text x="30.0" y="1719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_15</text>
-    <text x="30.0" y="1731.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_squaremortise_9</text>
-    <text x="30.0" y="1743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L0_16</text>
-    <text x="30.0" y="1755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L1_19</text>
-    <text x="30.0" y="1767.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L2_22</text>
-    <text x="30.0" y="1779.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_cutout_21</text>
-    <text x="30.0" y="1791.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_18</text>
-    <text x="30.0" y="1803.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_20</text>
-    <text x="30.0" y="1815.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_23</text>
-    <text x="30.0" y="1827.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_squaremortise_17</text>
-    <text x="30.0" y="1839.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L0_24</text>
-    <text x="30.0" y="1851.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L1_27</text>
-    <text x="30.0" y="1863.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L2_30</text>
-    <text x="30.0" y="1875.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_cutout_29</text>
-    <text x="30.0" y="1887.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_26</text>
-    <text x="30.0" y="1899.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_28</text>
-    <text x="30.0" y="1911.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_31</text>
-    <text x="30.0" y="1923.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_squaremortise_25</text>
+    <text x="20.0" y="1275.5875" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="1287.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 8 holes, 24 pockets, 16 profiles</text>
+    <text x="20.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">• hole: 10.0mm</text>
+    <text x="30.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 9.5mm, through</text>
+    <text x="20.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">Hole Diameters:</text>
+    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• ⌀8.0mm</text>
+    <text x="20.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (48):</text>
+    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_32</text>
+    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_drillhole_33</text>
+    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_drillhole_34</text>
+    <text x="30.0" y="1407.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_1_rabbet_35</text>
+    <text x="30.0" y="1419.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_36</text>
+    <text x="30.0" y="1431.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_drillhole_37</text>
+    <text x="30.0" y="1443.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_drillhole_38</text>
+    <text x="30.0" y="1455.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_2_rabbet_39</text>
+    <text x="30.0" y="1467.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_40</text>
+    <text x="30.0" y="1479.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_drillhole_41</text>
+    <text x="30.0" y="1491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_drillhole_42</text>
+    <text x="30.0" y="1503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_3_rabbet_43</text>
+    <text x="30.0" y="1515.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_44</text>
+    <text x="30.0" y="1527.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_drillhole_45</text>
+    <text x="30.0" y="1539.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_drillhole_46</text>
+    <text x="30.0" y="1551.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_apron_4_rabbet_47</text>
+    <text x="30.0" y="1563.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L0_0</text>
+    <text x="30.0" y="1575.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L1_3</text>
+    <text x="30.0" y="1587.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_L2_6</text>
+    <text x="30.0" y="1599.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_cutout_5</text>
+    <text x="30.0" y="1611.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_2</text>
+    <text x="30.0" y="1623.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_4</text>
+    <text x="30.0" y="1635.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_edgedado_7</text>
+    <text x="30.0" y="1647.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_1_squaremortise_1</text>
+    <text x="30.0" y="1659.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L0_8</text>
+    <text x="30.0" y="1671.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L1_11</text>
+    <text x="30.0" y="1683.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_L2_14</text>
+    <text x="30.0" y="1695.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_cutout_13</text>
+    <text x="30.0" y="1707.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_10</text>
+    <text x="30.0" y="1719.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_12</text>
+    <text x="30.0" y="1731.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_edgedado_15</text>
+    <text x="30.0" y="1743.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_2_squaremortise_9</text>
+    <text x="30.0" y="1755.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L0_16</text>
+    <text x="30.0" y="1767.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L1_19</text>
+    <text x="30.0" y="1779.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_L2_22</text>
+    <text x="30.0" y="1791.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_cutout_21</text>
+    <text x="30.0" y="1803.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_18</text>
+    <text x="30.0" y="1815.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_20</text>
+    <text x="30.0" y="1827.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_edgedado_23</text>
+    <text x="30.0" y="1839.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_3_squaremortise_17</text>
+    <text x="30.0" y="1851.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L0_24</text>
+    <text x="30.0" y="1863.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L1_27</text>
+    <text x="30.0" y="1875.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_L2_30</text>
+    <text x="30.0" y="1887.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_cutout_29</text>
+    <text x="30.0" y="1899.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_26</text>
+    <text x="30.0" y="1911.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_28</text>
+    <text x="30.0" y="1923.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_edgedado_31</text>
+    <text x="30.0" y="1935.5875" fill="#cccccc" font-family="monospace" font-size="10px">• beam_leg_4_squaremortise_25</text>
   </g>
   <g id="BEAM_ASSEMBLIES" class="beam-assemblies">
-    <text x="20.0" y="1955.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_1 (LEG)</text>
-    <text x="20.0" y="1967.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
-    <text x="18.0" y="1983.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="1975.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="1982.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="1997.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
-    <rect x="20.00" y="1989.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="1996.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2011.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
-    <rect x="20.00" y="2003.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2010.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="20.0" y="2032.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_2 (LEG)</text>
-    <text x="20.0" y="2044.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
-    <text x="18.0" y="2060.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2052.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2059.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2074.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
-    <rect x="20.00" y="2066.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2073.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2088.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
-    <rect x="20.00" y="2080.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2087.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="20.0" y="2109.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_3 (LEG)</text>
-    <text x="20.0" y="2121.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
-    <text x="18.0" y="2137.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2129.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2136.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2151.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
-    <rect x="20.00" y="2143.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2150.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2165.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
-    <rect x="20.00" y="2157.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2164.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="20.0" y="2186.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_4 (LEG)</text>
-    <text x="20.0" y="2198.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
-    <text x="18.0" y="2214.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2206.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2213.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2228.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
-    <rect x="20.00" y="2220.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2227.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="18.0" y="2242.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
-    <rect x="20.00" y="2234.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2241.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
-    <text x="20.0" y="2263.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_1 (APRON)</text>
-    <text x="20.0" y="2275.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
-    <text x="18.0" y="2291.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2283.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2290.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
-    <text x="20.0" y="2312.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_2 (APRON)</text>
-    <text x="20.0" y="2324.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
-    <text x="18.0" y="2340.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2332.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2339.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
-    <text x="20.0" y="2361.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_3 (APRON)</text>
-    <text x="20.0" y="2373.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
-    <text x="18.0" y="2389.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2381.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2388.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
-    <text x="20.0" y="2410.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_4 (APRON)</text>
-    <text x="20.0" y="2422.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
-    <text x="18.0" y="2438.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
-    <rect x="20.00" y="2430.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
-    <text x="195.00" y="2437.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
+    <text x="20.0" y="1967.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_1 (LEG)</text>
+    <text x="20.0" y="1979.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
+    <text x="18.0" y="1995.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="1987.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="1994.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2009.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
+    <rect x="20.00" y="2001.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2008.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2023.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
+    <rect x="20.00" y="2015.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2022.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="20.0" y="2044.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_2 (LEG)</text>
+    <text x="20.0" y="2056.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
+    <text x="18.0" y="2072.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2064.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2071.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2086.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
+    <rect x="20.00" y="2078.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2085.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2100.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
+    <rect x="20.00" y="2092.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2099.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="20.0" y="2121.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_3 (LEG)</text>
+    <text x="20.0" y="2133.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
+    <text x="18.0" y="2149.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2141.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2148.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2163.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
+    <rect x="20.00" y="2155.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2162.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2177.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
+    <rect x="20.00" y="2169.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2176.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="20.0" y="2198.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: leg_4 (LEG)</text>
+    <text x="20.0" y="2210.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">530 × 57 × 57mm</text>
+    <text x="18.0" y="2226.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2218.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2225.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2240.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L1</text>
+    <rect x="20.00" y="2232.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2239.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="18.0" y="2254.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L2</text>
+    <rect x="20.00" y="2246.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2253.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (530)</text>
+    <text x="20.0" y="2275.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_1 (APRON)</text>
+    <text x="20.0" y="2287.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
+    <text x="18.0" y="2303.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2295.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2302.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
+    <text x="20.0" y="2324.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_2 (APRON)</text>
+    <text x="20.0" y="2336.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
+    <text x="18.0" y="2352.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2344.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2351.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
+    <text x="20.0" y="2373.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_3 (APRON)</text>
+    <text x="20.0" y="2385.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
+    <text x="18.0" y="2401.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2393.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2400.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
+    <text x="20.0" y="2422.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">ASSEMBLY: apron_4 (APRON)</text>
+    <text x="20.0" y="2434.5875" fill="#5ab9ea" font-family="monospace" font-size="8px">358 × 90 × 19mm</text>
+    <text x="18.0" y="2450.5875" text-anchor="end" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">L0</text>
+    <rect x="20.00" y="2442.59" width="350.00" height="12.00" stroke="#6496c8" fill="#6496c8" fill-opacity="0.15" stroke-width="1" />
+    <text x="195.00" y="2449.59" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="7px">S0 (358)</text>
   </g>
 </svg>

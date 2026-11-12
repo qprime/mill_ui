@@ -4,12 +4,13 @@ Sheet:
   physical_width: 400mm
   physical_height: 400mm
   thickness: 19mm
+  margin: 10mm
 
 children:
   - Rect:
       id: medallion_panel
       label: "Medallion Panel"
-      at: {x: 200mm, y: 200mm, width: 320mm, height: 320mm}
+      at: {x: 190mm, y: 190mm, width: 320mm, height: 320mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -23,4 +24,4 @@ children:
                     - Island:
                         id: medallion
                         children:
-                          - Circle: {diameter: 100mm, at: {x: 200mm, y: 200mm}}
+                          - Circle: {diameter: 100mm, at: {x: 190mm, y: 190mm}}

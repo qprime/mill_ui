@@ -1,6 +1,6 @@
 {
   "baseline_commit": "388ae817095b22d119224bbae9dc92a695cc3377",
-  "source_pml_sha256": "645e02f0efc6adfde95ab4adc340ed70aa93e368dfb6389aeb1211bddf4e308a",
+  "source_pml_sha256": "38ecc1ec7e82ec795af32069710d208e4b5b9ff5502a46b14037369038565143",
   "nc_sha256": {
     "edge-12.00mm.nc": "45e07eb5e6b31309462c2918c98feb876cbb5736e6bdce6393f5f89350f9553c",
     "edge-12.70mm.nc": "a0d70cb2118a5411bd8a3f63115f0fcf1939f19cf40066410ee2f3ede557119d",
@@ -1007,5 +1007,6 @@
     0.0,
     0.0
   ],
-  "verification_scope": "Emitted NC and ideal declared quarter-circle cutter model; no physical cutting or verified shop inventory claim."
+  "verification_scope": "Emitted NC and ideal declared quarter-circle cutter model; no physical cutting or verified shop inventory claim.",
+  "source_amendment": "2026-11-12: explicit 10mm sheet margin; working-frame placements rebased to preserve physical coordinates. Measured NC programs remain byte-identical."
 }

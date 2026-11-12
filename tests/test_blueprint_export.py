@@ -13,6 +13,20 @@ from resolution.layout_resolver import LayoutResolver
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
 
+@pytest.mark.parametrize("margin", [0, 10, 15])
+def test_blueprint_identifies_the_configured_clamp_margin(margin):
+    ast = LayoutAST(sheet=Sheet(200, 180, 19, margin_mm=margin), items=())
+    svg = render_blueprint_svg(ast)
+    root = ET.fromstring(svg)
+    if margin:
+        assert f"Clamp margin: {margin}mm (shaded; no cutting)" in svg
+        for edge in ("top", "bottom", "left", "right"):
+            assert root.find(f".//*[@id='margin_{edge}']") is not None
+    else:
+        assert "Clamp margin: none (0mm)" in svg
+        assert root.find(".//*[@id='margin_left']") is None
+
+
 @pytest.mark.parametrize("theme", ["dark", "print"])
 def test_pocket_holes_survive_svg_export_without_background_overpainting(theme):
     item = Item(

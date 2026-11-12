@@ -4,12 +4,13 @@ Sheet:
   physical_width: 1100mm
   physical_height: 900mm
   thickness: 19mm
+  margin: 10mm
 
 children:
   - Rect:
       id: x_panel
       label: "X-Panel"
-      at: {x: 190mm, y: 675mm, width: 300mm, height: 400mm}
+      at: {x: 180mm, y: 665mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -20,7 +21,7 @@ children:
   - Rect:
       id: louvers
       label: "Louvers"
-      at: {x: 550mm, y: 675mm, width: 300mm, height: 400mm}
+      at: {x: 540mm, y: 665mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -35,7 +36,7 @@ children:
   - Rect:
       id: wave
       label: "Wave"
-      at: {x: 910mm, y: 675mm, width: 300mm, height: 400mm}
+      at: {x: 900mm, y: 665mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -51,7 +52,7 @@ children:
   - Rect:
       id: diamond_lattice
       label: "Diamond Lattice"
-      at: {x: 190mm, y: 225mm, width: 300mm, height: 400mm}
+      at: {x: 180mm, y: 215mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -63,7 +64,7 @@ children:
   - Rect:
       id: fluting
       label: "Fluting"
-      at: {x: 550mm, y: 225mm, width: 300mm, height: 400mm}
+      at: {x: 540mm, y: 215mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - Fluting:
@@ -76,7 +77,7 @@ children:
   - Rect:
       id: concentric_border
       label: "Concentric Border"
-      at: {x: 910mm, y: 225mm, width: 300mm, height: 400mm}
+      at: {x: 900mm, y: 215mm, width: 300mm, height: 400mm}
       children:
         - Profile: {side: outside, depth: through}
         - ConcentricBorder:

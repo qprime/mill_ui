@@ -312,6 +312,11 @@ no-cut zone) from unused working stock in review visuals. Move related features
 together in the front authoring frame; back setups retain the registered
 whole-sheet mirror. Do not shrink sheets solely to improve presentation.
 
+Part-cutting recipes explicitly declare a 10mm sheet margin and show its shaded
+no-cut border. Blueprints name the configured margin in their notes. Full-bed
+spoilboard surfacing is the explicit exception: its zero margin and edge overrun
+are intentional and labeled, rather than presented as a clamped part-cutting job.
+
 **Options:**
 - `--kerf 6.35` — Tool kerf in mm (default: 6.35 for projects, 3.175 for recipes)
 - `--theme dark` — Blueprint theme (dark/light/print)

@@ -28,6 +28,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-10 | HARD | POCKET_REGION_FIDELITY | Pocket fills preserve all holes and islands, using the same region subtraction as machining. |
 | SVG-11 | HARD | EDGE_PLAN_FIDELITY | Edge drawings use the planner's selected-tool contour and depth; unmachinable requests are marked unplanned. |
 | SVG-12 | HARD | POCKET_LABEL_REGION | Pocket label anchors must lie in the recessed region, outside preserved holes/islands; an empty region has no label. |
+| SVG-13 | HARD | CLAMP_MARGIN_IDENTIFIED | Layout blueprints identify the configured sheet margin; positive margins have shaded border strips and a no-cut note, while zero is explicitly identified as none. |
 
 ---
 

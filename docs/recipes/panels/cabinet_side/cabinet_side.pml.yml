@@ -4,32 +4,33 @@ Sheet:
   physical_width: 400mm
   physical_height: 800mm
   thickness: 18mm
+  margin: 10mm
 
 children:
   - Rect:
       id: cabinet_side
       label: "Cabinet Side"
-      at: {x: 200mm, y: 400mm, width: 350mm, height: 720mm}
+      at: {x: 190mm, y: 390mm, width: 350mm, height: 720mm}
       children:
         - Profile: {side: outside, depth: through}
         - Rect:
             id: dado_lower
             label: "Lower Shelf Dado"
-            at: {x: 200mm, y: 140mm, width: 350mm, height: 18mm}
+            at: {x: 190mm, y: 130mm, width: 350mm, height: 18mm}
             feature: {type: pocket, depth: 6mm}
         - Rect:
             id: dado_upper
             label: "Upper Shelf Dado"
-            at: {x: 200mm, y: 660mm, width: 350mm, height: 18mm}
+            at: {x: 190mm, y: 650mm, width: 350mm, height: 18mm}
             feature: {type: pocket, depth: 6mm}
         - Rect:
             id: back_rabbet
             label: "Back Rabbet"
-            at: {x: 369mm, y: 400mm, width: 12mm, height: 720mm}
+            at: {x: 359mm, y: 390mm, width: 12mm, height: 720mm}
             feature: {type: pocket, depth: 9mm}
         - AtPosition:
-            x: 194mm
-            y: 400mm
+            x: 184mm
+            y: 390mm
             width: 274mm
             height: 400mm
             child:

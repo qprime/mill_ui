@@ -185,6 +185,7 @@ def layoutast_to_diagram_ir(
         "sheet_width": str(sheet.width_mm),
         "sheet_height": str(sheet.height_mm),
         "sheet_thickness": str(sheet.thickness_mm),
+        "sheet_margin": sheet.margin_mm,
         "y_origin": y_origin,
         "view_face": view_face,
         "feature_counts": _count_features(ast),

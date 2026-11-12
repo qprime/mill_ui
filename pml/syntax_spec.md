@@ -1750,6 +1750,15 @@ Both `Keepout` and `Island` require nonempty geometry-only children and may not 
 
 Material a pocket preserves. Island must be a direct child of a Rect with a pocket feature; unsupported placements raise an error.
 
+Island geometry preserves the actual Rect, Circle, RoundedRect or Polygon
+boundary. Multiple shapes are combined, overlaps are preserved once, and shapes
+are clipped to the pocket. Circle and RoundedRect exclusions use a conservative polygon boundary
+with at most 0.001mm extra stock before NC rounding. Unsupported geometry errors
+instead of silently preserving its rectangular bounding box. A nonrectangular
+island lowers to ordinary polygon-pocket boundaries and holes; it uses the
+existing offset-pocket machining path. Fixture Keepout bounds retain their
+separate conservative clearance meaning.
+
 ```yaml
 - Rect:
     feature: {type: pocket, depth: 6mm}

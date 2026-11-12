@@ -1,9 +1,14 @@
+import math
 from io import StringIO
 from typing import Any
 
 import pytest
 from ruamel.yaml import YAML
+from shapely.geometry import Point, Polygon
 
+from adapters.ast_to_removal import ast_to_removal_intents
+from adapters.layoutast_to_ir import layoutast_to_diagram_ir
+from diagram_ir import Text
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
@@ -143,6 +148,101 @@ children:
     assert abs(island["y_max"] - 350.0) < 0.01
 
 
+@pytest.mark.parametrize("center", [(200, 200), (153.2, 163.2)])
+def test_circular_island_keeps_its_boundary_through_machining_ir(center):
+    x, y = center
+    children = [
+        {
+            "Rect": {
+                "at": {"x": x, "y": y, "width": 240, "height": 240},
+                "feature": {"type": "pocket", "depth": 6},
+                "children": [{"Island": {"children": [{"Circle": {"diameter": 100, "at": {"x": x, "y": y}}}]}}],
+            }
+        }
+    ]
+    ast = parse_pml_yaml(_zone_document(children))
+    (item,) = resolve_layout(ast).items
+    assert item.type == "Polygon" and item.geometry is not None
+    assert len(item.geometry.data["holes"]) == 1
+    (intent,) = ast_to_removal_intents(resolve_layout(ast))
+    assert intent.depth_profile.z_bottom == -6
+    assert intent.shape_geometry.holes is not None
+    (hole,) = intent.shape_geometry.holes
+    poly = Polygon(hole)
+    assert poly.area == pytest.approx(math.pi * 50**2, abs=0.25)
+    assert poly.boundary.distance(Point(0, 0)) >= 50 - 1e-9
+    assert max(math.hypot(px, py) for px, py in hole) <= 50.001001
+    assert not poly.covers(Point(49, 49))
+    assert parse_pml_yaml(format_pml_yaml(ast)) == ast
+
+
+def test_polygon_island_does_not_expand_to_its_bounding_rectangle():
+    children = [
+        {
+            "Rect": {
+                "feature": {"type": "pocket", "depth": 3},
+                "children": [{"Island": {"children": [{"Polygon": {"points": [[100, 100], [200, 100], [150, 200]]}}]}}],
+            }
+        }
+    ]
+    (intent,) = ast_to_removal_intents(resolve_layout(parse_pml_yaml(_zone_document(children))))
+    assert intent.shape_geometry.holes is not None
+    (hole,) = intent.shape_geometry.holes
+    assert Polygon(hole).area == pytest.approx(5000)
+
+
+def test_nonrectangular_islands_union_and_clip_at_pocket_boundary():
+    children = [
+        {
+            "Rect": {
+                "at": {"x": 100, "y": 100, "width": 100, "height": 100},
+                "feature": {"type": "pocket", "depth": 3},
+                "children": [
+                    {
+                        "Island": {
+                            "children": [
+                                {"Circle": {"diameter": 40, "at": {"x": 100, "y": 100}}},
+                                {"Rect": {"at": {"x": 100, "y": 100, "width": 20, "height": 20}}},
+                                {"Circle": {"diameter": 40, "at": {"x": 150, "y": 100}}},
+                            ]
+                        }
+                    }
+                ],
+            }
+        }
+    ]
+    flat = resolve_layout(parse_pml_yaml(_zone_document(children)))
+    assert len(flat.items) == 1 and flat.items[0].geometry is not None
+    g = flat.items[0].geometry.data
+    region = Polygon(g["points"], g["holes"])
+    assert region.area == pytest.approx(10000 - 1.5 * math.pi * 20**2, abs=0.2)
+    assert len(region.interiors) == 1
+
+
+def test_island_splitting_the_pocket_keeps_both_remaining_regions():
+    children = [
+        {
+            "Rect": {
+                "at": {"x": 100, "y": 100, "width": 100, "height": 100},
+                "label": "Split Recess",
+                "feature": {"type": "pocket", "depth": 3},
+                "children": [
+                    {"Island": {"children": [{"Polygon": {"points": [[90, 0], [110, 0], [110, 200], [90, 200]]}}]}}
+                ],
+            }
+        }
+    ]
+    flat = resolve_layout(parse_pml_yaml(_zone_document(children)))
+    assert len(flat.items) == 2
+    assert sum(intent.bounds.width * intent.bounds.height for intent in ast_to_removal_intents(flat)) == 8000
+
+    diagram = layoutast_to_diagram_ir(flat, y_origin="front")
+    labels = next(layer for layer in diagram.layers if layer.name == "LABELS").items
+    assert len(labels) == 2
+    assert all(isinstance(label, Text) for label in labels)
+    assert sorted(label.x for label in labels if isinstance(label, Text)) == [70, 130]
+
+
 def test_island_inside_grid():
     pml = """
 Sheet:
@@ -225,9 +325,9 @@ children:
     panel = panel_items[0]
 
     assert panel.geometry is not None
-    assert "islands" in panel.geometry.data
-    islands = panel.geometry.data["islands"]
-    assert len(islands) == 2
+    assert panel.type == "Polygon"
+    (hole,) = panel.geometry.data["holes"]
+    assert Polygon(hole).area == pytest.approx(90000)
 
 
 def test_island_roundtrip():
@@ -305,15 +405,15 @@ children:
 
     pocket = pocket_items[0]
     assert pocket.geometry is not None
-    assert "islands" in pocket.geometry.data
-    islands = pocket.geometry.data["islands"]
-    assert len(islands) == 1
-
-    island = islands[0]
-    assert abs(island["x_min"] - 150.0) < 0.01
-    assert abs(island["x_max"] - 250.0) < 0.01
-    assert abs(island["y_min"] - 150.0) < 0.01
-    assert abs(island["y_max"] - 250.0) < 0.01
+    assert pocket.type == "Polygon"
+    (ring,) = pocket.geometry.data["holes"]
+    preserved = Polygon(ring)
+    assert preserved.area == pytest.approx(math.pi * 50**2, abs=0.25)
+    assert pocket.placement is not None
+    cx, cy = pocket.placement.center_xy_mm
+    assert tuple(v + (cx if i % 2 == 0 else cy) for i, v in enumerate(preserved.bounds)) == pytest.approx(
+        (150, 150, 250, 250)
+    )
 
 
 def test_island_with_rounded_rect():
@@ -347,15 +447,15 @@ children:
 
     pocket = pocket_items[0]
     assert pocket.geometry is not None
-    assert "islands" in pocket.geometry.data
-    islands = pocket.geometry.data["islands"]
-    assert len(islands) == 1
-
-    island = islands[0]
-    assert abs(island["x_min"] - 50.0) < 0.01
-    assert abs(island["x_max"] - 450.0) < 0.01
-    assert abs(island["y_min"] - 50.0) < 0.01
-    assert abs(island["y_max"] - 350.0) < 0.01
+    assert pocket.type == "Polygon"
+    (ring,) = pocket.geometry.data["holes"]
+    preserved = Polygon(ring)
+    assert preserved.area == pytest.approx(400 * 300 - (4 - math.pi) * 10**2, abs=0.25)
+    assert pocket.placement is not None
+    cx, cy = pocket.placement.center_xy_mm
+    assert tuple(v + (cx if i % 2 == 0 else cy) for i, v in enumerate(preserved.bounds)) == pytest.approx(
+        (50, 50, 450, 350)
+    )
 
 
 def test_nested_island_error():

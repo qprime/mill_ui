@@ -846,7 +846,7 @@ def _build_label(item: Item, flip_y, margin: float) -> list:
     cx, cy = item.placement.center_xy_mm
     if item.feature is not None and item.feature.type == "pocket" and item.geometry is not None:
         data = item.geometry.data
-        if data.get("holes") or data.get("islands"):
+        if item.type == "Polygon" or data.get("holes") or data.get("islands"):
             region = _pocket_region_with_exclusions(item)
             if region.is_empty:
                 return []

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 from collections.abc import Callable, Sequence
 from dataclasses import replace
@@ -485,27 +486,91 @@ class LayoutResolver:
         region: ResolvedRegion,
         params: dict[str, Any],
     ) -> list[dict[str, float]]:
-        islands = []
+        return [
+            compute_shape_bounds_dict(item.type, item.geometry.data, item.placement.center_xy_mm)
+            for item in self._collect_island_items(children, region, params)
+            if item.geometry is not None and item.placement is not None
+        ]
 
+    def _collect_island_items(
+        self, children: tuple[Any, ...], region: ResolvedRegion, params: dict[str, Any]
+    ) -> list[Item]:
+        islands = []
         for child in children:
             if isinstance(child, Island):
-                for item in self._resolve_zone_geometry(child, region, params):
-                    if item.kind == "shape" and item.geometry and item.placement:
-                        bounds_dict = compute_shape_bounds_dict(
-                            item.type,
-                            item.geometry.data,
-                            item.placement.center_xy_mm,
-                        )
-                        islands.append(bounds_dict)
-
+                islands.extend(self._resolve_zone_geometry(child, region, params))
         return islands
+
+    @staticmethod
+    def _island_domain(item: Item) -> Domain:
+        if item.geometry is None or item.placement is None:
+            raise ValueError(f"Island '{item.shape_id}': geometry and placement are required")
+        data = item.geometry.data
+        cx, cy = item.placement.center_xy_mm
+
+        def rounded_rectangle() -> Domain:
+            hw, hh = float(data["w_mm"]) / 2, float(data["h_mm"]) / 2
+            corners = [
+                ("bl", -1, -1, math.pi),
+                ("br", 1, -1, 1.5 * math.pi),
+                ("tr", 1, 1, 0),
+                ("tl", -1, 1, 0.5 * math.pi),
+            ]
+            vertices = []
+            for corner, sx, sy, angle in corners:
+                radius = float(data.get(f"radius_{corner}_mm", data.get("radius_mm", 0)))
+                vertices.extend(
+                    LayoutResolver._island_arc(
+                        cx + sx * (hw - radius), cy + sy * (hh - radius), radius, angle, angle + math.pi / 2
+                    )
+                )
+            return Domain.from_polygon(vertices)
+
+        factories: dict[str, Callable[[], Domain]] = {
+            "Rect": lambda: Domain.from_rectangle(float(data["w_mm"]), float(data["h_mm"]), center=(cx, cy)),
+            "Circle": lambda: Domain.from_polygon(
+                LayoutResolver._island_arc(cx, cy, float(data["diameter_mm"]) / 2, 0, 2 * math.pi)
+            ),
+            "RoundedRect": rounded_rectangle,
+            "Polygon": lambda: Domain.from_polygon(
+                [(cx + x, cy + y) for x, y in data["points"]],
+                holes=[[(cx + x, cy + y) for x, y in ring] for ring in data.get("holes", [])],
+            ),
+        }
+        factory = factories.get(item.type)
+        if factory is None:
+            raise ValueError(
+                f"Island '{item.shape_id}': unsupported geometry '{item.type}'; expected {', '.join(factories)}"
+            )
+        return factory()
+
+    @staticmethod
+    def _island_arc(cx: float, cy: float, radius: float, start: float, end: float) -> list[tuple[float, float]]:
+        if radius == 0:
+            return [(cx, cy)]
+        curve_tolerance_mm = 0.001
+        full_segments = max(8, 4 * math.ceil(math.pi / math.acos(radius / (radius + curve_tolerance_mm)) / 4))
+        segments = max(1, round(full_segments * (end - start) / (2 * math.pi)))
+        step = (end - start) / segments
+        vertex_radius = radius / math.cos(step / 2)
+        return [
+            (cx + radius * math.cos(start), cy + radius * math.sin(start)),
+            *(
+                (
+                    cx + vertex_radius * math.cos(start + (i + 0.5) * step),
+                    cy + vertex_radius * math.sin(start + (i + 0.5) * step),
+                )
+                for i in range(segments)
+            ),
+            (cx + radius * math.cos(end), cy + radius * math.sin(end)),
+        ]
 
     def _resolve_zone_geometry(
         self, node: Island | Keepout, region: ResolvedRegion, params: dict[str, Any]
     ) -> list[Item]:
         items: list[Item] = []
         for child in node.children:
-            self._resolve_node(child, region, items, params)
+            self._resolve_node(child, region, items, {**params, "zone_geometry": True})
         if not items:
             raise ResolutionAssertionError(f"{type(node).__name__} '{node.id}': children produced no zone geometry")
         for item in items:
@@ -670,7 +735,12 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        islands = self._collect_island_bounds(node.children, region, params)
+        island_items = self._collect_island_items(node.children, region, params)
+        islands = [
+            compute_shape_bounds_dict(item.type, item.geometry.data, item.placement.center_xy_mm)
+            for item in island_items
+            if item.geometry is not None and item.placement is not None
+        ]
 
         edge_treatment = self._extract_edge_treatment(node.children)
 
@@ -694,9 +764,41 @@ class LayoutResolver:
             shape_id=node.id,
             label=node.label if node.label else node.id,
         )
-        items.append(rect_item)
-
         domain = Domain.from_rectangle(region.width, region.height, center=region.center)
+        if any(item.type != "Rect" for item in island_items):
+            from domains import MultiDomain
+
+            domains = MultiDomain(domains=(domain,))
+            for island_item in island_items:
+                island_domain = self._island_domain(island_item)
+                pieces: list[Domain] = []
+                for cut_domain in domains:
+                    pieces.extend(cut_domain.subtract(island_domain).domains)
+                domains = MultiDomain(domains=tuple(pieces))
+            for index, cut_domain in enumerate(domains.domains):
+                geometry = {
+                    "points": [[x - region.center[0], y - region.center[1]] for x, y in cut_domain.outer_boundary],
+                    "holes": [
+                        [[x - region.center[0], y - region.center[1]] for x, y in ring]
+                        for ring in cut_domain.inner_boundaries
+                    ],
+                }
+                if edge_treatment:
+                    geometry["edge_treatment"] = edge_treatment
+                shape_id = node.id
+                if len(domains.domains) > 1:
+                    shape_id = f"{node.id}_{index}" if node.id else self._next_shape_id("pocket")
+                items.append(
+                    replace(
+                        rect_item,
+                        type="Polygon",
+                        geometry=Geometry(data=geometry),
+                        shape_id=shape_id,
+                    )
+                )
+        else:
+            items.append(rect_item)
+
         child_params = {**params, "domain": domain, "domain_center": region.center}
         if edge_treatment:
             child_params["edge_treatment"] = edge_treatment
@@ -2475,7 +2577,7 @@ class LayoutResolver:
         cx, cy = bounds_center
         relative_points = [[pt[0] - cx, pt[1] - cy] for pt in abs_points]
 
-        if node.feature is not None:
+        if node.feature is not None or params.get("zone_geometry", False):
             polygon_item = Item(
                 kind="shape",
                 type="Polygon",
@@ -2518,7 +2620,7 @@ class LayoutResolver:
             (0, half_height),
         ]
 
-        if node.feature is not None:
+        if node.feature is not None or params.get("zone_geometry", False):
             triangle_item = Item(
                 kind="shape",
                 type="Polygon",

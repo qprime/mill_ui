@@ -1,0 +1,37 @@
+{
+  "baseline_commit": "83db8373b5bb40617aa8e9051ca239ce8ed2833c",
+  "source": "docs/recipes/panels/pocket_with_island/pocket_with_island.pml.yml",
+  "source_sha256": "9e5861a6db5a4b9a98b1102dfea63f4a0a8b5cfec584d44204c7b65ba7a1d002",
+  "tool_diameter_mm": 12.7,
+  "depth_mm": 6,
+  "nominal_island_diameter_mm": 100,
+  "curve_tolerance_mm": 0.001,
+  "nc_measurement_tolerance_mm": 0.004,
+  "phases": {
+    "before": {
+      "nc_sha256": "e3d5ad8de625f5bb9e705616b5a8ed9ecfcc51bf020e7783bc329141e61395ab",
+      "measured_island_xy_span_mm": [
+        100.00000000000003,
+        100.00000000000003
+      ],
+      "retained_island_area_mm2": 9999.995251027003,
+      "min_sampled_radius_mm": 50.0,
+      "max_sampled_radius_mm": 70.70006094040443,
+      "sample_angles": 1440,
+      "retains_point_49_49": true
+    },
+    "after": {
+      "nc_sha256": "e69279545cb5a02f5b1a1c614c60720262439a39d6f5fab6eabc592cdfb8c587",
+      "measured_island_xy_span_mm": [
+        100.00000000000003,
+        100.00000000000003
+      ],
+      "retained_island_area_mm2": 7854.07425943986,
+      "min_sampled_radius_mm": 49.99952047456434,
+      "max_sampled_radius_mm": 50.00118684867156,
+      "sample_angles": 1440,
+      "retains_point_49_49": false
+    }
+  },
+  "scope": "Retained island reconstructed from actual final-depth 12.7mm flat-cutter sweeps (96 segments/quadrant) in emitted NC. 1440 radial samples, not a physical cut test. The nominal circular exclusion is conservatively polygonized; controller rounding is measured separately."
+}

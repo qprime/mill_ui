@@ -24,6 +24,7 @@
 | PM-14 | HARD | ISLAND_UNDER_POCKET_RECT | Island must be a direct child of a Rect with a pocket feature; unsupported placements raise |
 | PM-15 | HARD | COMPONENT_BIND_BEFORE_PARSE | Bind each component use's arguments over its defaults before parsing parameterized body dimensions and counts. |
 | PM-16 | HARD | COMPONENT_BINDING_ROUND_TRIP | Formatting preserves component templates, defaults and per-use arguments; reparsing recreates equal concrete instances. |
+| PM-17 | HARD | ISLAND_SHAPE_PRESERVED | Island exclusion retains its resolved area geometry; nonrectangular islands lower to polygon pocket boundaries/holes instead of bounding-box exclusions. Curves conservatively approximate within 0.001mm before NC rounding. |
 
 ---
 

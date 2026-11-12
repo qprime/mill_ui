@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import replace
+from itertools import pairwise
 from typing import Any
 
 from shapely.geometry import LineString, Point, Polygon, box
@@ -421,6 +422,70 @@ def _is_hole_through_pocket_floor(a: RemovalIntent, b: RemovalIntent) -> bool:
     return region.contains(envelope) and region.boundary.distance(envelope) > _OVERLAP_CLEARANCE_TOLERANCE_MM
 
 
+def _notch_owner_region(profile: RemovalIntent, relief: RemovalIntent) -> BaseGeometry | None:
+    if profile.face != relief.face or profile.shape.lower() != "polygon" or profile.depth_profile.z_top != 0:
+        return None
+    if profile.depth_profile.mode != "constant" or not math.isclose(
+        profile.depth_mm(), relief.depth_mm(), rel_tol=0, abs_tol=_OVERLAP_CLEARANCE_TOLERANCE_MM
+    ):
+        return None
+    region = _profile_containment_region(profile)
+    if (
+        region is None
+        or not region.is_valid
+        or relief.dogbone_reference_point is None
+        or not region.contains(Point(relief.dogbone_reference_point))
+    ):
+        return None
+    return region
+
+
+def _is_groove_on_profile_notch_relief(a: RemovalIntent, b: RemovalIntent, profiles: list[RemovalIntent]) -> bool:
+    if not _match_same_type(a, b, FeatureType.POCKET):
+        return False
+    relief, groove = (a, b) if a.dogbone_corners is not None else (b, a)
+    if relief.dogbone is None or relief.dogbone_corners is None or len(relief.dogbone_corners) != 2:
+        return False
+    if groove.dogbone_corners is not None or relief.dogbone_reference_point is None:
+        return False
+    if relief.shape.lower() != "rect" or groove.shape.lower() != "rect":
+        return False
+    if any(
+        i.depth_profile.mode != "constant"
+        or i.depth_profile.z_top != 0
+        or i.rest is not None
+        or i.constraints.islands
+        or i.constraints.edge_treatment is not None
+        for i in (relief, groove)
+    ):
+        return False
+    if groove.depth_mm() <= 0 or groove.depth_mm() >= relief.depth_mm() - _OVERLAP_CLEARANCE_TOLERANCE_MM:
+        return False
+    notch = box(relief.bounds.x_min, relief.bounds.y_min, relief.bounds.x_max, relief.bounds.y_max)
+    pocket = box(groove.bounds.x_min, groove.bounds.y_min, groove.bounds.x_max, groove.bounds.y_max)
+    corners = LineString(relief.dogbone_corners)
+    edges = list(notch.exterior.coords)
+    if not any(
+        corners.hausdorff_distance(LineString([p, q])) <= _OVERLAP_CLEARANCE_TOLERANCE_MM for p, q in pairwise(edges)
+    ):
+        return False
+    for profile in profiles:
+        region = _notch_owner_region(profile, relief)
+        if region is None:
+            continue
+        blank = box(profile.bounds.x_min, profile.bounds.y_min, profile.bounds.x_max, profile.bounds.y_max)
+        envelope = blank.buffer(_OVERLAP_CLEARANCE_TOLERANCE_MM, join_style="mitre")
+        if not envelope.covers(notch) or not envelope.covers(pocket):
+            continue
+        if notch.distance(blank.boundary) > _OVERLAP_CLEARANCE_TOLERANCE_MM:
+            continue
+        if region.buffer(-_OVERLAP_CLEARANCE_TOLERANCE_MM).intersects(notch):
+            continue
+        if region.boundary.buffer(_OVERLAP_CLEARANCE_TOLERANCE_MM).covers(corners):
+            return True
+    return False
+
+
 def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: float | None = None) -> ValidationResult:
     if engrave_tool_diameter_mm is not None and (
         not math.isfinite(engrave_tool_diameter_mm) or engrave_tool_diameter_mm <= 0
@@ -431,6 +496,7 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
     result = ValidationResult()
     traces = [_engraving_trace(intent) if engrave_tool_diameter_mm is not None else None for intent in intents]
     pocket_regions = [_pocket_overlap_region(intent) for intent in intents]
+    profiles = [i for i in intents if i.hint_type == FeatureType.PROFILE and i.side == "outside"]
 
     for i, intent_a in enumerate(intents):
         for j, intent_b in enumerate(intents[i + 1 :], start=i + 1):
@@ -458,7 +524,9 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
                     continue
                 if _is_compatible_profile_edge(intent_a, intent_b):
                     continue
-                if _is_hole_through_pocket_floor(intent_a, intent_b):
+                if _is_hole_through_pocket_floor(intent_a, intent_b) or _is_groove_on_profile_notch_relief(
+                    intent_a, intent_b, profiles
+                ):
                     continue
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from adapters.hints_to_removal import (
@@ -52,6 +54,108 @@ def _floor_pocket() -> RemovalIntent:
             "depth_mm": 3,
         }
     )
+
+
+def _notch_and_back_groove(start: float = 20) -> list[RemovalIntent]:
+    from assembly.notches import build_notched_polygon
+    from assembly.panel import Edge, NotchSpec
+    from ir.removal_intent import DogboneSpec
+
+    points = build_notched_polygon(100, 100, (0, 0), [NotchSpec(Edge.TOP, start, 20, 18)])
+    outline = profile_hint_to_removal_intent(
+        {
+            "id": "outline",
+            "shape": "Polygon",
+            "center_xy_mm": [50, 50],
+            "geometry": {"points": points},
+            "side": "outside",
+            "depth_mm": 18,
+        },
+        18,
+    )
+    groove = pocket_hint_to_removal_intent(
+        {
+            "id": "back_slot",
+            "shape": "Rect",
+            "center_xy_mm": [50, 90.9],
+            "geometry": {"w_mm": 100, "h_mm": 18.2},
+            "depth_mm": 9,
+        }
+    )
+    relief = pocket_hint_to_removal_intent(
+        {
+            "id": "corner_relief",
+            "shape": "Rect",
+            "center_xy_mm": [start + 10, 91],
+            "geometry": {"w_mm": 20, "h_mm": 18},
+            "depth_mm": 18,
+        }
+    )
+    return [
+        outline,
+        replace(groove, dogbone=DogboneSpec()),
+        replace(
+            relief,
+            dogbone=DogboneSpec(),
+            dogbone_corners=((start, 82), (start + 20, 82)),
+            dogbone_reference_point=(50, 50),
+        ),
+    ]
+
+
+@pytest.mark.parametrize("start", [0, 20])
+@pytest.mark.parametrize("order", [(0, 1, 2), (2, 1, 0), (1, 2, 0)])
+def test_back_groove_may_cross_relief_of_a_proven_profile_notch(start, order):
+    intents = _notch_and_back_groove(start)
+    assert check_overlap([intents[index] for index in order]).is_valid()
+
+
+def test_notch_relief_cannot_claim_a_profile_that_is_missing():
+    assert len(check_overlap(_notch_and_back_groove()[1:]).errors) == 1
+
+
+@pytest.mark.parametrize(
+    "index, changes",
+    [
+        (0, {"shape": "Rect"}),
+        (0, {"side": "inside"}),
+        (0, {"face": "back"}),
+        (0, {"depth_profile": DepthProfile.constant(0, -20)}),
+        (1, {"bounds": Bounds2D(0, 101, 81.8, 100)}),
+        (1, {"shape": "Circle"}),
+        (1, {"depth_profile": DepthProfile.constant(0, -18)}),
+        (1, {"depth_profile": DepthProfile.constant(-1, -9)}),
+        (2, {"dogbone_corners": None}),
+        (2, {"dogbone_reference_point": None}),
+        (2, {"dogbone_reference_point": (30, 90)}),
+        (2, {"dogbone_corners": ((20, 83), (40, 83))}),
+        (2, {"depth_profile": DepthProfile.constant(0, -19)}),
+        (2, {"depth_profile": DepthProfile.constant(-1, -18)}),
+    ],
+)
+def test_unproven_notch_relief_overlap_keeps_its_report(index, changes):
+    intents = _notch_and_back_groove()
+    intents[index] = replace(intents[index], **changes)
+    assert check_overlap(intents).errors
+
+
+def test_notch_relief_rectangle_must_be_in_the_profile_cutout():
+    intents = _notch_and_back_groove()
+    intents[2] = replace(intents[2], bounds=Bounds2D(20, 40, 80, 100), dogbone_corners=((20, 80), (40, 80)))
+    assert check_overlap(intents).errors
+
+
+def test_relief_cannot_claim_an_uncut_or_invalid_polygon_boundary():
+    from ir.removal_intent import ShapeGeometry
+
+    for points in (
+        ((-50, -50), (50, -50), (50, 50), (-50, 50)),
+        ((-50, -50), (50, 50), (50, -50), (-50, 50)),
+    ):
+        intents = _notch_and_back_groove()
+        intents[0] = replace(intents[0], shape_geometry=ShapeGeometry(points=points))
+        intents[2] = replace(intents[2], dogbone_corners=((20, 100), (40, 100)))
+        assert check_overlap(intents).errors
 
 
 def _floor_hole(center: tuple[float, float] = (150, 150), depth: float = 19) -> RemovalIntent:

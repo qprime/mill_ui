@@ -389,6 +389,49 @@ class TestDadoDogboneThroughPipeline:
 
 
 class TestNotchDogboneThroughPipeline:
+    @pytest.mark.parametrize("columns", [2, 3])
+    def test_cubby_back_grooves_and_perimeter_reliefs_are_compatible(self, columns):
+        from core.geometry import polygon_region
+        from pml.yaml_parser import parse_pml_yaml
+        from resolution.layout_resolver import resolve_layout_multi
+        from validation import check_overlap
+
+        sheets = resolve_layout_multi(
+            parse_pml_yaml(f"""Sheet:
+  physical_width: 600mm
+  physical_height: 600mm
+  thickness: 18mm
+  margin: 10mm
+children:
+  - Assembly:
+      type: cubby
+      width: 240mm
+      depth: 60mm
+      height: 180mm
+      thickness: 18mm
+      grid: [{columns}, 2]
+      perimeter_joinery: finger
+      internal_joinery: half_lap
+      finger_width: 15mm
+      clearance: 0.12mm
+      layout_gap: 10mm
+      back:
+        joinery: captured
+        receiving: a
+        dado_depth: 9mm
+        inset: 0mm
+      back_thickness: 18mm
+      back_inset: 12mm
+""")
+        )
+        for sheet in sheets:
+            intents = ast_to_removal_intents(sheet)
+            assert check_overlap(intents).is_valid()
+            for intent in intents:
+                if intent.hint_type == "profile":
+                    region = polygon_region(intent.shape_geometry, intent.bounds.center)
+                    assert region is not None and region.is_valid
+
     @pytest.mark.parametrize(
         "cap, span, wall_height",
         [

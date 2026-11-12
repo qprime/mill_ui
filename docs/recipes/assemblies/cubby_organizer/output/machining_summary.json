@@ -207,10 +207,10 @@
           "feature_count": 1,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 28.0
+          "estimated_runtime_min": 27.3
         }
       ],
-      "total_runtime_min": 66.9,
+      "total_runtime_min": 66.2,
       "feature_counts": {
         "pocket": 24,
         "profile": 1
@@ -218,6 +218,6 @@
       "safe_z_mm": 6.0
     }
   ],
-  "total_runtime_min": 416.1,
+  "total_runtime_min": 415.4,
   "kerf_mm": 3.175
 }

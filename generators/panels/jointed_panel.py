@@ -58,12 +58,11 @@ def notched_panel_generator(
     outer = build_notched_polygon(
         width_mm=params.width_mm,
         height_mm=params.height_mm,
-        center=center,
+        center=(0.0, 0.0),
         notches=params.notches,
     )
 
-    cx, cy = center
-    polygon_points = [[x - cx, y - cy] for x, y in outer]
+    polygon_points = [[x, y] for x, y in outer]
     profile_item = Item(
         kind="shape",
         type="Polygon",

@@ -65,10 +65,7 @@
           }
         }
       },
-      "errors": [
-        "Overlapping regions detected: pocket_assembly_top_dado_7 and pocket_assembly_top_notch_dogbone_17",
-        "Overlapping regions detected: pocket_assembly_top_dado_7 and pocket_assembly_top_notch_dogbone_27"
-      ],
+      "errors": [],
       "warnings": []
     },
     {
@@ -135,12 +132,7 @@
           }
         }
       },
-      "errors": [
-        "Overlapping regions detected: pocket_assembly_bottom_dado_3 and pocket_assembly_bottom_notch_dogbone_4",
-        "Overlapping regions detected: pocket_assembly_bottom_dado_3 and pocket_assembly_bottom_notch_dogbone_14",
-        "Overlapping regions detected: pocket_assembly_left_side_dado_29 and pocket_assembly_left_side_notch_dogbone_40",
-        "Overlapping regions detected: pocket_assembly_left_side_dado_29 and pocket_assembly_left_side_notch_dogbone_51"
-      ],
+      "errors": [],
       "warnings": []
     },
     {
@@ -155,9 +147,9 @@
         }
       },
       "complexity": {
-        "total_moves": 3006,
+        "total_moves": 2978,
         "rapid_moves": 59,
-        "cut_moves": 2786,
+        "cut_moves": 2758,
         "rapid_ratio": 0.02
       },
       "fidelity": {
@@ -181,13 +173,13 @@
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 1188
+            "move_count": 1160
           }
         ]
       },
       "output_size": {
-        "total_bytes": 65974,
-        "total_lines": 2996,
+        "total_bytes": 65340,
+        "total_lines": 2968,
         "files": {
           "pocket-12.70mm": {
             "bytes": 1751,
@@ -202,28 +194,16 @@
             "lines": 1622
           },
           "profile-3.17mm": {
-            "bytes": 33453,
-            "lines": 1188
+            "bytes": 32819,
+            "lines": 1160
           }
         }
       },
-      "errors": [
-        "Overlapping regions detected: pocket_assembly_right_side_dado_2 and pocket_assembly_right_side_notch_dogbone_3",
-        "Overlapping regions detected: pocket_assembly_right_side_dado_2 and pocket_assembly_right_side_notch_dogbone_14"
-      ],
+      "errors": [],
       "warnings": []
     }
   ],
-  "errors": [
-    "sheet 1: Overlapping regions detected: pocket_assembly_top_dado_7 and pocket_assembly_top_notch_dogbone_17",
-    "sheet 1: Overlapping regions detected: pocket_assembly_top_dado_7 and pocket_assembly_top_notch_dogbone_27",
-    "sheet 2: Overlapping regions detected: pocket_assembly_bottom_dado_3 and pocket_assembly_bottom_notch_dogbone_4",
-    "sheet 2: Overlapping regions detected: pocket_assembly_bottom_dado_3 and pocket_assembly_bottom_notch_dogbone_14",
-    "sheet 2: Overlapping regions detected: pocket_assembly_left_side_dado_29 and pocket_assembly_left_side_notch_dogbone_40",
-    "sheet 2: Overlapping regions detected: pocket_assembly_left_side_dado_29 and pocket_assembly_left_side_notch_dogbone_51",
-    "sheet 3: Overlapping regions detected: pocket_assembly_right_side_dado_2 and pocket_assembly_right_side_notch_dogbone_3",
-    "sheet 3: Overlapping regions detected: pocket_assembly_right_side_dado_2 and pocket_assembly_right_side_notch_dogbone_14"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

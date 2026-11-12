@@ -95,6 +95,18 @@ retain the existing checks. A pocket's fallback bounding box cannot establish
 containment. Hole depths remain measured from the original sheet surface;
 `through` resolves to the sheet thickness, not additional depth below the floor.
 
+A shallow rectangular groove may meet a two-corner, relief-only notch operation
+when an outside Polygon profile proves their shared part context. The profile
+must be valid, contain the relief's reference point, and end at the same depth
+as the relief. Both feature envelopes must remain within its blank bounds. The
+relief rectangle must open onto the blank edge, lie outside retained material,
+and have its complete inner corner edge on the actual profile boundary. This
+recognizes a back groove meeting existing perimeter finger notches without
+treating every dogbone as a compatible pocket. Missing or invalid outlines,
+unproven cutouts, other faces, wrong depths, nonzero starts, islands, rest
+pocketing and edge treatments retain the overlap report. Normal groove dogbones
+remain part of the requested groove; no region-name or recipe exception applies.
+
 ---
 
 ## Cross-Face Web (VL-8)

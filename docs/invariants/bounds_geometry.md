@@ -60,6 +60,11 @@ An Item's `points`, `holes`, `start` and `end` are relative to `placement.center
 
 ---
 
+Notched-panel generators construct their profile at the local origin and keep
+sheet placement in the Item's Placement. A translate-then-subtract round trip
+can leave microscopic edge slivers and invalidate the polygon; moving a panel
+must not change its local geometry or notch topology.
+
 ## Normalized Coordinates
 
 Polyline and Spline points use normalized [0.0, 1.0] coordinates within their parent domain. These are resolved to absolute coordinates during layout resolution.

@@ -31,6 +31,26 @@ class TestNotchedPanelParams:
 
 
 class TestNotchedPanelGenerator:
+    @pytest.mark.parametrize("center", [(0, 0), (156.35, 306.35), (438.35, 742.35), (1030.35, 306.35)])
+    def test_local_notched_outline_is_valid_and_independent_of_placement(self, center):
+        from shapely.geometry import Polygon
+
+        from assembly.notches import finger_joints_to_notches
+
+        notches = tuple(
+            notch
+            for edge in (0, 2)
+            for notch in finger_joints_to_notches(edge, 300, 18, phase=1, width_mm=15, clearance_mm=0.12)
+        )
+        params = NotchedPanelParams(width_mm=300, height_mm=600, notches=notches)
+        item = notched_panel_generator(params, center=center)[0]
+        reference = notched_panel_generator(params, center=(0, 0))[0]
+        assert item.geometry is not None and reference.geometry is not None
+        assert item.placement is not None
+        assert item.geometry.data == reference.geometry.data
+        assert Polygon(item.geometry.data["points"]).is_valid
+        assert item.placement.center_xy_mm == center
+
     def test_simple_rectangle_no_notches(self):
         params = NotchedPanelParams(
             width_mm=100,

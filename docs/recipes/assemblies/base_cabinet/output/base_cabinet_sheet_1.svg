@@ -61,11 +61,11 @@
     <rect x="16.350" y="483.650" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_1" />
     <rect x="16.350" y="1085.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_2" />
     <rect x="558.150" y="483.650" width="18.200" height="720.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_3" />
-    <rect x="16.350" y="834.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_4" />
+    <rect x="16.350" y="784.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_4" />
     <rect x="586.350" y="483.650" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_6" />
     <rect x="586.350" y="1085.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_7" />
     <rect x="586.350" y="483.650" width="18.200" height="720.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_8" />
-    <rect x="586.350" y="834.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_9" />
+    <rect x="586.350" y="784.450" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_9" />
   </g>
   <g id="LABELS" class="labels">
     <text x="296.350" y="843.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_0_left_side_outer_label">LEFT SIDE</text>

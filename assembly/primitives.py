@@ -10,24 +10,47 @@ from assembly.panel import Edge, NotchSpec, PanelRole, PanelSpec
 
 
 @dataclass(frozen=True)
-class _BoxCapFit:
+class _CapFit:
     edge_inset_mm: float = 0.0
     wall_extension_mm: float = 0.0
 
 
-def _box_cap_fit(joinery: JoineryStrategy | Literal["none"] | None, thickness: float) -> _BoxCapFit:
+def _cap_fit(joinery: JoineryStrategy | Literal["none"] | None, thickness: float) -> _CapFit:
     if joinery is None or joinery == "none" or isinstance(joinery, Finger):
-        return _BoxCapFit()
+        return _CapFit()
     if isinstance(joinery, Captured):
         depth = joinery.groove_depth_mm(thickness)
         if not 0 < depth <= thickness:
-            raise ValueError(f"Box cap groove depth must be positive and at most {thickness}mm, got {depth}mm")
+            raise ValueError(f"Assembly cap groove depth must be positive and at most {thickness}mm, got {depth}mm")
         if joinery.receiving == "a":
-            return _BoxCapFit(edge_inset_mm=thickness - depth)
+            return _CapFit(edge_inset_mm=thickness - depth)
         if joinery.inset_mm != 0:
-            raise ValueError("Box caps with receiving='b' and nonzero inset require explicit wall placement")
-        return _BoxCapFit(wall_extension_mm=thickness - depth)
-    return _BoxCapFit(edge_inset_mm=thickness)
+            raise ValueError("Caps with receiving='b' and nonzero inset require explicit wall placement")
+        return _CapFit(wall_extension_mm=thickness - depth)
+    return _CapFit(edge_inset_mm=thickness)
+
+
+def _carcass_cap_fit(
+    joinery: JoineryStrategy | Literal["none"] | None,
+    thickness: float,
+    cap_style: Literal["between_sides", "over_sides"],
+) -> _CapFit:
+    fit = _cap_fit(joinery, thickness)
+    if joinery is None or joinery == "none" or isinstance(joinery, Finger):
+        return fit
+    if isinstance(joinery, Captured):
+        expected = "between_sides" if joinery.receiving == "a" else "over_sides"
+        if cap_style != expected:
+            raise ValueError(f"Carcass cap_style must be {expected!r} for Captured(receiving={joinery.receiving!r})")
+        return fit
+    return fit if cap_style == "between_sides" else _CapFit(wall_extension_mm=thickness)
+
+
+def _carcass_inside_offset(joinery: JoineryStrategy | Literal["none"] | None, fit: _CapFit, thickness: float) -> float:
+    if joinery is None or joinery == "none":
+        return 0.0
+    inset = joinery.inset_mm if isinstance(joinery, Captured) and joinery.receiving == "a" else 0.0
+    return thickness - fit.wall_extension_mm + inset
 
 
 def box(
@@ -47,8 +70,8 @@ def box(
         top = default_cap_joinery
     if bottom is None:
         bottom = default_cap_joinery
-    top_fit = _box_cap_fit(top, thickness)
-    bottom_fit = _box_cap_fit(bottom, thickness)
+    top_fit = _cap_fit(top, thickness)
+    bottom_fit = _cap_fit(bottom, thickness)
     wall_height = height - top_fit.wall_extension_mm - bottom_fit.wall_extension_mm
     if wall_height <= 0:
         raise ValueError(f"Box cap joints leave no positive wall height: {wall_height}mm")
@@ -166,12 +189,14 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
     if bottom is None:
         bottom = default_cap_joinery
 
-    if cap_style == "between_sides":
-        side_height = height
-        cap_width = width - 2 * thickness
-    else:
-        side_height = height - 2 * thickness
-        cap_width = width
+    top_fit = _carcass_cap_fit(top, thickness, cap_style)
+    bottom_fit = _carcass_cap_fit(bottom, thickness, cap_style)
+    side_height = height - top_fit.wall_extension_mm - bottom_fit.wall_extension_mm
+    if side_height <= 0:
+        raise ValueError(f"Carcass caps leave no positive side height: {side_height}mm")
+    if width <= 2 * max(top_fit.edge_inset_mm, bottom_fit.edge_inset_mm):
+        raise ValueError("Carcass dimensions leave no positive cap span")
+    cap_width = width - 2 * thickness if cap_style == "between_sides" else width
 
     left = PanelSpec(
         name="left_side",
@@ -198,7 +223,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
     if top is not None and top != "none":
         top_panel = PanelSpec(
             name="top",
-            width_mm=cap_width,
+            width_mm=width - 2 * top_fit.edge_inset_mm,
             height_mm=length,
             thickness_mm=thickness,
             role=PanelRole.TOP,
@@ -226,7 +251,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
         bottom_len = length - effective_toe_kick_setback if effective_toe_kick_height > 0 else length
         bottom_panel = PanelSpec(
             name="bottom",
-            width_mm=cap_width,
+            width_mm=width - 2 * bottom_fit.edge_inset_mm,
             height_mm=bottom_len,
             thickness_mm=thickness,
             role=PanelRole.BOTTOM,
@@ -297,15 +322,18 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                 interfaces.append(Interface(InterfaceType.BOTTOM, "bottom", "bottom", "back", "bottom", back_joinery))
 
     if fixed_shelves > 0:
-        shelf_x = cap_width
+        if isinstance(shelf_joinery, Captured) and shelf_joinery.receiving != "a":
+            raise ValueError("Carcass shelves require Captured(receiving='a')")
+        shelf_x = width - 2 * _cap_fit(shelf_joinery, thickness).edge_inset_mm
         shelf_y = length - back_inset if back_inset else length
-        interior_height = side_height
-        if top is not None and top != "none":
-            interior_height -= thickness
-        if bottom is not None and bottom != "none":
-            interior_height -= thickness
-        shelf_spacing = interior_height / (fixed_shelves + 1)
-        bottom_offset = thickness if (bottom is not None and bottom != "none") else 0.0
+        bottom_offset = _carcass_inside_offset(bottom, bottom_fit, thickness)
+        if effective_toe_kick_height > 0 and bottom is not None and bottom != "none":
+            bottom_offset = effective_toe_kick_height + thickness
+        top_offset = _carcass_inside_offset(top, top_fit, thickness)
+        interior_height = side_height - top_offset - bottom_offset
+        shelf_spacing = (interior_height - fixed_shelves * thickness) / (fixed_shelves + 1)
+        if shelf_spacing <= 0 or min(shelf_x, shelf_y) <= 0:
+            raise ValueError("Carcass shelves must leave positive panel spans and clear openings")
 
         for i in range(fixed_shelves):
             shelf = PanelSpec(
@@ -316,7 +344,7 @@ def carcass(  # noqa: C901 — conditional builder (defer refactor)
                 role=PanelRole.SHELF,
             )
             panels[f"shelf_{i + 1}"] = shelf
-            shelf_position = bottom_offset + (i + 1) * shelf_spacing - thickness / 2
+            shelf_position = bottom_offset + (i + 1) * shelf_spacing + i * thickness
             interfaces.append(
                 Interface(
                     InterfaceType.INTERNAL,

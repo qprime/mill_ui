@@ -2601,6 +2601,8 @@ class LayoutResolver:
         default_finger_width: float | None,
         default_finger_count: int | None,
         default_clearance: float,
+        *,
+        default_dado_depth: float | None = None,
     ):
         from layout_ast.compositional import InterfaceConfig
         from layout_ast.layout import DogboneSpec
@@ -2642,12 +2644,12 @@ class LayoutResolver:
         elif joinery_name == "captured" or joinery_name == "dado":
             if isinstance(config, InterfaceConfig):
                 return Captured(
-                    dado_depth_mm=config.dado_depth_mm,
+                    dado_depth_mm=config.dado_depth_mm if config.dado_depth_mm is not None else default_dado_depth,
                     inset_mm=config.inset_mm,
                     receiving=config.receiving,  # type: ignore[arg-type]
                     dogbone=dogbone_resolved,
                 )
-            return Captured()
+            return Captured(dado_depth_mm=default_dado_depth)
         elif joinery_name == "half_lap":
             if isinstance(config, InterfaceConfig):
                 return HalfLap(dogbone=dogbone_resolved)
@@ -2748,6 +2750,7 @@ class LayoutResolver:
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
+                default_dado_depth=node.shelf_dado_depth_mm,
             )
             shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
 
@@ -2756,6 +2759,7 @@ class LayoutResolver:
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
+                default_dado_depth=node.partition_dado_depth_mm,
             )
             partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
 
@@ -2802,6 +2806,7 @@ class LayoutResolver:
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
+                default_dado_depth=node.shelf_dado_depth_mm,
             )
             shelf_joinery = Butt() if shelf_joinery_raw == "none" else (shelf_joinery_raw or Captured())
 
@@ -2810,6 +2815,7 @@ class LayoutResolver:
                 default_finger_width,
                 default_finger_count,
                 default_clearance,
+                default_dado_depth=node.partition_dado_depth_mm,
             )
             partition_joinery = Butt() if partition_joinery_raw == "none" else (partition_joinery_raw or Captured())
 

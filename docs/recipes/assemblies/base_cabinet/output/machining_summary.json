@@ -82,7 +82,7 @@
           "max_depth_mm": 9.0,
           "feature_count": 1,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 3.9
+          "estimated_runtime_min": 4.0
         },
         {
           "filename": "sheet_2.dogbone-12.70mm.nc",
@@ -109,10 +109,10 @@
           "feature_count": 3,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 78.5
+          "estimated_runtime_min": 79.2
         }
       ],
-      "total_runtime_min": 83.3,
+      "total_runtime_min": 84.1,
       "feature_counts": {
         "pocket": 1,
         "profile": 3
@@ -141,7 +141,7 @@
           "max_depth_mm": 9.0,
           "feature_count": 1,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 3.9
+          "estimated_runtime_min": 4.0
         },
         {
           "filename": "sheet_3.dogbone-12.70mm.nc",
@@ -168,10 +168,10 @@
           "feature_count": 1,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 23.5
+          "estimated_runtime_min": 23.9
         }
       ],
-      "total_runtime_min": 28.3,
+      "total_runtime_min": 28.8,
       "feature_counts": {
         "pocket": 1,
         "profile": 1
@@ -179,6 +179,6 @@
       "safe_z_mm": 6.0
     }
   ],
-  "total_runtime_min": 210.7,
+  "total_runtime_min": 212.0,
   "kerf_mm": 3.175
 }

@@ -273,10 +273,10 @@ guide:
         summary: Joinery that steps, shoulders or butts panel edges.
         spec: pml/syntax_spec.md#joinery-types
         detect: [{value: {joinery: step}}, {value: {joinery: rabbet}}, {value: {joinery: butt}}]
-      - name: Partitions and shelves
-        summary: Dividers and fixed shelves inside a carcass.
+      - name: Fixed shelves
+        summary: Full-width fixed shelves inside a carcass.
         spec: pml/syntax_spec.md#carcass-assembly
-        detect: [{param: vertical_partitions}, {param: fixed_shelves}]
+        detect: [{param: fixed_shelves}]
       - name: Multi-sheet partitioning
         summary: Assembly panels split across sheets when they do not fit on one.
         spec: pml/syntax_spec.md#multi-sheet-partitioning

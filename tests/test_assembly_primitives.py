@@ -254,6 +254,109 @@ class TestBoxResolve:
 
 
 class TestCarcassPrimitive:
+    @pytest.mark.parametrize("top_depth, bottom_depth, shelf_depth", [(9, 9, 9), (6, 9, 4)])
+    def test_captured_caps_and_shelves_reach_their_side_grooves(self, top_depth, bottom_depth, shelf_depth):
+        assembly = carcass(
+            width=900,
+            length=300,
+            height=1100,
+            thickness=18,
+            top=Captured(dado_depth_mm=top_depth),
+            bottom=Captured(dado_depth_mm=bottom_depth),
+            fixed_shelves=3,
+            shelf_joinery=Captured(dado_depth_mm=shelf_depth),
+        )
+        assert assembly.panels["top"].width_mm == 864 + 2 * top_depth
+        assert assembly.panels["bottom"].width_mm == 864 + 2 * bottom_depth
+        for i in range(1, 4):
+            assert assembly.panels[f"shelf_{i}"].width_mm == 864 + 2 * shelf_depth
+
+    @pytest.mark.parametrize("cap_style", ["between_sides", "over_sides"])
+    def test_shelf_spacing_leaves_equal_clear_openings(self, cap_style):
+        assembly = carcass(width=900, length=300, height=1100, thickness=18, cap_style=cap_style, fixed_shelves=3)
+        positions = [
+            i.position_along_edge_a_mm
+            for i in assembly.interfaces
+            if i.panel_a == "left_side" and i.type == InterfaceType.INTERNAL
+        ]
+        offset = 18 if cap_style == "between_sides" else 0
+        assert positions == pytest.approx([offset + 252.5, offset + 523, offset + 793.5])
+        assert all(assembly.panels[f"shelf_{i}"].width_mm == 882 for i in range(1, 4))
+
+    def test_shelves_start_above_the_actual_toe_kick_bottom(self):
+        assembly = carcass(
+            width=600,
+            length=560,
+            height=720,
+            thickness=18,
+            fixed_shelves=1,
+            toe_kick_height=100,
+            top=Captured(),
+            bottom=Captured(),
+        )
+        shelf = next(i for i in assembly.interfaces if i.panel_a == "left_side" and i.type == InterfaceType.INTERNAL)
+        assert shelf.position_along_edge_a_mm == 401
+
+    @pytest.mark.parametrize("top, expected_height", [("none", 1091), (Butt(), 1073)])
+    def test_over_side_caps_account_for_only_their_exposed_thickness(self, top, expected_height):
+        assembly = carcass(
+            width=900,
+            length=300,
+            height=1100,
+            thickness=18,
+            cap_style="over_sides",
+            top=top,
+            bottom=Captured(receiving="b"),
+        )
+        assert assembly.panels["left_side"].height_mm == expected_height
+
+    @pytest.mark.parametrize("depth", [0, -1, 19])
+    def test_cap_groove_depth_must_fit_the_side_stock(self, depth):
+        with pytest.raises(ValueError, match="cap groove depth"):
+            carcass(width=900, length=300, height=1100, thickness=18, top=Captured(dado_depth_mm=depth))
+
+    @pytest.mark.parametrize("style, receiving", [("between_sides", "b"), ("over_sides", "a")])
+    def test_captured_cap_placement_must_agree_with_its_receiving_panel(self, style, receiving):
+        with pytest.raises(ValueError, match="cap_style"):
+            carcass(
+                width=900, length=300, height=1100, thickness=18, cap_style=style, top=Captured(receiving=receiving)
+            )
+
+    @pytest.mark.parametrize(
+        "joinery, root_depth, expected_depth",
+        [("dado", 6, 6), ("{joinery: captured, dado_depth: 4mm}", 6, 4), ("captured", 0, None)],
+    )
+    def test_pml_shelf_depth_reaches_both_the_groove_and_the_inserted_span(self, joinery, root_depth, expected_depth):
+        from adapters.ast_to_removal import ast_to_removal_intents
+        from pml.yaml_parser import parse_pml_yaml
+        from resolution.layout_resolver import resolve_layout
+
+        source = f"""Sheet: {{width: 1220mm, height: 1220mm, thickness: 18mm, margin: 10mm}}
+children:
+- Assembly:
+    type: carcass
+    width: 900mm
+    depth: 300mm
+    height: 400mm
+    thickness: 18mm
+    top: none
+    bottom: none
+    back: none
+    fixed_shelves: 1
+    shelf_joinery: {joinery}
+    shelf_dado_depth: {root_depth}mm
+"""
+        if expected_depth is None:
+            with pytest.raises(ValueError, match="cap groove depth"):
+                resolve_layout(parse_pml_yaml(source))
+            return
+        intents = ast_to_removal_intents(resolve_layout(parse_pml_yaml(source)))
+        shelf = next(i for i in intents if "shelf_1" in i.region_id and i.hint_type == "profile")
+        assert shelf.bounds.width == 864 + 2 * expected_depth
+        grooves = [i for i in intents if i.hint_type == "pocket"]
+        assert len(grooves) == 2
+        assert all(i.depth_mm() == expected_depth for i in grooves)
+
     def test_side_panel_dimensions(self):
         assembly = carcass(width=600, length=560, height=720, thickness=18)
         left = assembly.panels["left_side"]

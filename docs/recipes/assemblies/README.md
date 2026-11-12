@@ -14,7 +14,7 @@ A carcass assembly split across sheets by multi-sheet partitioning.
 
 <img src="bookcase/output/bookcase_sheet_1.svg" width="240">
 
-Carcass partitions and dadoed shelves.
+A carcass with three full-width fixed shelves captured in side dados.
 
 ## [Box bottoms and lids](box_bottoms_and_lids/)
 

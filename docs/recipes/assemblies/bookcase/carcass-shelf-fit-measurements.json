@@ -1,0 +1,199 @@
+{
+  "baseline_commit": "a2ae38ccd98f79a9f4040dc3d81c8af91d81c895",
+  "source_pml_sha256": "f22a6b19f9986a17b080e5b45018b119d9cf6a106f4094a06ccc608c5cf8c8b0",
+  "tools_mm": [
+    3.175,
+    12.7
+  ],
+  "stock_mm": 18,
+  "profile_depth_mm": 18.2,
+  "groove_depth_mm": 9,
+  "rounding_tolerance_mm": 0.004,
+  "nc_sha256": {
+    "sheet_1.profile-3.17mm.nc/before": "b9939298c6f05ba1d8d57386d346392498be73733e503a51c179b3dec8272c08",
+    "sheet_1.pocket-12.70mm.nc/before": "61725acb0131f626530c3ada05252ed17077591dc77e0adc41471eb00190b5bb",
+    "sheet_1.dogbone-12.70mm.nc/before": "d7b5b9f2d4a75c410cbca0fc2c754100f06c4ca642336c271a34c5ba48f01730",
+    "sheet_2.profile-3.17mm.nc/before": "6c0c94cccd45c29ce7761fdc87e70fe62097dd965809eb7722b5764a06b88b94",
+    "sheet_3.profile-3.17mm.nc/before": "a0468bb74efba216ed91765e127fbed9c15d3044d53f51161e7ad5269330c28b",
+    "sheet_1.profile-3.17mm.nc/after": "94365c6fddad8b84516ae390190983b3d0b6b9bf123b3c3e305f659df5737b29",
+    "sheet_1.pocket-12.70mm.nc/after": "9d653b4e22f9296af64e40b194e72725f47003eff92a37eb6ce44393b92068b5",
+    "sheet_1.dogbone-12.70mm.nc/after": "6d8a158d56d426ce5e6018d3e76b13909a8a3676d8b86bf1b73a55ef535b4bee",
+    "sheet_2.profile-3.17mm.nc/after": "46d770bd8ad0f274316d7958bce2de53906a352e7473f5c19c23a38306d74d95",
+    "sheet_3.profile-3.17mm.nc/after": "a144eb11122666c5129a18e9b8c926fa6d699667b569b48b8899ca5edf910462"
+  },
+  "members": {
+    "left_side": {
+      "sheet": 1,
+      "nominal_span_mm": [
+        300.0,
+        1100.0
+      ],
+      "measured_bounds_mm": [
+        0.0005000000000059401,
+        -0.0005000000000219273,
+        300.0005,
+        1100.0005
+      ],
+      "origin_xyz_mm": [
+        0,
+        0,
+        0
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "right_side": {
+      "sheet": 1,
+      "nominal_span_mm": [
+        300.0,
+        1100.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999313332,
+        -0.0005000000000219273,
+        300.0005,
+        1100.0005
+      ],
+      "origin_xyz_mm": [
+        882,
+        300,
+        0
+      ],
+      "reverse_depth_axis": true,
+      "front_normal_sign": -1
+    },
+    "top": {
+      "sheet": 2,
+      "nominal_span_mm": [
+        882.0,
+        300.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999775184,
+        0.0005000000000059401,
+        882.0005,
+        300.0005
+      ],
+      "origin_xyz_mm": [
+        9,
+        300,
+        1082
+      ],
+      "reverse_depth_axis": true,
+      "front_normal_sign": -1
+    },
+    "bottom": {
+      "sheet": 2,
+      "nominal_span_mm": [
+        882.0,
+        300.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999775184,
+        0.0004999999999313332,
+        882.0005,
+        300.0005
+      ],
+      "origin_xyz_mm": [
+        9,
+        0,
+        0
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "shelf_1": {
+      "sheet": 2,
+      "nominal_span_mm": [
+        882.0,
+        300.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999775184,
+        0.0004999999999881766,
+        882.0005,
+        300.0005
+      ],
+      "origin_xyz_mm": [
+        9,
+        0,
+        270.5
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "shelf_2": {
+      "sheet": 3,
+      "nominal_span_mm": [
+        882.0,
+        300.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999775184,
+        0.0005000000000059401,
+        882.0005,
+        300.0005
+      ],
+      "origin_xyz_mm": [
+        9,
+        0,
+        541
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    },
+    "shelf_3": {
+      "sheet": 3,
+      "nominal_span_mm": [
+        882.0,
+        300.0
+      ],
+      "measured_bounds_mm": [
+        0.0004999999999775184,
+        0.0004999999999313332,
+        882.0005,
+        300.0005
+      ],
+      "origin_xyz_mm": [
+        9,
+        0,
+        811.5
+      ],
+      "reverse_depth_axis": false,
+      "front_normal_sign": 1
+    }
+  },
+  "sample_depths": 612,
+  "collision_count": 0,
+  "clear_openings_mm": [
+    252.5,
+    252.5,
+    252.5,
+    252.5
+  ],
+  "groove_engagement_mm": {
+    "before": 0,
+    "after": 9
+  },
+  "sampling": {
+    "regular_y_mm": [
+      0.25,
+      299.75,
+      0.5
+    ],
+    "extra_y_mm": [
+      0.02,
+      0.1,
+      0.5,
+      1,
+      1.5875,
+      6.35,
+      293.65,
+      298.4125,
+      299,
+      299.5,
+      299.9,
+      299.98
+    ]
+  }
+}

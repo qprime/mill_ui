@@ -30,7 +30,4 @@ children:
       fixed_shelves: 3
       shelf_joinery: dado
       shelf_dado_depth: 9mm
-      vertical_partitions: 2
-      partition_joinery: dado
-      partition_dado_depth: 9mm
       show_labels: true

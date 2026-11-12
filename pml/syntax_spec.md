@@ -1463,6 +1463,18 @@ Grid of cubbies with perimeter and internal joinery:
 | toe_kick_style | no | open | Toe kick style: open, between_sides, over_sides |
 | toe_kick_cover | no | false | Add a cover panel for toe kick |
 
+A bookcase can be expressed as a carcass with `fixed_shelves`; `bookcase` is not
+a separate assembly type. The bookcase recipe demonstrates full-width shelves
+without vertical partitions. Use cubby for a grid of crossing dividers and
+shelves. Carcass `vertical_partitions` remains unsupported.
+
+Captured caps and shelves include their actual groove engagement in the blank
+span. Shelf levels divide the space between the actual cap faces into equal
+clear openings after allowing for shelf thickness. Captured cap receiving `a`
+requires `cap_style: between_sides`; receiving `b` requires `over_sides`.
+`shelf_dado_depth` and `partition_dado_depth` supply the groove-depth defaults;
+an explicit `dado_depth` in the corresponding joinery object takes precedence.
+
 **Cubby Parameters:**
 
 | Parameter | Required | Default | Description |

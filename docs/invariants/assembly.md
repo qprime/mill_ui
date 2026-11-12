@@ -29,6 +29,7 @@
 | AJ-19 | HARD | BOX_CAP_FIT | Box cap blanks reach their specified joints and account for exposed cap thickness without changing the declared outside dimensions. |
 | AJ-20 | HARD | CUBBY_ASSEMBLED_FIT | Cubby blanks and interface positions derive from common assembly spans; captured members engage their grooves, the declared outside envelope is preserved, and crossing half-laps open from opposite ends. |
 | AJ-21 | HARD | NOTCH_RELIEF_REFERENCE | Generated notch relief uses the cutout center as its directional reference, so its bores clear the mating corners. |
+| AJ-22 | HARD | CARCASS_CAP_AND_SHELF_FIT | Carcass cap and shelf spans include their groove engagement; cap exposure preserves the declared height, and shelf positions leave equal clear openings between actual cap faces. |
 
 ---
 
@@ -77,6 +78,27 @@ box primitive does not model; reject it rather than guessing a wall footprint.
 Explicitly supplied panel/interface assemblies retain that placement control.
 
 ---
+
+## Carcass Caps and Shelves
+
+The carcass factory uses the same cap-fit calculation as the box factory.
+Between-side Captured caps enter the side grooves; over-side Captured caps
+receive the sides and expose only stock thickness minus groove depth. Each cap
+is independent. Reject a receiving direction inconsistent with `cap_style`.
+Missing caps contribute no height projection. Finger caps span the outside
+width and interlock with full-height sides. Butt placement follows `cap_style`.
+
+Captured shelves enter grooves in the sides and span the inside width plus
+twice the groove depth, independently of cap width or placement. Subtract shelf
+thicknesses before dividing the interior into equal clear openings. Positions
+are relative to side-panel origins and account for cap insets, exposed cap
+thickness and a raised toe-kick bottom. Groove depth must fit receiving stock;
+panel spans and clear openings must stay positive.
+
+The bookcase recipe is a carcass with full-width fixed shelves and no vertical
+partitions. It is not a separate named assembly type. Nonzero carcass
+`vertical_partitions` remains explicitly unsupported; cubby supplies the
+continuous grid topology with HalfLap crossings.
 
 ## Cubby Assembled Fit
 

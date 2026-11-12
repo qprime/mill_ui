@@ -5,6 +5,12 @@
 .pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
 .hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
 .engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.bevel { stroke: #ffb454; fill: none; stroke-width: 1.5; }
+.chamfer { stroke: #8bd49c; fill: none; stroke-width: 1.5; stroke-dasharray: 6,2; }
+.roundover { stroke: #cba6f7; fill: none; stroke-width: 1.5; stroke-dasharray: 2,2; }
+.edge-unplanned { stroke: #ff6b6b; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.edge-label { fill: #e8e8e8; stroke: none; font-family: monospace; font-size: 8px; }
+.keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
 .waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
 .toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
 .dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
@@ -44,30 +50,30 @@
     <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 880.350 1203.650 L 880.350 903.650 L 16.350 903.650 L 16.350 1203.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_shelf_2_0_shelf_2_outer" />
-    <path d="M 880.350 893.650 L 880.350 593.650 L 16.350 593.650 L 16.350 893.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_shelf_3_1_shelf_3_outer" />
+    <path d="M 898.350 1203.650 L 898.350 903.650 L 16.350 903.650 L 16.350 1203.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_shelf_2_0_shelf_2_outer" />
+    <path d="M 898.350 893.650 L 898.350 593.650 L 16.350 593.650 L 16.350 893.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_shelf_3_1_shelf_3_outer" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 881.938 1205.237 L 881.938 902.062 L 14.763 902.062 L 14.763 1205.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_shelf_2_0_shelf_2_outer_toolpath" />
-    <path d="M 881.938 895.237 L 881.938 592.062 L 14.763 592.062 L 14.763 895.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_shelf_3_1_shelf_3_outer_toolpath" />
+    <path d="M 899.938 1205.237 L 899.938 902.062 L 14.763 902.062 L 14.763 1205.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_shelf_2_0_shelf_2_outer_toolpath" />
+    <path d="M 899.938 895.237 L 899.938 592.062 L 14.763 592.062 L 14.763 895.237 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_shelf_3_1_shelf_3_outer_toolpath" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="448.350" y="1053.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_shelf_2_0_shelf_2_outer_label">SHELF 2</text>
-    <text x="448.350" y="743.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_shelf_3_1_shelf_3_outer_label">SHELF 3</text>
+    <text x="457.350" y="1053.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_shelf_2_0_shelf_2_outer_label">SHELF 2</text>
+    <text x="457.350" y="743.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_shelf_3_1_shelf_3_outer_label">SHELF 3</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="16.350000000000023" y1="903.65" x2="16.350000000000023" y2="883.65" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="880.35" y1="903.65" x2="880.35" y2="883.65" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="16.350000000000023" y1="883.65" x2="880.35" y2="883.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="898.35" y1="903.65" x2="898.35" y2="883.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.350000000000023" y1="883.65" x2="898.35" y2="883.65" stroke="#5ab9ea" stroke-width="1" />
     <polygon points="16.350000000000023,883.65 19.350000000000023,880.65 19.350000000000023,886.65" fill="#5ab9ea" />
-    <polygon points="880.35,883.65 877.35,880.65 877.35,886.65" fill="#5ab9ea" />
-    <text x="448.35" y="878.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">864.0mm</text>
-    <line x1="880.35" y1="903.65" x2="900.35" y2="903.65" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="880.35" y1="1203.65" x2="900.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="900.35" y1="903.65" x2="900.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="900.35,903.65 897.35,906.65 903.35,906.65" fill="#5ab9ea" />
-    <polygon points="900.35,1203.65 897.35,1200.65 903.35,1200.65" fill="#5ab9ea" />
-    <text x="905.35" y="1053.65" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 905.35 1053.65)" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <polygon points="898.35,883.65 895.35,880.65 895.35,886.65" fill="#5ab9ea" />
+    <text x="457.35" y="878.65" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">882.0mm</text>
+    <line x1="898.35" y1="903.65" x2="918.35" y2="903.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="898.35" y1="1203.65" x2="918.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="918.35" y1="903.65" x2="918.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="918.35,903.65 915.35,906.65 921.35,906.65" fill="#5ab9ea" />
+    <polygon points="918.35,1203.65 915.35,1200.65 921.35,1200.65" fill="#5ab9ea" />
+    <text x="923.35" y="1053.65" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 923.35 1053.65)" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
     <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>

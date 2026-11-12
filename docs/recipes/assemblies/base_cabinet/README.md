@@ -8,6 +8,12 @@
 
 A 600mm frameless base cabinet with captured top, bottom and back, one fixed shelf, and a toe kick, split across 1220 × 1220 sheets.
 
+Captured caps and the shelf now include their side-groove engagement in their
+blank widths; the shelf level accounts for the raised toe-kick bottom. These
+shared carcass rules are illustrated in the [bookcase fit proof](../bookcase/carcass-shelf-fit-proof.svg).
+The cabinet's back placement and complete toe-kick assembly still require a
+separate fit audit; this recipe's passing gate does not establish that full fit.
+
 3 sheets.
 
 Sheet 1: 1220 × 1220 × 18mm mdf.
@@ -35,6 +41,7 @@ Sheet 3: 1220 × 1220 × 18mm mdf.
 ## Outputs
 
 - `base_cabinet_sheet_1.svg`
+- `base_cabinet_sheet_2.svg`
 - `base_cabinet_sheet_3.svg`
 - `machining_summary.json`
 - `manifest.json`

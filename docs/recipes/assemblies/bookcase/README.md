@@ -2,13 +2,39 @@
 
 ![Blueprint](output/bookcase_sheet_1.svg)
 
-**Demonstrates:** Carcass partitions and dadoed shelves.
+**Demonstrates:** A carcass with three full-width fixed shelves captured in side dados.
 
 ## What gets cut
 
-Blocked: carcass vertical partitions are not implemented. This recipe now fails explicitly. Its existing outputs omit both partitions and must not be used as a complete bookcase cut list.
+A 900 × 300 × 1100mm bookcase made with the `carcass` assembly: two sides,
+a top, a bottom and three full-width fixed shelves. This recipe has no vertical
+dividers and no back. It demonstrates how adding `fixed_shelves` turns a carcass
+into a bookcase; `bookcase` is not a separate named assembly type.
 
-A bookcase carcass with two vertical partitions and dadoed shelves.
+| Part | Blank size | Quantity |
+|------|------------|----------|
+| Sides | 300 × 1100mm | 2 |
+| Top / bottom / shelves | 882 × 300mm | 5 |
+
+All parts use 18mm stock. The horizontal boards enter 9mm-deep side grooves,
+leaving an inside width of 864mm. Shelf bottoms sit at 270.5, 541 and 811.5mm
+from the outside bottom, producing four equal 252.5mm-high clear openings.
+
+![Carcass with three full-width shelves and corrected groove engagement, reconstructed from emitted G-code](carcass-shelf-fit-proof.svg)
+
+The proof reconstructs retained material from actual profile, pocket and relief
+cutter sweeps. All seven blank spans match nominal dimensions within 0.004mm
+NC rounding tolerance; 612 depth slices show no part interference.
+[Measurements and NC hashes](carcass-shelf-fit-measurements.json) preserve the
+inputs and results. This is a computational check, not a physical assembly test.
+
+Earlier artifacts used 864mm horizontal boards that stopped at the side faces
+instead of entering their grooves. Their shelf spacing also omitted shelf
+thickness. The shared carcass fit calculations now account for both.
+
+Carcass vertical partitions remain unsupported and are rejected explicitly.
+The [cubby organizer](../cubby_organizer/) demonstrates crossing upright boards
+and shelves using HalfLap joints.
 
 3 sheets.
 

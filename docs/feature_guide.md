@@ -436,9 +436,9 @@ Spec: [pml/syntax_spec.md#joinery-types](../pml/syntax_spec.md#joinery-types)
 
 Recipes: [base_cabinet](recipes/assemblies/base_cabinet/), [bookcase](recipes/assemblies/bookcase/), [joinery_test_coupons](recipes/shop/joinery_test_coupons/)
 
-### Partitions and shelves
+### Fixed shelves
 
-Dividers and fixed shelves inside a carcass.
+Full-width fixed shelves inside a carcass.
 
 Spec: [pml/syntax_spec.md#carcass-assembly](../pml/syntax_spec.md#carcass-assembly)
 

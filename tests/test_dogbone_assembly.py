@@ -389,6 +389,43 @@ class TestDadoDogboneThroughPipeline:
 
 
 class TestNotchDogboneThroughPipeline:
+    def test_small_finger_box_has_full_size_sides_and_separate_notch_reliefs(self):
+        from pml.yaml_parser import parse_pml_yaml
+        from resolution.layout_resolver import resolve_layout
+        from validation import check_overlap
+
+        ast = resolve_layout(
+            parse_pml_yaml("""Sheet:
+  physical_width: 160mm
+  physical_height: 140mm
+  thickness: 18mm
+  margin: 10mm
+children:
+  - Assembly:
+      type: box
+      width: 55mm
+      depth: 50mm
+      height: 40mm
+      thickness: 18mm
+      joinery: finger
+      finger_width: 12mm
+      clearance: 0.2mm
+      layout_gap: 10mm
+      top: none
+      bottom: none
+""")
+        )
+        intents = ast_to_removal_intents(ast)
+        sides = [i for i in intents if i.hint_type == "profile" and "_side_" in i.region_id]
+        assert len(sides) == 2
+        for side in sides:
+            assert side.bounds.width == pytest.approx(50)
+            assert side.bounds.height == pytest.approx(40)
+        assert check_overlap(intents).is_valid()
+        planner_input = removal_intents_to_planner_input(intents)
+        assert len(planner_input.dogbones) == 12
+        assert all(d.depth_mm == 18 for d in planner_input.dogbones)
+
     @pytest.mark.parametrize("notch_depth", [6.0, 30.0, 144.0])
     def test_assembly_notch_dogbone_cuts_through_stock(self, notch_depth):
         from layout_ast.compositional import CompositionalLayoutAST

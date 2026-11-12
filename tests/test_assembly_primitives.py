@@ -1,3 +1,5 @@
+import pytest
+
 from assembly.core import InterfaceType
 from assembly.joinery import Butt, Captured, Finger, HalfLap
 from assembly.panel import Edge, PanelRole, PanelSpec
@@ -17,10 +19,40 @@ class TestBoxPrimitive:
         assert assembly.panels["front"].width_mm == 200
         assert assembly.panels["back"].width_mm == 200
 
-    def test_sides_have_reduced_width_for_joinery(self):
+    def test_finger_sides_span_the_full_box_depth(self):
         assembly = box(width=200, length=150, height=100, thickness=6)
-        assert assembly.panels["left_side"].width_mm == 150 - 2 * 6
-        assert assembly.panels["right_side"].width_mm == 150 - 2 * 6
+        assert assembly.panels["left_side"].width_mm == 150
+        assert assembly.panels["right_side"].width_mm == 150
+
+    @pytest.mark.parametrize("side_joinery", [Butt(), Captured()])
+    def test_nonfinger_sides_retain_their_existing_span(self, side_joinery):
+        assembly = box(width=200, length=150, height=100, thickness=6, side_joinery=side_joinery)
+        assert assembly.panels["left_side"].width_mm == 138
+        assert assembly.panels["right_side"].width_mm == 138
+
+    @pytest.mark.parametrize("thickness, depth", [(6, 50), (18, 50), (18, 150)])
+    def test_finger_box_side_outline_preserves_specified_dimensions(self, thickness, depth):
+        from shapely.geometry import Polygon
+        from shapely.geometry import box as region_box
+
+        from assembly.notches import build_notched_polygon
+
+        assembly = box(
+            width=55,
+            length=depth,
+            height=40,
+            thickness=thickness,
+            side_joinery=Finger(width_mm=12, clearance_mm=0.2),
+            top="none",
+            bottom="none",
+        )
+        for panel in assembly.resolve():
+            if panel.name not in ("left_side", "right_side"):
+                continue
+            outline = Polygon(build_notched_polygon(panel.width_mm, panel.height_mm, (0, 0), panel.notches))
+            assert outline.is_valid
+            assert outline.bounds == pytest.approx((-depth / 2, -20, depth / 2, 20))
+            assert outline.covers(region_box(-depth / 2, -1, depth / 2, 1))
 
     def test_all_panels_have_full_height(self):
         assembly = box(width=200, length=150, height=100, thickness=6)

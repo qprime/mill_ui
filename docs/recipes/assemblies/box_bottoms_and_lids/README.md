@@ -8,10 +8,15 @@
 
 Four small boxes that differ only in how the bottom and lid attach: captured, dado, finger, plug.
 
+All finger-jointed side profiles span the specified 100mm box depth. See the
+[coupon cutter-footprint proof](../../shop/joinery_test_coupons/finger-side-proof.svg).
+The two cap-relief overlap reports remain; cap fit and engagement dimensions
+still require the separate assembly audit.
+
 Sheet 1200 × 800 × 6mm mdf.
 
 - `pocket-3.17mm.nc`: pocket, 3.175mm tool, 24 feature(s), to 3mm
-- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 480 feature(s), to 6mm
+- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 496 feature(s), to 6mm
 - `profile-3.17mm.nc`: profile, 3.175mm tool, 24 feature(s), to 6.2mm
 
 ## Run

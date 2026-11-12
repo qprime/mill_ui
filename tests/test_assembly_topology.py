@@ -112,7 +112,7 @@ class TestBoxAssembly:
         assert front.edge_length(Edge.BOTTOM) == 200.0
         assert front.height_mm == 100
 
-        assert left.width_mm == 150 - 12
+        assert left.width_mm == 150
         assert left.height_mm == 100
 
         assert bottom.width_mm == 200 - 12

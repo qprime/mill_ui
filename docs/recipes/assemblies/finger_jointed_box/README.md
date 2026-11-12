@@ -8,6 +8,11 @@
 
 A small 6mm box with finger-jointed sides and a captured bottom, labelled and edge-coloured for assembly.
 
+The side profiles span the full specified 110mm box depth. The
+[coupon cutter-footprint proof](../../shop/joinery_test_coupons/finger-side-proof.svg)
+shows why finger-jointed sides must include the end fingers. Captured-bottom
+engagement dimensions remain under the assembly fit audit.
+
 Sheet 600 × 400 × 6mm mdf.
 
 - `pocket-3.17mm.nc`: pocket, 3.175mm tool, 4 feature(s), to 3mm

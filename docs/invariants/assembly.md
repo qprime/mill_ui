@@ -46,6 +46,13 @@
 - Count is always odd (ensures symmetric joint)
 - Width calculated from edge length and count
 
+Box side blanks joined to the front and back with Finger span the full declared
+box depth. Their end fingers occupy the front/back thickness; subtracting those
+thicknesses before cutting the fingers shortens the assembled box. The box
+primitive establishes these blank dimensions before the strategy creates
+notches. Resolution preserves the resulting PanelSpec dimensions. Other corner
+strategies retain their existing sizing rules.
+
 ---
 
 ## Toe-Kick Dado Positioning

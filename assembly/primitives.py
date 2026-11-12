@@ -24,6 +24,7 @@ def box(
         top = default_cap_joinery
     if bottom is None:
         bottom = default_cap_joinery
+    side_width = length if isinstance(side_joinery, Finger) else length - 2 * thickness
     front = PanelSpec(
         name="front",
         width_mm=width,
@@ -40,14 +41,14 @@ def box(
     )
     left = PanelSpec(
         name="left_side",
-        width_mm=length - 2 * thickness,
+        width_mm=side_width,
         height_mm=height,
         thickness_mm=thickness,
         role=PanelRole.LEFT,
     )
     right = PanelSpec(
         name="right_side",
-        width_mm=length - 2 * thickness,
+        width_mm=side_width,
         height_mm=height,
         thickness_mm=thickness,
         role=PanelRole.RIGHT,

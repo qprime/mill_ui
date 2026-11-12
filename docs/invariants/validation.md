@@ -85,6 +85,16 @@ Use actual Rect/Polygon geometry and leave missing-tool errors to the required
 edge planner. Nonzero starting surfaces, full-depth edges, modified boundaries,
 unproven containment and Bevel/RaisedPanel features retain existing checks.
 
+A circular hole may continue through a pocket floor when both features have
+constant depth, start at the original surface and the hole ends strictly below
+the floor. Its entire bounding envelope must lie inside the actual Rect/Polygon
+pocket region, with
+positive clearance from every wall, polygon hole and preserved island. Boundary
+modifiers, rest pocketing, missing polygon geometry and unsupported pocket shapes
+retain the existing checks. A pocket's fallback bounding box cannot establish
+containment. Hole depths remain measured from the original sheet surface;
+`through` resolves to the sheet thickness, not additional depth below the floor.
+
 ---
 
 ## Cross-Face Web (VL-8)

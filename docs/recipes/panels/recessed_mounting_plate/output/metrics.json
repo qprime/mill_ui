@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 3623,
+    "total_moves": 6575,
     "rapid_moves": 6,
-    "cut_moves": 3550,
-    "rapid_ratio": 0.002
+    "cut_moves": 6478,
+    "rapid_ratio": 0.001
   },
   "fidelity": {
     "tool_changes": 3,
@@ -17,7 +17,7 @@
       {
         "name": "bore",
         "tool_diameter_mm": 3.175,
-        "move_count": 3464
+        "move_count": 6416
       },
       {
         "name": "profile",
@@ -27,16 +27,16 @@
     ]
   },
   "output_size": {
-    "total_bytes": 113855,
-    "total_lines": 3643,
+    "total_bytes": 208855,
+    "total_lines": 6595,
     "files": {
       "pocket-12.70mm": {
         "bytes": 1837,
         "lines": 75
       },
       "bore-3.17mm": {
-        "bytes": 109481,
-        "lines": 3472
+        "bytes": 204481,
+        "lines": 6424
       },
       "profile-3.17mm": {
         "bytes": 2537,
@@ -44,12 +44,7 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: pocket_generated_pocket_1 and hole_hole_bl",
-    "Overlapping regions detected: pocket_generated_pocket_1 and hole_hole_br",
-    "Overlapping regions detected: pocket_generated_pocket_1 and hole_hole_tl",
-    "Overlapping regions detected: pocket_generated_pocket_1 and hole_hole_tr"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

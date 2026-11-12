@@ -397,6 +397,30 @@ def _pocket_long_axis(intent: RemovalIntent) -> tuple[float, float] | None:
     return None
 
 
+def _is_hole_through_pocket_floor(a: RemovalIntent, b: RemovalIntent) -> bool:
+    match = _match_feature_types(a, b, FeatureType.POCKET, FeatureType.HOLE)
+    if match is None:
+        return False
+    pocket, hole = match
+    if pocket.depth_profile.mode != "constant" or hole.depth_profile.mode != "constant":
+        return False
+    if hole.shape.lower() != "circle" or _has_boundary_modifiers(hole):
+        return False
+    if pocket.shape.lower() not in ("rect", "polygon"):
+        return False
+    if pocket.shape.lower() == "polygon" and not pocket.shape_geometry.points:
+        return False
+    if pocket.rest is not None or pocket.depth_profile.z_top != 0 or hole.depth_profile.z_top != 0:
+        return False
+    if hole.depth_profile.z_bottom >= pocket.depth_profile.z_bottom - _OVERLAP_CLEARANCE_TOLERANCE_MM:
+        return False
+    region = _pocket_overlap_region(pocket)
+    if region is None or region.is_empty:
+        return False
+    envelope = box(hole.bounds.x_min, hole.bounds.y_min, hole.bounds.x_max, hole.bounds.y_max)
+    return region.contains(envelope) and region.boundary.distance(envelope) > _OVERLAP_CLEARANCE_TOLERANCE_MM
+
+
 def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: float | None = None) -> ValidationResult:
     if engrave_tool_diameter_mm is not None and (
         not math.isfinite(engrave_tool_diameter_mm) or engrave_tool_diameter_mm <= 0
@@ -433,6 +457,8 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
                 if _is_nested_inside_profile(intent_a, intent_b):
                     continue
                 if _is_compatible_profile_edge(intent_a, intent_b):
+                    continue
+                if _is_hole_through_pocket_floor(intent_a, intent_b):
                     continue
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue

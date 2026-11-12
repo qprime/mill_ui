@@ -4,6 +4,7 @@ import pytest
 
 from adapters.hints_to_removal import (
     engrave_hint_to_removal_intent,
+    hole_hint_to_removal_intent,
     pocket_hint_to_removal_intent,
     profile_hint_to_removal_intent,
 )
@@ -39,6 +40,158 @@ def _make_intent(
         allowance=allowance or Allowance(inside=0.0, outside=0.0, on=0.0, kerf_compensation=0.0),
         constraints=constraints or Constraints(tabs=None, keepouts=(), islands=(), tolerance_mm=0.1, safe_z_mm=5.0),
     )
+
+
+def _floor_pocket() -> RemovalIntent:
+    return pocket_hint_to_removal_intent(
+        {
+            "id": "floor",
+            "shape": "Rect",
+            "center_xy_mm": [150, 150],
+            "geometry": {"w_mm": 100, "h_mm": 80},
+            "depth_mm": 3,
+        }
+    )
+
+
+def _floor_hole(center: tuple[float, float] = (150, 150), depth: float = 19) -> RemovalIntent:
+    return hole_hint_to_removal_intent(
+        {"id": "mount", "shape": "Circle", "center_xy_mm": center, "geometry": {"diameter_mm": 6}, "depth_mm": depth}
+    )
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_contained_hole_through_pocket_floor_is_a_compatible_cut(reverse):
+    pair = [_floor_pocket(), _floor_hole()]
+    assert check_overlap(list(reversed(pair)) if reverse else pair).is_valid()
+
+
+@pytest.mark.parametrize("depth, valid", [(2, False), (3, False), (10, True), (19, True)])
+def test_pocket_floor_hole_must_extend_below_the_floor(depth, valid):
+    assert check_overlap([_floor_pocket(), _floor_hole(depth=depth)]).is_valid() == valid
+
+
+@pytest.mark.parametrize("x, valid", [(198, False), (197, False), (196.9999999, False), (196.9, True)])
+def test_pocket_floor_hole_requires_clearance_from_pocket_walls(x, valid):
+    assert check_overlap([_floor_pocket(), _floor_hole(center=(x, 150))]).is_valid() == valid
+
+
+def test_floor_hole_must_avoid_a_preserved_island():
+    from dataclasses import replace
+
+    pocket = replace(_floor_pocket(), constraints=Constraints(islands=(Island(Bounds2D(140, 160, 140, 160)),)))
+    assert len(check_overlap([pocket, _floor_hole(center=(140, 150))]).errors) == 1
+
+
+@pytest.mark.parametrize("center, valid", [((140, 150), False), ((180, 150), True)])
+def test_floor_hole_must_avoid_polygon_holes(center, valid):
+    pocket = pocket_hint_to_removal_intent(
+        {
+            "id": "ring",
+            "shape": "Polygon",
+            "center_xy_mm": [150, 150],
+            "geometry": {
+                "points": [[-50, -40], [50, -40], [50, 40], [-50, 40]],
+                "holes": [[[-10, -10], [-10, 10], [10, 10], [10, -10]]],
+            },
+            "depth_mm": 3,
+        }
+    )
+    assert check_overlap([pocket, _floor_hole(center=center)]).is_valid() == valid
+
+
+@pytest.mark.parametrize("center, valid", [((80, 85), False), ((65, 120), True)])
+def test_floor_hole_containment_uses_a_concave_pockets_actual_region(center, valid):
+    pocket = pocket_hint_to_removal_intent(
+        {
+            "id": "concave",
+            "shape": "Polygon",
+            "center_xy_mm": [50, 50],
+            "geometry": {"points": [[0, 0], [100, 0], [100, 30], [30, 30], [30, 100], [0, 100]]},
+            "depth_mm": 3,
+        }
+    )
+    assert check_overlap([pocket, _floor_hole(center=center)]).is_valid() == valid
+
+
+def test_round_pocket_bounds_are_not_proof_of_floor_containment():
+    pocket = pocket_hint_to_removal_intent(
+        {"id": "round", "shape": "Circle", "center_xy_mm": [150, 150], "geometry": {"diameter_mm": 100}, "depth_mm": 3}
+    )
+    assert len(check_overlap([pocket, _floor_hole(center=(185, 185))]).errors) == 1
+
+
+@pytest.mark.parametrize("index", [0, 1])
+def test_pocket_floor_hole_with_nonzero_start_keeps_conservative_overlap_check(index):
+    from dataclasses import replace
+
+    pair = [_floor_pocket(), _floor_hole()]
+    pair[index] = replace(pair[index], depth_profile=DepthProfile.constant(-1, pair[index].depth_profile.z_bottom))
+    assert len(check_overlap(pair).errors) == 1
+
+
+@pytest.mark.parametrize("index", [0, 1])
+def test_pocket_floor_hole_with_varying_depth_keeps_conservative_overlap_check(index):
+    from dataclasses import replace
+
+    pair = [_floor_pocket(), _floor_hole()]
+    pair[index] = replace(
+        pair[index], depth_profile=DepthProfile.linear_gradient(0, pair[index].depth_profile.z_bottom, 0)
+    )
+    assert len(check_overlap(pair).errors) == 1
+
+
+@pytest.mark.parametrize("index", [0, 1])
+def test_modified_pocket_floor_hole_keeps_conservative_overlap_check(index):
+    from dataclasses import replace
+
+    from ir.removal_intent import EdgeTreatment
+
+    pair = [_floor_pocket(), _floor_hole()]
+    pair[index] = replace(
+        pair[index], constraints=Constraints(edge_treatment=EdgeTreatment(type="allowance", finish_allowance_mm=2))
+    )
+    assert len(check_overlap(pair).errors) == 1
+
+
+@pytest.mark.parametrize("shape", ["Polygon", "unknown"])
+def test_pocket_floor_containment_requires_supported_geometry(shape):
+    from dataclasses import replace
+
+    pocket = replace(_floor_pocket(), shape=shape)
+    assert len(check_overlap([pocket, _floor_hole()]).errors) == 1
+
+
+@pytest.mark.parametrize("thickness", [19, 25])
+def test_through_hole_in_a_pocket_uses_the_sheet_thickness(thickness):
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from pml.yaml_parser import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout
+
+    ast = resolve_layout(
+        parse_pml_yaml(f"""Sheet:
+  working_width: 200mm
+  working_height: 160mm
+  thickness: {thickness}mm
+children:
+  - Pocket:
+      depth: 3mm
+  - Circle:
+      id: mount
+      diameter: 6mm
+      at:
+        x: 100mm
+        y: 80mm
+      feature:
+        type: hole
+        depth: through
+""")
+    )
+    intents = ast_to_removal_intents(ast)
+    assert len(intents) == 2
+    hole = next(i for i in intents if i.hint_type == "hole")
+    assert hole.depth_profile.z_bottom == -thickness
+    assert check_overlap(intents).is_valid()
 
 
 def test_validation_result_basic():

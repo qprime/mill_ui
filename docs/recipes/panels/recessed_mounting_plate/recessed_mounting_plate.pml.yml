@@ -16,7 +16,7 @@ children:
             distance: 25mm
             children:
               - Pocket: {depth: 3mm}
-              - Circle: {id: hole_bl, diameter: 6mm, at: {x: 90mm, y: 90mm}, feature: {type: hole, depth: 10mm}}
-              - Circle: {id: hole_br, diameter: 6mm, at: {x: 210mm, y: 90mm}, feature: {type: hole, depth: 10mm}}
-              - Circle: {id: hole_tl, diameter: 6mm, at: {x: 90mm, y: 160mm}, feature: {type: hole, depth: 10mm}}
-              - Circle: {id: hole_tr, diameter: 6mm, at: {x: 210mm, y: 160mm}, feature: {type: hole, depth: 10mm}}
+              - Circle: {id: hole_bl, diameter: 6mm, at: {x: 90mm, y: 90mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_br, diameter: 6mm, at: {x: 210mm, y: 90mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_tl, diameter: 6mm, at: {x: 90mm, y: 160mm}, feature: {type: hole, depth: through}}
+              - Circle: {id: hole_tr, diameter: 6mm, at: {x: 210mm, y: 160mm}, feature: {type: hole, depth: through}}

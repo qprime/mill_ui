@@ -27,10 +27,10 @@
       "feed_xy_mm_min": 1080.0,
       "feed_z_mm_min": 356.4,
       "stepdown_mm": 1.5,
-      "max_depth_mm": 10.0,
+      "max_depth_mm": 19.0,
       "feature_count": 4,
       "strategy": "helical_bore",
-      "estimated_runtime_min": 0.7
+      "estimated_runtime_min": 1.1
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -47,7 +47,7 @@
       "estimated_runtime_min": 9.2
     }
   ],
-  "total_runtime_min": 12.7,
+  "total_runtime_min": 13.1,
   "feature_counts": {
     "hole": 4,
     "pocket": 1,

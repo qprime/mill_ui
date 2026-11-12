@@ -304,6 +304,14 @@ python -m cli.mill --recipe docs/recipes/doors/shaker_door
 - `--project`: User workspace for real manufacturing (looks in `$MILL_UI_PROJECTS`)
 - `--recipe`: Recipe directory for examples/documentation (outputs to `{recipe}/output/`)
 
+Recipes should demonstrate production PML layouts. Preserve the declared sheet
+size and place parts toward the working area's lower-left corner with clearance
+for the full selected cutter sweep. Extra space for a fixture or machining
+operation should have an explicit purpose. Distinguish the sheet margin (a
+no-cut zone) from unused working stock in review visuals. Move related features
+together in the front authoring frame; back setups retain the registered
+whole-sheet mirror. Do not shrink sheets solely to improve presentation.
+
 **Options:**
 - `--kerf 6.35` — Tool kerf in mm (default: 6.35 for projects, 3.175 for recipes)
 - `--theme dark` — Blueprint theme (dark/light/print)

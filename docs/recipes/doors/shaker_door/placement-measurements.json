@@ -1,0 +1,88 @@
+{
+  "baseline_commit": "cf2191ae09346364b579f3ced365338d438813cc",
+  "source": "docs/recipes/doors/shaker_door/shaker_door.pml.yml",
+  "source_sha256": "317ce852dab12544552fb8a8d075cb21c11c2713a76452a7c44ac4c1c9fc9888",
+  "sheet_mm": [
+    500,
+    700,
+    19
+  ],
+  "margin_mm": 10,
+  "part_edge_from_sheet_mm": [
+    13.2,
+    13.2
+  ],
+  "translation_authored_mm": [
+    -36.8,
+    -36.8
+  ],
+  "programs": {
+    "pocket-12.70mm.nc": {
+      "legacy_sha256": "64011ac6096d2679905f197a5a56affd5f5e6b5da7debe9e0314535e0e466d7c",
+      "sha256": "8104289fae537f72ef39c04a680d8c73c37f9582fdc9e67cdf69d1465e4d730f",
+      "move_count": 300,
+      "translation_physical_mm": [
+        -36.8,
+        -36.8
+      ],
+      "max_translation_rounding_error_mm": 7.105427357601002e-14,
+      "all_non_xy_words_unchanged": true,
+      "cutting_tool_envelope_bounds_mm": [
+        63.199999999999996,
+        63.199999999999996,
+        363.20000000000005,
+        563.2
+      ],
+      "maximum_depth_mm": 6.0
+    },
+    "profile-3.17mm.nc": {
+      "legacy_sha256": "f742fbb28866c8d7c780976b15d9741af6122a9b90176b494337074f0d951145",
+      "sha256": "9da75ac5cae2d16b818c65c08a87780aa58dc46ffb25ec605c6930d5ea43578b",
+      "move_count": 168,
+      "translation_physical_mm": [
+        -36.8,
+        -36.8
+      ],
+      "max_translation_rounding_error_mm": 0.0010000000000189857,
+      "all_non_xy_words_unchanged": true,
+      "cutting_tool_envelope_bounds_mm": [
+        10.0245,
+        10.0255,
+        416.3755,
+        616.3755
+      ],
+      "maximum_depth_mm": 19.2
+    }
+  },
+  "intent_status": "Placement accepted by owner. Door construction and machining design still awaiting owner review.",
+  "pocket": {
+    "actual_swept_bounds_mm": [
+      63.2,
+      63.2,
+      363.2,
+      563.2
+    ],
+    "depth_mm": 6,
+    "remaining_thickness_mm": 13,
+    "nominal_inside_corner_radius_mm": 6.35,
+    "measured_xy_span_mm": [
+      300.0,
+      500.00000000000006
+    ]
+  },
+  "measured_blank_span_mm": [
+    400.001,
+    600.0
+  ],
+  "tabs": {
+    "count": 4,
+    "height_mm": 3,
+    "axis_spans_mm": [
+      6.350000000000023,
+      6.350000000000023,
+      6.349999999999994,
+      6.350000000000023
+    ]
+  },
+  "scope": "Actual NC coordinate translation, cutter-radius envelopes, profile/pocket spans, tab lifts and cup XY extents/depths. Pocket inside corners retain the flat cutter radius; cup helices are tessellated. This is computational evidence, not a physical cut test or approval of the door design."
+}

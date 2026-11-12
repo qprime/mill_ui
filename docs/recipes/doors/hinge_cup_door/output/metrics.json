@@ -33,7 +33,7 @@
     ]
   },
   "output_size": {
-    "total_bytes": 114981,
+    "total_bytes": 114921,
     "total_lines": 3715,
     "files": {
       "back-bore-25.40mm": {
@@ -41,7 +41,7 @@
         "lines": 3220
       },
       "pocket-12.70mm": {
-        "bytes": 8801,
+        "bytes": 8741,
         "lines": 314
       },
       "profile-3.17mm": {

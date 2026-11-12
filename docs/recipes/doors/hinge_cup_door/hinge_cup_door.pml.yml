@@ -13,8 +13,8 @@ children:
       id: door
       label: Shaker Door
       at:
-        x: 240mm
-        y: 340mm
+        x: 203.2mm
+        y: 303.2mm
         width: 400mm
         height: 600mm
       children:
@@ -32,7 +32,7 @@ children:
       id: hinge_cup_bottom
       label: Hinge Cup
       diameter: 35mm
-      at: {x: 62.5mm, y: 140mm}
+      at: {x: 25.7mm, y: 103.2mm}
       feature:
         type: hole
         depth: 13mm
@@ -41,7 +41,7 @@ children:
       id: hinge_cup_top
       label: Hinge Cup
       diameter: 35mm
-      at: {x: 62.5mm, y: 540mm}
+      at: {x: 25.7mm, y: 503.2mm}
       feature:
         type: hole
         depth: 13mm

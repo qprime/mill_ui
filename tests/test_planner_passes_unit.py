@@ -1632,6 +1632,29 @@ class TestPickToolForRoundover:
 
 
 class TestPlanRoundoverPasses:
+    @pytest.mark.parametrize(
+        "tool_changes, message",
+        [
+            ({"roundover_radius_mm": 6.35}, "requires 6"),
+            ({"diameter": 11}, "cannot contain radius"),
+            ({"diameter": float("nan")}, "cannot contain radius"),
+        ],
+    )
+    def test_selected_roundover_must_reproduce_the_requested_profile(self, tool_changes, message):
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 6, RoundoverSpec(radius_mm=6))
+        tool = replace(TOOLS_WITH_ROUNDOVER[-1], **tool_changes)
+        with pytest.raises(ValueError, match=message):
+            build_edge_cut_plan(entry, [tool])
+
+    @pytest.mark.parametrize("diameter, expected_offset", [(12, 0), (18, 3), (25.4, 6.7)])
+    @pytest.mark.parametrize("side, sign", [("outside", 1), ("inside", -1)])
+    def test_contour_offset_uses_the_tool_nose_radius(self, diameter, expected_offset, side, sign):
+        entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 6, RoundoverSpec(radius_mm=6), side=side)
+        tool = replace(TOOLS_WITH_ROUNDOVER[-1], diameter=diameter)
+        plan = build_edge_cut_plan(entry, [tool])
+        assert plan.shape.bounds().x_max == pytest.approx(125 + sign * expected_offset)
+        assert plan.depth_mm == 6
+
     def test_roundover_produces_edge_record(self):
         acc = _accumulator()
         entries = (

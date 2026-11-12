@@ -130,6 +130,13 @@ feeds:
     depth_per_pass: 1.0
     plunge_factor: 0.25
 
+  - endmill: "Example 6mm point roundover"
+    material: mdf
+    chipload: 0.02
+    rpm: 18000
+    depth_per_pass: 1.0
+    plunge_factor: 0.25
+
   # --- plywood ---
 
   - endmill: "1/4 upcut spiral"

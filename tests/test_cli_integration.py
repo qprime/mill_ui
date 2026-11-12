@@ -226,14 +226,14 @@ def test_missing_roundover_tool_exits_3_and_replaces_old_gcode_with_diagnostics(
     args = ["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)]
     _run_cli(args)
     assert list(out_dir.glob("*.nc"))
-    source.write_text(SIMPLE_PROFILE_PML + "    children:\n    - Roundover: {radius: 6mm}\n")
+    source.write_text(SIMPLE_PROFILE_PML + "    children:\n    - Roundover: {radius: 10mm}\n")
 
     result = _run_cli(args, check=False)
 
     assert result.returncode == 3, result.stderr
     metrics = json.loads((out_dir / "metrics.json").read_text())
     error = next(error for error in metrics["errors"] if "no roundover bit" in error)
-    assert "6.0mm radius" in error and "roundover" in error
+    assert "10.0mm radius" in error and "roundover" in error
     assert error in result.stderr
     assert metrics["output_size"]["files"] == {}
     assert not list(out_dir.glob("*.nc"))

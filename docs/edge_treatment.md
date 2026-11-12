@@ -177,14 +177,34 @@ Implemented in `cam/planner/passes/edge.py`: `vbit_cut_depth()` and `vbit_effect
 
 ## Roundover Bit Geometry
 
-A CNC roundover bit (no bearing) has a concave quarter-circle cutting profile. For a bit with cutting radius `R`:
+A simple bearingless roundover has a concave quarter-circle cutting profile.
+For rounding radius `R` and full cutting diameter `D`:
 
 | Parameter | Value |
 |-----------|-------|
 | Cut depth | `R` |
-| Toolpath offset from boundary | `R` (positive for outside, negative for inside) |
+| Nose radius | `D/2 - R`, nonnegative |
+| Toolpath offset from boundary | Nose radius (positive for outside, negative for inside) |
 
-Implemented in `cam/planner/passes/edge.py`: `_plan_roundover_pass()`.
+Implemented by `build_edge_cut_plan()` and `_roundover_cut_parameters()` in
+`cam/planner/passes/edge.py`. A point-cutting bit (`D = 2R`) follows the nominal
+edge. A nearby tool radius is not equivalent: the selected rounding radius must
+match within 0.001mm. Invalid radius/diameter geometry is a planning error.
+The simple model does not describe bearing hardware or a nose extending below
+the modeled quarter-circle; those cutters need explicit geometry support.
+
+The distinction between large diameter, small diameter and profile radius is
+also explicit in the [Whiteside plunge-roundover dimensions](https://www.whitesiderouterbits.com/products/2052).
+The axis-offset relationship here is derived from that quarter-circle geometry;
+it does not treat the rounding radius as the nose radius.
+
+`config/machine_loader.py` preserves `type: roundover` and
+`roundover_radius_mm` from `machines/endmills.yml` into the planner tool model.
+The radius is required for roundover tools and forbidden for other types. A
+matching material entry in `machines/feeds.yml` supplies ordinary feeds/stepdown.
+`Example 6mm point roundover` is an owner-authorized demonstration tool, not
+verified shop inventory or manufacturer-recommended feeds. It models `R=6mm`,
+`D=12mm`, no nose extension/bearing, and a zero axis offset.
 
 ---
 

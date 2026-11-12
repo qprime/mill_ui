@@ -532,6 +532,21 @@ Rounded (fillet) edge using a roundover bit:
     radius: 6mm
 ```
 
+The selected bearingless quarter-circle tool must match the specified radius
+within 0.001mm. The axis offset is its nose radius,
+`cutting_diameter / 2 - roundover_radius`, with the sign chosen for the retained
+side. A point cutter whose diameter is twice the rounding radius follows the
+nominal edge. The deepest pass reaches the rounding radius below the surface.
+An impossible diameter or mismatched tool radius errors instead of cutting an
+approximation.
+
+The machine-library entry uses `type: roundover` and `roundover_radius_mm`, plus
+the normal cutting diameter, flute/shank dimensions and material feeds. The
+checked-in `Example 6mm point roundover` is an owner-authorized recipe tool with
+12mm cutting diameter and example MDF feeds; its presence is not a claim of
+shop ownership. Bearing-guided or extended-nose tools are outside this simple
+geometry model.
+
 #### SplitGrid
 
 Divide region into grid, apply children to all cells:

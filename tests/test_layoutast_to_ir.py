@@ -536,7 +536,7 @@ def test_beam_labels_on_items():
     [
         ("chamfer", {"chamfer_width_mm": 2.0, "chamfer_angle_deg": 45.0}, 2.0, 85),
         ("bevel", {"bevel_width_mm": 2.0, "bevel_angle_deg": 45.0, "bevel_inner_depth_mm": 1.0}, 2.0, 83),
-        ("roundover", {"roundover_radius_mm": 6.0}, 6.0, 79),
+        ("roundover", {"roundover_radius_mm": 6.0}, 6.0, 78.3),
     ],
 )
 def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, depth, left_x):

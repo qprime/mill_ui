@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -183,6 +184,7 @@ class Endmill:
     flutes: int
     type: str
     v_angle_deg: float | None = None
+    roundover_radius_mm: float | None = None
 
     def __post_init__(self):
         if self.diameter_mm <= 0:
@@ -191,6 +193,16 @@ class Endmill:
             raise ValueError(f"Endmill flute_length must be positive, got {self.flute_length_mm}")
         if self.flutes <= 0:
             raise ValueError(f"Endmill flutes must be positive, got {self.flutes}")
+        radius = self.roundover_radius_mm
+        if self.type == "roundover":
+            if radius is None or not math.isfinite(radius) or radius <= 0:
+                raise ValueError(f"Roundover endmill '{self.name}' requires a finite positive roundover_radius_mm")
+            if not math.isfinite(self.diameter_mm) or 2 * radius > self.diameter_mm:
+                raise ValueError(
+                    f"Roundover endmill '{self.name}': radius {radius}mm exceeds half the cutting diameter {self.diameter_mm}mm"
+                )
+        elif radius is not None:
+            raise ValueError(f"Endmill '{self.name}': roundover_radius_mm requires type roundover, got {self.type}")
 
     @property
     def radius_mm(self) -> float:
@@ -239,6 +251,7 @@ _ENDMILL_TYPE_TO_KIND: dict[str, str] = {
     "v_bit": "v",
     "ball": "ball",
     "engraving": "ball",
+    "roundover": "roundover",
 }
 
 _ENDMILL_TYPE_TO_ROTATION: dict[str, str | None] = {
@@ -249,6 +262,7 @@ _ENDMILL_TYPE_TO_ROTATION: dict[str, str | None] = {
     "v_bit": None,
     "ball": None,
     "engraving": None,
+    "roundover": None,
 }
 
 
@@ -272,6 +286,8 @@ def resolve_tool_selection(endmill: Endmill, feeds: FeedsEntry) -> dict[str, Any
         result["stepover_percent"] = feeds.stepover_percent
     if endmill.v_angle_deg is not None:
         result["v_angle_deg"] = endmill.v_angle_deg
+    if endmill.roundover_radius_mm is not None:
+        result["roundover_radius_mm"] = endmill.roundover_radius_mm
     return result
 
 
@@ -395,6 +411,7 @@ def load_endmills(path: Path | str) -> list[Endmill]:
             flutes=int(item.get("flutes", 1)),
             type=item.get("type", "unknown"),
             v_angle_deg=float(item["v_angle_deg"]) if "v_angle_deg" in item else None,
+            roundover_radius_mm=float(item["roundover_radius_mm"]) if "roundover_radius_mm" in item else None,
         )
         endmills.append(endmill)
 

@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from cam.pipeline import run_pipeline
-from cam.planner.passes.tools import ToolSelection, apply_feeds_override
+from cam.planner.passes.tools import (
+    ToolSelection,
+    apply_feeds_override,
+    normalize_tool_entries,
+    pick_tool_for_roundover,
+)
 from config.machine_loader import (
     Endmill,
     FeedsEntry,
@@ -22,7 +27,9 @@ from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
-def _endmill(name="1/4 upcut spiral", diameter=6.35, flutes=2, type_="upcut_spiral", v_angle=None):
+def _endmill(
+    name="1/4 upcut spiral", diameter=6.35, flutes=2, type_="upcut_spiral", v_angle=None, roundover_radius=None
+):
     return Endmill(
         name=name,
         diameter_mm=diameter,
@@ -31,6 +38,7 @@ def _endmill(name="1/4 upcut spiral", diameter=6.35, flutes=2, type_="upcut_spir
         flutes=flutes,
         type=type_,
         v_angle_deg=v_angle,
+        roundover_radius_mm=roundover_radius,
     )
 
 
@@ -177,6 +185,39 @@ class TestBuildToolDb:
         feeds = load_feeds("machines/feeds.yml")
         result = build_tool_db(endmills, feeds, "plywood")
         assert len(result) == 6
+
+
+class TestLoadEndmills:
+    def test_roundover_library_preserves_kind_and_radius_for_tool_selection(self, tmp_path):
+        yml = tmp_path / "endmills.yml"
+        yml.write_text(
+            textwrap.dedent("""\
+            endmills:
+              - name: test roundover
+                diameter_mm: 24
+                flute_length_mm: 12
+                shank_diameter_mm: 6.35
+                flutes: 2
+                type: roundover
+                roundover_radius_mm: 6
+        """)
+        )
+        tools = build_tool_db(load_endmills(yml), [_feeds_entry(endmill="test roundover")], "mdf")
+        assert tools[0]["kind"] == "roundover"
+        assert tools[0]["roundover_radius_mm"] == 6
+        selected = pick_tool_for_roundover(normalize_tool_entries(tools), radius_mm=6)
+        assert selected.name == "test roundover"
+        assert selected.roundover_radius_mm == 6
+        assert selected.as_model().roundover_radius_mm == 6
+
+    @pytest.mark.parametrize("radius", [None, 0, -1, float("nan"), float("inf"), 13])
+    def test_roundover_requires_a_valid_radius_that_fits_the_cutter(self, radius):
+        with pytest.raises(ValueError, match=r"[Rr]oundover"):
+            _endmill(type_="roundover", diameter=24, roundover_radius=radius)
+
+    def test_roundover_radius_cannot_be_ignored_on_another_tool_type(self):
+        with pytest.raises(ValueError, match="requires type roundover"):
+            _endmill(type_="straight", diameter=24, roundover_radius=6)
 
 
 class TestLoadFeeds:

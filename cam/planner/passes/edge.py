@@ -27,7 +27,7 @@ from .tools import ToolSelection, pick_tool_for_edge, pick_tool_for_roundover, s
 if TYPE_CHECKING:
     from cam.planner.passes import PassAccumulator
 
-_CHAMFER_DIMENSION_TOLERANCE_MM = 1e-3
+_EDGE_DIMENSION_TOLERANCE_MM = 1e-3
 _RAISED_PANEL_ARC_TOLERANCE_MM = 5e-4
 
 
@@ -94,12 +94,12 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
             radius = tool.diameter / 2
             if not math.isfinite(radius) or radius <= 0:
                 raise ValueError(f"Edge feature '{entry.id}': invalid cutter radius {radius}mm")
-            if spec.width_mm > radius + _CHAMFER_DIMENSION_TOLERANCE_MM:
+            if spec.width_mm > radius + _EDGE_DIMENSION_TOLERANCE_MM:
                 raise ValueError(
                     f"Edge feature '{entry.id}': chamfer width {spec.width_mm}mm exceeds cutter radius {radius}mm"
                 )
             if not math.isclose(
-                vbit_effective_radius(depth, angle), spec.width_mm, rel_tol=0, abs_tol=_CHAMFER_DIMENSION_TOLERANCE_MM
+                vbit_effective_radius(depth, angle), spec.width_mm, rel_tol=0, abs_tol=_EDGE_DIMENSION_TOLERANCE_MM
             ):
                 raise ValueError(
                     f"Edge feature '{entry.id}': V-bit '{tool.name}' ({angle}°) cannot cut requested chamfer "
@@ -109,13 +109,7 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
         else:
             offset = vbit_effective_radius(depth, angle)
     elif isinstance(spec, RoundoverSpec):
-        try:
-            tool = pick_tool_for_roundover(tool_db, radius_mm=spec.radius_mm)
-        except ValueError as exc:
-            raise ValueError(
-                f"Edge feature '{entry.id}': no roundover bit with {spec.radius_mm}mm radius available"
-            ) from exc
-        depth = offset = spec.radius_mm
+        tool, depth, offset = _roundover_cut_parameters(entry.id, spec, tool_db)
     else:
         raise ValueError(f"Edge feature '{entry.id}': unknown spec type '{type(spec).__name__}'")
     if (entry.side or "outside").lower() == "inside":
@@ -124,6 +118,31 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
     if shape is None:
         raise ValueError(f"Edge feature '{entry.id}': unsupported shape '{entry.shape}'")
     return EdgeCutPlan(shape, tool, depth + entry.start_depth_mm)
+
+
+def _roundover_cut_parameters(
+    feature_id: str, spec: RoundoverSpec, tool_db: Sequence[ToolSelection]
+) -> tuple[ToolSelection, float, float]:
+    radius = spec.radius_mm
+    if not math.isfinite(radius) or radius <= 0:
+        raise ValueError(f"Edge feature '{feature_id}': roundover radius must be finite and positive, got {radius}")
+    try:
+        tool = pick_tool_for_roundover(tool_db, radius_mm=radius)
+    except ValueError as exc:
+        raise ValueError(f"Edge feature '{feature_id}': no roundover bit with {radius}mm radius available") from exc
+    selected_radius = tool.roundover_radius_mm
+    if selected_radius is None or not math.isclose(
+        selected_radius, radius, rel_tol=0, abs_tol=_EDGE_DIMENSION_TOLERANCE_MM
+    ):
+        raise ValueError(
+            f"Edge feature '{feature_id}': roundover bit '{tool.name}' has radius {selected_radius}mm; requires {radius}mm"
+        )
+    nose_radius = tool.diameter / 2 - selected_radius
+    if not math.isfinite(nose_radius) or nose_radius < 0:
+        raise ValueError(
+            f"Edge feature '{feature_id}': roundover diameter {tool.diameter}mm cannot contain radius {selected_radius}mm"
+        )
+    return tool, radius, nose_radius
 
 
 def plan_edge_feature_passes(

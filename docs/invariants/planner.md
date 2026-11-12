@@ -77,8 +77,10 @@ setup. The CLI exits 3. The normal clean-output workflow removes stale programs.
 An explicit `--no-clean` preserves existing files and does not certify them as
 current build outputs; consumers must use the current metrics and output list.
 
-Tool-library entries must describe available shop tools. Do not invent a tool or
-substitute another machining strategy to make a failing recipe appear successful.
+Tool-library entries may include explicitly identified recipe example tools when
+the owner authorizes them. These describe modeled geometry and example feeds,
+not verified shop inventory. Do not silently invent availability or substitute
+another machining strategy to make a failing recipe appear successful.
 The tool selectors retain nearest-angle/radius lookup. A selected tool must also
 be able to produce the requested geometry; selection and planning failures must
 be surfaced rather than warned away.
@@ -90,6 +92,22 @@ bit must reproduce the requested width within 0.001mm output precision and its
 cutting radius must accommodate that width. Do not silently substitute a
 different bevel slope or cut wider than the available cutter. Bevel and roundover
 strategies retain their separate behavior.
+
+Roundovers use a simple bearingless quarter-circle cutter model. For profile
+radius `R` and full cutting diameter `D`, the nose radius is `D/2 - R` and must
+be nonnegative. The axis follows that nose-radius offset from the nominal
+boundary, outward for an outside edge and inward for an opening. Point cutters
+with `D = 2R` follow the nominal boundary. Depth is `R` below the starting surface.
+Do not use `R` itself as the lateral offset or silently accept a nearby rounding
+radius. Selected tool radius must match within 0.001mm; invalid dimensions and
+radius mismatch are required-planning errors. Bearing-guided and extended-nose
+cutters require an appropriate geometry model before use.
+
+The YAML machine library preserves `type: roundover` and
+`roundover_radius_mm` through `Endmill`, resolved tool dictionaries,
+`ToolSelection`, and `Tool`. A roundover requires a finite positive radius that
+fits its diameter; another type must not carry a silently ignored roundover
+radius. Material-specific feeds remain required for inclusion in a tool DB.
 
 ### Raised-panel profiles
 

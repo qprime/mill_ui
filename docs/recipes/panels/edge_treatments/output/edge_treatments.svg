@@ -59,9 +59,9 @@
     <path d="M 45.000 350.000 L 285.000 350.000 L 285.000 50.000 L 45.000 50.000 L 45.000 350.000 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
     <text x="165.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_1_edge_depth">Chamfer 6.000mm</text>
   </g>
-  <g id="UNPLANNED_EDGES" class="unplanned-edges">
-    <path d="M 330.000 350.000 L 570.000 350.000 L 570.000 50.000 L 330.000 50.000 Z" stroke="#ff6b6b" fill="none" stroke-width="1.5" stroke-dasharray="4,2" id="generated_roundover_3" />
-    <text x="450.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover unplanned</text>
+  <g id="ROUNDOVER_CUTS" class="roundover-cuts">
+    <path d="M 330.000 350.000 L 570.000 350.000 L 570.000 50.000 L 330.000 50.000 L 330.000 350.000 Z" stroke="#cba6f7" fill="none" stroke-width="1.5" stroke-dasharray="2,2" id="generated_roundover_3_edge_cut" />
+    <text x="450.000" y="200.000" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover 6.000mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="45.0" y1="50.0" x2="45.0" y2="30.0" stroke="#5ab9ea" stroke-width="1" />
@@ -89,8 +89,8 @@
     <text x="929.5874999999999" y="-0.5874999999999986" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
     <line x1="909.5874999999999" y1="12.412500000000001" x2="924.5874999999999" y2="12.412500000000001" stroke="#8bd49c" stroke-width="1.5" stroke-dasharray="6,2" />
     <text x="929.5874999999999" y="15.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Chamfer Centerline</text>
-    <line x1="909.5874999999999" y1="28.4125" x2="924.5874999999999" y2="28.4125" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="4,2" />
-    <text x="929.5874999999999" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Unplanned Edge</text>
+    <line x1="909.5874999999999" y1="28.4125" x2="924.5874999999999" y2="28.4125" stroke="#cba6f7" stroke-width="1.5" stroke-dasharray="2,2" />
+    <text x="929.5874999999999" y="31.4125" fill="#cccccc" font-family="monospace" font-size="10px">Roundover Centerline</text>
     <line x1="909.5874999999999" y1="44.4125" x2="924.5874999999999" y2="44.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
     <text x="929.5874999999999" y="47.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
     <line x1="909.5874999999999" y1="60.4125" x2="924.5874999999999" y2="60.4125" stroke="#5ab9ea" stroke-width="1" />
@@ -102,7 +102,7 @@
     <text x="20.0" y="445.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 1 chamfer, 3 profiles, 1 roundover</text>
     <text x="20.0" y="457.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
     <text x="30.0" y="469.5875" fill="#cccccc" font-family="monospace" font-size="10px">• chamfer: 6.000mm</text>
-    <text x="30.0" y="481.5875" fill="#cccccc" font-family="monospace" font-size="10px">• roundover: 6.000mm (unplanned)</text>
+    <text x="30.0" y="481.5875" fill="#cccccc" font-family="monospace" font-size="10px">• roundover: 6.000mm</text>
     <text x="20.0" y="493.5875" fill="#cccccc" font-family="monospace" font-size="10px">Edge Allowances:</text>
     <text x="30.0" y="505.5875" fill="#cccccc" font-family="monospace" font-size="10px">• Rough: 1.00mm, Finish: 0.20mm</text>
   </g>

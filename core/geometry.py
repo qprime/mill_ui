@@ -270,18 +270,30 @@ def extract_polygon_points(
     return None
 
 
+def polygon_region(geometry: ShapeGeometry, center_xy_mm: tuple[float, float]) -> BaseGeometry | None:
+    from shapely.geometry import Polygon
+
+    if not geometry.points:
+        return None
+    cx, cy = center_xy_mm
+    shell = [(float(x) + cx, float(y) + cy) for x, y in geometry.points]
+    holes = [[(float(x) + cx, float(y) + cy) for x, y in hole] for hole in geometry.holes or ()]
+    return Polygon(shell, holes)
+
+
 def pocket_region(
     shape: str, geometry: ShapeGeometry, center_xy_mm: tuple[float, float], islands: Sequence[Bounds2D] = ()
 ) -> BaseGeometry | None:
-    from shapely.geometry import Polygon, box
+    from shapely.geometry import box
     from shapely.ops import unary_union
 
     cx, cy = center_xy_mm
     base: BaseGeometry
-    if shape.lower() == "polygon" and geometry.points:
-        shell = [(float(x) + cx, float(y) + cy) for x, y in geometry.points]
-        holes = [[(float(x) + cx, float(y) + cy) for x, y in hole] for hole in geometry.holes or ()]
-        base = Polygon(shell, holes)
+    if shape.lower() == "polygon":
+        region = polygon_region(geometry, center_xy_mm)
+        if region is None:
+            return None
+        base = region
     elif islands and shape.lower() == "rect":
         half_w, half_h = float(geometry.w_mm or 0.0) / 2, float(geometry.h_mm or 0.0) / 2
         base = box(cx - half_w, cy - half_h, cx + half_w, cy + half_h)

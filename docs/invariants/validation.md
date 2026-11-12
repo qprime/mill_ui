@@ -67,6 +67,16 @@ parent boundary. Squares, nonconvex or modified pockets, parallel paths and
 oblique crossings do not gain this rotated-pattern exemption. Face and depth
 checks still apply before the crossing rule.
 
+An inside profile may be nested within an outside profile when its entire
+outline lies strictly inside the outer outline, leaving a positive wall greater
+than numerical tolerance. These compensated cuts remove material on opposite
+sides of the retained wall. Use exact Rect/Polygon outer regions and an inner
+Rect/Polygon region or conservative Circle bounding box. Profile polygons use
+only their outer loop, matching machining. Crossing or touching boundaries,
+other side combinations, missing/unsupported outer geometry and boundary
+modifiers retain the existing overlap checks. Containment in a bounding box
+alone does not establish containment in a concave part.
+
 ---
 
 ## Cross-Face Web (VL-8)

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from adapters.hints_to_removal import engrave_hint_to_removal_intent, pocket_hint_to_removal_intent
+from adapters.hints_to_removal import (
+    engrave_hint_to_removal_intent,
+    pocket_hint_to_removal_intent,
+    profile_hint_to_removal_intent,
+)
 from ir.removal_intent import Allowance, Bounds2D, Constraints, DepthProfile, Island, KeepoutRegion, RemovalIntent
 from validation import (
     ValidationResult,
@@ -207,6 +211,86 @@ children:
     intents = ast_to_removal_intents(ast)
     assert len(intents) == 22
     assert check_overlap(intents).is_valid()
+
+
+def _profile_intent(name, shape, geometry, center, side):
+    return profile_hint_to_removal_intent(
+        {"id": name, "shape": shape, "geometry": geometry, "center_xy_mm": center, "side": side, "depth_mm": 19},
+        sheet_thickness_mm=19,
+    )
+
+
+@pytest.mark.parametrize("shape, geometry", [("Rect", {"w_mm": 40, "h_mm": 30}), ("Circle", {"diameter_mm": 40})])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_inside_profile_cutouts_do_not_conflict_with_the_containing_outside_profile(shape, geometry, reverse):
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    inner = _profile_intent("inner", shape, geometry, [150, 150], "inside")
+    pair = [inner, outer] if reverse else [outer, inner]
+    assert check_overlap(pair).is_valid()
+
+
+def test_nested_polygon_profiles_use_actual_outlines():
+    outer = _profile_intent(
+        "outer", "Polygon", {"points": [[-80, -60], [80, -60], [60, 60], [-60, 60]]}, [150, 150], "outside"
+    )
+    inner = _profile_intent(
+        "inner", "Polygon", {"points": [[-30, -20], [30, -20], [20, 20], [-20, 20]]}, [150, 150], "inside"
+    )
+    assert check_overlap([outer, inner]).is_valid()
+
+
+@pytest.mark.parametrize("side", ["outside", "on"])
+def test_nested_profile_with_wrong_cut_side_is_not_exempt(side):
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 40, "h_mm": 30}, [150, 150], side)
+    assert len(check_overlap([outer, inner]).errors) == 1
+
+
+@pytest.mark.parametrize("gap, valid", [(-1, False), (0, False), (1e-7, False), (0.01, True)])
+def test_inside_profile_requires_a_positive_retained_wall(gap, valid):
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 40, "h_mm": 30}, [210 - gap, 150], "inside")
+    assert check_overlap([outer, inner]).is_valid() == valid
+
+
+def test_nested_profiles_are_not_inferred_from_bounding_boxes_of_concave_parts():
+    outer = _profile_intent(
+        "outer",
+        "Polygon",
+        {"points": [[0, 0], [100, 0], [100, 30], [30, 30], [30, 100], [0, 100]]},
+        [50, 50],
+        "outside",
+    )
+    inner = _profile_intent("inner", "Rect", {"w_mm": 20, "h_mm": 80}, [85, 100], "inside")
+    assert len(check_overlap([outer, inner]).errors) == 1
+
+
+@pytest.mark.parametrize("modified", ["outer", "inner"])
+def test_nested_profiles_with_allowances_keep_conservative_check(modified):
+    from dataclasses import replace
+
+    from ir.removal_intent import EdgeTreatment
+
+    outer = _profile_intent("outer", "Rect", {"w_mm": 160, "h_mm": 120}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 40, "h_mm": 30}, [150, 150], "inside")
+    constraints = Constraints(edge_treatment=EdgeTreatment(type="allowance", finish_allowance_mm=-80))
+    if modified == "outer":
+        outer = replace(outer, constraints=constraints)
+    else:
+        inner = replace(inner, constraints=constraints)
+    assert len(check_overlap([outer, inner]).errors) == 1
+
+
+def test_inside_profile_near_circle_corner_is_not_exempt_using_outer_bounds():
+    outer = _profile_intent("outer", "Circle", {"diameter_mm": 100}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 40, "h_mm": 40}, [175, 175], "inside")
+    assert len(check_overlap([outer, inner]).errors) == 1
+
+
+def test_nested_profile_missing_outer_polygon_geometry_is_not_exempt():
+    outer = _profile_intent("outer", "Polygon", {}, [150, 150], "outside")
+    inner = _profile_intent("inner", "Rect", {"w_mm": 0.2, "h_mm": 0.2}, [150, 150], "inside")
+    assert len(check_overlap([outer, inner]).errors) == 1
 
 
 def _engraving_trace(region_id, points):

@@ -53,10 +53,7 @@
       }
     }
   },
-  "errors": [
-    "Overlapping regions detected: profile_generated_profile_0 and profile_window_50x30",
-    "Overlapping regions detected: profile_generated_profile_0 and profile_window_d40"
-  ],
+  "errors": [],
   "warnings": [],
   "build": {
     "kerf_mm": 3.175,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from typing import Any
 
 from shapely.geometry import LineString, Point, Polygon, box
@@ -13,7 +14,7 @@ from core.constants import (
     WEB_CHECK_FEATURE_TYPES,
     FeatureType,
 )
-from core.geometry import engraving_paths, extract_shape_geometry, pocket_region
+from core.geometry import engraving_paths, extract_shape_geometry, pocket_region, polygon_region
 from ir.removal_intent import BevelSpec, Bounds2D, ChamferSpec, RemovalIntent, RoundoverSpec
 from validation.core import ValidationResult
 
@@ -295,13 +296,43 @@ def _engraving_trace(intent: RemovalIntent) -> BaseGeometry | None:
     return unary_union([LineString(path) if len(path) > 1 else Point(path[0]) for path in paths])
 
 
-def _pocket_overlap_region(intent: RemovalIntent) -> BaseGeometry | None:
-    if (
-        intent.hint_type != FeatureType.POCKET
-        or intent.constraints.edge_treatment is not None
+def _has_boundary_modifiers(intent: RemovalIntent) -> bool:
+    return (
+        intent.constraints.edge_treatment is not None
         or intent.dogbone is not None
         or intent.dogbone_corners is not None
-    ):
+    )
+
+
+def _profile_containment_region(intent: RemovalIntent) -> BaseGeometry | None:
+    if _has_boundary_modifiers(intent):
+        return None
+    shape = intent.shape.lower()
+    if shape == "rect" or (shape == "circle" and intent.side == "inside"):
+        return box(intent.bounds.x_min, intent.bounds.y_min, intent.bounds.x_max, intent.bounds.y_max)
+    if shape == "polygon":
+        return polygon_region(replace(intent.shape_geometry, holes=None), intent.bounds.center)
+    return None
+
+
+def _is_nested_inside_profile(a: RemovalIntent, b: RemovalIntent) -> bool:
+    if not _match_same_type(a, b, FeatureType.PROFILE):
+        return False
+    outer, inner = (a, b) if a.side == "outside" else (b, a)
+    if outer.side != "outside" or inner.side != "inside":
+        return False
+    outer_region = _profile_containment_region(outer)
+    inner_region = _profile_containment_region(inner)
+    if outer_region is None or inner_region is None or not outer_region.is_valid or not inner_region.is_valid:
+        return False
+    return (
+        outer_region.contains(inner_region)
+        and outer_region.boundary.distance(inner_region) > _OVERLAP_CLEARANCE_TOLERANCE_MM
+    )
+
+
+def _pocket_overlap_region(intent: RemovalIntent) -> BaseGeometry | None:
+    if intent.hint_type != FeatureType.POCKET or _has_boundary_modifiers(intent):
         return None
     geometry = extract_shape_geometry(intent.shape, intent.bounds, intent.shape_geometry)
     region = pocket_region(intent.shape, geometry, intent.bounds.center, [i.bounds for i in intent.constraints.islands])
@@ -360,6 +391,8 @@ def check_overlap(intents: list[RemovalIntent], *, engrave_tool_diameter_mm: flo
                 ):
                     continue
                 if _are_sibling_features(intent_a, intent_b):
+                    continue
+                if _is_nested_inside_profile(intent_a, intent_b):
                     continue
                 if _are_perpendicular_pockets(intent_a, intent_b):
                     continue

@@ -52,8 +52,7 @@
   },
   "errors": [
     "Overlapping regions detected: profile_generated_profile_0 and chamfer_generated_chamfer_2",
-    "Overlapping regions detected: profile_generated_profile_1 and chamfer_generated_chamfer_2",
-    "Overlapping regions detected: profile_generated_profile_7 and profile_shell_interior_8"
+    "Overlapping regions detected: profile_generated_profile_1 and chamfer_generated_chamfer_2"
   ],
   "warnings": [],
   "build": {

@@ -271,3 +271,21 @@ def test_instance_ids_preserved():
 
     assert sorted(instance_ids) == [0, 1, 2]
     print("  PASSED")
+
+
+@pytest.mark.parametrize("algorithm", list(PackingAlgorithm))
+@pytest.mark.parametrize("part_width, expected_sheets", [(200, 1), (200.1, 0)])
+def test_edge_clearance_reserves_stock_without_shrinking_parts(algorithm, part_width, expected_sheets):
+    part = PartSpec(name="panel", width_mm=part_width, height_mm=100, allow_rotation=False)
+    sheet = SheetSpec(width_mm=232, height_mm=132, thickness_mm=19, margin_mm=10, kerf_mm=6)
+
+    result = pack_sheets([part], sheet, algorithm=algorithm, edge_clearance_mm=6)
+
+    assert result.total_sheets == expected_sheets
+    if expected_sheets:
+        (placement,) = result.sheets[0].placements
+        assert placement.bounds == (16, 16, 216, 116)
+        assert placement.effective_width_mm == part_width
+        assert placement.effective_height_mm == 100
+    else:
+        assert result.unplaced_parts == (part,)

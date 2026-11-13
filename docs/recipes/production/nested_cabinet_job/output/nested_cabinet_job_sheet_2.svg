@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-23.175 -63.175 1396.350 1410.350" width="1396.35mm" height="1410.35mm">
+  <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
+.profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
+.pocket { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.2; stroke-width: 1.5; }
+.hole { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.engrave { stroke: #888888; fill: none; stroke-width: 0.25; }
+.bevel { stroke: #ffb454; fill: none; stroke-width: 1.5; }
+.chamfer { stroke: #8bd49c; fill: none; stroke-width: 1.5; stroke-dasharray: 6,2; }
+.roundover { stroke: #cba6f7; fill: none; stroke-width: 1.5; stroke-dasharray: 2,2; }
+.edge-unplanned { stroke: #ff6b6b; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.edge-label { fill: #e8e8e8; stroke: none; font-family: monospace; font-size: 8px; }
+.keepout { stroke: #ff6b6b; fill: #ff6b6b; fill-opacity: 0.15; stroke-width: 1; stroke-dasharray: 4,2; }
+.waste { stroke: #ff9500; fill: none; stroke-width: 2; stroke-dasharray: 8,4; }
+.toolpath { stroke: #5ab9ea; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.dimension { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.dimension-text { fill: #5ab9ea; font-family: monospace; font-size: 10px; }
+.construction { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 2,2; }
+.label { fill: #ffcc00; font-family: monospace; font-size: 8px; font-weight: bold; }
+.notes { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.table { stroke: #5c4a32; fill: #c4a46c; fill-opacity: 0.2; stroke-width: 1; }
+.envelope { stroke: #ff6b6b; fill: none; stroke-width: 2; }
+.spoilboard { stroke: none; fill: #4ecdc4; fill-opacity: 0.1; stroke-width: 0; }
+.effective-envelope { stroke: #ffd93d; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }
+.origin { stroke: #ff6b6b; fill: #ff6b6b; stroke-width: 1; }
+.centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
+.soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
+.t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
+.margin-zone { fill: #ff6b6b; fill-opacity: 0.15; }
+.legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
+.title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
+.section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
+.callout-box { stroke: #5ab9ea; fill: none; stroke-width: 1; }
+.callout-detail { stroke: #e8e8e8; fill: none; stroke-width: 1.5; }
+.beam-assembly { stroke: #e8e8e8; fill: none; stroke-width: 1; }
+.beam-layer { stroke: #6496c8; fill: #6496c8; fill-opacity: 0.15; stroke-width: 1; }
+.beam-splice { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 4,2; }
+.title-subtitle { fill: #cccccc; font-family: monospace; font-size: 9px; }
+.callout-ref-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.callout-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
+.beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
+.heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
+  <rect x="-23.175" y="-63.175" width="1396.35" height="1410.35" fill="#1a1a1a" />
+  <g id="SHEET_OUTLINE" class="sheet-outline">
+    <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
+    <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="1210.000" width="1220.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="1200.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_left" />
+    <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_right" />
+  </g>
+  <g id="PROFILE_CUTS" class="profile-cuts">
+    <path d="M 41.350 1003.650 L 291.350 1003.650 A 25.000 25.000 0 0 1 316.350 1028.650 L 316.350 1178.650 A 25.000 25.000 0 0 1 291.350 1203.650 L 41.350 1203.650 A 25.000 25.000 0 0 1 16.350 1178.650 L 16.350 1028.650 A 25.000 25.000 0 0 1 41.350 1003.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="corner_shelf_1_roundedrect" />
+    <circle cx="141.350" cy="872.300" r="125.000" stroke="#e8e8e8" fill="none" stroke-width="2" id="turntable_0_circle" />
+  </g>
+  <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
+    <path d="M 41.350 1000.475 L 291.350 1000.475 A 28.175 28.175 0 0 1 319.525 1028.650 L 319.525 1178.650 A 28.175 28.175 0 0 1 291.350 1206.825 L 41.350 1206.825 A 28.175 28.175 0 0 1 13.175 1178.650 L 13.175 1028.650 A 28.175 28.175 0 0 1 41.350 1000.475 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="corner_shelf_1_roundedrect_toolpath" />
+    <circle cx="141.350" cy="872.300" r="128.175" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="turntable_0_circle_toolpath" />
+  </g>
+  <g id="LABELS" class="labels">
+    <text x="166.350" y="1103.650" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="corner_shelf_1_roundedrect_label">corner_shelf</text>
+    <text x="141.350" y="872.300" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="turntable_0_circle_label">turntable</text>
+  </g>
+  <g id="DIMENSIONS" class="dimensions">
+    <line x1="16.349999999999994" y1="1003.6500000000001" x2="16.349999999999994" y2="983.6500000000001" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="1003.6500000000001" x2="316.35" y2="983.6500000000001" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="983.6500000000001" x2="316.35" y2="983.6500000000001" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.349999999999994,983.6500000000001 19.349999999999994,980.6500000000001 19.349999999999994,986.6500000000001" fill="#5ab9ea" />
+    <polygon points="316.35,983.6500000000001 313.35,980.6500000000001 313.35,986.6500000000001" fill="#5ab9ea" />
+    <text x="166.35000000000002" y="978.6500000000001" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <line x1="316.35" y1="1003.6500000000001" x2="336.35" y2="1003.6500000000001" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="316.35" y1="1203.65" x2="336.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="336.35" y1="1003.6500000000001" x2="336.35" y2="1203.65" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="336.35,1003.6500000000001 333.35,1006.6500000000001 339.35,1006.6500000000001" fill="#5ab9ea" />
+    <polygon points="336.35,1203.65 333.35,1200.65 339.35,1200.65" fill="#5ab9ea" />
+    <text x="341.35" y="1103.65" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 341.35 1103.65)" fill="#5ab9ea" font-family="monospace" font-size="10px">200.0mm</text>
+    <line x1="16.349999999999994" y1="747.3" x2="16.349999999999994" y2="707.3" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="266.35" y1="747.3" x2="266.35" y2="707.3" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="16.349999999999994" y1="707.3" x2="266.35" y2="707.3" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="16.349999999999994,707.3 19.349999999999994,704.3 19.349999999999994,710.3" fill="#5ab9ea" />
+    <polygon points="266.35,707.3 263.35,704.3 263.35,710.3" fill="#5ab9ea" />
+    <text x="141.35000000000002" y="702.3" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">⌀250.0mm</text>
+  </g>
+  <g id="TITLE_BLOCK" class="title-block">
+    <text x="-13.175" y="-49.175" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-13.175" y="-35.175" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+  </g>
+  <g id="LEGEND" class="legend">
+    <text x="1241.175" y="-49.175" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="1241.175" y1="-31.174999999999997" x2="1256.175" y2="-31.174999999999997" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="1261.175" y="-28.174999999999997" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="1241.175" y1="-15.174999999999997" x2="1256.175" y2="-15.174999999999997" stroke="#e8e8e8" stroke-width="2" />
+    <text x="1261.175" y="-12.174999999999997" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <line x1="1241.175" y1="0.8250000000000028" x2="1256.175" y2="0.8250000000000028" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="1261.175" y="3.825000000000003" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="1241.175" y1="16.825000000000003" x2="1256.175" y2="16.825000000000003" stroke="#5ab9ea" stroke-width="1" />
+    <text x="1261.175" y="19.825000000000003" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+  </g>
+  <g id="NOTES" class="notes">
+    <text x="20.0" y="1253.175" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="1265.175" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 1220.0 × 1220.0 × 18.0mm</text>
+    <text x="20.0" y="1277.175" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="1289.175" fill="#cccccc" font-family="monospace" font-size="10px">Features: 2 profiles</text>
+    <text x="20.0" y="1301.175" fill="#cccccc" font-family="monospace" font-size="10px">Parts (2):</text>
+    <text x="30.0" y="1313.175" fill="#cccccc" font-family="monospace" font-size="10px">• corner_shelf_1_roundedrect</text>
+    <text x="30.0" y="1325.175" fill="#cccccc" font-family="monospace" font-size="10px">• turntable_0_circle</text>
+  </g>
+</svg>

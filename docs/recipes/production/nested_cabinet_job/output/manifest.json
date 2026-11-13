@@ -1,0 +1,18 @@
+{
+  "source": "nested_cabinet_job.nest.yml",
+  "total_sheets": 2,
+  "sheets": [
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 1,
+      "job_name": "nested_cabinet_job_sheet_1",
+      "items": 16
+    },
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 2,
+      "job_name": "nested_cabinet_job_sheet_2",
+      "items": 2
+    }
+  ]
+}

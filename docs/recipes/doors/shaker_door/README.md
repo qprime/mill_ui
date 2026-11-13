@@ -15,22 +15,9 @@ The door's lower-left edge is 13.2mm from the physical sheet edges: the 10mm
 cutter. Its 3.175mm cutting diameter stays wholly inside the working area.
 The declared sheet size is retained, leaving the larger offcut above/right.
 
-## Intent review
-
-![Placement, two-sided registration and door cross-section](placement-intent-review.svg)
-
-This currently produces a single piece of 19mm MDF with a milled Shaker-style
-face. The center pocket is 300 × 500mm, 6mm deep, leaving 13mm of material below
-it and approximately R6.35 inside corners. The surrounding 50mm frame stays at
-full thickness. Four 3mm-high tabs retain the outside profile.
-
-The owner accepted the illustrated placement, construction and machining design
-on 2026-11-12 after reviewing the diagram and computational checks.
-[Measurements and source/NC hashes](placement-measurements.json) verify the
-translated programs, nominal spans, pocket extent, tabs and full cutter-radius
-clearance. Z depths, feeds, RPM and other non-XY program words are unchanged;
-the final machine-origin parking move is unchanged. This is computational
-evidence, not a physical cut test.
+The center pocket is 300 × 500mm, 6mm deep, leaving 13mm of material below
+it and approximately R6.35 inside corners. Four 3mm-high tabs retain the outside
+profile.
 
 ## Machining programs
 

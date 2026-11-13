@@ -19,22 +19,10 @@ each end. Their nearest edges leave 5mm of material at the door's left edge;
 6mm of front-face material remains above each cup. The front has the same
 50mm frame and 6mm-deep center recess as the Shaker example.
 
-## Intent review
-
-See the [front/back placement and cross-section](../shaker_door/placement-intent-review.svg).
-Red cups on the front view are see-through references to back-face machining.
 Machine the back cups first, then flip the whole sheet about X and machine the
 front recess and tabbed outline. Back features mirror about the sheet center;
 the door therefore appears toward the upper-left in the back setup. Keep the
 sheet registration and use each setup's stated stock-surface Z zero.
-
-The owner accepted the illustrated recipe design on 2026-11-12 after reviewing
-the placement, door section and hinge-cup layout.
-[Measurements and source/NC hashes](placement-measurements.json) verify the
-translated front programs and mirrored back coordinates, unchanged part-relative
-cup positions, depths, XY cup extents and full cutter-radius margin clearance.
-All non-XY program words and final origin parking moves are unchanged. This is
-computational evidence, not a physical cut or hardware-fit trial.
 
 ## Machining programs
 

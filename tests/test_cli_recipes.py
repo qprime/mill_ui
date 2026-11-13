@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -11,7 +12,7 @@ from cli.mill import write_recipe_outputs
 from cli.recipes import (
     REPO_ROOT,
     check_nest_recipe,
-    check_pml_recipe,
+    check_recipe_outputs,
     check_tree,
     compare_output_dirs,
     regenerate_recipe,
@@ -78,6 +79,25 @@ LONG_SHEET_NEST = """Nest:
       width: 400mm
       height: 600mm
       quantity: 6
+"""
+
+
+CABINET_NEST = """Nest:
+  algorithm: maxrects
+  Sheet:
+    width: 400mm
+    height: 300mm
+    thickness: 19mm
+  kerf: 6.35mm
+  margin: 10mm
+  holding:
+    onion_skin: 0.3mm
+  parts:
+    - name: door
+      width: 300mm
+      height: 180mm
+      quantity: 2
+      template: shaker
 """
 
 
@@ -271,7 +291,7 @@ def test_check_reports_a_stale_output_file(tmp_path: Path):
     regenerate_recipe(recipe)
     (recipe.path / "output" / "metrics.json").write_text("{}")
 
-    failures = run_on_recipes([recipe], lambda r: check_pml_recipe(r, _altmill()))
+    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _altmill()))
 
     assert len(failures) == 1
     assert failures[0].startswith("door: metrics.json differs: ")
@@ -283,7 +303,7 @@ def test_gate_rejects_design_errors_even_when_outputs_match(tmp_path: Path):
     assert recipe is not None
     regenerate_recipe(recipe)
 
-    failures = check_pml_recipe(recipe, _altmill())
+    failures = check_recipe_outputs(recipe, _altmill())
 
     assert len(failures) == 1
     assert "door.pml.yml sheet 1: Cutting edge extends" in failures[0]
@@ -295,7 +315,7 @@ def test_run_on_recipes_reports_an_unreadable_source(tmp_path: Path):
     assert recipe is not None
     recipe.pml_sources[0].write_text("Sheet: [")
 
-    failures = run_on_recipes([recipe], lambda r: check_pml_recipe(r, _altmill()))
+    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _altmill()))
 
     assert len(failures) == 1
     assert failures[0].startswith("door: ")
@@ -377,7 +397,7 @@ def test_recipe_readme_requires_demonstrates_and_blueprint(tmp_path: Path):
         "README.md has no **Demonstrates:** line",
         "README.md embeds no image from its own output/ that exists",
     ]
-    assert readme_problems(nest_recipe) == []
+    assert readme_problems(nest_recipe) == ["README.md embeds no image from its own output/ that exists"]
 
 
 def test_recipe_must_fit_altmill(tmp_path: Path):
@@ -388,7 +408,7 @@ def test_recipe_must_fit_altmill(tmp_path: Path):
     assert nest_recipe is not None
     regenerate_recipe(pml_recipe)
 
-    assert any("does not fit altmill_4x4" in problem for problem in check_pml_recipe(pml_recipe, _altmill()))
+    assert any("does not fit altmill_4x4" in problem for problem in check_recipe_outputs(pml_recipe, _altmill()))
     assert any(
         problem.startswith("job.nest.yml does not fit altmill_4x4: Job y_max")
         for problem in check_nest_recipe(nest_recipe, _altmill())
@@ -424,13 +444,15 @@ def test_cli_recipe_runs_source_named_after_recipe(tmp_path: Path):
     assert (folder / "output" / "metrics.json").exists()
 
 
-def test_cli_recipe_rejects_nest_only_folder(tmp_path: Path):
+def test_cli_recipe_runs_nest_only_folder(tmp_path: Path):
     folder = _write_dir(tmp_path / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST})
 
     result = _run_mill_recipe(folder)
 
-    assert result.returncode == 1
-    assert "python -m cli.nest" in result.stderr
+    assert result.returncode == 0, result.stderr
+    output = folder / "output"
+    assert (output / "metrics.json").exists()
+    assert list(output.glob("*.nc"))
 
 
 def test_validate_recipe_rejects_several_pml_sources(tmp_path: Path):
@@ -442,3 +464,65 @@ def test_validate_recipe_rejects_several_pml_sources(tmp_path: Path):
 
     with pytest.raises(ValueError, match="handles one PML source"):
         validate_recipe(recipe.path)
+
+
+@pytest.mark.parametrize("artifact", ["job_sheet_1.svg", "sheet_1.profile-6.35mm.nc"])
+def test_nest_recipe_generates_and_checks_machining_outputs(tmp_path: Path, artifact: str):
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "job", {"job.nest.yml": CABINET_NEST}))
+    assert recipe is not None
+    (recipe.path / "README.md").write_text(
+        "# Job\n\n![Blueprint](output/job_sheet_1.svg)\n\n**Demonstrates:** Nested doors.\n"
+    )
+
+    regenerate_recipe(recipe)
+
+    assert readme_problems(recipe) == []
+    assert check_recipe_outputs(recipe, _altmill()) == []
+    summary = json.loads((recipe.path / "output" / "machining_summary.json").read_text())
+    assert summary["total_sheets"] == 2
+    assert summary["kerf_mm"] == 6.35
+    for sheet in summary["sheets"]:
+        assert sheet["feature_counts"] == {"pocket": 1, "profile": 1}
+    (recipe.path / "output" / artifact).write_text("stale\n")
+
+    assert any(f"{artifact} differs" in error for error in check_recipe_outputs(recipe, _altmill()))
+
+
+def test_recipe_compiles_both_pml_and_nest_sources(tmp_path: Path):
+    recipe = recipe_at(
+        _make_recipe(_make_root(tmp_path), "doors", "job", {"part.pml.yml": PART_PML, "doors.nest.yml": CABINET_NEST})
+    )
+    assert recipe is not None
+
+    runs, outputs = write_recipe_outputs(recipe, recipe.path / "output")
+
+    assert len(runs) == 3
+    assert {run.source for run in runs} == {"part.pml.yml", "doors.nest.yml"}
+    assert all(not run.result.errors for run in runs)
+    assert (recipe.path / "output" / "part.pml.svg").exists()
+    assert (recipe.path / "output" / "doors.nest_sheet_1.svg").exists()
+    metrics = json.loads(outputs["metrics"].read_text())
+    assert metrics["build"]["kerf_mm"] is None
+    assert metrics["build"]["source_kerfs_mm"] == {"part.pml.yml": 3.175, "doors.nest.yml": 6.35}
+
+
+def test_nest_recipe_kerf_override_applies_to_packing_and_machining(tmp_path: Path):
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "job", {"job.nest.yml": CABINET_NEST}))
+    assert recipe is not None
+
+    runs, outputs = write_recipe_outputs(recipe, recipe.path / "output", kerf_mm=3.175)
+
+    assert all(not run.result.errors for run in runs)
+    assert runs[0].result.ast.kerf_width_mm == 3.175
+    assert "sheet_1.profile-3.17mm" in runs[0].result.gcode
+    summary = json.loads(outputs["machining_summary"].read_text())
+    assert summary["kerf_mm"] == 3.175
+
+
+def test_nest_recipe_rejects_unplaced_parts(tmp_path: Path):
+    nest = CABINET_NEST.replace("width: 300mm", "width: 500mm")
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "job", {"job.nest.yml": nest}))
+    assert recipe is not None
+
+    with pytest.raises(ValueError, match=r"job\.nest\.yml: parts do not fit.*2x door"):
+        regenerate_recipe(recipe)

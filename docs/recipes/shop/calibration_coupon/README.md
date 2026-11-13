@@ -11,12 +11,8 @@ A coupon of holes, pockets, and inside and outside profiles at known sizes, meas
 The rectangular and circular windows are inside profiles, separate from the
 coupon's outside profile. Their nearest retained walls are 15mm and 25mm.
 
-![Nested-profile validation and actual cutter footprints](nested-profile-proof.svg)
-
-The proof reconstructs the unchanged profile G-code using the full 3.175mm
-cutter diameter. Inside cuts remove material toward the windows; the outside
-cut removes material away from the coupon. Their cutter footprints do not
-intersect.
+Inside cuts remove material toward the windows; the outside cut removes
+material away from the coupon.
 
 Sheet 300 × 250 × 19mm mdf.
 

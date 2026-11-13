@@ -78,7 +78,13 @@ def nest_parts(
         gap_margin_mm=gap_margin_mm,
     )
 
-    result = pack_sheets(part_specs, sheet_spec, max_sheets=max_sheets, algorithm=algorithm)
+    result = pack_sheets(
+        part_specs,
+        sheet_spec,
+        max_sheets=max_sheets,
+        algorithm=algorithm,
+        edge_clearance_mm=sheet_spec.resolved_kerf_mm,
+    )
 
     response = {
         "sheets": [sheet.to_dict() for sheet in result.sheets],
@@ -130,7 +136,12 @@ def nest_and_generate(
         gap_margin_mm=gap_margin_mm,
     )
 
-    result = pack_sheets(part_specs, sheet_spec, algorithm=algorithm)
+    result = pack_sheets(
+        part_specs,
+        sheet_spec,
+        algorithm=algorithm,
+        edge_clearance_mm=sheet_spec.resolved_kerf_mm,
+    )
 
     output = nesting_result_to_pml(result) if output_format == "pml" else nesting_result_to_asts(result)
 

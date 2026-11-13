@@ -117,6 +117,12 @@ kerf: 6.35mm    # Cutter width for spacing between parts (default: 6.35mm / 1/4"
 margin: 10mm    # No-cut zone around sheet edges (default: 10mm)
 ```
 
+Nesting reserves one kerf of outside-profile clearance between nominal part
+edges and the working-area boundary, in addition to the sheet margin. It does
+not add that clearance to part dimensions. Between parts, spacing remains
+`kerf + gap_margin` when using the API's additional gap setting. The requested
+kerf must accommodate the cutter used in the subsequent machining run.
+
 ## Holding Strategies
 
 Holding strategies keep parts attached to the stock sheet during cutting. Two strategies are available — **onion skin** and **tabs** — and they are mutually exclusive.
@@ -380,13 +386,20 @@ Nest:
 
 Running a `.nest.yml` file produces:
 - Multiple `LayoutAST` objects (one per sheet needed)
-- Each sheet contains positioned parts with absolute coordinates
+- Each output sheet contains positioned parts in working-area coordinates; the physical sheet margin is applied at export
 - Templates are expanded to full geometry (profiles, pockets, etc.)
 
 **CLI output files:**
 - `{prefix}_{N}.pml.yml` - One PML file per sheet
 - `manifest.json` - Nesting summary with utilization metrics
 - `{prefix}_{N}.blueprint.{theme}.svg` - Optional SVG blueprints
+
+Recipes containing a `.nest.yml` source also support the complete machining
+workflow through `python -m cli.mill --recipe <recipe-directory>`. This writes
+normal per-sheet blueprints, G-code, machining summaries, metrics and a manifest
+to the recipe's `output/`. The nesting source's kerf is used unless `--kerf`
+explicitly overrides both packing and machining. The recipe regeneration and
+validation commands include nesting recipes and their generated artifacts.
 
 ## CLI Usage
 

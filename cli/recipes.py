@@ -79,7 +79,7 @@ def _fit_problems(result: InvariantResult, label: str) -> list[str]:
     return [f"{label} does not fit {RECIPE_MACHINE}: {failure}" for failure in result.failures]
 
 
-def check_pml_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
+def check_recipe_outputs(recipe: Recipe, machine: MachineConfig) -> list[str]:
     with tempfile.TemporaryDirectory() as scratch:
         generated = Path(scratch) / OUTPUT_DIR_NAME
         runs, _ = write_recipe_outputs(recipe, generated)
@@ -113,8 +113,7 @@ def check_nest_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
 
 def check_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
     problems = readme_problems(recipe)
-    if recipe.pml_sources:
-        problems += check_pml_recipe(recipe, machine)
+    problems += check_recipe_outputs(recipe, machine)
     if recipe.nest_sources:
         problems += check_nest_recipe(recipe, machine)
     return problems
@@ -153,7 +152,7 @@ def check_tree(root: Path, machine: MachineConfig, repo_root: Path | None = None
 def regenerate_tree(root: Path) -> list[str]:
     recipes = find_recipes(root)
     catalog = load_catalog(root)
-    failures = run_on_recipes([recipe for recipe in recipes if recipe.pml_sources], regenerate_recipe)
+    failures = run_on_recipes(recipes, regenerate_recipe)
     write_documents(render_documents(catalog, recipes, root), root)
     return failures
 

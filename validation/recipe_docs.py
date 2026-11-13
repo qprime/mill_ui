@@ -168,7 +168,7 @@ def readme_problems(recipe: Recipe) -> list[str]:
     if readme.demonstrates is None:
         problems.append(f"{README_NAME} has no {DEMONSTRATES_PREFIX} line")
     own_outputs = [image for image in readme.images if image.startswith(f"{OUTPUT_DIR_NAME}/")]
-    if recipe.pml_sources and not any((recipe.path / image).is_file() for image in own_outputs):
+    if not any((recipe.path / image).is_file() for image in own_outputs):
         problems.append(f"{README_NAME} embeds no image from its own {OUTPUT_DIR_NAME}/ that exists")
     return problems
 
@@ -202,7 +202,7 @@ def _recipe_entry(recipe: Recipe, readme: RecipeReadme | None, from_dir: Path, h
     link = f"{_relative_link(recipe.path, from_dir)}/"
     title = readme.title if readme is not None and readme.title else recipe.name
     lines = [f"{heading} [{title}]({link})", ""]
-    if recipe.pml_sources and readme is not None and readme.images:
+    if readme is not None and readme.images:
         lines += [f'<img src="{link}{readme.images[0]}" width="{THUMBNAIL_WIDTH}">', ""]
     if readme is not None and readme.demonstrates:
         lines += [readme.demonstrates, ""]

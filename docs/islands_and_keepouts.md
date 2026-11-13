@@ -49,4 +49,4 @@ The sheet margin protects the perimeter; fixture keepouts protect declared zones
 - `docs/recipes/panels/pocket_with_island/`: preserved material.
 - `docs/recipes/shop/clamp_keepouts/`: fixture zones around two plates and a disc, with a pocket island on one plate.
 
-Pocket fills do not yet show preserved islands correctly; blueprint hole rendering is tracked separately in #222. Keepout verification and pocket machining do not depend on that rendering fix.
+Blueprint pocket fills preserve island boundaries and polygon holes through the same region subtraction used for machining. Fixture keepouts and perimeter clamp margins share translucent red shading; the physical sheet outline remains distinct.

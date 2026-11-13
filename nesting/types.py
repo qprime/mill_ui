@@ -6,6 +6,8 @@ from typing import Any
 
 from pml.nest_parser import HoldingSpec
 
+PACKING_TOLERANCE_MM = 1e-9
+
 
 @dataclass(frozen=True)
 class FreeRect:
@@ -29,7 +31,7 @@ class FreeRect:
     def can_fit(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
         needed_w = part_w + gap
         needed_h = part_h + gap
-        return self.width >= needed_w and self.height >= needed_h
+        return self.width + PACKING_TOLERANCE_MM >= needed_w and self.height + PACKING_TOLERANCE_MM >= needed_h
 
     def can_fit_rotated(self, part_w: float, part_h: float, gap: float = 0.0) -> bool:
         return self.can_fit(part_h, part_w, gap)
@@ -193,10 +195,14 @@ class SheetSpec:
             )
 
     @property
-    def gap_mm(self) -> float:
+    def resolved_kerf_mm(self) -> float:
         if self.kerf_mm is None:
-            raise ValueError("kerf_mm must be set before computing gap_mm")
-        return self.kerf_mm + self.gap_margin_mm
+            raise ValueError("kerf_mm must be set before packing")
+        return self.kerf_mm
+
+    @property
+    def gap_mm(self) -> float:
+        return self.resolved_kerf_mm + self.gap_margin_mm
 
     @property
     def usable_width_mm(self) -> float:

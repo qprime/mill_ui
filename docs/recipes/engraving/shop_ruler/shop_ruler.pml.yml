@@ -32,7 +32,7 @@ children:
                   minor_ticks: true
                   labels: true
                   label_height: 3.5mm
-                  label_interval: 1
+                  label_interval: 2
                   label_start: 0
                   depth: 0.4mm
               - AtPosition:

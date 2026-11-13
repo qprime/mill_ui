@@ -8,13 +8,9 @@
 
 A small 6mm box with finger-jointed sides and a captured bottom, labelled and edge-coloured for assembly.
 
-The side profiles span the full specified 110mm box depth. The
-[coupon cutter-footprint proof](../../shop/joinery_test_coupons/finger-side-proof.svg)
-shows why finger-jointed sides must include the end fingers. Captured-bottom
-dimensions are now 154 × 104mm, entering the 3mm grooves on every edge while
-preserving the specified 160 × 110 × 70mm box dimensions. See the
-[cap-fit proof](../box_bottoms_and_lids/cap-fit-proof.svg), reconstructed from
-the actual G-code within 0.004mm NC rounding.
+The side profiles span the full specified 110mm box depth, including the end
+fingers. The captured bottom measures 154 × 104mm, entering the 3mm grooves on
+every edge while preserving the specified 160 × 110 × 70mm box dimensions.
 
 Sheet 600 × 400 × 6mm mdf.
 

@@ -12,7 +12,7 @@ Four 40 × 40mm clamp zones and one Ø20mm screw zone are fixture geometry. The 
 
 A cutting violation blocks all G-code for that setup. A rapid crossing instead produces a warning naming the zone and safe Z: confirm fixture height is below the stated 6mm safe Z. The system does not model clamp height.
 
-The pocket's island is preserved in machining. Blueprint pocket fills do not yet show that preserved region correctly; that rendering defect is tracked in #222.
+The pocket's island is preserved in both machining and the blueprint pocket fill. Fixture keepouts and the perimeter clamp margin use matching translucent red shading.
 
 ## Run
 

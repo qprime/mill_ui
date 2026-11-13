@@ -304,6 +304,12 @@ python -m cli.mill --recipe docs/recipes/doors/shaker_door
 - `--project`: User workspace for real manufacturing (looks in `$MILL_UI_PROJECTS`)
 - `--recipe`: Recipe directory for examples/documentation (outputs to `{recipe}/output/`)
 
+Recipe inputs may be PML layouts or nesting jobs. Both run with
+`python -m cli.mill --recipe <directory>` and keep their generated machining
+artifacts in `output/`. The recipe gate checks both input types through the
+machining pipeline and compares their saved outputs. Nesting-only layout export
+with `cli.nest` remains available separately.
+
 Recipes should demonstrate production PML layouts. Preserve the declared sheet
 size and place parts toward the working area's lower-left corner with clearance
 for the full selected cutter sweep. Extra space for a fixture or machining
@@ -317,12 +323,15 @@ selected cutter sweep inside the margin. Automatic assembly/nesting layouts
 retain their packer's cutter padding. Full-bed surfacing and the production
 sheet's sheet-wide waste-cut workflow retain their intentional sheet alignment.
 The [placement audit](recipes/placement-audit.json) records subsequent layout
-translations and current artifact hashes. Earlier detailed machining proofs
-remain snapshots with their original coordinates/hashes; use the placement
-audit to relate them to the current translated layout.
+translations and current artifact hashes. Keep temporary diagnostic and review
+drawings outside recipe directories and out of commits. Recipe blueprints in
+`output/` are generated through the normal CLI workflow.
 
-Part-cutting recipes explicitly declare a 10mm sheet margin and show its shaded
-no-cut border. Blueprints name the configured margin in their notes. Full-bed
+Part-cutting recipes explicitly declare a 10mm sheet margin and show its
+translucent red no-cut border, matching fixture keepouts in color and opacity.
+This shared no-cut treatment is the blueprint standard in dark and print themes;
+the physical sheet outline remains distinct. Blueprints name the configured
+margin in their notes. Full-bed
 spoilboard surfacing is the explicit exception: its zero margin and edge overrun
 are intentional and labeled, rather than presented as a clamped part-cutting job.
 

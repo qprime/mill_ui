@@ -1,0 +1,114 @@
+{
+  "total_sheets": 2,
+  "sheets": [
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 1,
+      "job_name": "nested_cabinet_job_sheet_1",
+      "constraint_audit": {
+        "tabs": {
+          "status": "honored",
+          "count": 1,
+          "safety_critical": false
+        }
+      },
+      "complexity": {
+        "total_moves": 1693,
+        "rapid_moves": 25,
+        "cut_moves": 1531,
+        "rapid_ratio": 0.015
+      },
+      "fidelity": {
+        "tool_changes": 3,
+        "passes": [
+          {
+            "name": "pocket",
+            "tool_diameter_mm": 12.7,
+            "move_count": 712
+          },
+          {
+            "name": "profile",
+            "tool_diameter_mm": 6.35,
+            "move_count": 842
+          },
+          {
+            "name": "release",
+            "tool_diameter_mm": 6.35,
+            "move_count": 139
+          }
+        ]
+      },
+      "output_size": {
+        "total_bytes": 48189,
+        "total_lines": 1654,
+        "files": {
+          "pocket-12.70mm": {
+            "bytes": 20461,
+            "lines": 712
+          },
+          "profile-6.35mm": {
+            "bytes": 23476,
+            "lines": 796
+          },
+          "release-6.35mm": {
+            "bytes": 4252,
+            "lines": 146
+          }
+        }
+      },
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 2,
+      "job_name": "nested_cabinet_job_sheet_2",
+      "constraint_audit": {},
+      "complexity": {
+        "total_moves": 1126,
+        "rapid_moves": 4,
+        "cut_moves": 1088,
+        "rapid_ratio": 0.004
+      },
+      "fidelity": {
+        "tool_changes": 2,
+        "passes": [
+          {
+            "name": "profile",
+            "tool_diameter_mm": 6.35,
+            "move_count": 888
+          },
+          {
+            "name": "release",
+            "tool_diameter_mm": 6.35,
+            "move_count": 238
+          }
+        ]
+      },
+      "output_size": {
+        "total_bytes": 32827,
+        "total_lines": 1136,
+        "files": {
+          "profile-6.35mm": {
+            "bytes": 25412,
+            "lines": 888
+          },
+          "release-6.35mm": {
+            "bytes": 7415,
+            "lines": 248
+          }
+        }
+      },
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "build": {
+    "kerf_mm": 6.35,
+    "theme": "dark",
+    "y_origin": "back",
+    "source": "nested_cabinet_job.nest.yml"
+  }
+}

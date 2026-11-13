@@ -1,0 +1,117 @@
+{
+  "total_sheets": 2,
+  "sheets": [
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 1,
+      "job_name": "nested_cabinet_job_sheet_1",
+      "stock": {
+        "width_mm": 1220.0,
+        "height_mm": 1220.0,
+        "thickness_mm": 18.0,
+        "material": "mdf"
+      },
+      "files": [
+        {
+          "filename": "sheet_1.pocket-12.70mm.nc",
+          "operation": "pocket",
+          "tool_diameter_mm": 12.7,
+          "rpm": 14000.0,
+          "feed_xy_mm_min": 1400.0,
+          "feed_z_mm_min": 350.0,
+          "stepdown_mm": 3.5,
+          "max_depth_mm": 6.0,
+          "feature_count": 4,
+          "strategy": "raster_pocket",
+          "estimated_runtime_min": 88.4
+        },
+        {
+          "filename": "sheet_1.profile-6.35mm.nc",
+          "operation": "profile",
+          "tool_diameter_mm": 6.35,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 1800.0,
+          "feed_z_mm_min": 594.0,
+          "stepdown_mm": 3.0,
+          "max_depth_mm": 18.2,
+          "feature_count": 8,
+          "strategy": "onion_skin_then_finish",
+          "holding": "tabs 4x3mm, onion_skin 0.3mm",
+          "cut_through_mm": 0.2,
+          "estimated_runtime_min": 51.8
+        },
+        {
+          "filename": "sheet_1.release-6.35mm.nc",
+          "operation": "release",
+          "tool_diameter_mm": 6.35,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 1800.0,
+          "feed_z_mm_min": 594.0,
+          "stepdown_mm": 3.0,
+          "max_depth_mm": 18.2,
+          "feature_count": 3,
+          "strategy": "onion_skin_release",
+          "holding": "onion_skin 0.3mm",
+          "cut_through_mm": 0.2,
+          "estimated_runtime_min": 3.8
+        }
+      ],
+      "total_runtime_min": 144.0,
+      "feature_counts": {
+        "pocket": 4,
+        "profile": 8
+      },
+      "safe_z_mm": 6.0
+    },
+    {
+      "source": "nested_cabinet_job.nest.yml",
+      "sheet_index": 2,
+      "job_name": "nested_cabinet_job_sheet_2",
+      "stock": {
+        "width_mm": 1220.0,
+        "height_mm": 1220.0,
+        "thickness_mm": 18.0,
+        "material": "mdf"
+      },
+      "files": [
+        {
+          "filename": "sheet_2.profile-6.35mm.nc",
+          "operation": "profile",
+          "tool_diameter_mm": 6.35,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 1800.0,
+          "feed_z_mm_min": 594.0,
+          "stepdown_mm": 3.0,
+          "max_depth_mm": 17.7,
+          "feature_count": 2,
+          "strategy": "onion_skin_then_finish",
+          "holding": "onion_skin 0.3mm",
+          "cut_through_mm": 0.2,
+          "estimated_runtime_min": 6.8
+        },
+        {
+          "filename": "sheet_2.release-6.35mm.nc",
+          "operation": "release",
+          "tool_diameter_mm": 6.35,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 1800.0,
+          "feed_z_mm_min": 594.0,
+          "stepdown_mm": 3.0,
+          "max_depth_mm": 18.2,
+          "feature_count": 2,
+          "strategy": "onion_skin_release",
+          "holding": "onion_skin 0.3mm",
+          "cut_through_mm": 0.2,
+          "estimated_runtime_min": 1.9
+        }
+      ],
+      "total_runtime_min": 8.7,
+      "feature_counts": {
+        "profile": 2
+      },
+      "safe_z_mm": 6.0
+    }
+  ],
+  "total_runtime_min": 152.7,
+  "kerf_mm": 6.35
+}

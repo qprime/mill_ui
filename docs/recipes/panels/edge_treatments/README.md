@@ -27,22 +27,9 @@ deliberately keeps its specified 0.2mm finish allowance after the 1mm rough pass
 The roundover changes the upper 6mm of the edge; the lower nominal edge remains.
 
 The chamfer tip follows the nominal edge to produce the requested 6 × 6mm bevel
-with the available 90° V-bit. See the
-[before/after chamfer cross-section proof](../frames_and_trays/chamfer-proof.svg).
+with the available 90° V-bit.
 
 Sheet 900 × 400 × 19mm mdf.
-
-## Roundover machining proof
-
-![Roundover reconstructed from actual NC](roundover-proof.svg)
-
-The proof uses the emitted roundover NC and the declared quarter-circle tool
-shape. It checks complete contours at all six depths, 1,924 straight-section
-samples across all four edges and 72,000 surface points. The measured surface
-matches the R6 profile within 0.004mm NC rounding tolerance, preserves the center
-face and retains the nominal edge below 6mm. This is computational evidence,
-not a physical cutting trial. Source/NC hashes and measurements are in
-[roundover-measurements.json](roundover-measurements.json).
 
 ## Programs
 

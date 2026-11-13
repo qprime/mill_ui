@@ -28,7 +28,7 @@ Pipeline: `LayoutAST -> DiagramIR -> SVG`
 | SVG-10 | HARD | POCKET_REGION_FIDELITY | Pocket fills preserve all holes and islands, using the same region subtraction as machining. |
 | SVG-11 | HARD | EDGE_PLAN_FIDELITY | Edge drawings use the planner's selected-tool contour and depth; unmachinable requests are marked unplanned. |
 | SVG-12 | HARD | POCKET_LABEL_REGION | Pocket label anchors must lie in the recessed region, outside preserved holes/islands; an empty region has no label. |
-| SVG-13 | HARD | CLAMP_MARGIN_IDENTIFIED | Layout blueprints identify the configured sheet margin; positive margins have shaded border strips and a no-cut note, while zero is explicitly identified as none. |
+| SVG-13 | HARD | CLAMP_MARGIN_IDENTIFIED | Layout blueprints identify the configured sheet margin; positive margins have translucent red border strips matching fixture keepouts and a no-cut note, while zero is explicitly identified as none. |
 
 ---
 
@@ -79,7 +79,7 @@ RaisedPanel uses that same compound edge plan: flat-pocket regions enter
 POCKET_REGIONS and its V-tip contour enters BEVEL_CUTS, with angle/depth and
 field-height labels. Region fills preserve holes and draw beneath centerlines.
 They describe intended clearing regions, not finite-cutter corner coverage;
-actual-NC cross-sections and footprint proofs document that separately.
+assess that coverage separately from the emitted machining paths.
 
 Defined in `adapters/layoutast_to_ir.py`:
 
@@ -104,6 +104,13 @@ Defined in `adapters/layoutast_to_ir.py`:
 ## Style Tokens
 
 Defined in `diagram_render/render_svg.py` DiagramTheme:
+
+Sheet clamp margins and fixture keepouts share the theme's red no-cut color
+and 15% fill opacity. This is the standard for every generated blueprint,
+including recipe, production and back-setup views, in both dark and print
+themes. Keep the physical sheet outline visually distinct. A zero margin has
+no perimeter band and retains its explicit note; full-bed surfacing remains
+the labeled exception.
 
 | Token | Purpose |
 |-------|---------|

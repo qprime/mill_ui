@@ -39,22 +39,12 @@ Sheet 1100 × 800 × 19mm mdf.
 Door outlines and their four 3mm-high tabs are unchanged. Estimated runtime is
 144.6 minutes, including the newly required gutter clearing.
 
-## Machining proof and limits
+## Machining limits
 
-![Actual G-code cross-sections and corner footprint](machined-profile-proof.svg)
-
-The proof reconstructs the cutter sweeps from the emitted NC, checks all cutting
-depths for cell containment, and measures 316,730 surface points across all five
-cells. Straight sections agree with the declared profiles within a 0.004mm NC
-rounding allowance; the largest sampled overcut is below 0.001mm. Declared center
-heights are preserved. Source/NC hashes and individual cell measurements are in
-[machined-profile-measurements.json](machined-profile-measurements.json).
-
-These are computational checks, not a physical cutting test. The 12.7mm flat
-cutter leaves rounded internal corners and small areas of retained stock there,
-including spots that retain the full original height. The enlarged corner shows
-that limitation explicitly; blueprint pocket fills describe the intended regions,
-not square-corner clearance. No dogbones are added to decorative corners.
+The 12.7mm flat cutter leaves rounded internal corners and small areas of
+retained stock there, including spots that retain the full original height.
+Blueprint pocket fills describe the intended regions, not square-corner
+clearance. No dogbones are added to decorative corners.
 Arbitrary shallow slopes and shaped molding profiles need separate capabilities.
 An unavailable angle or undersized bit is an error; tooling inventory is unchanged.
 

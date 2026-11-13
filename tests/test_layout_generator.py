@@ -22,7 +22,8 @@ def test_simple_sheet_to_ast():
     item = ast.items[0]
     assert item.type == "Rect"
     assert item.placement is not None
-    assert item.placement.center_xy_mm == (500, 500)
+    assert ast.sheet.margin_mm == 10
+    assert item.placement.center_xy_mm == (490, 490)
 
 
 def test_multiple_placements_to_ast():
@@ -41,9 +42,7 @@ def test_multiple_placements_to_ast():
     assert len(ast.items) == 3
 
     positions = {item.placement.center_xy_mm for item in ast.items if item.placement is not None}
-    assert (200, 200) in positions
-    assert (600, 200) in positions
-    assert (200, 600) in positions
+    assert positions == {(190, 190), (590, 190), (190, 590)}
 
 
 def test_shaker_placement_to_ast():
@@ -129,8 +128,8 @@ def test_sheet_to_pml_simple():
     assert "height: 1000mm" in pml
     assert "thickness: 19mm" in pml
     assert "panel_0_rect" in pml
-    assert "x: 500mm" in pml
-    assert "y: 500mm" in pml
+    assert "x: 490mm" in pml
+    assert "y: 490mm" in pml
     assert "width: 400mm" in pml
     assert "height: 300mm" in pml
     assert "type: profile" in pml

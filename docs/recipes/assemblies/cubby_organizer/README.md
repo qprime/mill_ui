@@ -24,25 +24,9 @@ their positions share the same assembly coordinates as the frame/back grooves.
 front, that face sits at 288mm and its front face at 270mm. The back is captured
 in four frame grooves and installed while assembling the frame.
 
-![Assembled front section, back setback and opposed half-laps checked against emitted G-code](assembly-fit-proof.svg)
-
-The colored sections reconstruct retained material from actual emitted profile,
-through-relief and pocket cutter sweeps. All eight retained blank bounds match
-the specified spans within 0.004mm NC rounding tolerance; 1,060 depth slices
-show no material interference. This is a computational check, not a physical
-cut test. [Measurements and NC hashes](assembly-fit-measurements.json) record
-its inputs, independent panel placements, sampling and results.
-
-Generated notch relief now uses the notch cutout's center to orient the bores.
-The former whole-panel reference left rounded material in mating corners;
-nominal dimensions alone did not reveal that fit defect. Bore depths and tools
-retain their specified values.
-
-The earlier [groove/relief proof](groove-relief-proof.svg) documents the previous
-validation and local-profile precision correction at commit `b8e64251`.
-Its dimensions and bore locations are historical; use the assembly proof and
-current outputs for this corrected design. A back groove may meet an existing
-notch relief because they belong to the same proven cutout.
+Generated notch relief uses each notch cutout's center to orient the bores
+and clear its mating corners. A back groove may meet an existing notch relief
+when they belong to the same cutout.
 
 3 sheets.
 

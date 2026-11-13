@@ -5,7 +5,7 @@ from typing import Any
 
 from .guillotine import guillotine_pack
 from .maxrects import MaxRectsHeuristic, maxrects_pack
-from .types import NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
+from .types import PACKING_TOLERANCE_MM, NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
 
 
 class PackingAlgorithm(Enum):
@@ -24,9 +24,9 @@ def _expand_parts(parts: list[PartSpec]) -> list[tuple[PartSpec, int]]:
     return expanded
 
 
-def _part_fits_on_sheet(part: PartSpec, sheet: SheetSpec) -> bool:
-    usable_w = sheet.usable_width_mm
-    usable_h = sheet.usable_height_mm
+def _part_fits_on_sheet(part: PartSpec, sheet: SheetSpec, edge_clearance_mm: float) -> bool:
+    usable_w = sheet.usable_width_mm - 2 * edge_clearance_mm + PACKING_TOLERANCE_MM
+    usable_h = sheet.usable_height_mm - 2 * edge_clearance_mm + PACKING_TOLERANCE_MM
 
     return (part.width_mm <= usable_w and part.height_mm <= usable_h) or (
         part.allow_rotation and part.height_mm <= usable_w and part.width_mm <= usable_h
@@ -66,8 +66,11 @@ def pack_sheets(
     sheet_spec: SheetSpec,
     max_sheets: int | None = None,
     algorithm: PackingAlgorithm | str = DEFAULT_ALGORITHM,
+    *,
+    edge_clearance_mm: float = 0.0,
 ) -> NestingResult:
-
+    if edge_clearance_mm < 0:
+        raise ValueError(f"edge_clearance_mm must be non-negative, got {edge_clearance_mm}")
     if isinstance(algorithm, str):
         algorithm = PackingAlgorithm(algorithm)
 
@@ -76,7 +79,7 @@ def pack_sheets(
     for part in parts:
         if part.quantity == 0:
             continue
-        if _part_fits_on_sheet(part, sheet_spec):
+        if _part_fits_on_sheet(part, sheet_spec, edge_clearance_mm):
             valid_parts.append(part)
         else:
             too_large.append(part)
@@ -99,8 +102,8 @@ def pack_sheets(
 
         placements = _pack_single_sheet(
             parts_input=pack_input,
-            bin_width=sheet_spec.usable_width_mm + sheet_spec.gap_mm,
-            bin_height=sheet_spec.usable_height_mm + sheet_spec.gap_mm,
+            bin_width=sheet_spec.usable_width_mm - 2 * edge_clearance_mm + sheet_spec.gap_mm,
+            bin_height=sheet_spec.usable_height_mm - 2 * edge_clearance_mm + sheet_spec.gap_mm,
             gap=sheet_spec.gap_mm,
             algorithm=algorithm,
         )
@@ -114,8 +117,8 @@ def pack_sheets(
         for p in placements:
             part_spec, inst_id = p.metadata
 
-            sheet_x = p.x + sheet_spec.margin_mm
-            sheet_y = p.y + sheet_spec.margin_mm
+            sheet_x = p.x + sheet_spec.margin_mm + edge_clearance_mm
+            sheet_y = p.y + sheet_spec.margin_mm + edge_clearance_mm
 
             sheet_placements.append(
                 NestedPart(

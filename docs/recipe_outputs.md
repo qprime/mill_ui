@@ -2,7 +2,7 @@
 
 A recipe is a folder `docs/recipes/<category>/<recipe>/` that directly holds at least one input file (`*.pml.yml` or `*.nest.yml`). Its category must be listed in `docs/recipes/catalog.yml`, and its folder name must be unique across all categories. `validation/recipes.py` finds recipes; every recipe tool uses it.
 
-A recipe with PML sources commits its outputs under `<recipe>/output/`. Nest recipes commit no `output/`. The recipe gate checks that the committed outputs, the recipe index and the feature guide are exactly what current code generates.
+Every recipe commits its outputs under `<recipe>/output/`, including recipes with nesting sources. The recipe gate checks that the committed outputs, the recipe index and the feature guide are exactly what current code generates.
 
 ## The rule
 
@@ -24,7 +24,7 @@ The gate is not part of the test suite: tests never read `docs/recipes/`. It run
 
 ## What the gate reports
 
-Each PML recipe is written into a temporary directory and compared with its `output/`:
+Each recipe is generated into a temporary directory and compared with its saved `output/`. This temporary directory is for verification only; normal recipe runs save outputs in the recipe directory:
 
 The gate also rejects design errors from every generated sheet, even when its files match `output/` exactly. Matching output proves reproducibility; each recipe must also have an empty `errors` list in `metrics.json`.
 
@@ -35,13 +35,13 @@ The gate also rejects design errors from every generated sheet, even when its fi
 | `<name> differs: N lines changed` | The committed file's content differs from what current code writes |
 | `Untracked recipe file: <path>` | A file under some `output/`, or a generated document, is not tracked by git |
 | `Generated document is missing / out of date / no longer generated` | Run `python -m cli.recipes --regen` |
-| `no README.md`, `README.md has no ...` | The README needs a `# ` title, a `**Demonstrates:**` line, and (for PML recipes) an image from its own `output/` that exists |
+| `no README.md`, `README.md has no ...` | The README needs a `# ` title, a `**Demonstrates:**` line, and an image from its own `output/` that exists |
 | `Misplaced input file: <path>` | An input file that is not directly in a recipe folder (or in its `output/`) |
 | `category '<name>' is not listed in catalog.yml` | Add the category to `catalog.yml` |
 | `... does not fit altmill_4x4: ...` | A resolved PML sheet, or a nest job's sheet, minus its margin exceeds the Altmill envelope |
 | `capability '<name>' names recipe '<name>', which does not exist` | A `{recipes: [...]}` rule in `catalog.yml` is stale |
 
-Nest recipes are run through `cli.nest.nest_job`; the gate fails one that produces no sheets or uses under 30% of the sheet area.
+Nest recipes first run through `cli.nest.nest_job`, then compile every generated sheet through the same machining pipeline and artifact writer as PML recipes. The gate also fails jobs that produce no sheets, leave parts unplaced, or use under 30% of the overall sheet area. Nesting uses the source job's kerf; an explicit `cli.mill --recipe ... --kerf` overrides both packing and machining. PML recipes retain their 3.175mm compilation default.
 
 ## Adding a recipe
 
@@ -66,7 +66,8 @@ Nest recipes are run through `cli.nest.nest_job`; the gate fails one that produc
 
 2. If the recipe shows a capability its PML does not spell out (multi-sheet partitioning, splicing, a joinery default), add `{recipes: [<recipe>]}` to that capability's `detect` in `catalog.yml`.
 3. Run `python -m cli.recipes --regen`.
-4. Stage every file in the new `output/` and every changed generated document, and commit them with the recipe.
+4. Review the generated blueprints with the owner and resolve design errors. Keep temporary diagnostic/review drawings outside the recipe directories and out of commits.
+5. Stage every file in the new `output/` and every changed generated document, and commit them with the recipe.
 
 ## Output structure
 
@@ -82,7 +83,7 @@ docs/recipes/doors/shaker_door/
     └── metrics.json                        # Complexity, fidelity, errors, warnings
 ```
 
-A recipe with a back face also writes `<name>.back.svg`. A multi-sheet recipe prefixes each G-code file with `sheet_N.`, writes one SVG per sheet, and adds `manifest.json`. A recipe with several PML sources names each source's outputs after `Path(source).stem` (`a.pml.svg`, `a.pml.profile-3.17mm.nc`) and writes one `metrics.json`, `machining_summary.json` and `manifest.json` for all of them.
+A recipe with a back face also writes `<name>.back.svg`. A multi-sheet recipe prefixes each G-code file with `sheet_N.`, writes one SVG per sheet, and adds `manifest.json`. A recipe with several input sources names each source's outputs after `Path(source).stem` (`a.pml.svg`, `a.pml.profile-3.17mm.nc`) and writes one `metrics.json`, `machining_summary.json` and `manifest.json` for all of them.
 
 ### Metrics schema
 

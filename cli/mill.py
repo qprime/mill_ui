@@ -8,6 +8,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
+from cli.nest import nest_job
 from cli.project import (
     DEFAULT_KERF_MM,
     DEFAULT_MACHINE,
@@ -31,7 +32,7 @@ from config.machine_loader import (
 from layout_ast.layout import LayoutAST
 from pml.revision_header import build_provenance, format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
-from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_parser import parse_nest_yaml, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout_multi
 from validation.recipes import Recipe, recipe_at, recipe_job_stem
 
@@ -354,33 +355,57 @@ def load_pml_asts(source: Path) -> list[LayoutAST]:
     return resolve_layout_multi(comp_ast)
 
 
+def _load_recipe_source(source: Path, kerf_mm: float | None) -> tuple[list[LayoutAST], float]:
+    if source.name.endswith(".nest.yml"):
+        job = parse_nest_yaml(source.read_text(encoding="utf-8"))
+        if kerf_mm is not None:
+            job = replace(job, kerf_mm=kerf_mm)
+        result = nest_job(job)
+        unplaced = result["nesting_result"].unplaced_parts
+        if unplaced:
+            names = ", ".join(f"{part.quantity}x {part.name}" for part in unplaced)
+            raise ValueError(f"{source.name}: parts do not fit the nesting sheets: {names}")
+        if not result["output"]:
+            raise ValueError(f"{source.name}: nesting produced 0 sheets")
+        return result["output"], job.kerf_mm
+    return load_pml_asts(source), RECIPE_KERF_MM if kerf_mm is None else kerf_mm
+
+
 def write_recipe_outputs(
     recipe: Recipe,
     output_dir: Path,
     *,
-    kerf_mm: float = RECIPE_KERF_MM,
+    kerf_mm: float | None = None,
     theme: str = RECIPE_THEME,
     y_origin: str = "back",
     generate_svg: bool = True,
     machine_config: MachineConfig | None = None,
 ) -> tuple[list[SheetRun], dict[str, Path]]:
-    runs = [
-        run
-        for source in recipe.pml_sources
-        for run in _compile(
-            load_pml_asts(source),
+    runs = []
+    source_kerfs = {}
+    for source in recipe.sources:
+        asts, source_kerf = _load_recipe_source(source, kerf_mm)
+        source_kerfs[source.name] = source_kerf
+        source_runs = _compile(
+            asts,
             source,
             recipe_job_stem(recipe, source),
-            kerf_mm=kerf_mm,
+            kerf_mm=source_kerf,
             theme=theme,
             y_origin=y_origin,
             generate_svg=generate_svg,
             machine_config=machine_config,
         )
-    ]
-    outputs = write_run_outputs(
-        runs, output_dir, build_params={"kerf_mm": kerf_mm, "theme": theme, "y_origin": y_origin}
-    )
+        runs.extend(source_runs)
+    kerfs = set(source_kerfs.values())
+    build_params: dict[str, object] = {
+        "kerf_mm": next(iter(kerfs)) if len(kerfs) == 1 else None,
+        "theme": theme,
+        "y_origin": y_origin,
+    }
+    if len(kerfs) > 1:
+        build_params["source_kerfs_mm"] = source_kerfs
+    outputs = write_run_outputs(runs, output_dir, build_params=build_params)
     return runs, outputs
 
 
@@ -389,20 +414,13 @@ def process_recipe(recipe_dir: Path, args) -> None:
     if recipe is None:
         print(f"Error: No *.pml.yml or *.nest.yml in {recipe_dir}", file=sys.stderr)
         sys.exit(1)
-    if not recipe.pml_sources:
-        print(
-            f"Error: {recipe_dir} has only nest sources; run them with python -m cli.nest <file>.nest.yml",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
     print(f"Recipe: {recipe.name}", file=sys.stderr)
-    for source in recipe.pml_sources:
+    for source in recipe.sources:
         print(f"Compiling: {source.name}", file=sys.stderr)
     runs, outputs = write_recipe_outputs(
         recipe,
         recipe_dir / "output",
-        kerf_mm=args.kerf if args.kerf is not None else RECIPE_KERF_MM,
+        kerf_mm=args.kerf,
         theme=args.theme if args.theme is not None else RECIPE_THEME,
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,

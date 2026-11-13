@@ -1,4 +1,8 @@
+import pytest
+
+from adapters.ast_to_removal import ast_to_removal_intents
 from nesting.api import nest_and_generate, nest_parts
+from validation.removal_checks import check_working_area_bounds
 
 
 def test_basic_nesting_api():
@@ -196,3 +200,38 @@ def test_invalid_output_format():
     except ValueError as e:
         assert "Invalid output_format" in str(e)
         assert "invalid" in str(e)
+
+
+@pytest.mark.parametrize("algorithm", ["guillotine", "maxrects"])
+@pytest.mark.parametrize("margin", [0, 10, 25])
+@pytest.mark.parametrize("padding", [0, 0.1])
+def test_nested_machining_reserves_cutter_clearance_in_working_coordinates(algorithm, margin, padding):
+    kerf = 6.35
+    width, height = 200, 100
+    params = {
+        "parts": [{"name": "panel", "width_mm": width, "height_mm": height, "allow_rotation": False}],
+        "sheet_width_mm": width + 2 * (margin + kerf) + padding,
+        "sheet_height_mm": height + 2 * (margin + kerf) + padding,
+        "sheet_thickness_mm": 19,
+        "margin_mm": margin,
+        "kerf_mm": kerf,
+        "algorithm": algorithm,
+    }
+
+    result = nest_and_generate(**params)
+    packed = nest_parts(**params)
+
+    assert result["total_sheets"] == packed["total_sheets"] == 1
+    assert packed["validation"]["is_valid"]
+    placement = result["nesting_result"].sheets[0].placements[0]
+    assert placement.left_mm == pytest.approx(margin + kerf)
+    assert placement.bottom_mm == pytest.approx(margin + kerf)
+    ast = result["output"][0]
+    (intent,) = ast_to_removal_intents(ast)
+    assert intent.bounds.x_min == pytest.approx(kerf)
+    assert intent.bounds.y_min == pytest.approx(kerf)
+    assert intent.bounds.x_max - intent.bounds.x_min == width
+    assert intent.bounds.y_max - intent.bounds.y_min == height
+    assert not check_working_area_bounds(
+        [intent], ast.sheet.working_width_mm, ast.sheet.working_height_mm, tool_radius_mm=kerf / 2
+    ).has_issues()

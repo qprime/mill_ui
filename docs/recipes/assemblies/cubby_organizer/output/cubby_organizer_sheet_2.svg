@@ -26,7 +26,7 @@
 .centerline { stroke: #6b8e7f; fill: none; stroke-width: 0.5; stroke-dasharray: 8,4; }
 .soft-limit { stroke: #ff9500; fill: none; stroke-width: 1.5; stroke-dasharray: 6,3; }
 .t-track { stroke: none; fill: #66cc88; fill-opacity: 0.25; stroke-width: 0; }
-.margin-zone { fill: #6b8e7f; fill-opacity: 0.15; }
+.margin-zone { fill: #ff6b6b; fill-opacity: 0.15; }
 .legend { fill: #cccccc; font-family: monospace; font-size: 10px; }
 .title { fill: #cccccc; font-family: monospace; font-size: 14px; font-weight: bold; }
 .section-label { fill: #5ab9ea; font-family: monospace; font-size: 9px; font-weight: bold; }
@@ -44,10 +44,10 @@
   <rect x="-21.5875" y="-61.5875" width="1393.1750000000002" height="1719.1750000000002" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="1220.000" height="1220.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
-    <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_bottom" />
-    <rect x="0.000" y="1210.000" width="1220.000" height="10.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_top" />
-    <rect x="0.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_left" />
-    <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#6b8e7f" fill-opacity="0.15" id="margin_right" />
+    <rect x="0.000" y="0.000" width="1220.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_bottom" />
+    <rect x="0.000" y="1210.000" width="1220.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_top" />
+    <rect x="0.000" y="10.000" width="10.000" height="1200.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_left" />
+    <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <path d="M 916.350 1203.650 L 916.350 1189.394 L 898.350 1189.394 L 898.350 1175.049 L 916.350 1175.049 L 916.350 1160.823 L 898.350 1160.823 L 898.350 1146.477 L 916.350 1146.477 L 916.350 1132.251 L 898.350 1132.251 L 898.350 1117.906 L 916.350 1117.906 L 916.350 1103.680 L 898.350 1103.680 L 898.350 1089.334 L 916.350 1089.334 L 916.350 1075.109 L 898.350 1075.109 L 898.350 1060.763 L 916.350 1060.763 L 916.350 1046.537 L 898.350 1046.537 L 898.350 1032.191 L 916.350 1032.191 L 916.350 1017.966 L 898.350 1017.966 L 898.350 1003.620 L 916.350 1003.620 L 916.350 989.394 L 898.350 989.394 L 898.350 975.049 L 916.350 975.049 L 916.350 960.823 L 898.350 960.823 L 898.350 946.477 L 916.350 946.477 L 916.350 932.251 L 898.350 932.251 L 898.350 917.906 L 916.350 917.906 L 916.350 903.650 L 16.350 903.650 L 16.350 917.906 L 34.350 917.906 L 34.350 932.251 L 16.350 932.251 L 16.350 946.477 L 34.350 946.477 L 34.350 960.823 L 16.350 960.823 L 16.350 975.049 L 34.350 975.049 L 34.350 989.394 L 16.350 989.394 L 16.350 1003.620 L 34.350 1003.620 L 34.350 1017.966 L 16.350 1017.966 L 16.350 1032.191 L 34.350 1032.191 L 34.350 1046.537 L 16.350 1046.537 L 16.350 1060.763 L 34.350 1060.763 L 34.350 1075.109 L 16.350 1075.109 L 16.350 1089.334 L 34.350 1089.334 L 34.350 1103.680 L 16.350 1103.680 L 16.350 1117.906 L 34.350 1117.906 L 34.350 1132.251 L 16.350 1132.251 L 16.350 1146.477 L 34.350 1146.477 L 34.350 1160.823 L 16.350 1160.823 L 16.350 1175.049 L 34.350 1175.049 L 34.350 1189.394 L 16.350 1189.394 L 16.350 1203.650 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_bottom_0_bottom_outer" />

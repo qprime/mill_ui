@@ -15,9 +15,9 @@
       "feed_z_mm_min": 100.0,
       "stepdown_mm": 0.5,
       "max_depth_mm": 0.4,
-      "feature_count": 3063,
+      "feature_count": 1996,
       "strategy": "engrave",
-      "estimated_runtime_min": 228.3
+      "estimated_runtime_min": 151.1
     },
     {
       "filename": "profile-3.17mm.nc",
@@ -34,9 +34,9 @@
       "estimated_runtime_min": 16.1
     }
   ],
-  "total_runtime_min": 244.4,
+  "total_runtime_min": 167.2,
   "feature_counts": {
-    "engrave": 3063,
+    "engrave": 1996,
     "profile": 1
   },
   "safe_z_mm": 6.0,

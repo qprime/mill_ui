@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 24600,
-    "rapid_moves": 3064,
-    "cut_moves": 6204,
-    "rapid_ratio": 0.125
+    "total_moves": 16064,
+    "rapid_moves": 1997,
+    "cut_moves": 4070,
+    "rapid_ratio": 0.124
   },
   "fidelity": {
     "tool_changes": 2,
@@ -12,7 +12,7 @@
       {
         "name": "engrave",
         "tool_diameter_mm": 1.0,
-        "move_count": 24504
+        "move_count": 15968
       },
       {
         "name": "profile",
@@ -22,12 +22,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 323738,
-    "total_lines": 18490,
+    "total_bytes": 211865,
+    "total_lines": 12088,
     "files": {
       "engrave-1.00mm": {
-        "bytes": 321227,
-        "lines": 18394
+        "bytes": 209354,
+        "lines": 11992
       },
       "profile-3.17mm": {
         "bytes": 2511,

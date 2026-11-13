@@ -769,7 +769,6 @@
       "subsequent_geometry_correction": {
         "description": "Circle island boundary now preserved instead of its bounding square. This is a geometry correction after the recorded placement-only audit.",
         "measurements": "panels/pocket_with_island/island-shape-measurements.json",
-        "proof": "panels/pocket_with_island/island-shape-proof.svg",
         "current_pocket_nc_sha256": "e69279545cb5a02f5b1a1c614c60720262439a39d6f5fab6eabc592cdfb8c587"
       }
     },

@@ -17,6 +17,10 @@ class Recipe:
     pml_sources: tuple[Path, ...]
     nest_sources: tuple[Path, ...]
 
+    @property
+    def sources(self) -> tuple[Path, ...]:
+        return self.pml_sources + self.nest_sources
+
 
 def _is_input(path: Path) -> bool:
     return path.is_file() and path.name.endswith((PML_SUFFIX, NEST_SUFFIX))
@@ -78,4 +82,4 @@ def misplaced_inputs(root: Path = RECIPES_ROOT) -> tuple[Path, ...]:
 
 
 def recipe_job_stem(recipe: Recipe, source: Path) -> str:
-    return recipe.name if len(recipe.pml_sources) == 1 else source.stem
+    return recipe.name if len(recipe.sources) == 1 else source.stem

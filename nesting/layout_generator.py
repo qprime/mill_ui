@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from layout_ast.layout import LayoutAST, Sheet
 from pml.lifter import lift_layout_ast
 from pml.yaml_formatter import format_pml_yaml
@@ -21,7 +23,14 @@ def sheet_layout_to_ast(sheet_layout: SheetLayout) -> LayoutAST:
     all_items = []
     for placement in sheet_layout.placements:
         items = placement_to_items(placement, sheet_spec.thickness_mm)
-        all_items.extend(items)
+        for item in items:
+            if item.placement is None:
+                raise ValueError(f"Nested item {item.shape_id} is missing its placement")
+            x, y = item.placement.center_xy_mm
+            working_placement = replace(
+                item.placement, center_xy_mm=(x - sheet_spec.margin_mm, y - sheet_spec.margin_mm)
+            )
+            all_items.append(replace(item, placement=working_placement))
 
     return LayoutAST(
         sheet=sheet,

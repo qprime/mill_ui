@@ -12,12 +12,6 @@ The diamond lattice intentionally crosses two families of 6.35mm-wide grooves,
 both 3mm deep, at right angles. Rotating the pattern does not change whether
 those crossings are valid.
 
-![Lattice validation and actual cutter footprint](lattice-proof.svg)
-
-The red dots mark the 59 former validation reports. The green view reconstructs
-the emitted G-code at 3mm depth using the full 3.175mm cutter diameter. The fix
-changes validation; the geometry and machining programs are unchanged.
-
 Sheet 1100 × 900 × 19mm mdf.
 
 - `pocket-12.70mm.nc`: pocket, 12.7mm tool, 4 feature(s), to 6mm

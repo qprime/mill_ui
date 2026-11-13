@@ -57,3 +57,7 @@ output/
 
 # Local project workspace symlink (points outside the repo)
 /projects
+
+# Temporary recipe review drawings
+/docs/recipes/*/*/*-proof.svg
+/docs/recipes/*/*/*-intent-review.svg

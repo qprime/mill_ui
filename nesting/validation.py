@@ -5,7 +5,7 @@ from typing import Any
 
 from shapely.geometry import Polygon
 
-from .types import NestedPart, NestingResult, SheetLayout
+from .types import PACKING_TOLERANCE_MM, NestedPart, NestingResult, SheetLayout
 
 
 @dataclass
@@ -78,7 +78,12 @@ def _geometries_overlap(p1: NestedPart, p2: NestedPart, epsilon: float = 0.01) -
 
 def _placement_in_bounds(p: NestedPart, sheet_width: float, sheet_height: float, margin: float) -> bool:
     left, b, r, t = p.bounds
-    return left >= margin and b >= margin and r <= sheet_width - margin and t <= sheet_height - margin
+    return (
+        left >= margin - PACKING_TOLERANCE_MM
+        and b >= margin - PACKING_TOLERANCE_MM
+        and r <= sheet_width - margin + PACKING_TOLERANCE_MM
+        and t <= sheet_height - margin + PACKING_TOLERANCE_MM
+    )
 
 
 def validate_sheet_layout(layout: SheetLayout) -> NestingValidationResult:

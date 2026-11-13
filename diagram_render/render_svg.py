@@ -39,6 +39,10 @@ class DiagramTheme:
         return self.get_style(token)
 
 
+_DARK_NO_CUT_COLOR = "#ff6b6b"
+_PRINT_NO_CUT_COLOR = "#cc0000"
+_NO_CUT_FILL_OPACITY = "0.15"
+
 DARK_DIAGRAM_THEME = DiagramTheme(
     background="#1a1a1a",
     foreground="#e8e8e8",
@@ -55,9 +59,9 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "edge-unplanned": {"stroke": "#ff6b6b", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
         "edge-label": {"fill": "#e8e8e8", "stroke": "none", "font-family": "monospace", "font-size": "8px"},
         "keepout": {
-            "stroke": "#ff6b6b",
-            "fill": "#ff6b6b",
-            "fill-opacity": "0.15",
+            "stroke": _DARK_NO_CUT_COLOR,
+            "fill": _DARK_NO_CUT_COLOR,
+            "fill-opacity": _NO_CUT_FILL_OPACITY,
             "stroke-width": "1",
             "stroke-dasharray": "4,2",
         },
@@ -76,7 +80,7 @@ DARK_DIAGRAM_THEME = DiagramTheme(
         "centerline": {"stroke": "#6b8e7f", "fill": "none", "stroke-width": "0.5", "stroke-dasharray": "8,4"},
         "soft-limit": {"stroke": "#ff9500", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "6,3"},
         "t-track": {"stroke": "none", "fill": "#66cc88", "fill-opacity": "0.25", "stroke-width": "0"},
-        "margin-zone": {"fill": "#6b8e7f", "fill-opacity": "0.15"},
+        "margin-zone": {"fill": _DARK_NO_CUT_COLOR, "fill-opacity": _NO_CUT_FILL_OPACITY},
         "legend": {"fill": "#cccccc", "font-family": "monospace", "font-size": "10px"},
         "title": {"fill": "#cccccc", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
         "section-label": {"fill": "#5ab9ea", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},
@@ -110,9 +114,9 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "edge-unplanned": {"stroke": "#666666", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "4,2"},
         "edge-label": {"fill": "#000000", "stroke": "none", "font-family": "monospace", "font-size": "8px"},
         "keepout": {
-            "stroke": "#cc0000",
-            "fill": "#cc0000",
-            "fill-opacity": "0.15",
+            "stroke": _PRINT_NO_CUT_COLOR,
+            "fill": _PRINT_NO_CUT_COLOR,
+            "fill-opacity": _NO_CUT_FILL_OPACITY,
             "stroke-width": "1",
             "stroke-dasharray": "4,2",
         },
@@ -131,7 +135,7 @@ PRINT_DIAGRAM_THEME = DiagramTheme(
         "centerline": {"stroke": "#666666", "fill": "none", "stroke-width": "0.5", "stroke-dasharray": "8,4"},
         "soft-limit": {"stroke": "#cc6600", "fill": "none", "stroke-width": "1.5", "stroke-dasharray": "6,3"},
         "t-track": {"stroke": "none", "fill": "#339955", "fill-opacity": "0.2", "stroke-width": "0"},
-        "margin-zone": {"fill": "#666666", "fill-opacity": "0.15"},
+        "margin-zone": {"fill": _PRINT_NO_CUT_COLOR, "fill-opacity": _NO_CUT_FILL_OPACITY},
         "legend": {"fill": "#000000", "font-family": "monospace", "font-size": "10px"},
         "title": {"fill": "#000000", "font-family": "monospace", "font-size": "14px", "font-weight": "bold"},
         "section-label": {"fill": "#333333", "font-family": "monospace", "font-size": "9px", "font-weight": "bold"},

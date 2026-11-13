@@ -134,6 +134,8 @@ Whole-sheet jobs laid out for the machine.
 
 ### [Nested cabinet job](production/nested_cabinet_job/)
 
+<img src="production/nested_cabinet_job/output/nested_cabinet_job_sheet_1.svg" width="240">
+
 Nesting a part list with MaxRects, including templated parts, shaped parts and a per-part holding override.
 
 ### [Production sheet](production/production_sheet/)

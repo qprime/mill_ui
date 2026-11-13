@@ -18,6 +18,8 @@
 | NS-8 | STRUCTURAL | ROTATION_SWAPS_DIMS | When rotated, width/height swap |
 | NS-9 | STRUCTURAL | GAP_FORMULA | gap_mm = kerf_mm + gap_margin_mm |
 | NS-10 | STRUCTURAL | USABLE_FORMULA | usable = dimension - 2*margin |
+| NS-11 | HARD | MACHINING_EDGE_CLEARANCE | Nesting APIs reserve the requested kerf inside each working-area edge for outside-profile cuts, preserving nominal part dimensions. |
+| NS-12 | HARD | LAYOUT_WORKING_COORDINATES | Convert physical packing placements to working-area coordinates when producing LayoutAST/PML; export applies the physical sheet margin once. |
 
 ---
 
@@ -59,6 +61,16 @@ The sheet packer passes this gap to both packing algorithms. Their internal
 rectangles include a trailing gap, so the packing bin extends by one gap on each
 axis. This reserves space between parts without requiring an additional gap at
 the sheet's usable outer edge; nominal parts must still fit inside the usable area.
+
+The general sheet packer accepts optional `edge_clearance_mm`, defaulting to
+zero for geometry-only packing. The nesting APIs supply the resolved kerf for
+machining jobs. This reduces the packing bin on both sides of each axis and
+insets placements without changing nominal part dimensions or part-to-part gap.
+
+Packing results describe physical sheet placements. At the LayoutAST boundary,
+subtract the physical sheet margin from each placement. The generated layout
+keeps the original physical sheet dimensions and margin; the exporter applies
+that margin once, as required by CS-13/CS-14.
 
 ---
 

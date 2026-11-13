@@ -172,7 +172,10 @@ outside tool centerlines coincide, with identical depth and no per-feature feeds
 allowance, tabs, onion skin, ramp distance, or nonzero start depth. Any job using
 tabs or onion skin keeps ordinary profiles. Connected compatible rectangles use
 shared seams followed by closed contours around their union, including holes.
-Partial seams retain the rest of the boundary. All contours use the existing
+Partial seams retain the rest of the boundary. A union may also remove internal
+boundaries that failed the seam threshold; those remain ordinary per-profile
+contours and are cut before the union outlines. Only accepted seams replace
+the corresponding per-profile traversals. All contours use the existing
 profile operation; ramp entries follow boundary segments without corner shortcuts.
 
 Two outside rectangle profiles require at least the selected cutter's diameter

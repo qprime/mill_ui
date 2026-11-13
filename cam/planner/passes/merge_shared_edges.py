@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import TYPE_CHECKING
 
-from shapely import set_precision
-from shapely.geometry import Polygon, box
+from shapely import get_parts, set_precision
+from shapely.geometry import LineString, Polygon, box
 from shapely.ops import orient, unary_union
 
 from cam.ops.profile import profile_outline
@@ -45,6 +45,7 @@ class SharedProfileGroup:
     depth_mm: float
     seams: tuple[Shape2D, ...]
     outlines: tuple[Shape2D, ...]
+    unshared_contours: tuple[Shape2D, ...] = ()
 
 
 def _rect_edges(cx: float, cy: float, w: float, h: float, profile_index: int) -> list[_Edge]:
@@ -168,6 +169,16 @@ def _connected_profiles(seams: Sequence[tuple[int, int, Shape2D]]) -> list[tuple
     return groups
 
 
+def _unshared_contours(regions: Sequence[Polygon], boundary: Polygon, seams: Sequence[Shape2D]) -> tuple[Shape2D, ...]:
+    planned = unary_union([boundary.boundary, *(LineString([(p.x, p.y) for p in seam.points]) for seam in seams)])
+    contours: list[Shape2D] = []
+    for region in regions:
+        for part in get_parts(region.boundary.difference(planned)):
+            if isinstance(part, LineString) and not part.is_empty:
+                contours.append(Shape2D(tuple(Vec2(float(x), float(y)) for x, y in part.coords)))
+    return tuple(contours)
+
+
 def merge_rect_profiles(
     profiles: Sequence[FeatureInput], *, tool_diameter_mm: float, config: Config
 ) -> tuple[SharedProfileGroup, ...]:
@@ -187,7 +198,8 @@ def merge_rect_profiles(
         region = orient(region, sign=1.0)
         outlines = tuple(polygon_shape(list(ring.coords), (0.0, 0.0)) for ring in (region.exterior, *region.interiors))
         group_seams = tuple(shape for a, b, shape in seams if a in indices and b in indices)
-        groups.append(SharedProfileGroup(indices, profiles[indices[0]].depth_mm, group_seams, outlines))
+        unshared = _unshared_contours([regions[index] for index in indices], region, group_seams)
+        groups.append(SharedProfileGroup(indices, profiles[indices[0]].depth_mm, group_seams, outlines, unshared))
     return tuple(groups)
 
 
@@ -195,7 +207,7 @@ def plan_shared_rect_profiles(
     groups: Sequence[SharedProfileGroup], *, record: PassRecord, tool: ToolSelection, cut_through_mm: float
 ) -> int:
     for group in groups:
-        for shape in (*group.seams, *group.outlines):
+        for shape in (*group.seams, *group.unshared_contours, *group.outlines):
             record.add_moves(
                 profile_outline(
                     shape, record.setup, group.depth_mm + cut_through_mm, step_down=stepdown_for_tool(tool)

@@ -16,7 +16,7 @@
 | PL-6 | STRUCTURAL | LAYOUT_TOPDOWN | Layout managers subdivide regions top-down |
 | PL-7 | STRUCTURAL | SHAPES_EMIT_ABSOLUTE | Shapes emit items with absolute coordinates |
 | PL-8 | HARD | NO_PASSTHROUGH_GEOMETRY | Do not add computed planner-geometry fields to Feature or RemovalIntent. See "Known Exception" below. |
-| PL-9 | STRUCTURAL | DOMAIN_VIA_PARAMS | Shape handlers pass true geometry to children via `params["domain"]` (Domain) and `params["domain_center"]` (Point2D). Domain-aware child handlers consume these when present, falling back to ResolvedRegion (Rect) when absent. Shape handlers must not special-case child types to pass geometry — all children receive the same params. Structural nodes (Frame, Inset, Grid, Split) strip domain from params before dispatching children. |
+| PL-9 | STRUCTURAL | DOMAIN_VIA_PARAMS | Shape handlers pass true geometry to children via `params["domain"]` (Domain) and `params["domain_center"]` (Point2D). Domain-aware child handlers consume these when present, falling back to ResolvedRegion (Rect) when absent. Geometry must not depend on milling child type or component packaging. Structural nodes reset domain; an Arch's immediate Frame retains its existing true-arch inset and dispatches all children uniformly on it. |
 | PL-10 | HARD | SINGLE_WRITER | Each serialized artifact type has exactly one canonical writer function. All code paths — CLI, tests, regen, batch — must call it. The writer owns filename and layout; callers pass data only. Any other path that writes this artifact type is a defect. |
 | PL-11 | HARD | BACK_SETUP_FIRST | Back-face programs machine before front; through-cuts exist only in the front setup |
 
@@ -142,6 +142,11 @@ shape geometry pull the domain from params rather than being special-cased insid
 - Structural nodes (Frame, Inset, Grid, Split, SplitHorizontal, SplitVertical, SplitGrid,
   SplitHorizontalGaps, AtPosition) MUST strip `domain` and `domain_center` from params
   before dispatching children, since they change the region.
+- An immediate Frame under Arch is the established geometry-aware exception:
+  inset the true arch once, require one connected region, and dispatch every child
+  on that domain through the ordinary handler map. Do not select geometry by
+  milling child type. Components and grouping Panels are transparent to this
+  relationship. Other Frame placements retain their rectangular layout behavior.
 
 **Wrong:**
 Shape handler special-cases a child type:

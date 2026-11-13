@@ -387,6 +387,11 @@ Create a frame border around content:
       - Pocket: {depth: 6mm}
 ```
 
+An immediate Frame inside Arch insets the actual arch boundary. Every milling
+child, including a reusable component, receives that same inset outline.
+The inset must leave one connected region. Frames in other placements retain
+their rectangular layout behavior.
+
 #### Grid
 
 Divide region into rows × cols cells:
@@ -2252,6 +2257,10 @@ Each use binds its `args` over the definition's `params` before parsing the body
 The example therefore produces a 65mm frame with an 8mm-deep pocket; another use
 without arguments keeps the 57mm/6mm defaults. Definitions and other uses remain
 unchanged. Bodies may be a node or a list of nodes.
+
+Components are transparent when a parent interprets its children. For example,
+an Edge allowance under a shape or a Cell with an inset under Grid keeps the
+same meaning when supplied by a component, including nested uses and list bodies.
 
 References replace values, not YAML keys. A value consisting only of `${name}`
 keeps the supplied scalar type: `3` stays a number for a count, `false` stays a

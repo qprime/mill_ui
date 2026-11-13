@@ -2387,28 +2387,28 @@ class LayoutResolver:
         child_params = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
         self._resolve_node(node.child, child_region, items, child_params)
 
-    def _dispatch_children_on_ring_domain(
+    def _dispatch_children_in_domain(
         self,
-        ring_domain: Domain,
+        domain: Domain,
         children: tuple[Any, ...],
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        ring_bounds = ring_domain.bounds
-        ring_region = ResolvedRegion(
-            x_min=ring_bounds.x_min,
-            y_min=ring_bounds.y_min,
-            x_max=ring_bounds.x_max,
-            y_max=ring_bounds.y_max,
+        bounds = domain.bounds
+        region = ResolvedRegion(
+            x_min=bounds.x_min,
+            y_min=bounds.y_min,
+            x_max=bounds.x_max,
+            y_max=bounds.y_max,
         )
 
         child_params = {
             **params,
-            "domain": ring_domain,
-            "domain_center": ring_region.center,
+            "domain": domain,
+            "domain_center": region.center,
         }
         for child in children:
-            self._resolve_node(child, ring_region, items, child_params)
+            self._resolve_node(child, region, items, child_params)
 
     def _handle_shell_gen(
         self,
@@ -2486,7 +2486,7 @@ class LayoutResolver:
 
         ring_domains = domain.subtract(inner_domain)
         for ring_domain in ring_domains:
-            self._dispatch_children_on_ring_domain(ring_domain, node.children, items, params)
+            self._dispatch_children_in_domain(ring_domain, node.children, items, params)
 
     def _handle_subtract(
         self,
@@ -2502,7 +2502,7 @@ class LayoutResolver:
         ring_domains = outer.subtract(inner)
 
         for ring_domain in ring_domains:
-            self._dispatch_children_on_ring_domain(ring_domain, node.children, items, params)
+            self._dispatch_children_in_domain(ring_domain, node.children, items, params)
 
     def _handle_arch(
         self,
@@ -2538,26 +2538,13 @@ class LayoutResolver:
         child_params = {**params, "domain": arch_domain, "domain_center": arch_region.center}
         for child in node.children:
             if isinstance(child, Frame):
-                inset_domain = arch_domain.inset(child.width_mm).domains[0]
-                inset_bounds = inset_domain.bounds
-                inset_region = ResolvedRegion(
-                    x_min=inset_bounds.x_min,
-                    y_min=inset_bounds.y_min,
-                    x_max=inset_bounds.x_max,
-                    y_max=inset_bounds.y_max,
-                )
-
-                for frame_child in child.children:
-                    if isinstance(frame_child, RaisedPanelGen):
-                        self._handle_raised_panel_gen(
-                            frame_child,
-                            inset_region,
-                            items,
-                            {**params, "domain": inset_domain, "domain_center": inset_region.center},
-                        )
-                    else:
-                        stripped = {k: v for k, v in params.items() if k not in ("domain", "domain_center")}
-                        self._resolve_node(frame_child, inset_region, items, stripped)
+                inset = arch_domain.inset(child.width_mm)
+                if len(inset.domains) != 1:
+                    raise ResolutionAssertionError(
+                        f"Arch Frame: width {child.width_mm}mm leaves {len(inset.domains)} regions; "
+                        "expected one connected inset arch"
+                    )
+                self._dispatch_children_in_domain(inset.domains[0], child.children, items, params)
             else:
                 self._resolve_node(child, arch_region, items, child_params)
 
@@ -3652,6 +3639,11 @@ class LayoutResolver:
         if node is None:
             return
 
+        children = getattr(node, "children", ())
+        if children:
+            expanded = tuple(child for value in children for child in _expanded_nodes(value))
+            node = replace(node, children=expanded)
+
         handler_map = self._get_handler_map()
         node_type = type(node)
 
@@ -3669,23 +3661,23 @@ def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> Layout
     return results[0]
 
 
-def _top_level_nodes(root: Any) -> tuple[Any, ...]:
+def _expanded_nodes(root: Any) -> tuple[Any, ...]:
     if isinstance(root, ComponentInstance):
-        return _top_level_nodes(root.body)
+        return _expanded_nodes(root.body)
     if isinstance(root, Panel):
         nodes: list[Any] = []
         for child in root.children:
-            nodes.extend(_top_level_nodes(child))
+            nodes.extend(_expanded_nodes(child))
         return tuple(nodes)
     return () if root is None else (root,)
 
 
 def _find_assembly_node(root: Any) -> AssemblyDecl | None:
-    return next((node for node in _top_level_nodes(root) if isinstance(node, AssemblyDecl)), None)
+    return next((node for node in _expanded_nodes(root) if isinstance(node, AssemblyDecl)), None)
 
 
 def _has_beam_content(root: Any) -> bool:
-    return any(isinstance(node, BeamDecl) for node in _top_level_nodes(root))
+    return any(isinstance(node, BeamDecl) for node in _expanded_nodes(root))
 
 
 def resolve_layout_multi(
@@ -3725,7 +3717,7 @@ def resolve_layout_multi(
             + ", ".join(f"{n} ({d})" for n, d in zip(names, dims, strict=True))
         )
 
-    standalone_assembly = _top_level_nodes(ast.root) == (assembly_node,)
+    standalone_assembly = _expanded_nodes(ast.root) == (assembly_node,)
     if len(partition.sheets) <= 1 and not standalone_assembly:
         return [resolver.resolve()]
 

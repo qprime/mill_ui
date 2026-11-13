@@ -399,6 +399,76 @@ children:
     assert intents[0].depth_profile.z_bottom == -3
 
 
+@pytest.mark.parametrize("shape", ["Rect", "Circle", "RoundedRect"])
+@pytest.mark.parametrize("body_list", [False, True])
+def test_component_edge_treatment_matches_a_direct_child(shape, body_list):
+    from io import StringIO
+
+    from ruamel.yaml import YAML
+
+    source = f"""Sheet: {{width: 400, height: 400, thickness: 19}}
+components:
+  allowance:
+    params: {{rough: 1mm}}
+    body:
+      Edge: {{treatment: allowance, rough_allowance: '${{rough}}', finish_allowance: 0.5mm}}
+  nested:
+    body:
+      UseComponent: {{name: allowance}}
+children:
+- Inset:
+    distance: 30
+    children:
+    - {shape}:
+        {"radius: 15" if shape == "RoundedRect" else ""}
+        feature: {{type: profile, depth: through, side: outside}}
+        children:
+        - Edge: {{treatment: allowance, rough_allowance: 1mm, finish_allowance: 0.5mm}}
+"""
+    direct = parse_pml_yaml(source)
+    yaml = YAML()
+    data = yaml.load(source)
+    if body_list:
+        data["components"]["allowance"]["body"] = [data["components"]["allowance"]["body"]]
+    data["children"][0]["Inset"]["children"][0][shape]["children"] = [{"UseComponent": {"name": "nested"}}]
+    stream = StringIO()
+    yaml.dump(data, stream)
+    component = parse_pml_yaml(stream.getvalue())
+
+    expected = ast_to_removal_intents(resolve_layout(direct))
+    actual = ast_to_removal_intents(resolve_layout(component))
+
+    assert actual == expected
+    treatment = actual[0].constraints.edge_treatment
+    assert treatment is not None
+    assert treatment.rough_allowance_mm == 1
+    assert treatment.finish_allowance_mm == 0.5
+    assert parse_pml_yaml(format_pml_yaml(component)) == component
+
+
+@pytest.mark.parametrize("layout", ["Grid: {rows: 1, cols: 2}", "Split: {rows: 1, cols: 2}"])
+def test_component_cells_keep_parent_layout_insets(layout):
+    from io import StringIO
+
+    from ruamel.yaml import YAML
+
+    yaml = YAML()
+    manager = yaml.load(layout)
+    manager[next(iter(manager))]["children"] = [{"UseComponent": {"name": "cell"}}]
+    data = {
+        "Sheet": {"width": 400, "height": 300, "thickness": 19},
+        "components": {"cell": {"body": {"Cell": {"inset": 10, "children": [{"Pocket": {"depth": 3}}]}}}},
+        "children": [manager],
+    }
+    stream = StringIO()
+    yaml.dump(data, stream)
+
+    intents = ast_to_removal_intents(resolve_layout(parse_pml_yaml(stream.getvalue())))
+
+    assert len(intents) == 2
+    assert [(intent.bounds.width, intent.bounds.height) for intent in intents] == [(180, 280), (180, 280)]
+
+
 @pytest.mark.parametrize("field", ["args", "params"])
 def test_component_binding_requires_parameter_mappings(field):
     source = _parameterized_component_pml()

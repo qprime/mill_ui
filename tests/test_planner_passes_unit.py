@@ -744,6 +744,35 @@ class TestRectangleProfilePlanning:
         assert len(group.outlines) == (2 if ring else 1)
         assert all(shape.points[0] == shape.points[-1] for shape in group.outlines)
 
+    @pytest.mark.parametrize("overlap", [1, 20])
+    @pytest.mark.parametrize("transpose", [False, True])
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_connected_group_preserves_boundaries_below_the_shared_overlap_threshold(self, overlap, transpose, reverse):
+        centers = [(50, 50), (50, 150), (150, 150 - overlap)]
+        if transpose:
+            centers = [center[::-1] for center in centers]
+        profiles = tuple(
+            replace(_feature("Rect", {"w_mm": 97, "h_mm": 97}, center, 6, id=str(index)), side="outside")
+            for index, center in enumerate(centers)
+        )
+        if reverse:
+            profiles = profiles[::-1]
+        materials = [box(cx - 48.5, cy - 48.5, cx + 48.5, cy + 48.5) for cx, cy in centers]
+        boundaries = unary_union([box(cx - 50, cy - 50, cx + 50, cy + 50).boundary for cx, cy in centers])
+
+        (record,) = self._plan(profiles)
+
+        for depth in (1.5, 3, 4.5, 6):
+            layer = unary_union(
+                [
+                    LineString([start[:2], end[:2]])
+                    for start, end in _cut_segments(record.moves)
+                    if start[2] == end[2] == -depth
+                ]
+            )
+            assert boundaries.difference(layer).length < 1e-8
+            assert all(layer.buffer(1.5).intersection(material).area < 1e-6 for material in materials)
+
     def test_clearance_uses_selected_tool_instead_of_requested_kerf(self):
         a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
         b = replace(a, id="b", center_xy_mm=(164, 80))

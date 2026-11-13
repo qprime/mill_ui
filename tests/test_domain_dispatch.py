@@ -438,9 +438,16 @@ class TestCoordinateCorrectness:
             dist = math.sqrt(p[0] ** 2 + p[1] ** 2)
             assert abs(dist - 100) < 1.0
 
-    def test_arch_frame_non_raised_panel_child_gets_no_domain(self):
-        from layout_ast.compositional import Frame
-
+    @pytest.mark.parametrize(
+        "child, feature_type",
+        [
+            (PocketGen(depth_mm=5), "pocket"),
+            (ProfileGen(side="inside", depth="through"), "profile"),
+            (ChamferGen(width_mm=2, depth_mm=2), "chamfer"),
+            (RoundoverGen(radius_mm=2), "roundover"),
+        ],
+    )
+    def test_arch_frame_passes_the_same_inset_domain_to_every_milling_child(self, child, feature_type):
         flat = _resolve_pml(
             Arch(
                 width_mm=200,
@@ -449,12 +456,27 @@ class TestCoordinateCorrectness:
                 children=(
                     Frame(
                         width_mm=20,
-                        children=(PocketGen(depth_mm=5),),
+                        children=(child,),
                     ),
                 ),
             )
         )
-        pockets = _items_by_feature(flat, "pocket")
-        assert len(pockets) == 1
-        assert pockets[0].type == "Rect"
-        assert "w_mm" in pockets[0].geometry.data
+        (intent,) = ast_to_removal_intents(flat)
+        assert intent.hint_type == feature_type
+        region = pocket_region(intent.shape, intent.shape_geometry, intent.bounds.center)
+        assert region is not None
+        expected = Domain.from_arch(200, 300, 80, center=(200, 200)).inset(20).domains[0].polygon
+        assert region.symmetric_difference(expected).area < 1e-8
+
+    def test_arch_frame_rejects_an_empty_inset(self):
+        from resolution.layout_resolver import ResolutionAssertionError
+
+        with pytest.raises(ResolutionAssertionError, match=r"Arch Frame.*expected one connected inset arch"):
+            _resolve_pml(
+                Arch(
+                    width_mm=200,
+                    height_mm=300,
+                    radius_mm=80,
+                    children=(Frame(width_mm=200, children=(PocketGen(depth_mm=5),)),),
+                )
+            )

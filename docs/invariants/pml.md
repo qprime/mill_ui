@@ -105,8 +105,12 @@ These are reusable layout definitions, distinct from assembly members in
 `ComponentInstance` pairing the original use with a separately parsed concrete
 body. Binding happens at the PML boundary; the resolver receives typed dimensions
 and counts and never imports the PML parser. Top-level instances remain
-transparent to assembly sheet partitioning. The inherited layout/domain context
-passes through an instance to its concrete body.
+transparent to assembly sheet partitioning. During resolution, bound instances
+and grouping Panels expand before a parent interprets its children. An Edge
+treatment, Cell inset or Frame therefore has the same meaning directly or
+through nested components, including list bodies. The original AST remains
+unchanged for formatting. The inherited layout/domain context passes through
+an instance to its concrete body.
 
 Arguments override declared defaults for that use only. Nested uses receive
 their own defaults and explicit arguments; callers forward values through

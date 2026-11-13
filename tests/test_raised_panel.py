@@ -69,6 +69,40 @@ def _entry(source):
     return ast, intents, raised, entry
 
 
+@pytest.mark.parametrize("component_part", ["milling", "frame"])
+@pytest.mark.parametrize("body_list", [False, True])
+def test_arch_frame_components_preserve_the_same_machining_intents(component_part, body_list):
+    from io import StringIO
+
+    from ruamel.yaml import YAML
+
+    source = _source(shape="Arch")
+    yaml = YAML()
+    data = yaml.load(source)
+    children = data["children"][0]["AtPosition"]["child"]["Arch"]["children"]
+    if component_part == "milling":
+        children = children[1]["Frame"]["children"]
+        index = 0
+    else:
+        index = 1
+    body = children[index]
+    data["components"] = {
+        "cut": {"body": [body] if body_list else body},
+        "nested": {"body": {"UseComponent": {"name": "cut"}}},
+    }
+    children[index] = {"UseComponent": {"name": "nested"}}
+    stream = StringIO()
+    yaml.dump(data, stream)
+    component = parse_pml_yaml(stream.getvalue())
+
+    actual = ast_to_removal_intents(resolve_layout(component))
+    expected = ast_to_removal_intents(resolve_layout(parse_pml_yaml(source)))
+
+    assert actual == expected
+    assert check_overlap(actual).is_valid()
+    assert parse_pml_yaml(format_pml_yaml(component)) == component
+
+
 @pytest.mark.parametrize("shape", ["Rect", "Arch"])
 @pytest.mark.parametrize("angle", [60, 90])
 @pytest.mark.parametrize("profile, field, pocket_count", [("gutter", 2, 2), ("v_groove", 2, 1), ("v_groove", 0, 0)])

@@ -15,13 +15,13 @@ from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
 from cam.model.tool import Tool
-from cam.moves import CutMove, DwellMove, Move, RapidMove, RetractMove, SetFeedMove, SetRpmMove, XYMove
+from cam.moves import CommentMove, CutMove, DwellMove, Move, RapidMove, RetractMove, SetFeedMove, SetRpmMove, XYMove
 from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
 from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
-from cam.planner.passes import PassAccumulator, plan_passes
+from cam.planner.passes import PassAccumulator, PassRecord, plan_passes
 from cam.planner.passes.edge import build_edge_cut_plan, plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
 from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges, merge_rect_profiles
 from cam.planner.passes.pocket import (
@@ -1875,3 +1875,39 @@ class TestGcodeFileStrategy:
 
     def test_unlabeled_op_uses_op_name(self):
         assert self._entry("corner_cleanup", [])["strategy"] == "corner_cleanup"
+
+
+def test_cut_count_tracks_multiple_records_streams_and_initial_moves():
+    acc = _accumulator()
+    tools = normalize_tool_entries([FLAT_3MM, FLAT_6MM])
+    pocket = acc.get_record("pocket", tools[0])
+    finish = acc.get_record("finish", tools[1])
+    pocket.add_moves(iter([CommentMove("start"), RapidMove(x=1), CutMove(x=2), CutMove(z=-1)]))
+    finish.add_moves(iter([SetFeedMove(100), CutMove(x=3), RetractMove(5)]))
+    assert acc.cut_move_count() == 3
+    assert acc.cut_move_count() == 3
+    pocket.add_moves(iter([CutMove(x=4), DwellMove(1)]))
+    assert acc.cut_move_count() == 4
+    restored = PassRecord("pocket", tools[0], pocket.setup, "restored.nc", list(pocket.moves))
+    assert restored.cut_move_count == 3
+    restored.add_moves(iter([CutMove(z=-2)]))
+    assert restored.cut_move_count == 4
+
+
+def test_cut_count_queries_do_not_revisit_accumulated_move_history():
+    class ObservedMoves(list):
+        traversed = 0
+
+        def __iter__(self):
+            for move in super().__iter__():
+                self.traversed += 1
+                yield move
+
+    acc = _accumulator()
+    record = acc.get_record("pocket", FLAT_ONLY[0])
+    history = ObservedMoves()
+    record.moves = history
+    record.add_moves(CutMove(x=i) for i in range(1000))
+    for _ in range(100):
+        assert acc.cut_move_count() == 1000
+    assert history.traversed == 0

@@ -117,6 +117,8 @@ def _plan_rest(
     entry: FeatureInput,
     region: BaseGeometry | None,
     *,
+    start_depth: float,
+    cut_depth: float,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
     config: Config,
@@ -131,9 +133,26 @@ def _plan_rest(
             f"Rest pocketing subsumes edge_treatment allowance — use rest alone."
         )
     if region is None:
-        _plan_rest_pocket(entry, rest, accumulator=accumulator, tool_db=tool_db, config=config)
+        _plan_rest_pocket(
+            entry,
+            rest,
+            start_depth=start_depth,
+            cut_depth=cut_depth,
+            accumulator=accumulator,
+            tool_db=tool_db,
+            config=config,
+        )
     else:
-        _plan_rest_region(entry, region, rest, accumulator=accumulator, tool_db=tool_db, config=config)
+        _plan_rest_region(
+            entry,
+            region,
+            rest,
+            start_depth=start_depth,
+            cut_depth=cut_depth,
+            accumulator=accumulator,
+            tool_db=tool_db,
+            config=config,
+        )
 
 
 def _plan_rest_region(
@@ -141,6 +160,8 @@ def _plan_rest_region(
     region: BaseGeometry,
     rest: RestSpec,
     *,
+    start_depth: float,
+    cut_depth: float,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
     config: Config,
@@ -155,11 +176,6 @@ def _plan_rest_region(
         pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat"), entry.feeds_override
     )
     accumulator.set_feature_tool(entry.id, rough_tool)
-
-    start_depth = max(0.0, entry.start_depth_mm)
-    cut_depth = entry.depth_mm - start_depth
-    if cut_depth <= 0.0:
-        return
 
     single_pass = rough_tool.diameter <= finish_tool.diameter
     rough_record = accumulator.get_record("pocket", rough_tool)
@@ -196,6 +212,8 @@ def _plan_rest_pocket(
     entry: FeatureInput,
     rest: RestSpec,
     *,
+    start_depth: float,
+    cut_depth: float,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
     config: Config,
@@ -236,12 +254,6 @@ def _plan_rest_pocket(
         )
 
     center = entry.center_xy_mm
-    depth = entry.depth_mm
-    start_depth = max(0.0, entry.start_depth_mm)
-    cut_depth = depth - start_depth
-    if cut_depth <= 0.0:
-        return
-
     rough_tool_r = 0.5 * rough_tool.diameter
     finish_tool_r = 0.5 * finish_tool.diameter
     rough_step_over = stepover_for_tool(rough_tool)
@@ -310,6 +322,8 @@ def _plan_rest_pocket(
 def _plan_surface_pass(
     entry: FeatureInput,
     *,
+    start_depth: float,
+    cut_depth: float,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
 ) -> None:
@@ -329,10 +343,6 @@ def _plan_surface_pass(
     record = accumulator.get_record("surface", tool)
 
     step_mm = tool.diameter * (sc.stepover_pct / 100.0)
-    cut_depth = entry.depth_mm - sc.start_depth_mm
-    if cut_depth <= 0.0:
-        return
-
     moves = face_zigzag(
         width,
         height,
@@ -343,7 +353,7 @@ def _plan_surface_pass(
         cool_every=sc.cool_every,
         cool_dwell_s=sc.cool_dwell_s,
     )
-    record.add_moves(offset_moves_z(moves, sc.start_depth_mm), increment=1)
+    record.add_moves(offset_moves_z(moves, start_depth), increment=1)
 
 
 def _pocket_region(entry: FeatureInput) -> BaseGeometry | None:
@@ -415,14 +425,23 @@ def plan_pocket_passes(
     for entry in pockets:
         _reject_unsupported_region_strategy(entry)
         start_depth = entry.surface_cooling.start_depth_mm if entry.surface_cooling else max(0.0, entry.start_depth_mm)
-        if entry.depth_mm <= start_depth:
+        cut_depth = entry.depth_mm - start_depth
+        if cut_depth <= 0.0:
             continue
         region = _pocket_region(entry)
         if region is not None and region.is_empty:
             accumulator.add_warning(f"Pocket '{entry.id}': islands cover the whole pocket — feature skipped")
             continue
         before = accumulator.cut_move_count()
-        _plan_pocket_entry(entry, region, accumulator=accumulator, tool_db=tool_db, config=config)
+        _plan_pocket_entry(
+            entry,
+            region,
+            start_depth=start_depth,
+            cut_depth=cut_depth,
+            accumulator=accumulator,
+            tool_db=tool_db,
+            config=config,
+        )
         if accumulator.cut_move_count() == before:
             raise _empty_pocket_error(entry, tool_db, accumulator.get_feature_tool(entry.id))
 
@@ -431,16 +450,28 @@ def _plan_pocket_entry(
     entry: FeatureInput,
     region: BaseGeometry | None,
     *,
+    start_depth: float,
+    cut_depth: float,
     accumulator: PassAccumulator,
     tool_db: Sequence[ToolSelection],
     config: Config,
 ) -> None:
     if entry.surface_cooling is not None:
-        _plan_surface_pass(entry, accumulator=accumulator, tool_db=tool_db)
+        _plan_surface_pass(
+            entry, start_depth=start_depth, cut_depth=cut_depth, accumulator=accumulator, tool_db=tool_db
+        )
         return
 
     if entry.rest is not None:
-        _plan_rest(entry, region, accumulator=accumulator, tool_db=tool_db, config=config)
+        _plan_rest(
+            entry,
+            region,
+            start_depth=start_depth,
+            cut_depth=cut_depth,
+            accumulator=accumulator,
+            tool_db=tool_db,
+            config=config,
+        )
         return
 
     sg = entry.geometry.geometry
@@ -458,17 +489,13 @@ def _plan_pocket_entry(
     record = accumulator.get_record("pocket", tool)
     setup = record.setup
     depth = entry.depth_mm
-    start_depth = max(0.0, entry.start_depth_mm)
-    if depth <= start_depth:
-        return
-    effective_depth = depth - start_depth
     step_over = stepover_for_tool(tool)
     step_down = stepdown_for_tool(tool)
 
     center = entry.center_xy_mm
 
     if region is not None:
-        moves = _offset_pocket_moves(region, tool, setup, depth_mm=effective_depth, wall_allowance_mm=rough_allowance)
+        moves = _offset_pocket_moves(region, tool, setup, depth_mm=cut_depth, wall_allowance_mm=rough_allowance)
         record.add_moves(offset_moves_z(moves, start_depth), increment=1)
         if allowance_et is not None:
             finish_record = accumulator.get_record("finish", tool)
@@ -477,7 +504,7 @@ def _plan_pocket_entry(
                 *pocket_finish_contours(
                     region,
                     finish_record.setup,
-                    depth_mm=effective_depth,
+                    depth_mm=cut_depth,
                     stepdown=step_down,
                     wall_allowance_mm=allowance_et.finish_allowance_mm or 0.0,
                 ),
@@ -527,7 +554,7 @@ def _plan_pocket_entry(
             center,
             diameter,
             setup,
-            depth_mm=effective_depth,
+            depth_mm=cut_depth,
             stepover_mm=step_over,
             stepdown_mm=step_down,
             finish=True,

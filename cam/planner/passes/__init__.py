@@ -54,6 +54,14 @@ class PassRecord:
     filename: str
     moves: list[Move] = field(default_factory=list)
     count: int = 0
+    _cut_moves: int = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._cut_moves = sum(isinstance(move, CutMove) for move in self.moves)
+
+    @property
+    def cut_move_count(self) -> int:
+        return self._cut_moves
 
     def setup_for(self, tool: ToolSelection) -> Setup:
         return replace(self.setup, tool=tool.as_model())
@@ -61,6 +69,7 @@ class PassRecord:
     def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
         for move in moves:
             self.moves.append(move)
+            self._cut_moves += isinstance(move, CutMove)
         if increment:
             self.count += int(increment)
 
@@ -136,7 +145,7 @@ class PassAccumulator:
         return list(self._warnings)
 
     def cut_move_count(self) -> int:
-        return sum(isinstance(move, CutMove) for record in self._records.values() for move in record.moves)
+        return sum(record.cut_move_count for record in self._records.values())
 
     def passes(self) -> list[PassRecord]:
         return list(self._records.values())

@@ -1154,6 +1154,12 @@ Exactly one of `count` (cycles across the pattern X span) or `wavelength`
 defaulting to 0. Both survive formatting and affect geometry. A rotated pattern
 is generated across its full parent domain and then clipped to its boundary.
 
+For compatibility with existing engraving output, clipped fragments shorter
+than `spacing` are discarded. The same value therefore controls centerline
+spacing and this inherited minimum-fragment-length threshold. The threshold
+is independent of the actual selected cutter width; changing `spacing` can
+also change which short boundary fragments remain.
+
 #### HoleGrid
 
 Grid of holes:

@@ -97,6 +97,11 @@ wavelength controls the pattern; direction and phase reach the generator in
 radians. Rotated generation covers the inverse-rotated parent bounds before
 clipping, so elongated parents do not lose coverage.
 
+Wave retains its inherited minimum-fragment-length filter: clipped segments
+shorter than `spacing_mm` are discarded. This compatibility policy couples
+spacing and short-fragment retention independently of selected tooling. The
+`groove` to `spacing` migration preserves that policy and the emitted paths.
+
 ## Output Coordinates
 
 Generators emit Items in absolute sheet coordinates, not domain-local coordinates. Coordinate transformation happens before output.

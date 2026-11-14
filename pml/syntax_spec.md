@@ -1145,10 +1145,14 @@ cutting depth. The former `groove` key is rejected with a migration message.
 - Wave:
     count: 5
     amplitude: 10mm
-    wavelength: 60mm
     spacing: 3mm
     depth: 2mm
 ```
+
+Exactly one of `count` (cycles across the pattern X span) or `wavelength`
+(distance per cycle, mm) is required. `direction` and `phase` are degrees,
+defaulting to 0. Both survive formatting and affect geometry. A rotated pattern
+is generated across its full parent domain and then clipped to its boundary.
 
 #### HoleGrid
 

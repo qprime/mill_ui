@@ -92,7 +92,10 @@ If `tab_count == 0`, tab dimensions are ignored.
 
 Wave emits clipped engraving centerlines. Its `spacing_mm` sets their offset,
 independently of the selected cutter width. PML exposes this as `spacing`; the
-misleading former `groove` key errors explicitly.
+misleading former `groove` key errors explicitly. Exactly one of cycle count or
+wavelength controls the pattern; direction and phase reach the generator in
+radians. Rotated generation covers the inverse-rotated parent bounds before
+clipping, so elongated parents do not lose coverage.
 
 ## Output Coordinates
 

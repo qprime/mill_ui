@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+from domains.domain import Bounds2D
 from domains.transforms import local_to_sheet_batch
 from generators.core import (
     GeneratorResult,
@@ -80,14 +81,24 @@ def wave_generator(
     wave_spacing = params.spacing_mm
 
     local_bounds = get_local_bounds(domain)
+    if params.direction_rad != 0.0:
+        corners = [
+            (local_bounds.x_min, local_bounds.y_min),
+            (local_bounds.x_max, local_bounds.y_min),
+            (local_bounds.x_max, local_bounds.y_max),
+            (local_bounds.x_min, local_bounds.y_max),
+        ]
+        local_bounds = Bounds2D.from_points(rotate_points(corners, -params.direction_rad))
     local_y_min, local_y_max = local_bounds.y_min, local_bounds.y_max
     local_x_min, local_x_max = local_bounds.x_min, local_bounds.x_max
 
     domain_width = local_x_max - local_x_min
-    if params.wave_count is not None and params.wave_count > 0:
+    if params.wave_count is not None:
         effective_wavelength = domain_width / params.wave_count
-    else:
+    elif params.wavelength_mm is not None:
         effective_wavelength = params.wavelength_mm
+    else:
+        raise ValueError("WaveGenerator: wavelength or wave count is required")
 
     coverage_y_min = local_y_min - params.amplitude_mm
     coverage_y_max = local_y_max + params.amplitude_mm

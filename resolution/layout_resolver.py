@@ -1632,6 +1632,8 @@ class LayoutResolver:
             depth_mm=node.depth_mm,
             spacing_mm=node.spacing_mm,
             wave_count=node.wave_count,
+            direction_rad=math.radians(node.direction_deg),
+            phase_rad=math.radians(node.phase_deg),
         )
 
         shape_id_prefix = self._next_shape_id("wave")

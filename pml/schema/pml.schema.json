@@ -324,8 +324,11 @@
     "waveNode": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["count", "amplitude", "wavelength", "spacing", "depth"],
+      "required": ["amplitude", "spacing", "depth"],
+      "oneOf": [{"required": ["count"]}, {"required": ["wavelength"]}],
       "properties": {
+        "direction": {"type": "number", "default": 0},
+        "phase": {"type": "number", "default": 0},
         "count": {"type": "integer", "minimum": 1},
         "amplitude": {"$ref": "#/$defs/dimension"},
         "wavelength": {"$ref": "#/$defs/dimension"},

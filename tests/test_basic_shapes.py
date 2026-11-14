@@ -701,7 +701,6 @@ children:
         - Wave:
             count: 4
             amplitude: 8mm
-            wavelength: 50mm
             spacing: 3mm
             depth: 1mm
 """
@@ -731,7 +730,6 @@ children:
               - Wave:
                   count: 4
                   amplitude: 8mm
-                  wavelength: 50mm
                   spacing: 3mm
                   depth: 1mm
 """

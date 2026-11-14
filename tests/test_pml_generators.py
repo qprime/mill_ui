@@ -52,9 +52,9 @@ PARSE_CASES = [
         id="chamfer",
     ),
     pytest.param(
-        "Wave:\n            count: 5\n            amplitude: 10mm\n            wavelength: 60mm\n            spacing: 3mm\n            depth: 2mm",
+        "Wave:\n            count: 5\n            amplitude: 10mm\n            spacing: 3mm\n            depth: 2mm",
         WaveGen,
-        {"wave_count": 5, "amplitude_mm": 10.0, "wavelength_mm": 60.0, "spacing_mm": 3.0, "depth_mm": 2.0},
+        {"wave_count": 5, "amplitude_mm": 10.0, "wavelength_mm": None, "spacing_mm": 3.0, "depth_mm": 2.0},
         id="wave",
     ),
 ]
@@ -291,7 +291,6 @@ children:
         - Wave:
             count: 5
             amplitude: 10mm
-            wavelength: 60mm
             spacing: 3mm
             depth: 2mm
 """
@@ -391,7 +390,6 @@ children:
         - Wave:
             count: 5
             amplitude: 10mm
-            wavelength: 60mm
             spacing: 3mm
             depth: 2mm
 """
@@ -725,7 +723,7 @@ def test_wave_rejects_misleading_groove_key(extra):
 
     pml = f"""Sheet: {{width: 200mm, height: 200mm, thickness: 19mm}}
 children:
-- Wave: {{count: 4, amplitude: 3mm, wavelength: 50mm, depth: 1mm, {extra}}}
+- Wave: {{count: 4, amplitude: 3mm, depth: 1mm, {extra}}}
 """
     with pytest.raises(PMLParseError, match="renamed to 'spacing'"):
         parse_pml_yaml(pml)
@@ -736,7 +734,7 @@ def test_wave_spacing_roundtrip_and_engraving_intent():
 
     pml = """Sheet: {width: 200mm, height: 200mm, thickness: 19mm}
 children:
-- Wave: {count: 4, amplitude: 3mm, wavelength: 50mm, spacing: 6.35mm, depth: 1mm}
+- Wave: {count: 4, amplitude: 3mm, spacing: 6.35mm, depth: 1mm}
 """
     ast = parse_pml_yaml(pml)
     assert ast == parse_pml_yaml(format_pml_yaml(ast))
@@ -744,3 +742,57 @@ children:
     assert intents
     assert all(intent.hint_type == "engrave" for intent in intents)
     assert all(intent.depth_profile.z_bottom == -1.0 for intent in intents)
+
+
+@pytest.mark.parametrize("control", ["count: 4", "wavelength: 40mm"])
+def test_wave_controls_roundtrip_and_reach_generator_geometry(control):
+    from domains import Domain
+    from generators import WaveParams, wave_generator
+    from pml import format_pml_yaml
+
+    pml = f"""Sheet: {{width: 200mm, height: 120mm, thickness: 19mm}}
+children:
+- Wave: {{{control}, amplitude: 3mm, spacing: 6mm, depth: 1mm, direction: 90, phase: 45}}
+"""
+    ast = parse_pml_yaml(pml)
+    assert ast == parse_pml_yaml(format_pml_yaml(ast))
+    params = WaveParams(
+        amplitude_mm=3,
+        depth_mm=1,
+        spacing_mm=6,
+        wave_count=4 if control.startswith("count") else None,
+        wavelength_mm=40 if control.startswith("wavelength") else None,
+        direction_rad=math.pi / 2,
+        phase_rad=math.pi / 4,
+    )
+    expected = wave_generator(Domain.from_rectangle(200, 120, center=(100, 60)), params, shape_id_prefix="wave_0")
+    actual = ast_to_removal_intents(resolve_layout(ast))
+    from layout_ast.layout import LayoutAST
+
+    assert actual == ast_to_removal_intents(LayoutAST(ast.sheet, tuple(expected)))
+    zero = parse_pml_yaml(pml.replace(", direction: 90, phase: 45", ""))
+    assert actual != ast_to_removal_intents(resolve_layout(zero))
+
+
+@pytest.mark.parametrize("controls", ["", "count: 4, wavelength: 40mm,", "count: 0,", "count: 2.5,", "count: true,"])
+def test_wave_rejects_missing_ambiguous_or_invalid_cycle_controls(controls):
+    from pml import PMLParseError
+
+    pml = f"""Sheet: {{width: 200mm, height: 120mm, thickness: 19mm}}
+children:
+- Wave: {{{controls} amplitude: 3mm, spacing: 6mm, depth: 1mm}}
+"""
+    with pytest.raises(PMLParseError, match=r"exactly one|positive integer"):
+        parse_pml_yaml(pml)
+
+
+@pytest.mark.parametrize("angles", ["direction: .nan", "phase: .inf"])
+def test_wave_rejects_nonfinite_angles(angles):
+    from pml import PMLParseError
+
+    pml = f"""Sheet: {{width: 200mm, height: 120mm, thickness: 19mm}}
+children:
+- Wave: {{count: 4, amplitude: 3mm, spacing: 6mm, depth: 1mm, {angles}}}
+"""
+    with pytest.raises(PMLParseError, match="finite"):
+        parse_pml_yaml(pml)

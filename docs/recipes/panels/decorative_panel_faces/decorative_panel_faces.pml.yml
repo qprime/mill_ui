@@ -45,7 +45,6 @@ children:
               - Wave:
                   count: 6
                   amplitude: 10mm
-                  wavelength: 80mm
                   spacing: 6.35mm
                   depth: 3mm
 

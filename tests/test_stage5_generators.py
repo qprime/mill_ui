@@ -39,7 +39,6 @@ def test_wave_params_valid():
     WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0)
     WaveParams(
         amplitude_mm=5.0,
-        wavelength_mm=20.0,
         depth_mm=2.0,
         direction_rad=math.pi / 4,
         phase_rad=math.pi / 2,
@@ -84,7 +83,7 @@ def test_wave_params_invalid_depth():
 def test_wave_params_invalid_wave_count():
     """Test WaveParams rejects non-positive wave_count."""
     try:
-        WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, wave_count=0)
+        WaveParams(amplitude_mm=10.0, depth_mm=3.0, wave_count=0)
         raise AssertionError("Should have raised ValueError")
     except ValueError as e:
         assert "wave_count" in str(e).lower()
@@ -860,3 +859,26 @@ def test_fluting_skip_error_when_not_allow_empty():
     params = FlutingParams(spacing_mm=20.0, depth_mm=3.0)
     with pytest.raises(GeneratorSkipError):
         fluting_generator(domain, params, allow_empty=False)
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"wave_count": 4, "wavelength_mm": 40.0}])
+def test_wave_params_require_exactly_one_cycle_control(kwargs):
+    with pytest.raises(ValueError, match="exactly one"):
+        WaveParams(amplitude_mm=3, depth_mm=1, **kwargs)
+
+
+def test_rotated_wave_covers_the_full_long_axis_of_a_rectangular_parent():
+    domain = Domain.from_rectangle(400, 60, center=(200, 30))
+    params = WaveParams(amplitude_mm=3, depth_mm=1, wavelength_mm=20, spacing_mm=6, direction_rad=math.pi / 2)
+    items = wave_generator(domain, params)
+    points = [
+        (x + item.placement.center_xy_mm[0], y + item.placement.center_xy_mm[1])
+        for item in items
+        if item.placement is not None and item.geometry is not None
+        for x, y in item.geometry.data["points"]
+    ]
+    assert min(x for x, _ in points) < 6
+    assert max(x for x, _ in points) > 394
+    assert min(y for _, y in points) == pytest.approx(0)
+    assert max(y for _, y in points) == pytest.approx(60)
+    assert all(domain.polygon.buffer(1e-8).covers(ShapelyPoint(x, y)) for x, y in points)

@@ -559,15 +559,20 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         return {"Chamfer": {"width": dim(node.width_mm), "depth": dim(node.depth_mm)}}
 
     elif isinstance(node, WaveGen):
-        return {
-            "Wave": {
-                "count": node.wave_count,
-                "amplitude": dim(node.amplitude_mm),
-                "wavelength": dim(node.wavelength_mm),
-                "spacing": dim(node.spacing_mm),
-                "depth": dim(node.depth_mm),
-            }
+        wave: dict[str, Any] = {
+            "amplitude": dim(node.amplitude_mm),
+            "spacing": dim(node.spacing_mm),
+            "depth": dim(node.depth_mm),
         }
+        if node.wave_count is not None:
+            wave["count"] = node.wave_count
+        if node.wavelength_mm is not None:
+            wave["wavelength"] = dim(node.wavelength_mm)
+        if node.direction_deg != 0.0:
+            wave["direction"] = node.direction_deg
+        if node.phase_deg != 0.0:
+            wave["phase"] = node.phase_deg
+        return {"Wave": wave}
 
     elif isinstance(node, RoseCurveGen):
         return {"Curve": {"type": "rose", "lobes": node.lobes, "depth": dim(node.depth_mm), **_curve_shared_keys(node)}}

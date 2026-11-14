@@ -234,11 +234,13 @@ class RoundoverGen:
 
 @dataclass(frozen=True)
 class WaveGen:
-    wave_count: int
+    wave_count: int | None
     amplitude_mm: float
-    wavelength_mm: float
+    wavelength_mm: float | None
     spacing_mm: float
     depth_mm: float
+    direction_deg: float = 0.0
+    phase_deg: float = 0.0
 
 
 @dataclass(frozen=True)

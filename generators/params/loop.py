@@ -72,8 +72,8 @@ class ProfileParams(BaseParams):
 @dataclass(frozen=True)
 class WaveParams(BaseParams):
     amplitude_mm: float
-    wavelength_mm: float
     depth_mm: float
+    wavelength_mm: float | None = None
     direction_rad: float = 0.0
     phase_rad: float = 0.0
     spacing_mm: float = 3.175
@@ -82,7 +82,7 @@ class WaveParams(BaseParams):
     def __post_init__(self) -> None:
         if self.amplitude_mm <= 0:
             raise ValueError(f"WaveParams: amplitude_mm must be positive, got {self.amplitude_mm}")
-        if self.wavelength_mm <= 0:
+        if self.wavelength_mm is not None and self.wavelength_mm <= 0:
             raise ValueError(f"WaveParams: wavelength_mm must be positive, got {self.wavelength_mm}")
         if self.depth_mm <= 0:
             raise ValueError(f"WaveParams: depth_mm must be positive, got {self.depth_mm}")
@@ -90,6 +90,15 @@ class WaveParams(BaseParams):
             raise ValueError(f"WaveParams: spacing_mm must be positive, got {self.spacing_mm}")
         if self.wave_count is not None and self.wave_count <= 0:
             raise ValueError(f"WaveParams: wave_count must be positive or None, got {self.wave_count}")
+
+        if (self.wave_count is None) == (self.wavelength_mm is None):
+            raise ValueError("WaveParams: exactly one of wave_count or wavelength_mm is required")
+        if self.wave_count is not None and (isinstance(self.wave_count, bool) or not isinstance(self.wave_count, int)):
+            raise ValueError(f"WaveParams: wave_count must be a positive integer, got {self.wave_count}")
+        for name in ("amplitude_mm", "depth_mm", "spacing_mm", "direction_rad", "phase_rad", "wavelength_mm"):
+            value = getattr(self, name)
+            if value is not None and not math.isfinite(value):
+                raise ValueError(f"WaveParams: {name} must be finite, got {value}")
 
 
 @dataclass(frozen=True)

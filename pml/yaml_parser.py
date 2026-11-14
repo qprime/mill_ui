@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Sequence
 from dataclasses import fields, is_dataclass, replace
@@ -1285,12 +1286,23 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             raise PMLParseError(
                 "Wave 'groove' was renamed to 'spacing'; engraving width comes from the selected tool", f"{path}.Wave"
             )
+        ctx = f"{path}.Wave"
+        if ("count" in node_data) == ("wavelength" in node_data):
+            raise PMLParseError("Wave requires exactly one of 'count' or 'wavelength'", ctx)
+        count = node_data.get("count")
+        if "count" in node_data and (isinstance(count, bool) or not isinstance(count, int) or count <= 0):
+            raise PMLParseError(f"Wave 'count' must be a positive integer, got {count}", ctx)
+        angles = {key: _safe_float(node_data.get(key, 0.0), key, ctx) for key in ("direction", "phase")}
+        if not all(math.isfinite(value) for value in angles.values()):
+            raise PMLParseError(f"Wave direction and phase must be finite, got {angles}", ctx)
         return WaveGen(
-            wave_count=_require(node_data, "count", f"{path}.Wave"),
-            amplitude_mm=parse_dimension(_require(node_data, "amplitude", f"{path}.Wave")),
-            wavelength_mm=parse_dimension(_require(node_data, "wavelength", f"{path}.Wave")),
-            spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Wave")),
-            depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Wave")),
+            wave_count=count,
+            amplitude_mm=parse_dimension(_require(node_data, "amplitude", ctx)),
+            wavelength_mm=parse_dimension(node_data["wavelength"]) if "wavelength" in node_data else None,
+            spacing_mm=parse_dimension(_require(node_data, "spacing", ctx)),
+            depth_mm=parse_dimension(_require(node_data, "depth", ctx)),
+            direction_deg=angles["direction"],
+            phase_deg=angles["phase"],
         )
 
     elif node_type == "XPanel":

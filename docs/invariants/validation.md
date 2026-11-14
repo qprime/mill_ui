@@ -32,6 +32,15 @@ including the normalized custom tool library. A missing context or invalid
 fingerprint fails explicitly; neither a diameter in legacy metrics nor the
 current default library substitutes for the actual build inputs.
 
+Explicit `--pml` uses the same source/context resolver. With `--recipe`, it is
+a source override validated against that recipe's complete per-sheet artifacts
+and saved source context. Standalone `--pml` supports one sheet; multiple sheets require `--recipe` so
+artifact ownership is explicit. Explicitly supplied artifacts may be in separate
+directories, but conflicting saved compilation contexts are rejected.
+Unsupported combinations and missing context return concise input errors, not
+internal resolver tracebacks. Source overrides retain their own source directory
+for relative templates.
+
 ## Depth Validation
 
 - Gradient depth must not exceed sheet thickness

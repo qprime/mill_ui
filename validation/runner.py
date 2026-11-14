@@ -128,6 +128,28 @@ def validate(
     return result
 
 
+def resolve_validation_source(
+    source_file: Path, output_dir: Path, *, context_source: str | None = None
+) -> list[LayoutAST]:
+    from cam.compilation import CompilationContext, load_pml_asts
+    from pml import parse_pml_yaml
+    from resolution.layout_resolver import requires_machining_clearance, resolve_layout_multi
+
+    metrics_path = output_dir / "metrics.json"
+    build = json.loads(metrics_path.read_text(encoding="utf-8")).get("build", {}) if metrics_path.is_file() else {}
+    saved = build.get("compilation_contexts", {}).get(context_source or source_file.name)
+    if saved is not None:
+        return load_pml_asts(source_file, context=CompilationContext.from_dict(saved))
+    parsed = replace(
+        parse_pml_yaml(source_file.read_text(encoding="utf-8")), source_dir=str(source_file.parent.resolve())
+    )
+    if requires_machining_clearance(parsed.root):
+        raise ValueError(
+            f"Source {source_file.name}: saved compilation context is missing; rebuild before validating packed geometry"
+        )
+    return resolve_layout_multi(parsed)
+
+
 def validate_recipe(
     recipe_dir: str | Path,
     ast: LayoutAST | None = None,
@@ -135,6 +157,7 @@ def validate_recipe(
     golden_file: str | None = None,
     comparison_config: ComparisonConfig | None = None,
     options: ValidationOptions | None = None,
+    pml_source: str | Path | None = None,
 ) -> CAMValidationResult:
     recipe_dir = Path(recipe_dir)
     output_dir = recipe_dir / "output"
@@ -147,27 +170,15 @@ def validate_recipe(
         )
     source_file = recipe.pml_sources[0] if recipe is not None and recipe.pml_sources else None
 
+    context_source = source_file.name if source_file is not None else None
+    if pml_source is not None:
+        if ast is not None:
+            raise ValueError("Recipe validation accepts an AST or a PML source override, not both")
+        source_file = Path(pml_source)
+        if not source_file.is_file():
+            raise FileNotFoundError(f"PML file not found: {source_file}")
     if ast is None and source_file is not None:
-        from cam.compilation import CompilationContext, load_pml_asts
-        from pml import parse_pml_yaml
-        from resolution.layout_resolver import requires_machining_clearance, resolve_layout_multi
-
-        parsed = replace(
-            parse_pml_yaml(source_file.read_text(encoding="utf-8")), source_dir=str(source_file.parent.resolve())
-        )
-        if requires_machining_clearance(parsed.root):
-            metrics_path = output_dir / "metrics.json"
-            build = (
-                json.loads(metrics_path.read_text(encoding="utf-8")).get("build", {}) if metrics_path.is_file() else {}
-            )
-            saved = build.get("compilation_contexts", {}).get(source_file.name)
-            if saved is None:
-                raise ValueError(
-                    f"Recipe {recipe_dir.name}: saved compilation context is missing; rebuild the recipe before validating packed geometry"
-                )
-            asts = load_pml_asts(source_file, context=CompilationContext.from_dict(saved))
-        else:
-            asts = resolve_layout_multi(parsed)
+        asts = resolve_validation_source(source_file, output_dir, context_source=context_source)
         if len(asts) > 1:
             return _validate_recipe_sheets(
                 recipe_dir, source_file, asts, golden_metrics, golden_file, comparison_config, options

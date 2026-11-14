@@ -369,3 +369,130 @@ def test_multi_sheet_golden_uses_separate_sheet_metrics(tmp_path):
     code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--golden", str(golden), "--quiet")
     assert code in (EXIT_PASS, EXIT_WARN), stderr
     assert json.loads(stdout)["validation_result"]["regressions"]["exceeded_tolerance"] == 0
+
+
+@pytest.mark.parametrize("renamed", [False, True])
+def test_explicit_pml_with_recipe_uses_the_same_sheet_context_and_results(tmp_path, renamed):
+    folder, runs = _make_multi_sheet_recipe(tmp_path)
+    pml = folder / "box.pml.yml"
+    if renamed:
+        pml = tmp_path / "expected_box.pml.yml"
+        pml.write_text(MULTI_SHEET_PML)
+    code, stdout, stderr = run_cli("--recipe", str(folder), "--pml", str(pml), "--quiet")
+    assert code in (EXIT_PASS, EXIT_WARN), stderr
+    result = json.loads(stdout)["validation_result"]
+    assert len(result["sheets"]) == len(runs)
+    assert all(sheet["assertions"]["failed"] == 0 for sheet in result["sheets"])
+    assert all(sheet["assertions"]["total"] > 0 for sheet in result["sheets"])
+
+
+def test_explicit_pml_with_recipe_checks_corruption_on_a_later_sheet(tmp_path):
+    folder, runs = _make_multi_sheet_recipe(tmp_path)
+    nc = next((folder / "output").glob(f"sheet_{len(runs)}.*.nc"))
+    nc.write_text(nc.read_text() + "\nG1 X99999 Y99999 Z-30 F1000\n")
+    code, stdout, stderr = run_cli("--recipe", str(folder), "--pml", str(folder / "box.pml.yml"), "--quiet")
+    assert code == EXIT_FAIL, stderr
+    result = json.loads(stdout)["validation_result"]
+    assert result["sheets"][-1]["verdict"] == "fail"
+    assert result["sheets"][0]["verdict"] != "fail"
+
+
+def test_standalone_multi_sheet_pml_returns_supported_mode_guidance_without_traceback(tmp_path):
+    folder, runs = _make_multi_sheet_recipe(tmp_path)
+    svg = folder / "output" / "box_sheet_1.svg"
+    code, _, stderr = run_cli("--pml", str(folder / "box.pml.yml"), "--svg", str(svg))
+    assert code == EXIT_FAIL
+    assert f"resolves to {len(runs)} sheets" in stderr
+    assert "use --recipe" in stderr
+    assert "Traceback" not in stderr
+    assert "ResolutionAssertionError" not in stderr
+
+
+def test_standalone_packed_pml_uses_saved_custom_tool_context(tmp_path):
+    from config.machine_loader import Endmill, FeedsEntry
+
+    folder = tmp_path / "rail"
+    folder.mkdir()
+    source = folder / "rail.pml.yml"
+    source.write_text("""Sheet: {physical_width: 600mm, physical_height: 600mm, thickness: 19mm, margin: 10mm}
+children:
+- Beam: {name: rail, length: 300mm, width: 40mm, thickness: 19mm, layers: 2}
+""")
+    recipe = recipe_at(folder)
+    assert recipe is not None
+    runs, _ = write_recipe_outputs(
+        recipe,
+        folder / "output",
+        kerf_mm=5,
+        endmills=[Endmill("custom3", 3, 20, 3, 2, "straight")],
+        feeds=[FeedsEntry("custom3", "mdf", 0.05, 18000, 2, 0.3)],
+    )
+    assert len(runs) == 1
+    code, stdout, stderr = run_cli(
+        "--pml",
+        str(source),
+        "--svg",
+        str(folder / "output" / "rail.svg"),
+        "--gcode",
+        str(folder / "output" / "profile-3.00mm.nc"),
+        "--quiet",
+    )
+    assert code in (EXIT_PASS, EXIT_WARN), stderr
+    result = json.loads(stdout)["validation_result"]
+    assert result["assertions"]["total"] > 0
+    assert result["assertions"]["failed"] == 0
+
+
+def test_standalone_packed_pml_without_context_fails_explicitly(tmp_path):
+    source = tmp_path / "legacy.pml.yml"
+    source.write_text(MULTI_SHEET_PML)
+    svg = tmp_path / "legacy.svg"
+    svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+    code, _, stderr = run_cli("--pml", str(source), "--svg", str(svg))
+    assert code == EXIT_FAIL
+    assert "saved compilation context is missing" in stderr
+    assert "Traceback" not in stderr
+
+
+def test_standalone_single_sheet_pml_keeps_explicit_artifacts_from_different_directories(tmp_path):
+    recipe = _make_recipe(tmp_path)
+    other = tmp_path / "copied"
+    other.mkdir()
+    copied = []
+    for nc in (recipe / "output").glob("*.nc"):
+        path = other / nc.name
+        path.write_bytes(nc.read_bytes())
+        copied.append(str(path))
+    code, _, stderr = run_cli(
+        "--pml",
+        str(recipe / "example.pml.yml"),
+        "--svg",
+        str(recipe / "output" / "frame.svg"),
+        "--gcode",
+        *copied,
+        "--quiet",
+    )
+    assert code in (EXIT_PASS, EXIT_WARN), stderr
+
+
+def test_standalone_explicit_pml_rejects_conflicting_build_contexts(tmp_path):
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    a = _make_recipe(first)
+    b = _make_recipe(second)
+    recipe = recipe_at(b)
+    assert recipe is not None
+    write_recipe_outputs(recipe, b / "output", kerf_mm=6.35)
+    code, _, stderr = run_cli(
+        "--pml",
+        str(a / "example.pml.yml"),
+        "--svg",
+        str(a / "output" / "frame.svg"),
+        "--gcode",
+        str(next((b / "output").glob("*.nc"))),
+    )
+    assert code == EXIT_FAIL
+    assert "conflicting compilation contexts" in stderr
+    assert "Traceback" not in stderr

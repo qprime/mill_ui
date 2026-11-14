@@ -5,11 +5,13 @@ import json
 import sys
 from pathlib import Path
 
+from layout_ast.layout import LayoutAST
 from validation.core import Verdict
 from validation.regression import ComparisonConfig
 from validation.runner import (
     ValidationInput,
     ValidationOptions,
+    resolve_validation_source,
     validate,
     validate_recipe,
 )
@@ -134,7 +136,7 @@ Exit codes:
 
     try:
         return run_validation(args)
-    except FileNotFoundError as e:
+    except (FileNotFoundError, ValueError) as e:
         if not args.quiet:
             print(f"Error: {e}", file=sys.stderr)
         return EXIT_FAIL
@@ -145,6 +147,28 @@ Exit codes:
 
             traceback.print_exc(file=sys.stderr)
         return EXIT_FAIL
+
+
+def resolve_explicit_pml(pml_path: Path, artifacts: list[Path]) -> LayoutAST:
+    folders = sorted({path.parent.resolve() for path in artifacts})
+    matches = {}
+    for folder in folders:
+        metrics = folder / "metrics.json"
+        if metrics.is_file():
+            data = json.loads(metrics.read_text(encoding="utf-8"))
+            context = data.get("build", {}).get("compilation_contexts", {}).get(pml_path.name)
+            if context is not None:
+                matches[folder] = context
+    fingerprints = {context.get("fingerprint") for context in matches.values()}
+    if len(fingerprints) > 1:
+        raise ValueError("Explicit --pml artifacts have conflicting compilation contexts; validate one build at a time")
+    output_dir = next(iter(matches)) if matches else folders[0] if folders else pml_path.parent
+    asts = resolve_validation_source(pml_path, output_dir)
+    if len(asts) != 1:
+        raise ValueError(
+            f"Multi-sheet --pml input resolves to {len(asts)} sheets; use --recipe to match every sheet to its artifacts"
+        )
+    return asts[0]
 
 
 def run_validation(args: argparse.Namespace) -> int:
@@ -171,14 +195,12 @@ def run_validation(args: argparse.Namespace) -> int:
     )
 
     ast = None
-    if args.pml:
-        pml_path = Path(args.pml)
-        if not pml_path.exists():
-            raise FileNotFoundError(f"PML file not found: {args.pml}")
-        from pml import parse_pml
-
-        with open(pml_path) as f:
-            ast = parse_pml(f.read())
+    pml_path = Path(args.pml) if args.pml else None
+    if pml_path is not None and not pml_path.is_file():
+        raise FileNotFoundError(f"PML file not found: {pml_path}")
+    if pml_path is not None and not args.recipe:
+        artifacts = [Path(path) for path in ([args.svg] if args.svg else []) + (args.gcode or [])]
+        ast = resolve_explicit_pml(pml_path, artifacts)
 
     if args.recipe:
         recipe_dir = Path(args.recipe)
@@ -189,7 +211,7 @@ def run_validation(args: argparse.Namespace) -> int:
 
         result = validate_recipe(
             recipe_dir,
-            ast=ast,
+            pml_source=pml_path,
             golden_metrics=golden_metrics,
             golden_file=golden_file,
             comparison_config=comparison_config,
@@ -199,6 +221,8 @@ def run_validation(args: argparse.Namespace) -> int:
         inputs = ValidationInput(
             source_file=args.pml,
             ast=ast,
+            sheet_width_mm=ast.sheet.width_mm if ast is not None else None,
+            sheet_height_mm=ast.sheet.height_mm if ast is not None else None,
             svg_path=args.svg,
             gcode_paths=args.gcode or [],
             golden_metrics=golden_metrics,

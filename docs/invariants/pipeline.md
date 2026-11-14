@@ -8,7 +8,7 @@
 
 | ID | Type | Invariant | Description |
 |----|------|-----------|-------------|
-| PL-1 | HARD | PIPELINE_ORDER | PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code |
+| PL-1 | HARD | PIPELINE_ORDER | PML/nest → LayoutAST → RemovalIntent IR → CAM Planner → G-code |
 | PL-2 | HARD | IR_LAYER_REQUIRED | All AST-to-CAM conversion MUST pass through RemovalIntent IR layer |
 | PL-3 | HARD | SEMANTIC_NOT_SYNTAX | Round-trip preserves semantics, not surface syntax |
 | PL-4 | HARD | TEST_AT_IR | Write tests against RemovalIntent IR, not full CAM pipeline |
@@ -81,27 +81,22 @@ assert ast1 == ast2
 Canonical PML machining entry points select the actual flat profile tool before
 resolving assembly and beam layouts. A frozen, dependency-light
 `MachiningClearance` carries only its positive finite diameter into resolution.
-The resolved LayoutAST retains that contract, including through JSON export;
+The resolved LayoutAST retains that contract, only during the current invocation;
 Feature and RemovalIntent carry no tool objects or computed paths. The planner
 rejects a different selected diameter and uses the actual diameter for clearance
 checks. A changed library requires resolution again.
 
-Entry-point cutter defaults remain unchanged: recipes request 3.175mm and
-projects 6.35mm; an explicit CLI kerf overrides that request. An authored PML
-`kerf` retains its existing geometry-generation meaning and does not substitute
-for the actual profile-tool selection. Geometry-only resolution without a
-machining context retains its legacy behavior: an omitted or zero authored kerf
-uses 6.35mm for packing. A positive authored kerf is preserved. Numeric layout
-gaps are preserved and incompatible selected cutters error instead of shrinking
-parts or spacing. Explicit automatic gaps require this actual-cutter context and record their
-bounded preflight/repacking attempts. A geometry-only call with numeric gaps
-retains its existing behavior.
+Manufacturing resolves the selected machine's material-specific cutting preset
+before packing. Recipes explicitly select the machine in `machines/defaults.yml`.
+A CLI/nest kerf is an exact cutter constraint; it never selects a nearest diameter.
+Authored PML `kerf` retains its geometry-generation meaning. Numeric gaps preserve
+nominal dimensions and reject insufficient clearance; automatic gaps use the
+actual cutter and bounded sweep preflight/repacking.
 
 ## Part Ownership and Sweep Preflight
 
 Items and RemovalIntent carry optional semantic `part_id` metadata. Resolvers
-preserve it across assembly, beam, shape-child and template expansion and through
-JSON/PML conversion. No cutter paths or computed regions enter semantic records.
+preserve it across assembly, beam, shape-child and template expansion in memory. No cutter paths or computed regions enter semantic records.
 Planner move ranges retain contributing feature IDs, including shared groups and
 deferred finishing/release, so sweep checks distinguish a feature's own part from
 neighboring retained geometry. A legacy single-workpiece layout remains usable
@@ -117,30 +112,24 @@ working-area margins and keepouts are protected. Explicit full-bed surface
 operations keep their authorized margin exception. Failed setups emit no NC.
 Automatic resolution runs these checks before returning any packed sheets.
 
-## Reproducible Compilation Context
+## Source-based Compilation
 
-`cam.compilation` is the shared orchestration boundary for PML resolution and
-tool selection; validation does not import `cam.pipeline`. A frozen context
-retains the requested kerf, material and normalized tool-library snapshot. Its
-serialized version, selected profile diameter and fingerprint are checked when
-read. Recipe metrics record this context per source, so validation can resolve
-custom-tool jobs without reselecting from the current default library. Missing
-or inconsistent context on a packed recipe requires a rebuild.
+`cam.compilation` resolves current authored PML/nest, referenced templates/assets,
+machine, cutting preset and tool library on each invocation. `CompilationContext`
+is an immutable in-memory handoff. No context, layout, flattened PML, library
+snapshot, fingerprint or resumable checkpoint is persisted or replayed.
 
-`build.kerf_mm` consistently means the requested kerf for compatibility.
-`requested_kerf_mm` states it explicitly; `selected_profile_diameter_mm` records
-the actual cutter. Mixed source requests use `source_kerfs_mm`; mixed actual
-diameters use `source_profile_diameters_mm`. `compilation_contexts` retains the
-complete per-source inputs. These fields are written by the canonical artifact
-writer from each pipeline result, not guessed by CLI entry points.
+`cli.mill` and `cli.nest` pack and machine in one invocation through the existing
+AST → RemovalIntent → planner layers. Legacy resolved-layout JSON is rejected
+with instructions to rebuild from the original source. Source formatting remains
+available without resolving/flattening the layout.
 
-Geometry-only PML-to-JSON conversion marks packed layouts as requiring a cutter
-context. Use `convert_layout --for-machining` with optional kerf/tool/feeds
-arguments to produce a single-sheet JSON job with that context. Replaying it
-uses the saved tools unless explicitly overridden; a different profile diameter
-requires resolution from the original PML. Legacy flat JSON is never repacked by
-inferred topology. It still passes actual-cutter physical-clearance checks before
-any setup G-code is emitted. JSON preserves material and output grouping.
+Final NC, blueprint and setup/timing/validation reports are outputs, never build
+inputs. `build.machining` identifies machine/preset/material and actual profile
+diameter per source. Setup summaries report each effective pass's tool identity,
+geometry and parameters, including overrides, without a complete tool library.
+Validation resolves expected geometry from source/current explicit configuration,
+or receives the same invocation's AST. Historical reports are comparison evidence.
 
 ## Layer Separation
 

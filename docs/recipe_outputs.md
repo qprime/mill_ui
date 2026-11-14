@@ -171,3 +171,20 @@ stepdown diagnostics. The numeric stepdown diagnostics change with the new passe
 these checks do not distinguish cleared kerf from uncut material. No additional
 recipes fail those checks. [Detailed baseline/revised results](evidence/altmill_recipe_tooling/validation.json)
 retain the findings rather than hiding or relaxing them.
+
+## Explicit cutting preset migration, issue #253
+
+[Current evidence](evidence/issue_253/README.md) records a fresh source build of all
+33 recipes using the configured AltMill production preset. The combined modeled
+estimate is 1,121.3 minutes, compared with the preserved 1,189.1-minute retune and
+3,790.0-minute original comparison. All sheet counts are unchanged. Machine
+retract settings and explicit approved detail/hole tools explain material timing
+differences; the comparison does not isolate cutter-size effects.
+
+Recipes resolve current authored PML/nest and current machine/preset/tool inputs
+on every invocation. `build.machining` and per-file effective pass summaries are
+reports of the completed build, never reusable compilation settings. Resolved
+layouts, flattened sources, saved tool libraries and fingerprint replay have been
+removed. The extended validator retains the two previously documented problem
+recipes; the evidence records their current findings separately from the passing
+33-recipe compilation/artifact gate.

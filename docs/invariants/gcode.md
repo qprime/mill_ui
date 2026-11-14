@@ -42,8 +42,7 @@
 ## Physical Clearance Before Emission
 
 A setup that fails working-area cutter-clearance checks emits no NC programs.
-Bounds and actual emitted-motion sweeps use selected tool diameters, including for legacy JSON and
-requests that differ from available cutters. Its blueprint, planned passes and
+Bounds and actual emitted-motion sweeps use selected tool diameters, using tools resolved from authored source and current configuration. Its blueprint, planned passes and
 errors remain diagnostic outputs; an independent valid setup can retain its
 programs. Explicit full-bed surface facing remains the documented exception.
 

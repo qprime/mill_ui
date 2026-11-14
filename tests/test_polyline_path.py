@@ -95,7 +95,6 @@ Sheet:
 children:
   - Circle:
       id: boundary
-      fit: true
       children:
         - Polyline:
             id: cross

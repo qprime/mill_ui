@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
-
-from core.constants import TOOL_PURPOSES
 
 
 @dataclass(frozen=True)
@@ -125,8 +124,6 @@ class TTrack:
 @dataclass(frozen=True)
 class MachineDefaults:
     safe_z_mm: float = 5.0
-    feed_rate_mm_min: float = 1500.0
-    plunge_rate_mm_min: float = 500.0
     park_z_mm: float = 100.0
     ramp_angle_deg: float = 3.0
 
@@ -144,8 +141,15 @@ class MachineConfig:
     spoilboard: Spoilboard2D | None = None
     t_track: TTrack | None = None
     defaults: MachineDefaults = field(default_factory=MachineDefaults)
+    cutting_preset: str | None = None
+    controller: dict[str, Any] = field(default_factory=dict)
+    capabilities: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self):
+        known = {"max_feed_xy", "max_feed_z", "rpm_min", "rpm_max", "max_shank_mm", "rapid_z"}
+        for key, value in self.capabilities.items():
+            if key not in known or not math.isfinite(value) or value <= 0:
+                raise ValueError(f"Machine {self.machine.name!r}: invalid capability {key}={value}")
         if self.spoilboard is not None:
             wb = self.spoilboard
             m = self.machine
@@ -187,13 +191,8 @@ class Endmill:
     type: str
     v_angle_deg: float | None = None
     roundover_radius_mm: float | None = None
-    purpose: str = "general"
 
     def __post_init__(self):
-        if self.purpose not in TOOL_PURPOSES:
-            raise ValueError(
-                f"Endmill '{self.name}': purpose must be one of {sorted(TOOL_PURPOSES)}, got {self.purpose!r}"
-            )
         if self.diameter_mm <= 0:
             raise ValueError(f"Endmill diameter must be positive, got {self.diameter_mm}")
         if self.flute_length_mm <= 0:
@@ -273,30 +272,31 @@ _ENDMILL_TYPE_TO_ROTATION: dict[str, str | None] = {
 }
 
 
-def resolve_tool_selection(endmill: Endmill, feeds: FeedsEntry) -> dict[str, Any]:
-    feed_xy = feeds.rpm * endmill.flutes * feeds.chipload
-    feed_z = feed_xy * feeds.plunge_factor
-    kind = _ENDMILL_TYPE_TO_KIND.get(endmill.type, "flat")
-    rotation = _ENDMILL_TYPE_TO_ROTATION.get(endmill.type)
-
-    result: dict[str, Any] = {
+def endmill_geometry(endmill: Endmill) -> dict[str, Any]:
+    return {
         "name": endmill.name,
         "diameter": endmill.diameter_mm,
-        "kind": kind,
+        "kind": _ENDMILL_TYPE_TO_KIND.get(endmill.type, "flat"),
+        "rotation": _ENDMILL_TYPE_TO_ROTATION.get(endmill.type),
+        "v_angle_deg": endmill.v_angle_deg,
+        "roundover_radius_mm": endmill.roundover_radius_mm,
+        "flute_length_mm": endmill.flute_length_mm,
+        "flutes": endmill.flutes,
+        "shank_diameter_mm": endmill.shank_diameter_mm,
+    }
+
+
+def resolve_tool_selection(endmill: Endmill, feeds: FeedsEntry) -> dict[str, Any]:
+    feed_xy = feeds.rpm * endmill.flutes * feeds.chipload
+    result = {
+        **endmill_geometry(endmill),
         "rpm": feeds.rpm,
         "feed_xy": feed_xy,
-        "feed_z": feed_z,
+        "feed_z": feed_xy * feeds.plunge_factor,
         "depth_per_pass": feeds.depth_per_pass,
-        "rotation": rotation,
     }
-    if endmill.purpose != "general":
-        result["purpose"] = endmill.purpose
     if feeds.stepover_percent is not None:
         result["stepover_percent"] = feeds.stepover_percent
-    if endmill.v_angle_deg is not None:
-        result["v_angle_deg"] = endmill.v_angle_deg
-    if endmill.roundover_radius_mm is not None:
-        result["roundover_radius_mm"] = endmill.roundover_radius_mm
     return result
 
 
@@ -381,17 +381,24 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
 
     defaults = MachineDefaults(
         safe_z_mm=float(defaults_data.get("safe_z_mm", 5.0)),
-        feed_rate_mm_min=float(defaults_data.get("feed_rate_mm_min", 1500.0)),
-        plunge_rate_mm_min=float(defaults_data.get("plunge_rate_mm_min", 500.0)),
         park_z_mm=float(defaults_data.get("park_z_mm", 100.0)),
         ramp_angle_deg=float(defaults_data.get("ramp_angle_deg", 3.0)),
     )
 
-    return MachineConfig(machine=machine, table=table, spoilboard=spoilboard, t_track=t_track, defaults=defaults)
+    return MachineConfig(
+        machine=machine,
+        table=table,
+        spoilboard=spoilboard,
+        t_track=t_track,
+        defaults=defaults,
+        cutting_preset=data.get("cutting_preset"),
+        controller=data.get("controller", {}),
+        capabilities={key: float(value) for key, value in data.get("capabilities", {}).items()},
+    )
 
 
-_endmills_cache: dict[tuple[str, float], tuple[Endmill, ...]] = {}
-_feeds_cache: dict[tuple[str, float], tuple[FeedsEntry, ...]] = {}
+_endmills_cache: dict[tuple[str, int], tuple[Endmill, ...]] = {}
+_feeds_cache: dict[tuple[str, int], tuple[FeedsEntry, ...]] = {}
 
 
 def _reset_caches() -> None:
@@ -401,7 +408,7 @@ def _reset_caches() -> None:
 
 def load_endmills(path: Path | str) -> list[Endmill]:
     path = Path(path)
-    key = (str(path), path.stat().st_mtime)
+    key = (str(path), path.stat().st_mtime_ns)
     cached = _endmills_cache.get(key)
     if cached is not None:
         return list(cached)
@@ -421,7 +428,6 @@ def load_endmills(path: Path | str) -> list[Endmill]:
             type=item.get("type", "unknown"),
             v_angle_deg=float(item["v_angle_deg"]) if "v_angle_deg" in item else None,
             roundover_radius_mm=float(item["roundover_radius_mm"]) if "roundover_radius_mm" in item else None,
-            purpose=item.get("purpose", "general"),
         )
         endmills.append(endmill)
 
@@ -449,7 +455,7 @@ def load_spindles(path: Path | str) -> list[Spindle]:
 
 def load_feeds(path: Path | str) -> list[FeedsEntry]:
     path = Path(path)
-    key = (str(path), path.stat().st_mtime)
+    key = (str(path), path.stat().st_mtime_ns)
     cached = _feeds_cache.get(key)
     if cached is not None:
         return list(cached)
@@ -475,27 +481,20 @@ def load_feeds(path: Path | str) -> list[FeedsEntry]:
     return entries
 
 
-def load_machine_tool_db(material: str = "mdf") -> list[dict[str, Any]]:
-    machines_dir = get_machines_dir()
-    endmills_path = machines_dir / "endmills.yml"
-    feeds_path = machines_dir / "feeds.yml"
-    if not endmills_path.exists():
-        raise FileNotFoundError(f"Endmill library not found: {endmills_path}")
-    if not feeds_path.exists():
-        raise FileNotFoundError(f"Feeds library not found: {feeds_path}")
-    endmills = load_endmills(endmills_path)
-    feeds = load_feeds(feeds_path)
-    return build_tool_db(endmills, feeds, material)
-
-
 def available_materials(feeds: list[FeedsEntry] | None = None) -> frozenset[str]:
-    if feeds is None:
-        feeds = load_feeds(get_machines_dir() / "feeds.yml")
-    return frozenset(f.material.lower() for f in feeds)
+    if feeds is not None:
+        return frozenset(f.material.lower() for f in feeds)
+    yaml = YAML(typ="safe")
+    return frozenset(
+        material
+        for path in (get_machines_dir() / "cutting_presets").glob("*.yml")
+        for material in yaml.load(path.read_text()).get("materials", {})
+    )
 
 
 def get_machines_dir() -> Path:
-    return Path(__file__).parent.parent / "machines"
+    configured = os.environ.get("MILL_UI_MACHINES_DIR")
+    return Path(configured).expanduser().resolve() if configured else Path(__file__).parent.parent / "machines"
 
 
 def list_available_machines() -> list[str]:
@@ -531,7 +530,6 @@ __all__ = [
     "load_endmills",
     "load_feeds",
     "load_machine_by_name",
-    "load_machine_tool_db",
     "load_spindles",
     "resolve_tool_selection",
 ]

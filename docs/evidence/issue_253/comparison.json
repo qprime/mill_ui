@@ -1,0 +1,642 @@
+{
+  "date": "2026-11-14",
+  "machine": "altmill_4x4",
+  "preset": "altmill_production",
+  "estimate": "Modeled canonical program estimates, not measured cutting performance",
+  "historical_evidence": "docs/evidence/altmill_recipe_tooling/",
+  "historical_original_min": 3790.0,
+  "historical_retuned_min": 1189.1,
+  "preset_total_min": 1121.3,
+  "all_sheet_counts_unchanged": true,
+  "recipes": [
+    {
+      "recipe": "base_cabinet",
+      "category": "assemblies",
+      "original_min": 174.1,
+      "retuned_min": 45.0,
+      "preset_min": 44.5,
+      "delta_from_retune_min": -0.5,
+      "sheets_retuned": 2,
+      "sheets_preset": 2
+    },
+    {
+      "recipe": "bookcase",
+      "category": "assemblies",
+      "original_min": 182.9,
+      "retuned_min": 34.8,
+      "preset_min": 34.3,
+      "delta_from_retune_min": -0.5,
+      "sheets_retuned": 3,
+      "sheets_preset": 3
+    },
+    {
+      "recipe": "box_bottoms_and_lids",
+      "category": "assemblies",
+      "original_min": 142.0,
+      "retuned_min": 56.0,
+      "preset_min": 58.8,
+      "delta_from_retune_min": 2.8,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "cubby_organizer",
+      "category": "assemblies",
+      "original_min": 400.6,
+      "retuned_min": 118.4,
+      "preset_min": 125.8,
+      "delta_from_retune_min": 7.4,
+      "sheets_retuned": 2,
+      "sheets_preset": 2
+    },
+    {
+      "recipe": "finger_jointed_box",
+      "category": "assemblies",
+      "original_min": 24.5,
+      "retuned_min": 9.2,
+      "preset_min": 9.6,
+      "delta_from_retune_min": 0.4,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "long_spliced_rail",
+      "category": "beams",
+      "original_min": 107.0,
+      "retuned_min": 9.9,
+      "preset_min": 9.9,
+      "delta_from_retune_min": 0.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "side_table_frame",
+      "category": "beams",
+      "original_min": 180.4,
+      "retuned_min": 30.8,
+      "preset_min": 29.8,
+      "delta_from_retune_min": -1.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "decorated_shaker_door",
+      "category": "doors",
+      "original_min": 72.3,
+      "retuned_min": 21.5,
+      "preset_min": 22.2,
+      "delta_from_retune_min": 0.7,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "hinge_cup_door",
+      "category": "doors",
+      "original_min": 66.2,
+      "retuned_min": 18.2,
+      "preset_min": 20.6,
+      "delta_from_retune_min": 2.4,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "multi_panel_doors",
+      "category": "doors",
+      "original_min": 230.0,
+      "retuned_min": 57.5,
+      "preset_min": 57.3,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "raised_panel_doors",
+      "category": "doors",
+      "original_min": 144.5,
+      "retuned_min": 50.2,
+      "preset_min": 49.8,
+      "delta_from_retune_min": -0.4,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "shaker_door",
+      "category": "doors",
+      "original_min": 65.7,
+      "retuned_min": 17.8,
+      "preset_min": 17.8,
+      "delta_from_retune_min": 0.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "layout_board",
+      "category": "engraving",
+      "original_min": 309.4,
+      "retuned_min": 156.7,
+      "preset_min": 115.8,
+      "delta_from_retune_min": -40.9,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "shop_ruler",
+      "category": "engraving",
+      "original_min": 167.2,
+      "retuned_min": 61.0,
+      "preset_min": 35.1,
+      "delta_from_retune_min": -25.9,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "sign",
+      "category": "engraving",
+      "original_min": 39.9,
+      "retuned_min": 15.2,
+      "preset_min": 11.5,
+      "delta_from_retune_min": -3.7,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "svg_artwork",
+      "category": "engraving",
+      "original_min": 11.1,
+      "retuned_min": 2.7,
+      "preset_min": 2.5,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "cabinet_side",
+      "category": "panels",
+      "original_min": 31.5,
+      "retuned_min": 7.6,
+      "preset_min": 7.4,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "decorative_panel_faces",
+      "category": "panels",
+      "original_min": 217.0,
+      "retuned_min": 81.6,
+      "preset_min": 86.5,
+      "delta_from_retune_min": 4.9,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "edge_treatments",
+      "category": "panels",
+      "original_min": 71.8,
+      "retuned_min": 17.9,
+      "preset_min": 17.9,
+      "delta_from_retune_min": 0.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "frames_and_trays",
+      "category": "panels",
+      "original_min": 117.1,
+      "retuned_min": 30.0,
+      "preset_min": 29.8,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "pocket_with_island",
+      "category": "panels",
+      "original_min": 31.8,
+      "retuned_min": 10.0,
+      "preset_min": 9.8,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "recessed_mounting_plate",
+      "category": "panels",
+      "original_min": 13.1,
+      "retuned_min": 3.6,
+      "preset_min": 3.6,
+      "delta_from_retune_min": 0.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "curve_coasters",
+      "category": "patterns",
+      "original_min": 43.3,
+      "retuned_min": 11.7,
+      "preset_min": 11.5,
+      "delta_from_retune_min": -0.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "pattern_coasters",
+      "category": "patterns",
+      "original_min": 35.4,
+      "retuned_min": 11.6,
+      "preset_min": 10.4,
+      "delta_from_retune_min": -1.2,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "radial_patterns",
+      "category": "patterns",
+      "original_min": 69.9,
+      "retuned_min": 19.9,
+      "preset_min": 16.1,
+      "delta_from_retune_min": -3.8,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "relief_carving",
+      "category": "patterns",
+      "original_min": 240.3,
+      "retuned_min": 137.2,
+      "preset_min": 127.2,
+      "delta_from_retune_min": -10.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "nested_cabinet_job",
+      "category": "production",
+      "original_min": 152.6,
+      "retuned_min": 49.4,
+      "preset_min": 49.3,
+      "delta_from_retune_min": -0.1,
+      "sheets_retuned": 2,
+      "sheets_preset": 2
+    },
+    {
+      "recipe": "production_sheet",
+      "category": "production",
+      "original_min": 227.7,
+      "retuned_min": 30.7,
+      "preset_min": 32.7,
+      "delta_from_retune_min": 2.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "calibration_coupon",
+      "category": "shop",
+      "original_min": 33.4,
+      "retuned_min": 2.8,
+      "preset_min": 3.7,
+      "delta_from_retune_min": 0.9,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "clamp_keepouts",
+      "category": "shop",
+      "original_min": 31.1,
+      "retuned_min": 6.4,
+      "preset_min": 6.3,
+      "delta_from_retune_min": -0.1,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "joinery_test_coupons",
+      "category": "shop",
+      "original_min": 101.5,
+      "retuned_min": 26.8,
+      "preset_min": 27.2,
+      "delta_from_retune_min": 0.4,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "pocket_corner_test",
+      "category": "shop",
+      "original_min": 35.2,
+      "retuned_min": 17.5,
+      "preset_min": 17.5,
+      "delta_from_retune_min": 0.0,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    },
+    {
+      "recipe": "spoilboard_surfacing",
+      "category": "shop",
+      "original_min": 19.5,
+      "retuned_min": 19.5,
+      "preset_min": 19.1,
+      "delta_from_retune_min": -0.4,
+      "sheets_retuned": 1,
+      "sheets_preset": 1
+    }
+  ],
+  "artifact_review": {
+    "base_cabinet": {
+      "artifact_counts": {
+        ".svg": 2,
+        ".json": 3,
+        ".nc": 6
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "bookcase": {
+      "artifact_counts": {
+        ".svg": 3,
+        ".json": 3,
+        ".nc": 5
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "box_bottoms_and_lids": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".nc": 3,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "cubby_organizer": {
+      "artifact_counts": {
+        ".svg": 2,
+        ".json": 3,
+        ".nc": 8
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "finger_jointed_box": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "long_spliced_rail": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".json": 2,
+        ".nc": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "side_table_frame": {
+      "artifact_counts": {
+        ".nc": 4,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "decorated_shaker_door": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".json": 2,
+        ".nc": 3
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "hinge_cup_door": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".svg": 2,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "multi_panel_doors": {
+      "artifact_counts": {
+        ".json": 2,
+        ".svg": 1,
+        ".nc": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "raised_panel_doors": {
+      "artifact_counts": {
+        ".nc": 4,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "shaker_door": {
+      "artifact_counts": {
+        ".json": 2,
+        ".nc": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "layout_board": {
+      "artifact_counts": {
+        ".nc": 1,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "shop_ruler": {
+      "artifact_counts": {
+        ".nc": 2,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "sign": {
+      "artifact_counts": {
+        ".nc": 1,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "svg_artwork": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "cabinet_side": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "decorative_panel_faces": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".nc": 4,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "edge_treatments": {
+      "artifact_counts": {
+        ".nc": 4,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "frames_and_trays": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "pocket_with_island": {
+      "artifact_counts": {
+        ".json": 2,
+        ".nc": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "recessed_mounting_plate": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "curve_coasters": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".nc": 2,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "pattern_coasters": {
+      "artifact_counts": {
+        ".nc": 5,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "radial_patterns": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "relief_carving": {
+      "artifact_counts": {
+        ".nc": 3,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "nested_cabinet_job": {
+      "artifact_counts": {
+        ".json": 3,
+        ".svg": 2,
+        ".nc": 6
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "production_sheet": {
+      "artifact_counts": {
+        ".nc": 4,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "calibration_coupon": {
+      "artifact_counts": {
+        ".nc": 5,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "clamp_keepouts": {
+      "artifact_counts": {
+        ".svg": 1,
+        ".json": 2,
+        ".nc": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "joinery_test_coupons": {
+      "artifact_counts": {
+        ".nc": 4,
+        ".svg": 1,
+        ".json": 2
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "pocket_corner_test": {
+      "artifact_counts": {
+        ".nc": 6,
+        ".json": 2,
+        ".svg": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    },
+    "spoilboard_surfacing": {
+      "artifact_counts": {
+        ".json": 2,
+        ".svg": 1,
+        ".nc": 1
+      },
+      "sheet_count_unchanged": true,
+      "preset": "altmill_production"
+    }
+  }
+}

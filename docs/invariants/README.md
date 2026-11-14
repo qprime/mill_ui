@@ -33,7 +33,7 @@ These invariants affect everything. Violating any one breaks the system.
 | CS-7 | Z_POSITIVE_AWAY | Z positive away from material, negative into material. |
 | DS-1 | FROZEN_DATACLASSES | All core dataclasses are frozen (immutable). |
 | DS-2 | USE_REPLACE | Use `replace()` to modify frozen dataclasses, never mutate. |
-| PL-1 | PIPELINE_ORDER | PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code |
+| PL-1 | PIPELINE_ORDER | PML/nest → LayoutAST → RemovalIntent IR → CAM Planner → G-code |
 | PL-2 | IR_LAYER_REQUIRED | All AST-to-CAM conversion MUST pass through RemovalIntent IR layer. |
 | PL-5 | DETERMINISTIC | Pipeline is deterministic. Same input = same output. |
 

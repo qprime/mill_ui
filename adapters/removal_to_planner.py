@@ -127,6 +127,7 @@ def _intent_to_feature_input(intent: RemovalIntent) -> FeatureInput:
         rest=intent.rest,
         edge_treatment=edge_treatment,
         feeds_override=intent.feeds_override,
+        tool_name=intent.tool_name,
         ramp_mm=intent.ramp_mm,
     )
 
@@ -237,6 +238,8 @@ def _intent_to_edge_feature_input(intent: RemovalIntent) -> EdgeFeatureInput:
         start_depth_mm=start_depth_mm,
         side=intent.side,
         edge_feature=intent.edge_feature,
+        tool_name=intent.tool_name,
+        feeds_override=intent.feeds_override,
     )
 
 

@@ -333,7 +333,7 @@ def test_acceptance_4_instances_frame_grid_pocket():
     assert flat.sheet.height_mm == 1200
     assert flat.project == "acceptance_test_grid_panels"
 
-    pml_output = format_pml(flat)
+    pml_output = format_pml(ast)
     assert "width: 1200mm" in pml_output
     assert "project: acceptance_test_grid_panels" in pml_output
     assert "type: profile" in pml_output

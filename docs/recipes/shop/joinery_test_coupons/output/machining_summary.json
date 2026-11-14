@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 600.0,
     "height_mm": 400.0,
@@ -9,6 +21,46 @@
     {
       "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "assembly_back_dado_49",
+            "assembly_back_dado_63",
+            "assembly_bottom_dado_77",
+            "assembly_front_dado_46",
+            "assembly_front_dado_60",
+            "assembly_left_side_dado_52",
+            "assembly_left_side_dado_66",
+            "assembly_left_side_dado_80",
+            "assembly_right_side_dado_55",
+            "assembly_right_side_dado_69",
+            "assembly_right_side_dado_83",
+            "assembly_top_dado_74"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,24 +69,106 @@
       "max_depth_mm": 9.0,
       "feature_count": 12,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 2.7
+      "estimated_runtime_min": 2.5
     },
     {
       "filename": "dogbone-3.17mm.nc",
       "operation": "dogbone",
+      "tool_name": "1/8 downcut plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 20.64
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "dogbone",
+          "feature_ids": [
+            "assembly_back_notch_dogbone_14",
+            "assembly_back_notch_dogbone_15",
+            "assembly_front_notch_dogbone_10",
+            "assembly_front_notch_dogbone_11",
+            "assembly_left_side_notch_dogbone_18",
+            "assembly_left_side_notch_dogbone_19",
+            "assembly_left_side_notch_dogbone_20",
+            "assembly_left_side_notch_dogbone_21",
+            "assembly_partition_1_notch_dogbone_89",
+            "assembly_right_side_notch_dogbone_24",
+            "assembly_right_side_notch_dogbone_25",
+            "assembly_right_side_notch_dogbone_26",
+            "assembly_right_side_notch_dogbone_27",
+            "assembly_shelf_1_notch_dogbone_86"
+          ],
+          "tool": {
+            "name": "1/8 downcut plunge",
+            "diameter": 3.175,
+            "kind": "flat",
+            "rotation": "downcut",
+            "depth_per_pass": 2.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 20.64,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0
+          }
+        }
+      ],
       "tool_diameter_mm": 3.175,
       "rpm": 18000.0,
-      "feed_xy_mm_min": 2160.0,
-      "feed_z_mm_min": 712.8,
+      "feed_xy_mm_min": 1800.0,
+      "feed_z_mm_min": 594.0,
       "stepdown_mm": 2.0,
       "max_depth_mm": 18.0,
       "feature_count": 28,
       "strategy": "dogbone",
-      "estimated_runtime_min": 8.7
+      "estimated_runtime_min": 10.0
     },
     {
       "filename": "dogbone-9.53mm.nc",
       "operation": "dogbone",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "dogbone",
+          "feature_ids": [
+            "assembly_back_dado_49",
+            "assembly_back_dado_63",
+            "assembly_bottom_dado_77",
+            "assembly_front_dado_46",
+            "assembly_front_dado_60",
+            "assembly_left_side_dado_52",
+            "assembly_left_side_dado_66",
+            "assembly_left_side_dado_80",
+            "assembly_right_side_dado_55",
+            "assembly_right_side_dado_69",
+            "assembly_right_side_dado_83",
+            "assembly_top_dado_74"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -43,11 +177,71 @@
       "max_depth_mm": 9.0,
       "feature_count": 48,
       "strategy": "dogbone",
-      "estimated_runtime_min": 5.5
+      "estimated_runtime_min": 5.1
     },
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_assembly_back_13_back_outer",
+            "generated_assembly_back_31_back_outer",
+            "generated_assembly_back_39_back_outer",
+            "generated_assembly_back_3_back_outer",
+            "generated_assembly_back_48_back_outer",
+            "generated_assembly_back_62_back_outer",
+            "generated_assembly_bottom_57_bottom_outer",
+            "generated_assembly_bottom_71_bottom_outer",
+            "generated_assembly_bottom_76_bottom_outer",
+            "generated_assembly_front_1_front_outer",
+            "generated_assembly_front_29_front_outer",
+            "generated_assembly_front_37_front_outer",
+            "generated_assembly_front_45_front_outer",
+            "generated_assembly_front_59_front_outer",
+            "generated_assembly_front_9_front_outer",
+            "generated_assembly_left_side_17_left_side_outer",
+            "generated_assembly_left_side_33_left_side_outer",
+            "generated_assembly_left_side_41_left_side_outer",
+            "generated_assembly_left_side_51_left_side_outer",
+            "generated_assembly_left_side_5_left_side_outer",
+            "generated_assembly_left_side_65_left_side_outer",
+            "generated_assembly_left_side_79_left_side_outer",
+            "generated_assembly_partition_1_88_partition_1_outer",
+            "generated_assembly_right_side_23_right_side_outer",
+            "generated_assembly_right_side_35_right_side_outer",
+            "generated_assembly_right_side_43_right_side_outer",
+            "generated_assembly_right_side_54_right_side_outer",
+            "generated_assembly_right_side_68_right_side_outer",
+            "generated_assembly_right_side_7_right_side_outer",
+            "generated_assembly_right_side_82_right_side_outer",
+            "generated_assembly_shelf_1_85_shelf_1_outer",
+            "generated_assembly_top_73_top_outer"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -57,14 +251,14 @@
       "feature_count": 53,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 9.9
+      "estimated_runtime_min": 9.6
     }
   ],
-  "total_runtime_min": 26.8,
+  "total_runtime_min": 27.2,
   "feature_counts": {
     "pocket": 26,
     "profile": 32
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

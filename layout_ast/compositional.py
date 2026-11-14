@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from core.constants import GOLDEN_ANGLE_DEG
-from layout_ast.layout import DogboneSpec, FeedsOverride, RestSpec
+from layout_ast.layout import DogboneSpec, FeedsOverride, MachiningSpec, RestSpec
 
 
 @dataclass(frozen=True)
@@ -203,6 +203,7 @@ class ProfileGen:
     tab_width_mm: float | None = None
     onion_skin_mm: float | None = None
     feeds_override: FeedsOverride | None = None
+    tool_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -210,6 +211,7 @@ class PocketGen:
     depth_mm: float
     face: str = "front"
     feeds_override: FeedsOverride | None = None
+    tool_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -219,17 +221,23 @@ class RaisedPanelGen:
     field_depth_mm: float
     profile: Literal["gutter", "v_groove"] = "gutter"
     v_angle_deg: float = 90.0
+    tool_name: str | None = None
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)
 class ChamferGen:
     width_mm: float
     depth_mm: float
+    tool_name: str | None = None
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)
 class RoundoverGen:
     radius_mm: float
+    tool_name: str | None = None
+    feeds_override: FeedsOverride | None = None
 
 
 @dataclass(frozen=True)
@@ -817,8 +825,10 @@ class BeamDecl:
 @dataclass(frozen=True)
 class SurfaceDecl:
     depth_mm: float
+    tool_name: str | None = None
+    feeds_override: FeedsOverride | None = None
     passes: int = 1
-    stepover_pct: float = 70.0
+    stepover_pct: float | None = None
     direction: str = "x"
     margin_mm: float = 0.0
     cool_every: int = 0
@@ -834,3 +844,4 @@ class CompositionalLayoutAST:
     kerf_width_mm: float | None = None
     surface: SurfaceDecl | None = None
     source_dir: str | None = None
+    machining: MachiningSpec = field(default_factory=MachiningSpec)

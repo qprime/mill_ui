@@ -16,7 +16,7 @@ from cam.path.toolpath import move_comment, offset_moves_z
 from cam.planner.planner_input import CornerCleanupInput, DogboneInput, FeatureInput
 from core.geometry import compute_shape_bounds, engraving_paths, pocket_region
 from ir.removal_intent import Bounds2D
-from layout_ast.layout import RestSpec
+from layout_ast.layout import FeedsOverride, RestSpec
 
 from .profile import offset_rect_shape, rect_shape
 from .tools import (
@@ -30,6 +30,7 @@ from .tools import (
     pick_tool_for_surface,
     stepdown_for_tool,
     stepover_for_tool,
+    tools_for_role,
 )
 
 if TYPE_CHECKING:
@@ -168,13 +169,15 @@ def _plan_rest_region(
     config: Config,
 ) -> None:
     rough_tool = pick_tool_for_region(
-        tool_db, region, cleanup_offset_mm=config.cleanup_offset_mm + rest.rough_allowance_mm
+        tools_for_role(tool_db, "pocket", entry.tool_name, entry.depth_mm),
+        region,
+        cleanup_offset_mm=config.cleanup_offset_mm + rest.rough_allowance_mm,
     )
     if rough_tool is None:
         raise _empty_pocket_error(entry, tool_db)
     rough_tool = apply_feeds_override(rough_tool, entry.feeds_override)
     finish_tool = apply_feeds_override(
-        pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat"), entry.feeds_override
+        pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat", role="pocket"), entry.feeds_override
     )
     accumulator.set_feature_tool(entry.id, rough_tool)
 
@@ -238,14 +241,14 @@ def _plan_rest_pocket(
         )
 
     rough_tool = pick_tool_for_pocket(
-        tool_db,
+        tools_for_role(tool_db, "pocket", entry.tool_name, entry.depth_mm),
         required_width_mm=min_dim,
         cleanup_offset_mm=config.cleanup_offset_mm,
     )
     rough_tool = apply_feeds_override(rough_tool, entry.feeds_override)
     accumulator.set_feature_tool(entry.id, rough_tool)
 
-    finish_tool = pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat")
+    finish_tool = pick_tool_by_diameter(tool_db, rest.tool_diameter_mm, kind="flat", role="pocket")
     finish_tool = apply_feeds_override(finish_tool, entry.feeds_override)
 
     if finish_tool.diameter >= rough_tool.diameter:
@@ -338,23 +341,32 @@ def _plan_surface_pass(
     width = float(sg.w_mm or 0.0)
     height = float(sg.h_mm or 0.0)
 
-    tool = pick_tool_for_surface(tool_db)
+    tool = pick_tool_for_surface(tools_for_role(tool_db, "surface", entry.tool_name, entry.depth_mm))
+    tool = apply_feeds_override(
+        tool, FeedsOverride(depth_per_pass=cut_depth, stepover_percent=sc.stepover_pct), validate=False
+    )
     tool = apply_feeds_override(tool, entry.feeds_override)
     accumulator.set_feature_tool(entry.id, tool)
     record = accumulator.get_record("surface", tool)
 
-    step_mm = tool.diameter * (sc.stepover_pct / 100.0)
-    moves = face_zigzag(
-        width,
-        height,
-        record.setup,
-        step=step_mm,
-        depth_mm=cut_depth,
-        direction=sc.direction,
-        cool_every=sc.cool_every,
-        cool_dwell_s=sc.cool_dwell_s,
-    )
-    record.add_moves(offset_moves_z(moves, start_depth), feature_ids=(entry.id,), increment=1)
+    step_mm = stepover_for_tool(tool)
+    offset = 0.0
+    while offset < cut_depth - 1e-9:
+        layer_depth = min(stepdown_for_tool(tool), cut_depth - offset)
+        moves = face_zigzag(
+            width,
+            height,
+            record.setup,
+            step=step_mm,
+            depth_mm=layer_depth,
+            direction=sc.direction,
+            cool_every=sc.cool_every,
+            cool_dwell_s=sc.cool_dwell_s,
+        )
+        record.add_moves(
+            offset_moves_z(moves, start_depth + offset), feature_ids=(entry.id,), increment=int(offset == 0)
+        )
+        offset += layer_depth
 
 
 def _pocket_region(entry: FeatureInput) -> BaseGeometry | None:
@@ -408,10 +420,10 @@ def _empty_pocket_error(
 ) -> ValueError:
     bounds = compute_shape_bounds(entry.shape, entry.geometry.to_dict(), entry.center_xy_mm)
     smallest = min((t.diameter for t in tool_db if t.kind == "flat"), default=None)
-    selected = f"{tool.diameter:g} mm" if tool is not None else "none fits"
+    selected = f"{tool.name!r} ({tool.diameter:g} mm)" if tool is not None else "none fits"
     return ValueError(
         f"Pocket '{entry.id}' ({entry.shape}, {bounds.width:g} x {bounds.height:g} mm): "
-        f"required cutting moves, got 0; selected tool {selected}; smallest flat tool "
+        f"required cutting moves, got 0; selected tool {selected}; approved tools {[t.name for t in tool_db]}; smallest flat tool "
         + (f"{smallest:g} mm" if smallest is not None else "unavailable")
     )
 
@@ -482,7 +494,13 @@ def _plan_pocket_entry(
     allowance_et = et if et is not None and et.type == "allowance" else None
     rough_allowance = (allowance_et.rough_allowance_mm or 0.0) if allowance_et is not None else 0.0
 
-    picked = _pick_fitting_pocket_tool(entry, region, tool_db=tool_db, config=config, wall_allowance_mm=rough_allowance)
+    candidates = tools_for_role(tool_db, "pocket", entry.tool_name, entry.depth_mm)
+    try:
+        picked = _pick_fitting_pocket_tool(
+            entry, region, tool_db=candidates, config=config, wall_allowance_mm=rough_allowance
+        )
+    except ValueError as exc:
+        raise ValueError(f"Pocket {entry.id!r} ({entry.shape}): {exc}") from exc
     if picked is None:
         raise _empty_pocket_error(entry, tool_db)
     tool = apply_feeds_override(picked, entry.feeds_override)
@@ -575,7 +593,7 @@ def plan_hole_passes(
 ) -> None:
     for entry in holes:
         if entry.shape.lower() != "circle":
-            continue
+            raise ValueError(f"Hole {entry.id!r}: shape {entry.shape!r} is unsupported; holes require circles")
         diameter = float(entry.geometry.geometry.diameter_mm or 0.0)
         center = entry.center_xy_mm
         depth = entry.depth_mm
@@ -739,10 +757,12 @@ def plan_dogbone_passes(
             if parent_tool is not None:
                 tool = parent_tool
             else:
-                flat_tools = [t for t in tool_db if t.kind == "flat"]
+                flat_tools = [
+                    t for t in tools_for_role(tool_db, "specialty", depth_mm=entry.depth_mm) if t.kind == "flat"
+                ]
                 if not flat_tools:
                     raise ValueError("No flat tools available in tool_db for dogbone fillet")
-                tool = min(flat_tools, key=lambda t: t.diameter)
+                tool = flat_tools[0]
 
         record = accumulator.get_record("dogbone", tool)
         setup = record.setup

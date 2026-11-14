@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1220.0,
     "height_mm": 1220.0,
@@ -9,6 +21,42 @@
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "beam_long_rail_L0_S0_0",
+            "beam_long_rail_L0_S1_1",
+            "beam_long_rail_L1_S0_2",
+            "beam_long_rail_L1_S1_3",
+            "beam_long_rail_L1_S2_4",
+            "beam_long_rail_L2_S0_5",
+            "beam_long_rail_L2_S1_6",
+            "beam_long_rail_L2_S2_7"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -25,6 +73,6 @@
   "feature_counts": {
     "profile": 8
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

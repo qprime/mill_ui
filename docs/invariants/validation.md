@@ -27,19 +27,16 @@ Missing sheet artifacts error explicitly. Results retain each sheet and aggregat
 all invariant/assertion checks; any sheet failure fails the job. Multi-sheet
 goldens use a `sheets` mapping keyed by `sheet_1`, `sheet_2`, and so on.
 
-Packed recipe validation uses the saved compilation context for its source,
-including the normalized custom tool library. A missing context or invalid
-fingerprint fails explicitly; neither a diameter in legacy metrics nor the
-current default library substitutes for the actual build inputs.
+Recipe and explicit-source validation resolve authored PML/nest with the current
+machine, preset and tool configuration. Custom build inputs must be supplied
+explicitly (`--machine`, `--preset`, `--endmills`, optional explicit `--feeds`), or
+validation receives the invocation's in-memory AST. Metrics/manifests never select
+tools or feeds. Stale, altered or absent reports cannot change expected geometry.
+A mismatch requires a fresh source build, never recovery of old settings.
 
-Explicit `--pml` uses the same source/context resolver. With `--recipe`, it is
-a source override validated against that recipe's complete per-sheet artifacts
-and saved source context. Standalone `--pml` supports one sheet; multiple sheets require `--recipe` so
-artifact ownership is explicit. Explicitly supplied artifacts may be in separate
-directories, but conflicting saved compilation contexts are rejected.
-Unsupported combinations and missing context return concise input errors, not
-internal resolver tracebacks. Source overrides retain their own source directory
-for relative templates.
+Explicit `--pml` with `--recipe` overrides the source for that recipe's artifacts.
+Standalone explicit-source validation supports one sheet; use `--recipe` for
+per-sheet matching. Source overrides retain their source directory for assets.
 
 ## Depth Validation
 
@@ -182,3 +179,7 @@ For inside features:
 | Type | Meaning |
 |------|---------|
 | HARD | Violation breaks the system |
+
+SVG path dimension assertions use the shared SVG path parser, including arc
+commands, with 0.001mm curve flattening tolerance. Arc radii, flags and angles
+are parameters, never XY coordinates in a path bounding box.

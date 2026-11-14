@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 300.0,
     "height_mm": 300.0,
@@ -9,6 +21,35 @@
     {
       "filename": "heightfield-rough-9.53mm.nc",
       "operation": "heightfield-rough",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "heightfield-rough",
+          "feature_ids": [
+            "generated_heightfield_0_000"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,11 +58,40 @@
       "max_depth_mm": 5.7,
       "feature_count": 1,
       "strategy": "heightfield-rough",
-      "estimated_runtime_min": 4.1
+      "estimated_runtime_min": 3.7
     },
     {
       "filename": "heightfield-rough-3.17mm.nc",
       "operation": "heightfield-rough",
+      "tool_name": "1/8 upcut spiral",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 12.7
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "heightfield-rough",
+          "feature_ids": [
+            "generated_heightfield_0_000"
+          ],
+          "tool": {
+            "name": "1/8 upcut spiral",
+            "diameter": 3.175,
+            "kind": "flat",
+            "rotation": "upcut",
+            "depth_per_pass": 2.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 12.7,
+            "flutes": 2,
+            "shank_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy": 2160.0,
+            "feed_z": 712.8
+          }
+        }
+      ],
       "tool_diameter_mm": 3.175,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2160.0,
@@ -30,11 +100,40 @@
       "max_depth_mm": 5.7,
       "feature_count": 1,
       "strategy": "heightfield-rough",
-      "estimated_runtime_min": 74.2
+      "estimated_runtime_min": 68.7
     },
     {
       "filename": "heightfield-finish-3.19mm.nc",
       "operation": "heightfield-finish",
+      "tool_name": "1/8 ball nose 2F",
+      "tool_geometry": {
+        "kind": "ball",
+        "v_angle_deg": null,
+        "flute_length_mm": 22.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "heightfield-finish",
+          "feature_ids": [
+            "generated_heightfield_0_000"
+          ],
+          "tool": {
+            "name": "1/8 ball nose 2F",
+            "diameter": 3.19,
+            "kind": "ball",
+            "rotation": null,
+            "depth_per_pass": 1.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 22.0,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0
+          }
+        }
+      ],
       "tool_diameter_mm": 3.19,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1800.0,
@@ -43,13 +142,13 @@
       "max_depth_mm": 4.405,
       "feature_count": 1,
       "strategy": "heightfield-finish",
-      "estimated_runtime_min": 58.9
+      "estimated_runtime_min": 54.8
     }
   ],
-  "total_runtime_min": 137.2,
+  "total_runtime_min": 127.2,
   "feature_counts": {
     "heightfield": 1
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

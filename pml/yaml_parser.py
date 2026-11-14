@@ -80,13 +80,302 @@ from layout_ast.layout import (
     DogboneSpec,
     Feature,
     FeedsOverride,
+    MachiningSpec,
     RestSpec,
     Sheet,
 )
-from pml.measurement_fields import parse_measurement_fields
+from pml.measurement_fields import MEASUREMENT_KEYS, parse_measurement_fields
 from pml.nest_parser import HoldingSpec, NestJob, NestParseError, NestPart
 
+_DIMENSION_MATCH_TOLERANCE_MM = 1e-9
+
 _VALID_SHAPE_TYPES = ("Rect", "RoundedRect", "Circle", "Polygon", "Triangle", "Ellipse")
+
+
+_NODE_KEYS: dict[str, tuple[str, ...]] = {
+    "Radial": ("depth", "element", "end_angle", "minor_subdivisions", "radius", "rays", "start_angle"),
+    "Curve": (
+        "a",
+        "b",
+        "cycles",
+        "depth",
+        "frequency_x",
+        "frequency_y",
+        "height",
+        "layers",
+        "lobes",
+        "m",
+        "max_cut_length",
+        "min_length",
+        "n1",
+        "n2",
+        "n3",
+        "pendulums",
+        "phase",
+        "rotation",
+        "size",
+        "tolerance",
+        "type",
+        "width",
+    ),
+    "Phyllotaxis": ("angle", "count", "depth", "element", "min_size", "scale_with_radius", "spacing"),
+    "Voronoi": (
+        "cell_inset",
+        "depth",
+        "line_width",
+        "margin",
+        "min_length",
+        "min_spacing",
+        "mode",
+        "points",
+        "rest",
+        "rest_tool",
+        "seed",
+        "seed_count",
+    ),
+    "StringArt": ("anchors", "depth", "factor", "min_length", "phase", "rule", "step"),
+    "SvgStamp": ("center", "depth", "feature", "invert_y", "path", "scale", "svg_unit"),
+    "Panel": ("children", "id"),
+    "Rect": ("at", "children", "feature", "id", "label"),
+    "Circle": ("at", "children", "diameter", "feature", "id", "label", "radius"),
+    "RoundedRect": ("at", "children", "corners", "feature", "id", "label", "radius"),
+    "Line": ("children", "feature", "id", "label", "orientation"),
+    "Polyline": ("children", "feature", "id", "label", "points"),
+    "Spline": ("children", "feature", "id", "label", "points", "tolerance"),
+    "Island": ("children", "id"),
+    "Keepout": ("children", "id"),
+    "Edge": ("distance", "finish_allowance", "id", "radius", "rough_allowance", "treatment"),
+    "Inset": ("children", "distance"),
+    "Frame": ("children", "width"),
+    "Grid": ("children", "cols", "gap", "rows"),
+    "Cell": ("children", "inset"),
+    "Split": ("children", "cols", "mullion", "rail", "rows"),
+    "Profile": ("tool", "depth", "feeds", "onion_skin_mm", "side", "tab_count", "tab_height", "tab_width"),
+    "Pocket": ("tool", "depth", "face", "feeds"),
+    "RaisedPanel": ("tool", "feeds", "border_depth", "border_width", "field_depth", "profile", "v_angle"),
+    "Chamfer": ("tool", "feeds", "depth", "width"),
+    "Roundover": (
+        "tool",
+        "feeds",
+        "radius",
+    ),
+    "Wave": ("amplitude", "count", "depth", "direction", "phase", "spacing", "wavelength"),
+    "XPanel": ("bar_width", "depth"),
+    "SplitHorizontal": ("children", "count", "gap"),
+    "SplitVertical": ("children", "count", "gap"),
+    "SplitGrid": ("children", "cols", "gap", "rows"),
+    "SplitHorizontalGaps": ("children", "count", "gap"),
+    "Lines": ("angle", "depth", "spacing", "width"),
+    "Heightfield": ("depth", "image", "size", "tools", "white_is_high"),
+    "Fluting": ("angle", "depth", "inset", "ramp", "spacing"),
+    "ConcentricBorder": ("count", "depth", "groove", "insets", "join", "mode", "start", "step"),
+    "Place": ("children", "layout"),
+    "AtPosition": ("child", "height", "part_id", "width", "x", "y"),
+    "Subtract": ("children", "inner_inset"),
+    "Shell": ("children", "depth", "interior", "wall"),
+    "Arch": ("children", "feature", "height", "id", "label", "radius", "width"),
+    "Polygon": ("at", "children", "feature", "id", "label", "points"),
+    "Triangle": ("base", "children", "feature", "height", "id", "label"),
+    "Ellipse": ("at", "children", "feature", "id", "label", "rx", "ry"),
+    "HoleGrid": ("align", "depth", "diameter", "inset", "pattern", "spacing"),
+    "MeasurementGrid": (
+        *MEASUREMENT_KEYS,
+        "depth",
+    ),
+    "MeasurementEdge": (
+        *MEASUREMENT_KEYS,
+        "depth",
+        "edges",
+    ),
+    "GridLines": ("depth", "minor_lines", "minor_spacing", "spacing", "unit"),
+    "EngraveText": ("alignment", "depth", "font", "height", "orientation", "text"),
+    "WasteCuts": ("margin", "min_height", "min_width", "strategy", "tab_count", "tab_height"),
+    "Assembly": (
+        "type",
+        "width",
+        "depth",
+        "height",
+        "dimensions",
+        "thickness",
+        "joinery",
+        "finger_width",
+        "finger_count",
+        "clearance",
+        "perimeter_joinery",
+        "layout_gap",
+        "show_labels",
+        "show_edge_colors",
+        "top",
+        "bottom",
+        "cap_style",
+        "back",
+        "back_thickness",
+        "back_inset",
+        "fixed_shelves",
+        "shelf_joinery",
+        "shelf_dado_depth",
+        "shelf_back_support",
+        "vertical_partitions",
+        "toe_kick_height",
+        "toe_kick_depth",
+        "toe_kick_style",
+        "toe_kick_cover",
+        "grid",
+        "back_joinery",
+        "back_rabbet_depth",
+        "back_internal_support",
+        "partition_joinery",
+        "partition_dado_depth",
+        "internal_joinery",
+    ),
+    "UseComponent": ("args", "name"),
+    "Engrave": (
+        "tool",
+        "feeds",
+        "depth",
+    ),
+    "Beam": (
+        "edge_features",
+        "end_features",
+        "face_features",
+        "layers",
+        "layout_gap",
+        "length",
+        "name",
+        "role",
+        "show_labels",
+        "thickness",
+        "width",
+    ),
+}
+
+_ASSEMBLY_COMMON_KEYS = (
+    "type",
+    "width",
+    "depth",
+    "height",
+    "dimensions",
+    "thickness",
+    "joinery",
+    "finger_width",
+    "finger_count",
+    "clearance",
+    "perimeter_joinery",
+    "layout_gap",
+    "show_labels",
+    "show_edge_colors",
+)
+_ASSEMBLY_TYPE_KEYS: dict[str, tuple[str, ...]] = {
+    "box": (*_ASSEMBLY_COMMON_KEYS, "top", "bottom"),
+    "carcass": (
+        *_ASSEMBLY_COMMON_KEYS,
+        "top",
+        "bottom",
+        "cap_style",
+        "back",
+        "back_thickness",
+        "back_inset",
+        "fixed_shelves",
+        "shelf_joinery",
+        "shelf_dado_depth",
+        "shelf_back_support",
+        "vertical_partitions",
+        "toe_kick_height",
+        "toe_kick_depth",
+        "toe_kick_style",
+        "toe_kick_cover",
+    ),
+    "cubby": (
+        *_ASSEMBLY_COMMON_KEYS,
+        "grid",
+        "back",
+        "back_thickness",
+        "back_inset",
+        "back_joinery",
+        "back_rabbet_depth",
+        "back_internal_support",
+        "shelf_joinery",
+        "shelf_dado_depth",
+        "partition_joinery",
+        "partition_dado_depth",
+        "internal_joinery",
+    ),
+}
+
+_AT_KEYS: dict[str, tuple[str, ...]] = {
+    "Rect": ("x", "y", "width", "height"),
+    "RoundedRect": ("x", "y", "width", "height"),
+    "Ellipse": ("x", "y", "width", "height"),
+    "Circle": ("x", "y"),
+    "Polygon": ("x", "y"),
+}
+
+_FEATURE_KEYS: dict[str, tuple[str, ...]] = {
+    "profile": (
+        "tool",
+        "type",
+        "depth",
+        "face",
+        "side",
+        "tab_count",
+        "tab_height",
+        "tab_width",
+        "onion_skin_mm",
+        "feeds",
+    ),
+    "pocket": ("tool", "type", "depth", "face", "corner_cleanup", "dogbone", "rest", "rest_tool", "feeds"),
+    "hole": ("tool", "type", "depth", "face", "feeds"),
+    "engrave": ("tool", "type", "depth", "face", "feeds"),
+}
+
+_DOGBONE_KEYS = ("style", "diameter", "overcut")
+_INTERFACE_KEYS = (
+    "joinery",
+    "finger_width",
+    "finger_count",
+    "clearance",
+    "dado_depth",
+    "inset",
+    "receiving",
+    "dogbone",
+)
+_BEAM_FEATURE_KEYS = {
+    "DrillHole": ("x", "y", "diameter", "depth", "face", "stage"),
+    "SquareMortise": ("x", "y", "width", "height", "depth", "face", "stage"),
+    "Tenon": ("end", "extension", "width", "height", "layers"),
+    "Rabbet": ("edge", "width", "depth", "start", "end", "layers", "stage"),
+    "EdgeDado": ("edge", "position", "width", "depth", "layers", "stage"),
+    "EdgeNotch": ("edge", "position", "width", "depth", "layers", "stage"),
+}
+
+_RADIAL_ELEMENT_KEYS = {
+    "pocket": ("tool", "type", "bar_width", "shape", "center_shape", "center_size"),
+    "tick": ("type", "tick_length", "minor_tick_length", "inward", "labels", "label_list", "label_height"),
+    "label": ("type", "values", "height"),
+    "svg": ("type", "path", "feature", "scale", "svg_unit", "rotate", "size"),
+}
+
+_PHYLLOTAXIS_ELEMENT_KEYS = {
+    "hole": ("tool", "type", "diameter"),
+    "pocket": ("tool", "type", "diameter"),
+    "svg": ("type", "path", "size", "feature", "rotate"),
+}
+
+_SHEET_KEYS = (
+    "width",
+    "height",
+    "physical_width",
+    "physical_height",
+    "working_width",
+    "working_height",
+    "thickness",
+    "margin",
+    "min_web",
+    "safe_z",
+    "show_dimensions",
+    "material",
+    "gcode_output",
+)
 
 
 class PMLParseError(Exception):
@@ -103,10 +392,23 @@ def _require(node_data: dict, key: str, path: str) -> Any:
         raise PMLParseError(f"Missing required key '{key}'", path) from None
 
 
-def _reject_unknown_keys(data: dict[str, Any], known: Sequence[str], label: str, ctx: str) -> None:
+def _reject_unknown_keys(
+    data: dict[str, Any],
+    known: Sequence[str],
+    label: str,
+    ctx: str,
+    *,
+    hint: str = "",
+    error_type: type[Exception] = PMLParseError,
+) -> None:
+    if not isinstance(data, dict):
+        raise error_type(f"Expected {label} mapping, got {type(data).__name__} (PM-18 violation)", ctx)
     unknown = [str(key) for key in data if key not in known]
     if unknown:
-        raise PMLParseError(f"Unknown {label} key(s): {', '.join(unknown)}. Known keys: {', '.join(known)}", ctx)
+        message = f"Unknown {label} key(s): {', '.join(unknown)}. Allowed keys: {', '.join(known)}."
+        if hint:
+            message += f" {hint}"
+        raise error_type(f"{message} (PM-18 violation)", ctx)
 
 
 def parse_dimension(value: Any) -> float:
@@ -199,6 +501,7 @@ def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry
 
     if not isinstance(entry, dict):
         raise PMLParseError(f"Heightfield tool entry must be a mapping, got {type(entry).__name__}", path)
+    _reject_unknown_keys(entry, ("tool", "role", "stepover", "stepdown", "angle"), "Heightfield tool", path)
     if "tool" not in entry:
         raise PMLParseError("Heightfield tool entry requires 'tool' (endmill name)", path)
     role = str(entry.get("role", "rough")).lower()
@@ -239,7 +542,11 @@ def _parse_heightfield_tool_entry(entry: Any, path: str) -> HeightfieldToolEntry
     )
 
 
-def _parse_interface_config(data: dict, default_joinery: str = "butt") -> InterfaceConfig:
+def _parse_interface_config(
+    data: dict, default_joinery: str = "butt", *, path: str = "", back: bool = False
+) -> InterfaceConfig:
+    known = (*_INTERFACE_KEYS, "thickness") if back else _INTERFACE_KEYS
+    _reject_unknown_keys(data, known, "interface config", path)
     dogbone_raw = data.get("dogbone")
     dogbone: DogboneSpec | bool | None = None
     if dogbone_raw is False:
@@ -247,10 +554,15 @@ def _parse_interface_config(data: dict, default_joinery: str = "butt") -> Interf
     elif dogbone_raw is True:
         dogbone = True
     elif isinstance(dogbone_raw, dict):
+        _reject_unknown_keys(dogbone_raw, _DOGBONE_KEYS, "dogbone", f"{path}.dogbone")
         dogbone = DogboneSpec(
             style=dogbone_raw.get("style", "dogbone"),
             diameter_mm=parse_dimension(dogbone_raw["diameter"]) if "diameter" in dogbone_raw else None,
             overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
+        )
+    elif "dogbone" in data:
+        raise PMLParseError(
+            f"dogbone must be true, false or a mapping, got {dogbone_raw!r} (PM-18 violation)", f"{path}.dogbone"
         )
 
     return InterfaceConfig(
@@ -266,12 +578,38 @@ def _parse_interface_config(data: dict, default_joinery: str = "butt") -> Interf
 
 
 def parse_children(children_data: list[dict] | None, path: str = "") -> tuple[Any, ...]:
-    if not children_data:
+    if children_data is None:
         return ()
+    if not isinstance(children_data, list):
+        raise PMLParseError("children must be a list (PM-18 violation)", path)
     return tuple(parse_node(child, f"{path}.children[{i}]") for i, child in enumerate(children_data))
 
 
+def _parse_tool_name(value: Any, path: str) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise PMLParseError("tool must be a nonempty library name", path)
+    return value
+
+
+def _parse_machining(data: Any, path: str = "machining") -> MachiningSpec:
+    if data is None:
+        return MachiningSpec()
+    _reject_unknown_keys(data, ("tools", "feeds"), "machining", path)
+    tools = data.get("tools", {})
+    if not isinstance(tools, dict):
+        raise PMLParseError("machining.tools must be a mapping of roles to exact tool names", path)
+    try:
+        return MachiningSpec(tools=dict(tools), feeds=_parse_feeds_override(data.get("feeds"), path + ".feeds"))
+    except ValueError as exc:
+        raise PMLParseError(str(exc), path) from exc
+
+
 def _parse_feeds_override(data: dict | None, path: str = "") -> FeedsOverride | None:
+    if data is None:
+        return None
+    _reject_unknown_keys(data, ("rpm", "feed_xy", "feed_z", "depth_per_pass", "stepover_percent"), "feeds", path)
     if not data:
         return None
     try:
@@ -307,6 +645,7 @@ def _parse_rest(data: dict, path: str) -> RestSpec | None:
             path,
         )
     if isinstance(rest_raw, dict):
+        _reject_unknown_keys(rest_raw, ("tool", "rough_allowance", "finish_allowance"), "rest", path + ".rest")
         return RestSpec(
             tool_diameter_mm=parse_dimension(_require(rest_raw, "tool", path + ".rest")),
             rough_allowance_mm=parse_dimension(rest_raw["rough_allowance"]) if "rough_allowance" in rest_raw else 0.5,
@@ -319,21 +658,18 @@ def _parse_rest(data: dict, path: str) -> RestSpec | None:
     return None
 
 
-_PROFILE_NODE_KEYS = ("side", "depth", "tab_count", "tab_height", "tab_width", "onion_skin_mm", "feeds")
-
-
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
+    if not isinstance(data, dict):
+        raise PMLParseError("Feature must be a mapping (PM-18 violation)", path)
     feature_type = data.get("type")
     if feature_type is None:
         raise PMLParseError("Feature missing 'type'", path)
 
-    if feature_type == "profile":
-        _reject_unknown_keys(
-            data,
-            ("type", "face", "corner_cleanup", "dogbone", "rest", "rest_tool", *_PROFILE_NODE_KEYS),
-            "profile feature",
-            path,
+    if feature_type not in _FEATURE_KEYS:
+        raise PMLParseError(
+            f"Unknown feature type: {feature_type!r}. Valid types: {', '.join(_FEATURE_KEYS)} (PM-18 violation)", path
         )
+    _reject_unknown_keys(data, _FEATURE_KEYS[feature_type], "feature", path)
     depth = data.get("depth", "through")
     is_through = DepthMode.is_through(depth)
 
@@ -358,10 +694,15 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
     if dogbone_raw is True:
         dogbone = DogboneSpec()
     elif isinstance(dogbone_raw, dict):
+        _reject_unknown_keys(dogbone_raw, _DOGBONE_KEYS, "dogbone", f"{path}.dogbone")
         dogbone = DogboneSpec(
             style=dogbone_raw.get("style", "dogbone"),
             diameter_mm=parse_dimension(dogbone_raw["diameter"]) if "diameter" in dogbone_raw else None,
             overcut_mm=parse_dimension(dogbone_raw["overcut"]) if "overcut" in dogbone_raw else 0.0,
+        )
+    elif "dogbone" in data and dogbone_raw is not False:
+        raise PMLParseError(
+            f"dogbone must be true, false or a mapping, got {dogbone_raw!r} (PM-18 violation)", f"{path}.dogbone"
         )
 
     return Feature(
@@ -378,82 +719,123 @@ def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -
         tab_width_mm=parse_dimension(data["tab_width"]) if "tab_width" in data else None,
         onion_skin_mm=parse_dimension(data["onion_skin_mm"]) if "onion_skin_mm" in data else None,
         feeds_override=_parse_feeds_override(data.get("feeds"), f"{path}.feeds"),
+        tool_name=_parse_tool_name(data.get("tool"), path),
     )
 
 
-def _parse_joinery_field(raw: Any, default_joinery: str = "butt") -> str | InterfaceConfig | None:
+def _parse_joinery_field(
+    raw: Any, default_joinery: str = "butt", *, path: str = "", back: bool = False
+) -> str | InterfaceConfig | None:
     if raw is None:
         return None
     if isinstance(raw, str):
         return raw
     if isinstance(raw, dict):
-        return _parse_interface_config(raw, default_joinery=default_joinery)
-    return None
+        return _parse_interface_config(raw, default_joinery=default_joinery, path=path, back=back)
+    raise PMLParseError("Joinery must be a string or mapping (PM-18 violation)", path)
 
 
-def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
+def _parse_assembly_dimensions(node_data: dict, ctx: str) -> tuple[float, float, float]:
+    dims = node_data.get("dimensions")
+    if "dimensions" in node_data:
+        if not isinstance(dims, list) or not 1 <= len(dims) <= 3:
+            raise PMLParseError("Assembly dimensions must be a list of one to three dimensions (PM-18 violation)", ctx)
+        for index, value in enumerate(dims):
+            try:
+                parse_dimension(value)
+            except (ValueError, TypeError) as exc:
+                raise PMLParseError(f"Invalid dimensions[{index}]: {value!r} (PM-18 violation)", ctx) from exc
+
+    resolved = []
+    for index, key in enumerate(("width", "depth", "height")):
+        value = node_data.get(key)
+        if value is None:
+            value = dims[index] if dims and index < len(dims) else _require(node_data, key, ctx)
+        resolved.append(parse_dimension(value))
+    return resolved[0], resolved[1], resolved[2]
+
+
+def _validate_back_dimensions(node_data: dict, back_raw: Any, ctx: str) -> None:
+    if isinstance(back_raw, dict):
+        for key in ("thickness", "inset"):
+            flat_key = f"back_{key}"
+            if flat_key not in node_data or key not in back_raw:
+                continue
+            flat_value = parse_dimension(node_data[flat_key])
+            nested_value = parse_dimension(back_raw[key])
+            if key == "inset" and nested_value == 0.0:
+                continue
+            if not math.isclose(flat_value, nested_value, rel_tol=0.0, abs_tol=_DIMENSION_MATCH_TOLERANCE_MM):
+                raise PMLParseError(
+                    f"Conflicting {flat_key} ({flat_value}mm) and back.{key} ({nested_value}mm); expected matching dimensions (PM-18 violation)",
+                    ctx,
+                )
+
+
+def _parse_assembly_node(node_data: dict, path: str) -> Any:
     from layout_ast.compositional import AssemblyDecl
 
     assembly_type = node_data.get("type", "box")
+    ctx = f"{path}.Assembly"
+    if assembly_type not in _ASSEMBLY_TYPE_KEYS:
+        raise PMLParseError(
+            f"Unknown Assembly type: {assembly_type!r}. Allowed types: {', '.join(_ASSEMBLY_TYPE_KEYS)} (PM-18 violation)",
+            ctx,
+        )
+    _reject_unknown_keys(node_data, _ASSEMBLY_TYPE_KEYS[assembly_type], f"Assembly {assembly_type}", ctx)
+    for key in ("top", "bottom", "back", "shelf_joinery", "partition_joinery"):
+        if key in node_data and not isinstance(node_data[key], (str, dict)):
+            raise PMLParseError("Joinery must be a string or mapping (PM-18 violation)", f"{path}.Assembly.{key}")
 
-    interfaces_raw = node_data.get("interfaces")
-    interfaces: dict[str, str | InterfaceConfig] | None = None
-    if interfaces_raw:
-        interfaces = {}
-        for iface_name, iface_data in interfaces_raw.items():
-            if isinstance(iface_data, str):
-                interfaces[iface_name] = iface_data
-            elif isinstance(iface_data, dict):
-                interfaces[iface_name] = _parse_interface_config(iface_data)
-
-    top = _parse_joinery_field(node_data.get("top"))
-    bottom = _parse_joinery_field(node_data.get("bottom", "captured"), default_joinery="captured")
+    top = _parse_joinery_field(node_data.get("top"), path=f"{path}.Assembly.top")
+    bottom = _parse_joinery_field(
+        node_data.get("bottom", "captured"), default_joinery="captured", path=f"{path}.Assembly.bottom"
+    )
     back_raw = node_data.get("back")
-    back = _parse_joinery_field(back_raw, default_joinery="captured")
+    back = _parse_joinery_field(back_raw, default_joinery="captured", path=f"{path}.Assembly.back", back=True)
 
     grid_raw = node_data.get("grid")
     grid = None
-    if grid_raw and isinstance(grid_raw, list) and len(grid_raw) == 2:
+    if "grid" in node_data:
+        if not isinstance(grid_raw, list) or len(grid_raw) != 2:
+            raise PMLParseError("grid must be a 2-element list (PM-18 violation)", f"{path}.Assembly.grid")
         try:
             grid = (int(grid_raw[0]), int(grid_raw[1]))
         except (ValueError, TypeError) as e:
             raise PMLParseError(f"Invalid grid values: {e}", path) from e
 
     shelf_joinery: str | InterfaceConfig = (
-        _parse_joinery_field(node_data.get("shelf_joinery", "captured"), default_joinery="captured") or "captured"
+        _parse_joinery_field(
+            node_data.get("shelf_joinery", "captured"),
+            default_joinery="captured",
+            path=f"{path}.Assembly.shelf_joinery",
+        )
+        or "captured"
     )
     partition_joinery: str | InterfaceConfig = (
-        _parse_joinery_field(node_data.get("partition_joinery", "captured"), default_joinery="captured") or "captured"
+        _parse_joinery_field(
+            node_data.get("partition_joinery", "captured"),
+            default_joinery="captured",
+            path=f"{path}.Assembly.partition_joinery",
+        )
+        or "captured"
     )
 
-    dims = node_data.get("dimensions") if isinstance(node_data.get("dimensions"), list) else None
-
-    raw_w = node_data.get("width")
-    if raw_w is None:
-        raw_w = dims[0] if dims and len(dims) > 0 else _require(node_data, "width", f"{path}.Assembly")
-
-    raw_d = node_data.get("depth")
-    if raw_d is None:
-        raw_d = dims[1] if dims and len(dims) > 1 else _require(node_data, "depth", f"{path}.Assembly")
-
-    raw_h = node_data.get("height")
-    if raw_h is None:
-        raw_h = dims[2] if dims and len(dims) > 2 else _require(node_data, "height", f"{path}.Assembly")
+    width_mm, depth_mm, height_mm = _parse_assembly_dimensions(node_data, ctx)
+    _validate_back_dimensions(node_data, back_raw, ctx)
 
     return AssemblyDecl(
         type=assembly_type,
-        width_mm=parse_dimension(raw_w),
-        depth_mm=parse_dimension(raw_d),
-        height_mm=parse_dimension(raw_h),
+        width_mm=width_mm,
+        depth_mm=depth_mm,
+        height_mm=height_mm,
         thickness_mm=parse_dimension(_require(node_data, "thickness", f"{path}.Assembly")),
         joinery=node_data.get("joinery", "finger"),
         finger_width_mm=parse_dimension(node_data["finger_width"]) if "finger_width" in node_data else None,
         finger_count=node_data.get("finger_count"),
         clearance_mm=parse_dimension(node_data.get("clearance", "0.12mm")),
-        interfaces=interfaces,
         top=top,
         bottom=bottom,
-        children=children,
         layout_gap_mm=_parse_layout_gap(node_data.get("layout_gap", "10mm")),
         show_labels=node_data.get("show_labels", False),
         show_edge_colors=node_data.get("show_edge_colors", False),
@@ -510,12 +892,16 @@ def _parse_beam_feature(feat_data: dict, feat_path: str):
     if len(feat_keys) != 1:
         raise PMLParseError(f"Invalid beam feature: {feat_data}", feat_path)
     feat_type = feat_keys[0]
+    _reject_unknown_keys(feat_data, (feat_type,), "beam feature wrapper", feat_path)
     if feat_type in _UNBACKED_BEAM_FEATURES:
         raise PMLParseError(
             f"Beam feature '{feat_type}' is not supported: {_UNBACKED_BEAM_FEATURES[feat_type]}",
             feat_path,
         )
     feat_params = feat_data[feat_type] or {}
+    if feat_type not in _BEAM_FEATURE_KEYS:
+        raise PMLParseError(f"Unknown beam feature type: {feat_type!r} (PM-18 violation)", feat_path)
+    _reject_unknown_keys(feat_params, _BEAM_FEATURE_KEYS[feat_type], feat_type, feat_path)
     parsed_params: dict[str, Any] = {}
     dimension_keys = {
         "x",
@@ -552,8 +938,13 @@ def _parse_beam_node(node_data: dict, path: str) -> Any:
     elif isinstance(layers_raw, list):
         parsed_layers = []
         for layer_data in layers_raw:
+            _reject_unknown_keys(layer_data, ("length", "offset", "cutouts"), "Beam layer", f"{path}.Beam.layer")
             cutouts: tuple[()] | tuple[dict, ...] = ()
             if "cutouts" in layer_data:
+                for cutout in layer_data["cutouts"]:
+                    _reject_unknown_keys(
+                        cutout, ("start", "length", "width", "offset"), "Beam cutout", f"{path}.Beam.layer.cutout"
+                    )
                 cutouts = tuple(
                     {
                         "start_mm": parse_dimension(_require(c, "start", f"{path}.Beam.layer.cutout")),
@@ -572,7 +963,7 @@ def _parse_beam_node(node_data: dict, path: str) -> Any:
             )
         layers = tuple(parsed_layers)
     else:
-        layers = 1
+        raise PMLParseError("Beam layers must be an integer or list (PM-18 violation)", f"{path}.Beam.layers")
 
     face_features = tuple(
         _parse_beam_feature(f, f"{path}.face_features[{i}]") for i, f in enumerate(node_data.get("face_features", []))
@@ -614,6 +1005,11 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
     element = node_data.get("element", {})
     element_type = element.get("type", "pocket")
     ctx = f"{path}.Radial"
+    if element_type not in _RADIAL_ELEMENT_KEYS:
+        raise PMLParseError(f"Unknown Radial element type: {element_type!r}", ctx)
+    _reject_unknown_keys(element, _RADIAL_ELEMENT_KEYS[element_type], "Radial element", f"{ctx}.element")
+    if "minor_subdivisions" in node_data and element_type != "tick":
+        raise PMLParseError("Radial minor_subdivisions is only valid with element.type: tick (PM-18 violation)", ctx)
 
     rays = _safe_int(_require(node_data, "rays", ctx), "rays", ctx)
     depth_mm = parse_dimension(_require(node_data, "depth", ctx))
@@ -694,9 +1090,6 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
     from layout_ast.compositional import PhyllotaxisHoleGen, PhyllotaxisPocketGen, PhyllotaxisSvgGen
 
     ctx = f"{path}.Phyllotaxis"
-    for key in ("children", "feature"):
-        if key in node_data:
-            raise PMLParseError(f"Phyllotaxis does not accept '{key}'", ctx)
 
     element = _require(node_data, "element", ctx)
     element_ctx = f"{ctx}.element"
@@ -706,6 +1099,12 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
             f"Unknown Phyllotaxis element type: '{element_type}'. Known types: {', '.join(_PHYLLOTAXIS_ELEMENT_TYPES)}",
             ctx,
         )
+    hint = ""
+    if element_type == "svg" and any(key in element for key in ("scale", "svg_unit")):
+        hint = "Phyllotaxis svg elements are always fitted to 'size'; omit 'scale' and 'svg_unit'"
+    _reject_unknown_keys(
+        element, _PHYLLOTAXIS_ELEMENT_KEYS[element_type], "Phyllotaxis element", element_ctx, hint=hint
+    )
 
     count = _safe_int(_require(node_data, "count", ctx), "count", ctx)
     spacing_mm = parse_dimension(_require(node_data, "spacing", ctx))
@@ -742,12 +1141,6 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
             min_size_mm=min_size_mm,
         )
 
-    for key in ("scale", "svg_unit"):
-        if key in element:
-            raise PMLParseError(
-                f"Phyllotaxis svg element does not accept '{key}': the motif is always fitted to 'size'",
-                element_ctx,
-            )
     return PhyllotaxisSvgGen(
         count=count,
         spacing_mm=spacing_mm,
@@ -847,9 +1240,6 @@ def _parse_spirograph_layers(raw: Any, ctx: str) -> tuple[SpirographLayer, ...]:
 
 def _parse_curve_node(node_data: dict, path: str) -> Any:
     ctx = f"{path}.Curve"
-    for key in ("children", "feature"):
-        if key in node_data:
-            raise PMLParseError(f"Curve does not accept '{key}'", ctx)
 
     curve_type = _require(node_data, "type", ctx)
     if curve_type not in _CURVE_TYPES:
@@ -945,9 +1335,6 @@ def _parse_voronoi_points(raw: Any, ctx: str) -> tuple[tuple[float, float], ...]
 
 
 def _check_voronoi_keys(node_data: dict, ctx: str) -> Literal["engrave", "pocket"]:
-    for key in ("children", "feature"):
-        if key in node_data:
-            raise PMLParseError(f"Voronoi does not accept '{key}'", ctx)
     if ("seed_count" in node_data) == ("points" in node_data):
         raise PMLParseError("Voronoi takes exactly one of 'seed_count' or 'points'", ctx)
     if "points" in node_data:
@@ -1009,9 +1396,6 @@ _STRING_ART_RULE_KEYS = {"multiply": "factor", "skip": "step"}
 
 def _parse_string_art_node(node_data: dict, path: str) -> StringArtGen:
     ctx = f"{path}.StringArt"
-    for key in ("children", "feature"):
-        if key in node_data:
-            raise PMLParseError(f"StringArt does not accept '{key}'", ctx)
     rule = _require(node_data, "rule", ctx)
     if rule not in _STRING_ART_RULES:
         raise PMLParseError(f"Unknown StringArt rule: '{rule}'. Known rules: {', '.join(_STRING_ART_RULES)}", ctx)
@@ -1030,9 +1414,14 @@ def _parse_string_art_node(node_data: dict, path: str) -> StringArtGen:
     )
 
 
-def _validate_zones(node: Any, path: str, parent: Any = None, in_zone: bool = False) -> None:
+def _validate_node_structure(node: Any, path: str, parent: Any = None, in_zone: bool = False) -> None:
+    if isinstance(node, Feature):
+        raise PMLParseError(
+            "Standalone Feature is not allowed here; attach it to a shape with feature: or one Feature child (PM-18 violation)",
+            path,
+        )
     if isinstance(node, ComponentInstance):
-        _validate_zones(node.body, f"{path}.body", parent, in_zone)
+        _validate_node_structure(node.body, f"{path}.body", parent, in_zone)
         return
     is_zone = isinstance(node, (Island, Keepout))
     if is_zone:
@@ -1050,18 +1439,28 @@ def _validate_zones(node: Any, path: str, parent: Any = None, in_zone: bool = Fa
                 path,
             )
     for index, child in enumerate(getattr(node, "children", ())):
-        _validate_zones(child, f"{path}.children[{index}]", node, in_zone or is_zone)
-    child = getattr(node, "child", None)
-    if child is not None:
-        _validate_zones(child, f"{path}.child", node, in_zone or is_zone)
+        _validate_node_structure(child, f"{path}.children[{index}]", node, in_zone or is_zone)
+    for field in ("child", "layout"):
+        child = getattr(node, field, None)
+        if child is not None:
+            _validate_node_structure(child, f"{path}.{field}", node, in_zone or is_zone)
+    if isinstance(node, Place) and node.layout is not None:
+        if not isinstance(node.layout, Grid):
+            raise PMLParseError(
+                "Place.layout must be a Grid; omit layout to use the parent region (PM-18 violation)", f"{path}.layout"
+            )
+        if node.layout.children:
+            raise PMLParseError(
+                "Place.layout Grid cannot contain children; put them in Place.children (PM-18 violation)",
+                f"{path}.layout.children",
+            )
 
 
 def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-type dispatcher
     if not isinstance(data, dict):
         raise PMLParseError(f"Expected dict, got {type(data).__name__}", path)
 
-    keys = [k for k in data if k not in ("id", "children", "feature")]
-    type_keys = [k for k in keys if k[0].isupper()]
+    type_keys = [k for k in data if isinstance(k, str) and k[:1].isupper()]
 
     if len(type_keys) == 0:
         raise PMLParseError(f"No node type found in {list(data.keys())}", path)
@@ -1069,9 +1468,33 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         raise PMLParseError(f"Multiple node types found: {type_keys}", path)
 
     node_type = type_keys[0]
+    siblings = [str(key) for key in data if key != node_type]
+    if siblings:
+        raise PMLParseError(
+            f"{', '.join(repr(key) for key in siblings)} must be inside the {node_type} mapping (PM-18 violation)", path
+        )
+    if node_type not in _NODE_KEYS:
+        raise PMLParseError(f"Unknown node type: {node_type}", path)
     node_data = data[node_type]
     if node_data is None:
         node_data = {}
+
+    ctx = f"{path}.{node_type}"
+    hint = ""
+    if (
+        node_type in ("Rect", "RoundedRect", "Ellipse")
+        and isinstance(node_data, dict)
+        and any(key in node_data for key in ("w", "h", "x", "y", "width", "height"))
+    ):
+        hint = "placement and size go in at: {x, y, width, height}"
+    if node_type == "Wave" and isinstance(node_data, dict) and "groove" in node_data:
+        hint = "Wave 'groove' was renamed to 'spacing'; engraving width comes from the selected tool"
+    _reject_unknown_keys(node_data, _NODE_KEYS[node_type], node_type, ctx, hint=hint)
+    if node_type in _AT_KEYS and "at" in node_data:
+        at = node_data["at"]
+        _reject_unknown_keys(at, _AT_KEYS[node_type], "at", f"{ctx}.at")
+        _require(at, "x", f"{ctx}.at")
+        _require(at, "y", f"{ctx}.at")
 
     if node_type == "Radial":
         return _parse_radial_node(node_data, path)
@@ -1104,20 +1527,24 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
     children = parse_children(children_data, f"{path}.{node_type}")
 
     feature = None
-    feature_data = node_data.get("feature") if isinstance(node_data, dict) else None
-    if feature_data:
-        feature = parse_feature(feature_data, f"{path}.{node_type}.feature")
+    if "feature" in node_data:
+        feature = parse_feature(node_data["feature"], f"{path}.{node_type}.feature")
 
-    if children and not feature:
-        feature_children = [c for c in children if isinstance(c, Feature)]
-        if feature_children:
-            feature = feature_children[0]
-            children = tuple(c for c in children if not isinstance(c, Feature))
+    feature_children = [child for child in children if isinstance(child, Feature)]
+    if feature_children:
+        if "feature" not in _NODE_KEYS[node_type]:
+            raise PMLParseError(f"{node_type} does not accept Feature children (PM-18 violation)", ctx)
+        if feature is not None or len(feature_children) > 1:
+            raise PMLParseError(
+                "A node carries at most one feature, from feature: or one Feature child (PM-18 violation)", ctx
+            )
+        feature = feature_children[0]
+        children = tuple(child for child in children if not isinstance(child, Feature))
+    if node_type in ("Line", "Polyline", "Spline") and children:
+        raise PMLParseError(f"{node_type} children may contain only one Feature child (PM-18 violation)", ctx)
 
     node_id = node_data.get("id") if isinstance(node_data, dict) else None
     node_label = node_data.get("label") if isinstance(node_data, dict) else None
-    if node_type in ("Island", "Keepout") and feature is not None:
-        raise PMLParseError(f"{node_type} defines zone geometry and cannot carry a feature", path)
 
     if node_type == "Panel":
         return Panel(children=children, id=node_id)
@@ -1125,7 +1552,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
     elif node_type == "Rect":
         at_data = node_data.get("at") if isinstance(node_data, dict) else None
         rect = Rect(children=children, feature=feature, id=node_id, label=node_label)
-        if at_data:
+        if at_data is not None:
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
                 y_mm=parse_dimension(at_data.get("y")),
@@ -1147,7 +1574,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             id=node_id,
             label=node_label,
         )
-        if at_data:
+        if at_data is not None:
             size = diameter_mm if diameter_mm else (radius_mm * 2 if radius_mm else None)
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
@@ -1172,7 +1599,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             label=node_label,
             corners=corners,
         )
-        if at_data:
+        if at_data is not None:
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
                 y_mm=parse_dimension(at_data.get("y")),
@@ -1260,7 +1687,6 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "Profile":
-        _reject_unknown_keys(node_data, _PROFILE_NODE_KEYS, "Profile", path)
         depth = parse_dimension_or_through(node_data.get("depth", "through"))
         return ProfileGen(
             side=_require(node_data, "side", f"{path}.Profile"),
@@ -1270,6 +1696,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             tab_width_mm=parse_dimension(node_data["tab_width"]) if "tab_width" in node_data else None,
             onion_skin_mm=parse_dimension(node_data["onion_skin_mm"]) if "onion_skin_mm" in node_data else None,
             feeds_override=_parse_feeds_override(node_data.get("feeds"), f"{path}.Profile.feeds"),
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
         )
 
     elif node_type == "Pocket":
@@ -1277,13 +1704,13 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Pocket")),
             face=_parse_face(node_data.get("face"), f"{path}.Pocket"),
             feeds_override=_parse_feeds_override(node_data.get("feeds"), f"{path}.Pocket.feeds"),
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
         )
 
     elif node_type == "RaisedPanel":
-        _reject_unknown_keys(
-            node_data, ("border_width", "border_depth", "field_depth", "profile", "v_angle"), "RaisedPanel", path
-        )
         return RaisedPanelGen(
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), path + ".feeds"),
             border_width_mm=parse_dimension(node_data["border_width"]) if "border_width" in node_data else None,
             border_depth_mm=parse_dimension(_require(node_data, "border_depth", f"{path}.RaisedPanel")),
             field_depth_mm=parse_dimension(_require(node_data, "field_depth", f"{path}.RaisedPanel")),
@@ -1293,20 +1720,20 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     elif node_type == "Chamfer":
         return ChamferGen(
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), path + ".feeds"),
             width_mm=parse_dimension(_require(node_data, "width", f"{path}.Chamfer")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Chamfer")),
         )
 
     elif node_type == "Roundover":
         return RoundoverGen(
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), path + ".feeds"),
             radius_mm=parse_dimension(_require(node_data, "radius", f"{path}.Roundover")),
         )
 
     elif node_type == "Wave":
-        if "groove" in node_data:
-            raise PMLParseError(
-                "Wave 'groove' was renamed to 'spacing'; engraving width comes from the selected tool", f"{path}.Wave"
-            )
         ctx = f"{path}.Wave"
         if ("count" in node_data) == ("wavelength" in node_data):
             raise PMLParseError("Wave requires exactly one of 'count' or 'wavelength'", ctx)
@@ -1371,7 +1798,8 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 
     elif node_type == "Heightfield":
         size_data = _require(node_data, "size", f"{path}.Heightfield")
-        if not isinstance(size_data, dict) or "width" not in size_data or "height" not in size_data:
+        _reject_unknown_keys(size_data, ("width", "height"), "Heightfield size", f"{path}.Heightfield.size")
+        if "width" not in size_data or "height" not in size_data:
             raise PMLParseError("Heightfield 'size' must have 'width' and 'height' keys", path)
         tools_raw = node_data.get("tools")
         tools: tuple[HeightfieldToolEntry, ...] = ()
@@ -1401,8 +1829,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         return _parse_concentric_border_node(node_data, path)
 
     elif node_type == "Place":
-        layout_data = node_data.get("layout", {})
-        layout = parse_node(layout_data, f"{path}.{node_type}.layout") if layout_data else None
+        layout = parse_node(node_data["layout"], f"{path}.{node_type}.layout") if "layout" in node_data else None
         return Place(
             layout=layout,
             children=children,
@@ -1452,7 +1879,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
         at_data = node_data.get("at") if isinstance(node_data, dict) else None
         polygon = Polygon(points=points, children=children, feature=feature, id=node_id, label=node_label)
-        if at_data:
+        if at_data is not None:
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
                 y_mm=parse_dimension(at_data.get("y")),
@@ -1482,7 +1909,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             id=node_id,
             label=node_label,
         )
-        if at_data:
+        if at_data is not None:
             return AtPosition(
                 x_mm=parse_dimension(at_data.get("x")),
                 y_mm=parse_dimension(at_data.get("y")),
@@ -1557,7 +1984,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "Assembly":
-        return _parse_assembly_node(node_data, children, path)
+        return _parse_assembly_node(node_data, path)
 
     elif node_type == "UseComponent":
         args = node_data.get("args", {})
@@ -1573,6 +2000,8 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         return Feature(
             type="engrave",
             depth_mm=depth_mm,
+            tool_name=_parse_tool_name(node_data.get("tool"), path),
+            feeds_override=_parse_feeds_override(node_data.get("feeds"), path + ".feeds"),
         )
 
     elif node_type == "Beam":
@@ -1585,6 +2014,22 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
 def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     if block is None:
         return None
+    _reject_unknown_keys(
+        block,
+        (
+            "depth-per-pass",
+            "passes",
+            "stepover",
+            "direction",
+            "margin-overrun",
+            "cool_every",
+            "cool_dwell",
+            "tool",
+            "feeds",
+        ),
+        "Surface",
+        "Surface",
+    )
     depth_mm = parse_dimension(_require(block, "depth-per-pass", "Surface"))
     if depth_mm <= 0.0:
         raise PMLParseError("Surface depth-per-pass must be > 0", "Surface")
@@ -1615,9 +2060,11 @@ def _parse_surface_block(block: dict | None) -> SurfaceDecl | None:
     if cool_dwell_s < 0.0:
         raise PMLParseError("Surface cool_dwell must be >= 0", "Surface")
     return SurfaceDecl(
+        tool_name=_parse_tool_name(block.get("tool"), "Surface"),
+        feeds_override=_parse_feeds_override(block.get("feeds"), "Surface.feeds"),
         depth_mm=depth_mm,
         passes=passes,
-        stepover_pct=stepover_pct,
+        stepover_pct=stepover_pct if "stepover" in block else None,
         direction=direction,
         margin_mm=margin_mm,
         cool_every=cool_every,
@@ -1712,6 +2159,7 @@ def _parse_components(data: dict[str, Any]) -> dict[str, ComponentDef]:
         path = f"components.{name}"
         if not isinstance(comp_data, dict):
             raise PMLParseError("Component definition must be a mapping", path)
+        _reject_unknown_keys(comp_data, ("params", "body"), "component definition", path)
         params = comp_data.get("params", {})
         if not isinstance(params, dict):
             raise PMLParseError("Component params must be a mapping", path)
@@ -1724,9 +2172,29 @@ def _parse_components(data: dict[str, Any]) -> dict[str, ComponentDef]:
                 body = Panel(children=parse_children(body_data, f"{path}.body"))
             else:
                 body = parse_node(body_data, f"{path}.body")
-        _validate_zones(body, f"{path}.body")
+        _validate_node_structure(body, f"{path}.body")
         components[name] = ComponentDef(name=name, params=params, body=body)
     return components
+
+
+def _parse_sheet_dimension(sheet: dict, axis: str, margin_mm: float) -> float:
+    candidates = []
+    for key in (f"working_{axis}", f"physical_{axis}", axis):
+        if key in sheet:
+            value = parse_dimension(sheet[key])
+            if key == f"working_{axis}":
+                value += 2 * margin_mm
+            candidates.append((key, value))
+    if not candidates:
+        raise PMLParseError(f"Sheet missing '{axis}', 'physical_{axis}', or 'working_{axis}'")
+    first_key, physical = candidates[0]
+    for key, value in candidates[1:]:
+        if not math.isclose(physical, value, rel_tol=0.0, abs_tol=_DIMENSION_MATCH_TOLERANCE_MM):
+            raise PMLParseError(
+                f"Conflicting Sheet {axis}: {first_key} implies {physical}mm physical size, {key} implies {value}mm; expected matching dimensions (PM-18 violation)",
+                "Sheet",
+            )
+    return physical
 
 
 def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
@@ -1740,31 +2208,18 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
     if data is None:
         raise PMLParseError("Empty YAML document")
 
+    _reject_unknown_keys(
+        data, ("Sheet", "project", "kerf", "Surface", "components", "children", "machining"), "PML root", "root"
+    )
     sheet_block = data.get("Sheet")
     if sheet_block is None:
         raise PMLParseError("Missing 'Sheet:' root key")
 
+    _reject_unknown_keys(sheet_block, _SHEET_KEYS, "Sheet", "Sheet")
     margin_mm = parse_dimension(sheet_block.get("margin", "0mm"))
 
-    if "working_width" in sheet_block:
-        working_width = parse_dimension(sheet_block["working_width"])
-        width_mm = working_width + 2 * margin_mm
-    elif "physical_width" in sheet_block:
-        width_mm = parse_dimension(sheet_block["physical_width"])
-    elif "width" in sheet_block:
-        width_mm = parse_dimension(sheet_block["width"])
-    else:
-        raise PMLParseError("Sheet missing 'width', 'physical_width', or 'working_width'")
-
-    if "working_height" in sheet_block:
-        working_height = parse_dimension(sheet_block["working_height"])
-        height_mm = working_height + 2 * margin_mm
-    elif "physical_height" in sheet_block:
-        height_mm = parse_dimension(sheet_block["physical_height"])
-    elif "height" in sheet_block:
-        height_mm = parse_dimension(sheet_block["height"])
-    else:
-        raise PMLParseError("Sheet missing 'height', 'physical_height', or 'working_height'")
+    width_mm = _parse_sheet_dimension(sheet_block, "width", margin_mm)
+    height_mm = _parse_sheet_dimension(sheet_block, "height", margin_mm)
 
     min_web_mm = parse_dimension(sheet_block["min_web"]) if "min_web" in sheet_block else DEFAULT_MIN_WEB_MM
     if min_web_mm < 0.0:
@@ -1801,7 +2256,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
 
     root = Panel(children=children) if children else None
     root = _bind_component_uses(root, components)
-    _validate_zones(root, "root")
+    _validate_node_structure(root, "root")
 
     return CompositionalLayoutAST(
         sheet=sheet,
@@ -1810,6 +2265,7 @@ def parse_pml_yaml(source: str) -> CompositionalLayoutAST:
         project=project,
         kerf_width_mm=kerf_width_mm,
         surface=surface,
+        machining=_parse_machining(data.get("machining")),
     )
 
 
@@ -1817,12 +2273,7 @@ _VALID_HOLDING_KEYS = {"onion_skin", "tab_count", "tab_height", "tab_width"}
 
 
 def _parse_holding_block(block: dict[str, Any], path: str) -> HoldingSpec:
-    unknown = set(block.keys()) - _VALID_HOLDING_KEYS
-    if unknown:
-        raise NestParseError(
-            f"Unknown key(s) in {path}: {', '.join(sorted(unknown))}. "
-            f"Valid keys: {', '.join(sorted(_VALID_HOLDING_KEYS))}"
-        )
+    _reject_unknown_keys(block, sorted(_VALID_HOLDING_KEYS), "holding", path, error_type=NestParseError)
     kwargs: dict[str, Any] = {}
     if "onion_skin" in block:
         try:
@@ -1863,10 +2314,20 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
     if data is None:
         raise NestParseError("Empty YAML document")
 
+    if not isinstance(data, dict):
+        raise NestParseError("Nest document must be a mapping (PM-18 violation)")
     nest_block = data.get("Nest")
     if nest_block is None:
         raise NestParseError("Missing 'Nest:' root key")
 
+    _reject_unknown_keys(data, ("Nest",), "nest root", "root", error_type=NestParseError)
+    _reject_unknown_keys(
+        nest_block,
+        ("algorithm", "Sheet", "kerf", "margin", "gap_margin", "holding", "parts", "machining"),
+        "Nest",
+        "Nest",
+        error_type=NestParseError,
+    )
     algorithm = nest_block.get("algorithm")
     if algorithm is None:
         raise NestParseError("Missing 'algorithm' in Nest block")
@@ -1875,6 +2336,9 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
     if sheet_block is None:
         raise NestParseError("Missing 'Sheet:' in Nest block")
 
+    _reject_unknown_keys(
+        sheet_block, ("width", "height", "thickness", "material"), "nest Sheet", "Nest.Sheet", error_type=NestParseError
+    )
     try:
         sheet_width = parse_dimension(sheet_block.get("width"))
         sheet_height = parse_dimension(sheet_block.get("height"))
@@ -1912,6 +2376,13 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
         if not isinstance(part_data, dict):
             raise NestParseError(f"Invalid part definition: {part_data}")
 
+        _reject_unknown_keys(
+            part_data,
+            ("name", "width", "height", "quantity", "template", "shape", "holding"),
+            "nest part",
+            "Nest.parts",
+            error_type=NestParseError,
+        )
         name = part_data.get("name")
         if name is None:
             raise NestParseError("Part missing 'name'")
@@ -1932,8 +2403,21 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
         template_block = part_data.get("template")
         if template_block is not None:
             if isinstance(template_block, dict):
+                _reject_unknown_keys(
+                    template_block,
+                    ("name", "params"),
+                    "part template",
+                    f"Nest.parts.{name}.template",
+                    error_type=NestParseError,
+                )
                 template = template_block.get("name")
+                if template is None:
+                    raise NestParseError("Part template requires name (PM-18 violation)", f"Nest.parts.{name}.template")
                 params_block = template_block.get("params", {})
+                if not isinstance(params_block, dict):
+                    raise NestParseError(
+                        "Template params must be a mapping (PM-18 violation)", f"Nest.parts.{name}.template.params"
+                    )
                 for k, v in params_block.items():
                     try:
                         template_params[k] = parse_dimension(v)
@@ -1959,6 +2443,14 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
                     f"Invalid shape type '{shape_type}' for part '{name}'. "
                     f"Must be one of: {', '.join(_VALID_SHAPE_TYPES)}"
                 )
+            shape_keys: tuple[str, ...] = ("type",)
+            if shape_type == "RoundedRect":
+                shape_keys += ("radius", "corners")
+            elif shape_type == "Polygon":
+                shape_keys += ("points",)
+            _reject_unknown_keys(
+                shape_block, shape_keys, "part shape", f"Nest.parts.{name}.shape", error_type=NestParseError
+            )
             shape = shape_type
 
             if shape == "RoundedRect":
@@ -2034,6 +2526,11 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
             )
         )
 
+    try:
+        machining = _parse_machining(nest_block.get("machining"), "Nest.machining")
+    except PMLParseError as exc:
+        raise NestParseError(exc.message, exc.path) from exc
+
     return NestJob(
         algorithm=algorithm,
         sheet_width_mm=sheet_width,
@@ -2044,6 +2541,9 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
         gap_margin_mm=parse_dimension(nest_block.get("gap_margin", "0mm")),
         holding=job_holding,
         parts=parts,
+        material=str(sheet_block.get("material", "mdf")),
+        machining=machining,
+        kerf_explicit="kerf" in nest_block,
     )
 
 
@@ -2071,15 +2571,19 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
     if data is None:
         raise PMLParseError("Empty YAML document")
 
+    _reject_unknown_keys(data, ("Template",), "template root", "root")
     template_block = data.get("Template")
     if template_block is None:
         raise PMLParseError("Missing 'Template:' root key")
 
+    _reject_unknown_keys(template_block, ("name", "params", "body"), "Template", "Template")
     name = template_block.get("name")
     if name is None:
         raise PMLParseError("Template missing 'name'")
 
     params_block = template_block.get("params", {})
+    if not isinstance(params_block, dict):
+        raise PMLParseError("Template params must be a mapping (PM-18 violation)", "Template.params")
     params: dict[str, Any] = {}
     for k, v in params_block.items():
         if isinstance(v, str) and v.endswith("mm"):
@@ -2090,7 +2594,7 @@ def parse_template_yaml(source: str, parse_body: bool = False) -> TemplateDef:
     body = None
     if parse_body and "body" in template_block:
         body = parse_node(template_block["body"], "Template.body")
-        _validate_zones(body, "Template.body")
+        _validate_node_structure(body, "Template.body")
 
     return TemplateDef(name=name, params=params, body=body)
 

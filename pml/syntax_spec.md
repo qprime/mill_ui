@@ -65,19 +65,50 @@ children:
                   depth: 6mm
 ```
 
+## Closed Key Sets
+
+Every parsed mapping has a closed set of allowed keys (PM-18). Allowed values
+reach the AST, `NestJob` or `TemplateDef`, following the syntax's default and
+override rules. Unknown or misplaced keys raise `PMLParseError`; the error
+identifies the context and lists the unknown and allowed keys. Checks run before
+required-key and value checks. There are no implicit aliases: `depht` does not
+mean `depth` and `w` does not mean `width`.
+
+PM-18 validates parser retention, structure and supported option keys for the
+selected assembly type. Unsupported Assembly options and non-Grid
+`Place.layout` configurations raise before resolution.
+
+Node wrappers contain only their type key. All options, including `id`,
+`feature`, `children` and `at`, belong inside the node's mapping and are accepted
+only by nodes that retain them. A shape accepts at most one feature, supplied
+as `feature:` or one Feature child. Line, Polyline and Spline `children` may
+contain only that Feature child. Standalone Features at the document root, in
+component/template bodies, as `AtPosition.child` or as `Place.layout` are invalid;
+attach the Feature to a shape. Parameterized component bodies are checked when
+instantiated. `feature: {}` is invalid.
+
+Rect, RoundedRect and Ellipse placement and size use
+`at: {x, y, width, height}`. Circle and Polygon `at` mappings accept only `x`
+and `y`; set circle size with `diameter` or `radius`, and polygon size with
+`points`. Every supplied `at` requires both `x` and `y`.
+
+Template documents contain only `Template:`, whose keys are `name`, `params`
+and `body`. Nest callers may override only declared parameters and cannot
+supply the reserved `outer_w` or `outer_h` values.
+
 ## Document Structure
 
 A PML document has the following top-level keys:
 
 ```yaml
 project: "optional project name"    # Optional
-kerf: 3.175mm                       # Optional tool kerf override
+kerf: 3.175mm                       # Optional geometry-generation kerf (not cutter identity)
 Sheet:                              # Required
   physical_width: 1220mm            # or 'width' for backward compat
   physical_height: 2420mm           # or 'height' for backward compat
   thickness: 19mm
   margin: 10mm                      # Optional, default 0mm (working area = 1200x2400)
-  material: mdf                     # Optional, default "mdf" — validated against feeds.yml (data-driven)
+  material: mdf                     # Optional, default "mdf" — validated by the selected machine cutting preset at build time
   gcode_output: per-tool            # Optional, default "per-operation"
   safe_z: 15mm                      # Optional retract height above the stock top (see below)
 Surface:                              # Optional — full-sheet facing passes
@@ -114,6 +145,11 @@ Sheet:
   thickness: 19mm
   margin: 10mm              # physical sheet = 1220x1220mm
 ```
+
+If multiple size forms are supplied for one axis, they must imply the same
+physical size. For example, `width: 1220mm`, `physical_width: 1220mm` and
+`working_width: 1200mm` agree with `margin: 10mm`. Conflicting declarations raise
+instead of selecting one silently. Width and height are checked independently.
 
 This is useful when you want to work in a coordinate system where (0,0) is the corner of the cuttable zone without thinking about physical sheet size.
 
@@ -1369,7 +1405,24 @@ See `docs/heightfield.md` for full ingest requirements, error messages, and exte
 
 #### Assembly
 
-Multi-panel assembly with interface-first architecture. Each assembly type (box, carcass, cubby) generates panels and their joinery based on explicit interface specifications.
+Multi-panel assembly with interface-first architecture. Each assembly type (box, carcass, cubby) generates panels and joinery from its supported configuration fields.
+
+Keys are checked per assembly type. Carcass shelf/toe-kick options on a box,
+cubby-only grid/back-support options on a carcass, and box/carcass cap options
+on a cubby raise. The PML `interfaces` mapping is not implemented and is rejected;
+use the supported joinery fields below. Assembly `children` and
+`show_dimensions` are also rejected because resolution does not use them.
+Blueprint dimensions are configured with `Sheet.show_dimensions`.
+
+Named `width`, `depth` and `height` may use a `dimensions` fallback list in that
+order (one to three entries). A named value overrides its corresponding entry,
+including zero. Other entries still provide missing named values. Empty,
+oversized or malformed lists and invalid entries raise.
+
+When supplied together, `back_thickness` and `back.thickness` must agree. A
+nonzero `back.inset` must agree with `back_inset`; zero is the neutral joinery
+inset and may accompany a nonzero assembly setback. Equivalent forms round-trip
+through the formatter; contradictory dimensions raise before resolution.
 
 **Core Concept:** Assemblies are built from panels joined at interfaces. Each interface selects one joinery strategy. Edge-based joinery (butt, finger, step, rabbet) modifies panel edges. Face-based joinery (half-lap, captured, dado) modifies panel faces.
 
@@ -1439,19 +1492,8 @@ Open-sided cabinet with optional back, shelves, and partitions:
     show_labels: true
 ```
 
-```yaml
-# Carcass with partitions
-- Assembly:
-    type: carcass
-    width: 1200mm
-    depth: 400mm
-    height: 800mm
-    thickness: 18mm
-    fixed_shelves: 2
-    vertical_partitions: 3
-    shelf_joinery: dado
-    partition_joinery: dado
-```
+Carcass vertical partitions are not implemented. Nonzero
+`vertical_partitions` still raises; use a cubby for a supported grid of dividers.
 
 ##### Cubby Assembly
 
@@ -1535,16 +1577,11 @@ Grid of cubbies with perimeter and internal joinery:
 | back | no | none | Back panel joinery strategy |
 | back_thickness | no | - | Back panel thickness (enables captured back) |
 | back_inset | no | 0mm | Clear gap from rear outside edge to the back panel's rear face |
-| back_joinery | no | - | Alternative back joinery specification |
-| back_rabbet_depth | no | - | Depth of rabbet/dado for back panel |
-| back_internal_support | no | true | Internal bracing for back panel |
 | fixed_shelves | no | 0 | Number of fixed shelves |
 | shelf_joinery | no | captured | Shelf-to-side joinery |
 | shelf_dado_depth | no | t/2 | Shelf dado depth |
 | shelf_back_support | no | false | Add back panel support for shelves |
 | vertical_partitions | no | 0 | Reserved for vertical dividers; nonzero values are currently rejected because carcass partition interfaces are not implemented |
-| partition_joinery | no | captured | Partition-to-cap joinery |
-| partition_dado_depth | no | t/2 | Partition dado depth |
 | toe_kick_height | no | - | Height of toe kick cutout |
 | toe_kick_depth | no | - | Depth (setback) of toe kick from front |
 | toe_kick_style | no | open | Toe kick style: open, between_sides, over_sides |
@@ -1594,6 +1631,14 @@ separate parts are intended.
 | internal_joinery | no | half_lap | Joinery for shelf/partition intersections |
 | back_thickness | no | - | Back panel thickness (enables captured back) |
 | back_inset | no | 0mm | Clear gap from rear outside edge to the back panel’s rear face |
+| back | no | - | Back joinery configuration |
+| back_joinery | no | - | Alternative back joinery specification when `back` is absent |
+| back_rabbet_depth | no | t/2 | Default back groove depth |
+| back_internal_support | no | true | Back support grooves for internal members |
+| shelf_joinery | no | captured | Shelf-to-side joinery |
+| shelf_dado_depth | no | t/2 | Shelf groove depth default |
+| partition_joinery | no | captured | Partition-to-cap joinery |
+| partition_dado_depth | no | t/2 | Partition groove depth default |
 
 For cubby, a 300mm depth, 18mm back and `back_inset: 12mm` place the back’s
 rear face at 288mm and front face at 270mm from the front. The back’s width
@@ -1700,6 +1745,10 @@ Pocket interior with wall chamfer:
 | `children` | list | no | — | Operations applied to wall ring (Chamfer, Roundover, Pocket, etc.) |
 
 #### Place
+
+When supplied, `layout` must be a Grid configuration without children. Put
+machining content in `Place.children`. Omitting `layout` places children in the
+parent region; other layout node types raise instead of being ignored.
 
 Container with optional layout manager for positioning children:
 
@@ -1994,6 +2043,23 @@ Or as generator children:
           depth: through
 ```
 
+### Feature Key Sets
+
+Only these feature types and keys are accepted:
+
+| Type | Allowed keys |
+|------|--------------|
+| `profile` | `type`, `depth`, `face`, `side`, `tab_count`, `tab_height`, `tab_width`, `onion_skin_mm`, `feeds` |
+| `pocket` | `type`, `depth`, `face`, `corner_cleanup`, `dogbone`, `rest`, `rest_tool`, `feeds` |
+| `hole` | `type`, `depth`, `face`, `feeds` |
+| `engrave` | `type`, `depth`, `face`, `feeds` |
+
+`face: back` still requires a finite depth and a pocket, hole or engrave feature
+(PM-13). `dogbone` mappings accept `style`, `diameter`, `overcut`; `rest`
+accepts `tool`, `rough_allowance`, `finish_allowance`; `feeds` accepts `rpm`,
+`feed_xy`, `feed_z`, `depth_per_pass`, `stepover_percent`. Empty `feeds: {}`
+means no override.
+
 ### Feature Types
 
 | Type | Description |
@@ -2139,6 +2205,10 @@ The `corner_cleanup` value is the diameter of the cleanup tool. A circular bore 
 
 ### Dogbone Fillets
 
+A supplied `dogbone` must be a YAML boolean (`true` or `false`) or a mapping.
+Strings such as `'true'` or `3mm`, numeric scalars, lists and explicit null raise
+a parse error. Omit the key to retain the existing default behavior.
+
 Pocket features can specify dogbone fillets to provide clearance at internal corners for mating parts. CNC routers leave tool-radius fillets at internal corners; dogbone bores at each corner allow square parts to fit.
 
 Simple form (default style, auto tool selection):
@@ -2181,6 +2251,7 @@ Three-way semantics on interface configs:
 | PML | Meaning |
 |-----|---------|
 | *(absent)* | Use strategy default (dogbone on) |
+| `dogbone: true` | Use strategy default (dogbone on) |
 | `dogbone: false` | Explicitly suppress dogbone on this interface |
 | `dogbone: { style: t-bone_x }` | Override style |
 
@@ -2200,11 +2271,11 @@ Three-way semantics on interface configs:
       dogbone: false
 ```
 
-The `dogbone` parameter on an interface config accepts: `false` to suppress, or a dict with `style`, `diameter`, and `overcut` to override.
+The `dogbone` parameter on an interface config accepts `true` for the strategy default, `false` to suppress, or a mapping with `style`, `diameter`, and `overcut` to override.
 
 ### Feed Overrides
 
-Features can optionally override resolved feeds/speeds. This lets operators slow down a specific cut without changing the global feeds table.
+Features can optionally override resolved feeds/speeds. This lets operators slow down a specific cut without changing the selected cutting preset.
 
 ```yaml
 - Rect:
@@ -2346,3 +2417,50 @@ machining geometry. Assembly, beam, shape children and nesting expansion preserv
 this ownership. Generated PML can retain it explicitly on `AtPosition.part_id`;
 all machining children of that placement belong to the named part. This permits
 separate pocket/profile items without guessing ownership from adjacency.
+
+## Job machining and named operation tools
+
+```yaml
+machining:
+  tools:
+    pocket: "1/4 upcut spiral"
+  feeds:
+    feed_z: 500
+Sheet: {width: 300mm, height: 300mm, thickness: 19mm, material: mdf}
+children:
+- Rect:
+    at: {x: 150mm, y: 150mm, width: 100mm, height: 100mm}
+    children:
+    - Pocket:
+        depth: 3mm
+        tool: "1/8 downcut plunge"
+        feeds: {feed_xy: 900}
+```
+
+`machining` admits only `tools` and `feeds`. `tools` maps role names (`profile`,
+`pocket`, `hole`, `engrave`, `vcarve`, `surface`, `roundover`, `specialty`) to exact
+nonempty library names. It contains no machine identity. Select the machine once
+with `--machine`; omitted machine uses `machines/defaults.yml`.
+
+Named `tool` and existing `feeds` are supported on primitive feature mappings,
+Profile/Pocket/Chamfer/Roundover/RaisedPanel operations and the top-level
+Surface block. Heightfield retains its existing exact named tool assignments.
+Resolution is operation tool > job role > preset material role > error. Explicit
+tools are binding, including kind, reach, V angle and geometric feasibility.
+Only preset defaults may try the preset's ordered approved alternatives.
+
+Parameters resolve for the actual preset/material/operation/cutter, followed by
+job `machining.feeds`, then operation `feeds`. The fields remain `rpm`, `feed_xy`,
+`feed_z`, `depth_per_pass`, `stepover_percent`; finite positive numbers are
+required, with stepover <=100%. Missing combinations and known physical-limit
+violations error. A different tool/machine never inherits the old tool's settings.
+
+All profiles on a sheet use one cutter selected before packing. Conflicting
+operation profile tools fail before packing. CLI `--kerf` is an exact profile
+constraint; no nearest-diameter guess is allowed. Builds resolve from authored
+source/current configuration in memory; they do not emit reusable layouts.
+
+Surface `stepover` overrides the preset percentage when present; omission uses
+the selected cutter settings. Surface `depth-per-pass` defines the operation
+stepdown, with an explicit `feeds.depth_per_pass` taking precedence and splitting
+that removal into smaller passes when required.

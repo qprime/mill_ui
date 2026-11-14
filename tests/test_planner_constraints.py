@@ -23,6 +23,8 @@ from validation.toolpath_checks import (
     verify_toolpath_avoids_keepouts,
 )
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 
 class TestConstraintAudit:
     def test_audit_no_constraints(self):
@@ -113,7 +115,9 @@ class TestToolpathKeepoutVerification:
         from validation.toolpath_checks import verify_passes_avoid_keepouts
 
         accumulator = PassAccumulator(machine=Machine(), stock=Stock(300, 200, 19), safe_z=6, prime_spindle=False)
-        tool = normalize_tool_entries([{"diameter": 3.175, "kind": "flat"}])[0]
+        tool = normalize_tool_entries(
+            [{"diameter": 3.175, "kind": "flat", "rpm": 18000, "feed_xy": 900, "feed_z": 300}]
+        )[0]
         first = accumulator.get_record("pocket", tool)
         first.add_moves([RapidMove(x=0, y=50)], feature_ids=("test",))
         second = accumulator.get_record("profile", tool)
@@ -248,8 +252,16 @@ children:
     at: {x: 250mm, y: 100mm}
     feature: {type: hole, face: back, depth: 3mm}
 """
-        flat = {"name": "flat", "diameter": 3.175, "kind": "flat"}
-        roundover = {"name": "roundover", "diameter": 25.4, "kind": "roundover", "roundover_radius_mm": 6}
+        flat = {"name": "flat", "diameter": 3.175, "kind": "flat", "rpm": 18000, "feed_xy": 900, "feed_z": 300}
+        roundover = {
+            "rpm": 18000,
+            "feed_xy": 1200,
+            "feed_z": 300,
+            "name": "roundover",
+            "diameter": 25.4,
+            "kind": "roundover",
+            "roundover_radius_mm": 6,
+        }
         ast = resolve_layout(parse_pml_yaml(pml))
         valid_result = run_pipeline(ast, tool_db=[flat, roundover])
         assert valid_result.svg is not None and 'id="ROUNDOVER_CUTS"' in valid_result.svg
@@ -259,7 +271,7 @@ children:
         result = run_pipeline(ast, tool_db=[flat])
         write_run_outputs([SheetRun("part.pml.yml", 1, "part", result)], tmp_path)
 
-        assert any("no roundover bit with 6.0mm radius" in error for error in result.errors)
+        assert any("role roundover" in error for error in result.errors)
         assert result.metrics["constraint_audit"]["edge_feature"]["safety_critical"] is True
         assert all("no roundover bit" not in warning for warning in result.warnings)
         assert result.gcode and all(name.startswith("back-") for name in result.gcode)
@@ -345,8 +357,6 @@ Sheet:
 children:
   - Rect:
       id: panel
-      w: 100mm
-      h: 100mm
       feature:
         type: profile
         depth: through

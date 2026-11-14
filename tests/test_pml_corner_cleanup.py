@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import pytest
+
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 from pml.yaml_formatter import format_pml_yaml
-from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
 
@@ -162,10 +164,8 @@ children:
         invalid_field: 3.175mm
 """
 
-    ast = parse_pml_yaml(pml_text)
-    flat = resolve_layout(ast)
-    assert flat.items[0].feature is not None
-    assert flat.items[0].feature.corner_cleanup_tool_diameter_mm is None
+    with pytest.raises(PMLParseError, match="invalid_field"):
+        parse_pml_yaml(pml_text)
 
 
 def test_pml_corner_cleanup_through_depth():

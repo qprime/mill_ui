@@ -882,3 +882,76 @@ Nest:
     assert job2.parts[1].holding is not None
     assert job2.parts[1].holding.tab_count == 6
     assert job2.parts[1].holding.tab_height_mm == 3.0
+
+
+class TestNestClosedKeys:
+    @staticmethod
+    def _parse(nest, extra_root=None):
+        from io import StringIO
+
+        from ruamel.yaml import YAML
+
+        source = StringIO()
+        YAML().dump({"Nest": nest, **(extra_root or {})}, source)
+        return parse_nest_yaml(source.getvalue())
+
+    @staticmethod
+    def _nest():
+        return {
+            "algorithm": "maxrects",
+            "Sheet": {"width": 1000, "height": 1000, "thickness": 19},
+            "parts": [{"name": "part", "width": 100, "height": 100}],
+        }
+
+    def test_unknown_root_key_rejected(self):
+        import pytest
+
+        with pytest.raises(NestParseError, match=r"zz_unknown.*PM-18"):
+            self._parse(self._nest(), {"zz_unknown": 1})
+
+    def test_unknown_nest_block_key_rejected(self):
+        import pytest
+
+        with pytest.raises(NestParseError, match=r"zz_unknown.*PM-18"):
+            self._parse({**self._nest(), "zz_unknown": 1})
+
+    def test_unknown_sheet_key_rejected(self):
+        import pytest
+
+        nest = self._nest()
+        nest["Sheet"]["zz_unknown"] = 1
+        with pytest.raises(NestParseError, match=r"Nest.Sheet.*zz_unknown.*PM-18"):
+            self._parse(nest)
+
+    def test_unknown_part_key_rejected(self):
+        import pytest
+
+        nest = self._nest()
+        nest["parts"][0]["zz_unknown"] = 1
+        with pytest.raises(NestParseError, match=r"zz_unknown.*PM-18"):
+            self._parse(nest)
+
+    def test_unknown_shape_key_rejected(self):
+        import pytest
+
+        for shape in ("Rect", "Circle", "Triangle", "Ellipse", "RoundedRect", "Polygon"):
+            nest = self._nest()
+            nest["parts"][0]["shape"] = {"type": shape, "zz_unknown": 1}
+            with pytest.raises(NestParseError, match=r"zz_unknown.*PM-18"):
+                self._parse(nest)
+
+    def test_unknown_part_template_key_rejected(self):
+        import pytest
+
+        nest = self._nest()
+        nest["parts"][0]["template"] = {"name": "shaker", "param": {"stile_w": 50}}
+        with pytest.raises(NestParseError, match=r"param.*PM-18"):
+            self._parse(nest)
+
+    def test_shape_rejects_cross_type_params(self):
+        import pytest
+
+        nest = self._nest()
+        nest["parts"][0]["shape"] = {"type": "Circle", "radius": 50}
+        with pytest.raises(NestParseError, match=r"radius.*PM-18"):
+            self._parse(nest)

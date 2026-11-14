@@ -211,7 +211,6 @@ def verify_passes_preserve_parts(
     from shapely.strtree import STRtree
 
     from cam.planner.passes.merge_shared_edges import profile_material_region
-    from cam.planner.passes.tools import pick_tool_for_profile
 
     retained = [
         (p, profile_material_region(p))
@@ -220,9 +219,10 @@ def verify_passes_preserve_parts(
     ]
     if not retained or not passes:
         return ()
-    diameter = pick_tool_for_profile(
-        [record.tool_selection for record in passes], kerf_mm=planner_input.kerf_width_mm
-    ).diameter
+    diameter = next(
+        (record.tool_selection.diameter for record in passes if record.op in {"profile", "profile_finish", "release"}),
+        planner_input.kerf_width_mm,
+    )
     regions = [
         region.buffer(diameter) if p.tabs is not None or (p.onion_skin_mm or 0) > 0 else region
         for p, region in retained

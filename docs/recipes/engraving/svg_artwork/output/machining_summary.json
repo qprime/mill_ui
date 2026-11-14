@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 600.0,
     "height_mm": 400.0,
@@ -9,6 +21,37 @@
     {
       "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "generated_svg_000",
+            "generated_svg_001",
+            "generated_svg_002"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,11 +60,42 @@
       "max_depth_mm": 4.0,
       "feature_count": 3,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 1.1
+      "estimated_runtime_min": 1.0
     },
     {
       "filename": "engrave-1.00mm.nc",
       "operation": "engrave",
+      "tool_name": "1mm engraving bit",
+      "tool_geometry": {
+        "kind": "ball",
+        "v_angle_deg": null,
+        "flute_length_mm": 5.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "engrave",
+          "feature_ids": [
+            "generated_svg_000",
+            "generated_svg_001",
+            "generated_svg_002"
+          ],
+          "tool": {
+            "name": "1mm engraving bit",
+            "diameter": 1.0,
+            "kind": "ball",
+            "rotation": null,
+            "depth_per_pass": 0.5,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 5.0,
+            "flutes": 1,
+            "shank_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy": 1200.0,
+            "feed_z": 300.0
+          }
+        }
+      ],
       "tool_diameter_mm": 1.0,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1200.0,
@@ -30,11 +104,42 @@
       "max_depth_mm": 0.5,
       "feature_count": 3,
       "strategy": "engrave",
-      "estimated_runtime_min": 0.6
+      "estimated_runtime_min": 0.5
     },
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_svg_000",
+            "generated_svg_001",
+            "generated_svg_002"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -47,12 +152,12 @@
       "estimated_runtime_min": 1.0
     }
   ],
-  "total_runtime_min": 2.7,
+  "total_runtime_min": 2.5,
   "feature_counts": {
     "engrave": 3,
     "pocket": 3,
     "profile": 3
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

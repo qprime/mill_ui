@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1220.0,
     "height_mm": 1220.0,
@@ -9,21 +21,50 @@
     {
       "filename": "surface-25.40mm.nc",
       "operation": "surface",
+      "tool_name": "1 inch surfacing bit",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 10.2
+      },
+      "stepover_percent": 70.0,
+      "effective_passes": [
+        {
+          "operation": "surface",
+          "feature_ids": [
+            "surface_pass_0"
+          ],
+          "tool": {
+            "name": "1 inch surfacing bit",
+            "diameter": 25.4,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 0.5,
+            "stepover_percent": 70.0,
+            "flute_length_mm": 10.2,
+            "flutes": 4,
+            "shank_diameter_mm": 6.35,
+            "rpm": 12000.0,
+            "feed_xy": 4800.0,
+            "feed_z": 1200.0
+          }
+        }
+      ],
       "tool_diameter_mm": 25.4,
       "rpm": 12000.0,
       "feed_xy_mm_min": 4800.0,
       "feed_z_mm_min": 1200.0,
-      "stepdown_mm": 1.0,
+      "stepdown_mm": 0.5,
       "max_depth_mm": 0.5,
       "feature_count": 1,
       "strategy": "surface",
-      "estimated_runtime_min": 19.5
+      "estimated_runtime_min": 19.1
     }
   ],
-  "total_runtime_min": 19.5,
+  "total_runtime_min": 19.1,
   "feature_counts": {
     "pocket": 1
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

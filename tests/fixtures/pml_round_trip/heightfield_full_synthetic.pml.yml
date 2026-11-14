@@ -21,15 +21,15 @@ children:
           depth: 6mm
           white_is_high: true
           tools:
-            - tool: "1/4 upcut spiral"
+            - tool: "test_flat_6"
               role: rough
               stepover: 60%
               stepdown: 2mm
-            - tool: "1/8 upcut spiral"
+            - tool: "test_flat_3"
               role: rough
               stepover: 50%
               stepdown: 1mm
-            - tool: "1/8 ball nose 2F"
+            - tool: "test_ball"
               role: finish
               stepover: 12%
               angle: 0

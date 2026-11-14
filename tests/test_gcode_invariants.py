@@ -10,11 +10,15 @@ from validation.invariants.gcode_invariants import check_gcode_invariants_from_c
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import pytest
+
 from validation.core import Verdict
 from validation.invariants.gcode_invariants import (
     GCODE_INVARIANT_IDS,
     check_gcode_invariants,
 )
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 SHELF_PML = """Sheet:
   width: 280mm

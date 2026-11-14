@@ -30,6 +30,16 @@ soft_limits:
 
 defaults:
   safe_z_mm: 3.0
-  feed_rate_mm_min: 5000
-  plunge_rate_mm_min: 2000
   ramp_angle_deg: 3.0
+
+cutting_preset: altmill_production
+
+controller:
+  work_coord_system: G54
+  spindle_dwell_s: 5
+
+capabilities:
+  # Published axis limits: https://resources.sienci.com/view/am-about-your-altmill/
+  max_feed_xy: 15000
+  max_feed_z: 6000
+  rapid_z: 1000

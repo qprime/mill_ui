@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Any, cast
 
+from generators.svg.parser import parse_svg_path, polylines_bounds
 from validation.core import round_metric
 
 SVG_NS = "{http://www.w3.org/2000/svg}"
@@ -356,22 +357,17 @@ def _extract_path_geometry(elem: ET.Element) -> ElementGeometry | None:
     if not d:
         return None
 
-    numbers = re.findall(r"-?\d+\.?\d*", d)
-    if len(numbers) < 4:
-        return None
     try:
-        coords = [float(n) for n in numbers]
-
-        x_coords = [coords[i] for i in range(0, len(coords), 2)]
-        y_coords = [coords[i] for i in range(1, len(coords), 2)]
-        if not x_coords or not y_coords:
+        paths = parse_svg_path(d, tolerance=0.001)
+        if not paths:
             return None
-        x_min, x_max = min(x_coords), max(x_coords)
-        y_min, y_max = min(y_coords), max(y_coords)
+        x_min, y_min, x_max, y_max = polylines_bounds(paths)
         return ElementGeometry(
             element_type="path",
             bounds=(x_min, y_min, x_max, y_max),
             center=((x_min + x_max) / 2, (y_min + y_max) / 2),
+            width=x_max - x_min,
+            height=y_max - y_min,
         )
     except (ValueError, TypeError):
         return None

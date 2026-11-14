@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from layout_ast.layout import LayoutAST
 from validation.core import Verdict
@@ -76,6 +77,10 @@ Exit codes:
         help="PML source file (for intent assertions)",
     )
 
+    parser.add_argument("--machine", default=None, help="Current machine configuration for source resolution")
+    parser.add_argument("--preset", default=None, help="Current cutting preset YAML input")
+    parser.add_argument("--endmills", default=None, help="Explicit endmill library input")
+    parser.add_argument("--feeds", default=None, help="Explicit feeds input; requires --endmills")
     options_group = parser.add_argument_group("Validation options")
     options_group.add_argument(
         "--golden",
@@ -149,21 +154,8 @@ Exit codes:
         return EXIT_FAIL
 
 
-def resolve_explicit_pml(pml_path: Path, artifacts: list[Path]) -> LayoutAST:
-    folders = sorted({path.parent.resolve() for path in artifacts})
-    matches = {}
-    for folder in folders:
-        metrics = folder / "metrics.json"
-        if metrics.is_file():
-            data = json.loads(metrics.read_text(encoding="utf-8"))
-            context = data.get("build", {}).get("compilation_contexts", {}).get(pml_path.name)
-            if context is not None:
-                matches[folder] = context
-    fingerprints = {context.get("fingerprint") for context in matches.values()}
-    if len(fingerprints) > 1:
-        raise ValueError("Explicit --pml artifacts have conflicting compilation contexts; validate one build at a time")
-    output_dir = next(iter(matches)) if matches else folders[0] if folders else pml_path.parent
-    asts = resolve_validation_source(pml_path, output_dir)
+def resolve_explicit_pml(pml_path: Path, **build_inputs) -> LayoutAST:
+    asts = resolve_validation_source(pml_path, **build_inputs)
     if len(asts) != 1:
         raise ValueError(
             f"Multi-sheet --pml input resolves to {len(asts)} sheets; use --recipe to match every sheet to its artifacts"
@@ -194,13 +186,20 @@ def run_validation(args: argparse.Namespace) -> int:
         check_regressions=not args.metrics_only and not args.no_regressions and golden_metrics is not None,
     )
 
+    from config.machine_loader import load_endmills, load_feeds, load_machine_by_name
+
+    build_inputs: dict[str, Any] = {
+        "machine_config": load_machine_by_name(args.machine) if getattr(args, "machine", None) else None,
+        "preset_path": Path(args.preset) if getattr(args, "preset", None) else None,
+        "endmills": load_endmills(args.endmills) if getattr(args, "endmills", None) else None,
+        "feeds": load_feeds(args.feeds) if getattr(args, "feeds", None) else None,
+    }
     ast = None
     pml_path = Path(args.pml) if args.pml else None
     if pml_path is not None and not pml_path.is_file():
         raise FileNotFoundError(f"PML file not found: {pml_path}")
     if pml_path is not None and not args.recipe:
-        artifacts = [Path(path) for path in ([args.svg] if args.svg else []) + (args.gcode or [])]
-        ast = resolve_explicit_pml(pml_path, artifacts)
+        ast = resolve_explicit_pml(pml_path, **build_inputs)
 
     if args.recipe:
         recipe_dir = Path(args.recipe)
@@ -212,6 +211,7 @@ def run_validation(args: argparse.Namespace) -> int:
         result = validate_recipe(
             recipe_dir,
             pml_source=pml_path,
+            **build_inputs,
             golden_metrics=golden_metrics,
             golden_file=golden_file,
             comparison_config=comparison_config,

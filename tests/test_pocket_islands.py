@@ -13,6 +13,8 @@ from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 
 def _zone_document(children, components=None):
     data: dict[str, Any] = {"Sheet": {"width": 400, "height": 400, "thickness": 19}, "children": children}
@@ -313,7 +315,6 @@ children:
                   distance: 200mm
                   children:
                     - Circle:
-                        fit: true
 """
 
     ast = parse_pml_yaml(pml)

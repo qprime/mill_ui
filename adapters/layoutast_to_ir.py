@@ -232,10 +232,9 @@ def _edge_tools_for_layout(ast: LayoutAST, tools: Sequence[ToolSelection] | None
         return tools
     if not any(item.feature and item.feature.type in _EDGE_TYPES for item in ast.items):
         return ()
-    from cam.planner.passes.tools import normalize_tool_entries
-    from config.machine_loader import load_machine_tool_db
+    from cam.compilation import compilation_context
 
-    return normalize_tool_entries(load_machine_tool_db(ast.sheet.material))
+    return (ast.machining_context or compilation_context(ast.sheet.material, machining=ast.machining)).tools
 
 
 def _record_edge_depth(depths: dict[str, set[str]], feature_type: str, context: _DrawingContext) -> None:

@@ -139,6 +139,17 @@ def summarise_gcode_file(
     entry: dict[str, Any] = {
         "filename": filename,
         "operation": ", ".join(ops),
+        "tool_name": tool.name,
+        "tool_geometry": {"kind": tool.kind, "v_angle_deg": tool.v_angle_deg, "flute_length_mm": tool.flute_length_mm},
+        "stepover_percent": tool.stepover_percent,
+        "effective_passes": [
+            {
+                "operation": p.op,
+                "feature_ids": sorted({fid for _, _, ids in p.move_ranges for fid in ids}),
+                "tool": tool_identity(p.tool_selection),
+            }
+            for p in passes
+        ],
         "tool_diameter_mm": float(tool.diameter),
         "rpm": round(tool.rpm, 3),
         "feed_xy_mm_min": round(tool.feed_xy, 3),

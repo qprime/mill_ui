@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from cli.mill import write_recipe_outputs
 from layout_ast.layout import (
     Feature,
@@ -23,6 +25,8 @@ from validation.runner import (
     validate,
     validate_recipe,
 )
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 PLATE_PML = """Sheet:
   width: 220mm

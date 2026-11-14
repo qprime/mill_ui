@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import pytest
+
 from cam.pipeline import run_pipeline
 from pml import parse_pml
 from validation.metrics.svg_metrics import (
     extract_svg_metrics,
     extract_svg_metrics_from_file,
 )
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 TRAY_PML = """Sheet:
   width: 300mm
@@ -172,3 +176,13 @@ def test_svg_metrics_dimension_text():
     assert metrics.text.count == 3
     assert "200.0mm" in metrics.text.dimension_labels
     assert "150.0mm" in metrics.text.dimension_labels
+
+
+def test_rounded_profile_path_dimensions_use_arc_geometry():
+    source = """<svg xmlns="http://www.w3.org/2000/svg" width="400mm" height="300mm">
+<g id="PROFILE_CUTS"><path d="M 45 20 L 295 20 A 25 25 0 0 1 320 45 L 320 195 A 25 25 0 0 1 295 220 L 45 220 A 25 25 0 0 1 20 195 L 20 45 A 25 25 0 0 1 45 20 Z"/></g>
+</svg>"""
+    metrics = extract_svg_metrics(source)
+    (profile,) = metrics.layers["PROFILE_CUTS"].elements
+    assert profile.bounds == (20, 20, 320, 220)
+    assert (profile.width, profile.height) == (300, 200)

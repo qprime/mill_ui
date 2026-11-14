@@ -46,6 +46,19 @@ Nest:
       quantity: 2
 ```
 
+## Closed Key Sets
+
+Every parsed nest mapping accepts only its documented keys (PM-18). Unknown
+keys raise `NestParseError`, with the context, unknown keys, allowed keys and
+`(PM-18 violation)`. They are never silently ignored. The document root accepts
+only `Nest:`; part template mappings accept only `name` and `params`.
+
+A part shape accepts `type`, plus `radius` and `corners` for RoundedRect or
+`points` for Polygon. Other shape types accept only `type`; part `width` and
+`height` supply their bounding dimensions. Template parameters must be declared
+by the template. `outer_w` and `outer_h` are reserved for the packed part's size
+and cannot be supplied by callers.
+
 ## Document Structure
 
 ```yaml
@@ -57,7 +70,7 @@ Nest:                           # Required root key
     height: 2400mm
     thickness: 19mm
 
-  kerf: 6.35mm                  # Optional, default 6.35mm
+  kerf: 6.35mm                  # Optional exact profile constraint; omitted uses selected preset
   margin: 10mm                  # Optional, default 10mm
 
   holding:                      # Optional default holding strategy
@@ -113,7 +126,7 @@ Sheet:
 ## Kerf and Margin
 
 ```yaml
-kerf: 6.35mm    # Cutter width for spacing between parts (default: 6.35mm / 1/4")
+kerf: 6.35mm    # Exact cutter constraint; omit to use the machine preset
 margin: 10mm    # No-cut zone around sheet edges (default: 10mm)
 ```
 
@@ -441,11 +454,23 @@ onion skin, use `kerf: 6.35mm` and `gap_margin: 6.35mm` to reserve disjoint kerf
 and preserve retention stock. Holding is never removed to tighten a nest.
 
 The machining recipe route selects the actual profile cutter before packing,
-reserves that diameter at the working-area edges, and saves the cutter contract
-on each AST. An incompatible numeric gap or a different cutter on replay errors
+reserves that diameter at the working-area edges, and retains the cutter contract
+in memory. An incompatible numeric gap or exact cutter constraint errors
 explicitly. `nest_parts` and `nest_and_generate` remain usable for geometry-only
 packing; their optional `machining_clearance` supplies the actual cutter when
-known. Machining-aware output requires AST/JSON to retain that contract. Plain
-PML export remains geometry-only and is checked against the cutter selected when
-it is later machined. PML export preserves explicit part ownership through
-`AtPosition.part_id`, including the separate operations inside templates.
+known. Manufacturing hands ASTs directly to the pipeline; flattened PML/JSON exports and replay are removed.
+Part ownership is retained in memory, including the separate template operations.
+
+## Machining configuration
+
+`Nest.Sheet.material` defaults to `mdf`. `Nest.machining` accepts the same
+`tools` role assignments and `feeds` as PML's top-level `machining`. Templates
+retain their operation-level exact tool/feeds declarations; conflicting profile
+tools are rejected before packing. Omit `Nest.kerf` to derive spacing from the
+selected profile cutter. An explicit positive kerf must match that cutter.
+`gap_margin` remains additional spacing, including disjoint holding stock.
+
+`python -m cli.nest job.nest.yml --machine altmill_4x4` performs packing and
+machining together, emitting final NC, SVG and setup/timing reports through the
+shared writer. No per-sheet source, resolved JSON or saved machining context is
+emitted. Rerun the original nest source after editing configuration.

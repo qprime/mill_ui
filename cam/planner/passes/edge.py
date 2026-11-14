@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from shapely.geometry.base import BaseGeometry
@@ -22,7 +22,14 @@ from .profile import (
     offset_rounded_rect_shape,
     polygon_shape,
 )
-from .tools import ToolSelection, pick_tool_for_edge, pick_tool_for_roundover, stepdown_for_tool
+from .tools import (
+    ToolSelection,
+    apply_feeds_override,
+    pick_tool_for_edge,
+    pick_tool_for_roundover,
+    stepdown_for_tool,
+    tools_for_role,
+)
 
 if TYPE_CHECKING:
     from cam.planner.passes import PassAccumulator
@@ -62,7 +69,14 @@ def build_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[ToolSelection
     if isinstance(spec, RaisedPanelSpec):
         from .raised_panel import build_raised_panel_plan
 
-        return build_raised_panel_plan(entry, tool_db)
+        plan = build_raised_panel_plan(entry, tool_db)
+        return replace(
+            plan,
+            tool=apply_feeds_override(plan.tool, entry.feeds_override),
+            pockets=tuple(
+                replace(pocket, tool=apply_feeds_override(pocket.tool, entry.feeds_override)) for pocket in plan.pockets
+            ),
+        )
     return _build_standard_edge_cut_plan(entry, tool_db)
 
 
@@ -79,7 +93,9 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
             chamfer_included_angle(spec.angle_deg) if isinstance(spec, ChamferSpec) else spec.angle_deg * 2.0
         )
         try:
-            tool = pick_tool_for_edge(tool_db, angle_deg=desired_angle)
+            tool = pick_tool_for_edge(
+                tools_for_role(tool_db, "vcarve", entry.tool_name, entry.depth_mm), angle_deg=desired_angle
+            )
         except ValueError as exc:
             raise ValueError(f"Edge feature '{entry.id}': no V-bit with {desired_angle}° angle available") from exc
         depth = vbit_cut_depth(spec.width_mm, spec.angle_deg)
@@ -109,7 +125,9 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
         else:
             offset = vbit_effective_radius(depth, angle)
     elif isinstance(spec, RoundoverSpec):
-        tool, depth, offset = _roundover_cut_parameters(entry.id, spec, tool_db)
+        tool, depth, offset = _roundover_cut_parameters(
+            entry.id, spec, tools_for_role(tool_db, "roundover", entry.tool_name, spec.radius_mm)
+        )
     else:
         raise ValueError(f"Edge feature '{entry.id}': unknown spec type '{type(spec).__name__}'")
     if (entry.side or "outside").lower() == "inside":
@@ -117,6 +135,7 @@ def _build_standard_edge_cut_plan(entry: EdgeFeatureInput, tool_db: Sequence[Too
     shape = _build_offset_shape(entry, offset)
     if shape is None:
         raise ValueError(f"Edge feature '{entry.id}': unsupported shape '{entry.shape}'")
+    tool = apply_feeds_override(tool, entry.feeds_override).validate_cut(depth + entry.start_depth_mm)
     return EdgeCutPlan(shape, tool, depth + entry.start_depth_mm)
 
 

@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1000.0,
     "height_mm": 700.0,
@@ -9,6 +21,36 @@
     {
       "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "generated_pocket_4",
+            "generated_pocket_6"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,11 +59,41 @@
       "max_depth_mm": 12.0,
       "feature_count": 2,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 21.0
+      "estimated_runtime_min": 20.8
     },
     {
       "filename": "edge-12.70mm.nc",
       "operation": "edge",
+      "tool_name": "90 degree v-bit",
+      "tool_geometry": {
+        "kind": "v",
+        "v_angle_deg": 90.0,
+        "flute_length_mm": 12.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "edge",
+          "feature_ids": [
+            "chamfer_generated_chamfer_2"
+          ],
+          "tool": {
+            "name": "90 degree v-bit",
+            "diameter": 12.7,
+            "kind": "v",
+            "rotation": null,
+            "depth_per_pass": 1.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 12.0,
+            "flutes": 1,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 450.0,
+            "v_angle_deg": 90.0
+          }
+        }
+      ],
       "tool_diameter_mm": 12.7,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1800.0,
@@ -35,6 +107,41 @@
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_1",
+            "generated_profile_3",
+            "generated_profile_5",
+            "generated_profile_7",
+            "generated_profile_9",
+            "shell_interior_8"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -47,12 +154,12 @@
       "estimated_runtime_min": 6.9
     }
   ],
-  "total_runtime_min": 30.0,
+  "total_runtime_min": 29.8,
   "feature_counts": {
     "chamfer": 1,
     "pocket": 2,
     "profile": 7
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

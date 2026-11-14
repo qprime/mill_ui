@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from pml import PMLParseError, parse_pml
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
@@ -274,8 +276,8 @@ children:
         depth: 5mm
 """
 
-    ast = parse_pml(pml)
-    assert ast.items[0].feature.type == "invalid_feature"
+    with pytest.raises(PMLParseError, match="Unknown feature type"):
+        parse_pml(pml)
 
 
 def test_pml_parse_error_invalid_profile_side():
@@ -395,60 +397,6 @@ children:
         assert item1.feature.type == item2.feature.type
         assert item1.feature.is_through == item2.feature.is_through
         assert item1.feature.depth_mm == item2.feature.depth_mm
-
-
-def test_pml_to_json_to_ast_semantic_equivalence():
-    pml = """
-Sheet:
-  width: 450mm
-  height: 650mm
-  thickness: 19mm
-  margin: 0mm
-
-project: test_panel
-kerf: 0.15mm
-
-children:
-  - Rect:
-      id: door_outer
-      feature:
-        type: profile
-        side: outside
-        depth: through
-  - Inset:
-      distance: 50mm
-      children:
-        - Rect:
-            id: door_panel
-            feature:
-              type: pocket
-              depth: 6mm
-  - Circle:
-      id: door_anchor_1
-      diameter: 10mm
-      at:
-        x: 95mm
-        y: 545mm
-      feature:
-        type: hole
-        depth: 8mm
-"""
-
-    ast1 = parse_pml(pml)
-    json_str = ast1.to_json()
-    json_dict = json.loads(json_str)
-
-    assert "sheet" in json_dict
-    assert "items" in json_dict
-    assert json_dict["sheet"]["thickness_mm"] == 19.0
-    assert len(json_dict["items"]) == 3
-    assert json_dict.get("project") == "test_panel"
-    assert json_dict.get("kerf_width_mm") == 0.15
-
-    assert ast1.sheet.thickness_mm == 19.0
-    assert len(ast1.items) == 3
-    assert ast1.project == "test_panel"
-    assert ast1.kerf_width_mm == 0.15
 
 
 def test_pml_canonical_formatting():
@@ -661,14 +609,6 @@ children:
         type: profile
         side: outside
         depth: through
-        corner_cleanup: 3mm
-        dogbone:
-          style: t-bone_y
-          diameter: 6mm
-        rest:
-          tool: 3mm
-          rough_allowance: 0.3mm
-          finish_allowance: 0.1mm
         tab_count: 4
         tab_height: 3mm
         tab_width: 10mm
@@ -691,17 +631,40 @@ children:
     assert f1.type == f2.type
     assert f1.is_through == f2.is_through
     assert f1.side == f2.side
-    assert f1.corner_cleanup_tool_diameter_mm == f2.corner_cleanup_tool_diameter_mm
-    assert f1.dogbone.style == f2.dogbone.style
-    assert f1.dogbone.diameter_mm == f2.dogbone.diameter_mm
-    assert f1.rest.tool_diameter_mm == f2.rest.tool_diameter_mm
-    assert f1.rest.rough_allowance_mm == f2.rest.rough_allowance_mm
-    assert f1.rest.finish_allowance_mm == f2.rest.finish_allowance_mm
     assert f1.tab_count == f2.tab_count
     assert f1.tab_height_mm == f2.tab_height_mm
     assert f1.tab_width_mm == f2.tab_width_mm
     assert f1.onion_skin_mm == f2.onion_skin_mm
     assert f1.feeds_override == f2.feeds_override
+
+
+def test_pml_roundtrip_pocket_feature_fields():
+    pml = """
+Sheet: {width: 300mm, height: 300mm, thickness: 19mm}
+children:
+  - Rect:
+      feature:
+        type: pocket
+        depth: 5mm
+        corner_cleanup: 3mm
+        dogbone:
+          style: t-bone_y
+          diameter: 6mm
+        rest:
+          tool: 3mm
+          rough_allowance: 0.3mm
+          finish_allowance: 0.1mm
+"""
+    ast1 = parse_pml_yaml(pml)
+    ast2 = parse_pml_yaml(format_pml_yaml(ast1))
+    assert ast1 == ast2
+    feature = ast2.root.children[0].feature
+    assert feature.corner_cleanup_tool_diameter_mm == 3.0
+    assert feature.dogbone.style == "t-bone_y"
+    assert feature.dogbone.diameter_mm == 6.0
+    assert feature.rest.tool_diameter_mm == 3.0
+    assert feature.rest.rough_allowance_mm == 0.3
+    assert feature.rest.finish_allowance_mm == 0.1
 
 
 def test_feature_face_survives_roundtrip():

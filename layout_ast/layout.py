@@ -5,6 +5,7 @@ from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from cam.compilation import CompilationContext
     from layout_ast.raised_panel import RaisedPanelSpec
 
 VALID_GCODE_OUTPUT_MODES = ("per-operation", "per-tool")
@@ -31,11 +32,8 @@ class Sheet:
             raise ValueError(f"Sheet min_web_mm must be >= 0, got {self.min_web_mm}")
         if self.safe_z_mm is not None and self.safe_z_mm <= 0.0:
             raise ValueError(f"Sheet safe_z_mm must be > 0, got {self.safe_z_mm}")
-        from config.machine_loader import available_materials
-
-        valid = available_materials()
-        if self.material.lower() not in valid:
-            raise ValueError(f"Unknown material {self.material!r}. Available materials in feeds.yml: {sorted(valid)}")
+        if not self.material.strip():
+            raise ValueError("Sheet material must be a nonempty name")
 
     @property
     def working_width_mm(self) -> float:
@@ -63,6 +61,28 @@ class FeedsOverride:
     feed_z: float | None = None
     depth_per_pass: float | None = None
     stepover_percent: float | None = None
+
+    def __post_init__(self) -> None:
+        for name in ("rpm", "feed_xy", "feed_z", "depth_per_pass", "stepover_percent"):
+            value = getattr(self, name)
+            if value is not None and (not math.isfinite(value) or value <= 0):
+                raise ValueError(f"feeds.{name} must be finite and positive, got {value}")
+        if self.stepover_percent is not None and self.stepover_percent > 100:
+            raise ValueError("feeds.stepover_percent must be <= 100")
+
+
+MACHINING_ROLES = ("profile", "pocket", "hole", "engrave", "vcarve", "surface", "roundover", "specialty")
+
+
+@dataclass(frozen=True)
+class MachiningSpec:
+    tools: dict[str, str] = field(default_factory=dict)
+    feeds: FeedsOverride | None = None
+
+    def __post_init__(self) -> None:
+        for role, name in self.tools.items():
+            if role not in MACHINING_ROLES or not isinstance(name, str) or not name.strip():
+                raise ValueError(f"Invalid machining role/tool {role!r}: {name!r}; roles: {MACHINING_ROLES}")
 
 
 @dataclass(frozen=True)
@@ -124,6 +144,7 @@ class Feature:
     roundover_radius_mm: float | None = None
 
     feeds_override: FeedsOverride | None = None
+    tool_name: str | None = None
 
     ramp_mm: float | None = None
     raised_panel: RaisedPanelSpec | None = None
@@ -172,20 +193,11 @@ class LayoutAST:
     layout: dict[str, Any] | None = None
     config: dict[str, Any] = field(default_factory=dict)
     machining_clearance: MachiningClearance | None = None
+    machining: MachiningSpec = field(default_factory=MachiningSpec)
+    machining_context: CompilationContext | None = field(default=None, repr=False, compare=False)
 
     def face_items(self, face: str) -> tuple[Item, ...]:
         return tuple(i for i in self.items if item_face(i) == face)
-
-    @staticmethod
-    def from_json(path: str) -> LayoutAST:
-        from layout_ast.parsers import parse_layout_json
-
-        return parse_layout_json(path)
-
-    def to_json(self, path: str | None = None) -> str:
-        from layout_ast.emitters import emit_layout_json
-
-        return emit_layout_json(self, path)
 
 
 def item_face(item: Item) -> str:

@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 700.0,
     "height_mm": 260.0,
@@ -9,6 +21,41 @@
     {
       "filename": "engrave-1.00mm.nc",
       "operation": "engrave",
+      "tool_name": "1mm engraving bit",
+      "tool_geometry": {
+        "kind": "ball",
+        "v_angle_deg": null,
+        "flute_length_mm": 5.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "engrave",
+          "feature_ids": [
+            "generated_harmonograph_9_000",
+            "generated_lissajous_5_000",
+            "generated_rose_1_000",
+            "generated_spirograph_3_000",
+            "generated_spirograph_3_001",
+            "generated_spirograph_3_002",
+            "generated_superformula_7_000"
+          ],
+          "tool": {
+            "name": "1mm engraving bit",
+            "diameter": 1.0,
+            "kind": "ball",
+            "rotation": null,
+            "depth_per_pass": 0.5,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 5.0,
+            "flutes": 1,
+            "shank_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy": 1200.0,
+            "feed_z": 300.0
+          }
+        }
+      ],
       "tool_diameter_mm": 1.0,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1200.0,
@@ -17,11 +64,44 @@
       "max_depth_mm": 0.5,
       "feature_count": 7,
       "strategy": "engrave",
-      "estimated_runtime_min": 9.8
+      "estimated_runtime_min": 9.7
     },
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_2",
+            "generated_profile_4",
+            "generated_profile_6",
+            "generated_profile_8"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -31,14 +111,14 @@
       "feature_count": 5,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 1.9
+      "estimated_runtime_min": 1.8
     }
   ],
-  "total_runtime_min": 11.7,
+  "total_runtime_min": 11.5,
   "feature_counts": {
     "engrave": 7,
     "profile": 5
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

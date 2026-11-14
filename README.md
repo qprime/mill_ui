@@ -8,14 +8,14 @@ It is a compiler-style CAM system that turns declarative panel layouts into vali
 
 mill_ui is a CAM system architected from the ground up for AI-driven workflows. You describe what you want to build in natural language, an AI assistant generates PML, you review the SVG blueprint, iterate, then cut. The compiler-style pipeline and IR-level validation exist specifically to make AI-generated layouts safe to trust — every design is validated *before* any toolpath is generated, so errors surface as design problems rather than wrecked stock.
 
-Most CAM software is built around a GUI for a human operator clicking through toolpath setup for every job. That workflow doesn't compose with AI assistants. mill_ui inverts the model: declarative input, explicit IRs, validation at each layer, and a reverse path from layout back to PML. The architecture is what makes it suitable as a platform — extensible in a way GUI-based CAM isn't.
+Most CAM software is built around a GUI for a human operator clicking through toolpath setup for every job. That workflow doesn't compose with AI assistants. mill_ui inverts the model: declarative input, explicit IRs, and validation at each layer. The architecture is what makes it suitable as a platform — extensible in a way GUI-based CAM isn't.
 
 ## Architecture
 
 These are the design decisions that distinguish mill_ui from conventional CAM software:
 
 - **Declarative input** — PML (YAML) describes shapes, features, and layout. No manual toolpath editing, no GUI clickthrough, no per-job procedural setup.
-- **Compiler pipeline** — `PML → LayoutAST → RemovalIntent IR → CAM Planner → G-code`. Explicit intermediate representations let each stage be validated and tested in isolation. A reverse path (`pml/lifter.py`) lifts LayoutAST back to PML, used by nesting output and format conversion.
+- **Compiler pipeline** — `PML → LayoutAST → RemovalIntent IR → CAM Planner → G-code`. Explicit intermediate representations let each stage be validated and tested in isolation. Each build derives them in memory from authored source and current configuration.
 - **Validation before toolpaths** — IR-level checks (overlap, depth feasibility, toolability) catch errors against the *semantic* description of what to machine, before any G-code is generated. CAM artifact validation compares outputs against golden metrics for regression detection.
 - **Domain/Generator composition** — Machining features are built from two composable primitives: a *domain* (a bounded 2D region, with algebraic operations like inset, offset, subtract, intersect) and a *generator* (what to produce inside that region). New features arise from new combinations, not new special cases — which is what keeps the system extensible as the feature surface grows.
 
@@ -90,7 +90,7 @@ children:
 ## Pipeline
 
 ```
-PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code + SVG
+PML/nest → LayoutAST → RemovalIntent IR → CAM Planner → G-code + SVG
 ```
 
 | Stage | Entry Point |
@@ -101,8 +101,6 @@ PML/JSON → LayoutAST → RemovalIntent IR → CAM Planner → G-code + SVG
 | IR → Planner | `adapters/removal_to_planner.py:removal_intents_to_hints()` |
 | Plan Passes | `cam/planner/passes/__init__.py:plan_passes()` |
 | Generate G-code | `cam/post/gcode.py:write_gcode()` |
-
-`pml/lifter.py` provides the reverse path, lifting LayoutAST back to PML (used by nesting output and format conversion).
 
 ## Feature Reference
 
@@ -199,7 +197,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert geometry between formats |
-| `python -m cli.convert_layout --from pml --to json --for-machining --kerf 3.175 input.pml.yml output.json` | Preserve selected tooling and packing clearance for JSON machining |
+| `python -m cli.convert_layout input.pml.yml --output formatted.pml.yml` | Validate and format authored PML |
 | `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
 
 ## Project Structure
@@ -221,7 +219,7 @@ mill_ui/
 ├── layout_ast/         # LayoutAST and CompositionalLayoutAST dataclasses
 ├── machines/           # Machine configs, endmill library, feed rates (YAML)
 ├── nesting/            # Bin-packing algorithms (guillotine, maxrects)
-├── pml/                # PML YAML parser and lifter
+├── pml/                # PML YAML parser and source formatting
 ├── resolution/         # Compositional → Flat layout resolution
 ├── templates/          # Parametric component templates
 ├── tools/              # Utility scripts (visualization, code cleanup)
@@ -291,3 +289,21 @@ See [cam/native/README.md](cam/native/README.md) for native tests and sanitizer 
 Copyright © 2026 Stephen S. Quinlan. All rights reserved.
 
 This repository is published for portfolio and review purposes. No license is granted to use, copy, modify, or distribute this code or its contents. If you're interested in using any part of this work, please get in touch.
+
+## Machine cutting presets
+
+Manufacturing builds start from authored `.pml.yml` or `.nest.yml` and current
+configuration on every invocation. `machines/defaults.yml` selects the unattended
+production machine and the reproducible recipe machine. `--machine` selects
+another machine and its cutting preset. `cli.nest` packs and machines in one run.
+Resolved JSON layouts and flattened-layout exports have been removed; rebuild
+legacy jobs from their original source.
+
+See [machine configuration](machines/README.md) for role assignments and parameter
+precedence. Final setup summaries identify the actual machine, preset, material,
+tools and effective pass parameters; reports never supply later build settings.
+
+General tests use fresh synthetic machining configuration through an explicit
+configuration root without production fallback. Run shipped-configuration checks separately with
+`tools/run_tests.py -m shipped_configuration`; the recipe gate continues to use
+the actual production configuration. See [testing invariants](docs/invariants/testing.md#production-independent-machining-tests).

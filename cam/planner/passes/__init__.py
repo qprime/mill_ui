@@ -43,6 +43,7 @@ from .tools import (
     pass_key,
     pick_tool_for_profile,
     stepdown_for_tool,
+    tools_for_role,
 )
 
 
@@ -72,6 +73,8 @@ class PassRecord:
             raise ValueError("Planned moves require explicit contributing feature IDs")
         start = len(self.moves)
         for move in moves:
+            if isinstance(move, CutMove) and move.z is not None:
+                self.tool_selection.validate_cut(max(0, -move.z))
             self.moves.append(move)
             self._cut_moves += isinstance(move, CutMove)
         if len(self.moves) > start:
@@ -95,12 +98,13 @@ class PassAccumulator:
         self._safe_z = float(safe_z)
         self._prime_spindle = prime_spindle
         self._ramp_angle_deg = float(ramp_angle_deg)
-        self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
+        self._records: dict[tuple[Any, ...], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
         self._warnings: list[str] = []
         self._errors: list[str] = []
 
     def _make_record(self, operation: str, tool: ToolSelection) -> PassRecord:
+        tool.validate_cut()
         setup = Setup(
             stock=self._stock,
             tool=tool.as_model(),
@@ -190,11 +194,22 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     )
 
     for pocket in planner_input.pockets:
-        plan_pocket_passes((pocket,), accumulator=accumulator, tool_db=tool_db, config=config)
+        plan_pocket_passes(
+            (pocket,),
+            accumulator=accumulator,
+            tool_db=tool_db,
+            config=config,
+        )
     for hole in planner_input.holes:
-        plan_hole_passes((hole,), accumulator=accumulator, tool_db=tool_db)
+        plan_hole_passes(
+            (hole,), accumulator=accumulator, tool_db=tools_for_role(tool_db, "hole", hole.tool_name, hole.depth_mm)
+        )
     for engrave in planner_input.engraves:
-        plan_engrave_passes((engrave,), accumulator=accumulator, tool_db=tool_db)
+        plan_engrave_passes(
+            (engrave,),
+            accumulator=accumulator,
+            tool_db=tools_for_role(tool_db, "engrave", engrave.tool_name, engrave.depth_mm),
+        )
     for cleanup in planner_input.corner_cleanups:
         plan_corner_cleanup_passes((cleanup,), accumulator=accumulator, tool_db=tool_db)
     for dogbone in planner_input.dogbones:
@@ -213,13 +228,24 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     cut_through_mm = _extract_positive_float(profile_data.get("cut_through_mm", 0.0))
 
     profiles = planner_input.profiles
+    profile_names = {rec.tool_name for rec in profiles if rec.tool_name}
+    if len(profile_names) > 1:
+        raise ValueError(f"Conflicting profile tool overrides on one sheet: {sorted(profile_names)}")
+    if profiles:
+        profile_tools = tools_for_role(
+            tool_db, "profile", next(iter(profile_names), None), max(rec.depth_mm for rec in profiles) + cut_through_mm
+        )
+    else:
+        profile_tools = ()
 
     any_profile_has_tabs = tabs_enabled or any(rec.tabs is not None for rec in profiles)
     any_profile_has_onion_skin = onion_skin_mm > 0.0 or any(
         rec.onion_skin_mm is not None and rec.onion_skin_mm > 0.0 for rec in profiles
     )
 
-    merge_enabled = config.merge_epsilon_mm > 0.0 and not (any_profile_has_onion_skin or any_profile_has_tabs)
+    merge_enabled = config.merge_epsilon_mm > 0.0 and not (
+        any_profile_has_onion_skin or any_profile_has_tabs or any(rec.feeds_override is not None for rec in profiles)
+    )
 
     def _tabs_for_feature(rec: FeatureInput) -> dict[str, float] | None:
         if rec.tabs is not None:
@@ -304,7 +330,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     merged_seams = 0
     merged_indices: set[int] = set()
     if profiles:
-        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = pick_tool_for_profile(profile_tools, kerf_mm=kerf_mm)
         validate_profile_clearance(
             profiles, profile_tool.diameter, holding=any_profile_has_tabs or any_profile_has_onion_skin
         )
@@ -326,7 +352,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     merged_ids = {id(mergeable_profiles[index]) for index in merged_indices}
     for rec in rect_profiles:
         if id(rec) not in merged_ids:
-            profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+            profile_tool = pick_tool_for_profile(profile_tools, kerf_mm=kerf_mm)
             profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
             width = float(rec.geometry.geometry.w_mm or 0.0)
             height = float(rec.geometry.geometry.h_mm or 0.0)
@@ -352,7 +378,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 _plan_profile_stage(rec, shape, profile_tool, label)
 
     for rec in circle_profiles:
-        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = pick_tool_for_profile(profile_tools, kerf_mm=kerf_mm)
         profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         diameter = float(rec.geometry.geometry.diameter_mm or 0.0)
         radius = 0.5 * diameter
@@ -366,7 +392,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             for label, allow in [("profile", rough_allow), ("finish", finish_allow)]:
                 r = radius + sign * (tool_radius + allow)
                 if r <= 0.0:
-                    continue
+                    raise ValueError(
+                        f"Profile {rec.id!r}: cutter {profile_tool.name!r} is geometrically infeasible for this circle"
+                    )
                 s = circle_shape_mm(r * 2.0, rec.center_xy_mm)
                 _plan_profile_stage(rec, s, profile_tool, label)
         else:
@@ -375,19 +403,21 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             elif side == "inside":
                 radius -= tool_radius
             if radius <= 0.0:
-                continue
+                raise ValueError(
+                    f"Profile {rec.id!r}: cutter {profile_tool.name!r} is geometrically infeasible for this circle"
+                )
             shape = circle_shape_mm(radius * 2.0, rec.center_xy_mm)
             _plan_profile_stage(rec, shape, profile_tool)
 
     for rec in polygon_profiles:
         if id(rec) in merged_ids:
             continue
-        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = pick_tool_for_profile(profile_tools, kerf_mm=kerf_mm)
         profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         raw_points = rec.geometry.geometry.points
         points = [list(p) for p in raw_points] if raw_points is not None else []
         if not points:
-            continue
+            raise ValueError(f"Profile {rec.id!r}: missing polygon points")
         side = (rec.side or "on").lower()
         tool_radius = 0.5 * profile_tool.diameter
         et = rec.edge_treatment
@@ -403,7 +433,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                     else polygon_shape(points, rec.center_xy_mm)
                 )
                 if s is None:
-                    continue
+                    raise ValueError(
+                        f"Profile {rec.id!r}: cutter {profile_tool.name!r} leaves no feasible offset boundary"
+                    )
                 _plan_profile_stage(rec, s, profile_tool, label)
         else:
             offset = 0.0
@@ -417,11 +449,11 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             else:
                 shape_poly = polygon_shape(points, rec.center_xy_mm)
             if shape_poly is None:
-                continue
+                raise ValueError(f"Profile {rec.id!r}: cutter {profile_tool.name!r} leaves no feasible offset boundary")
             _plan_profile_stage(rec, shape_poly, profile_tool)
 
     for rec in rounded_rect_profiles:
-        profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
+        profile_tool = pick_tool_for_profile(profile_tools, kerf_mm=kerf_mm)
         profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         sg = rec.geometry.geometry
         width = float(sg.w_mm or 0.0)
@@ -448,7 +480,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                     else rounded_rect_shape(width, height, radii, rec.center_xy_mm)
                 )
                 if s is None:
-                    continue
+                    raise ValueError(
+                        f"Profile {rec.id!r}: cutter {profile_tool.name!r} leaves no feasible offset boundary"
+                    )
                 _plan_profile_stage(rec, s, profile_tool, label)
         else:
             offset = 0.0

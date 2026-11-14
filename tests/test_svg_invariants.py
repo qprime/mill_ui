@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from cam.pipeline import run_pipeline
 from pml import parse_pml
 from validation.core import Verdict
@@ -7,6 +9,8 @@ from validation.invariants.svg_invariants import (
     SVG_INVARIANT_IDS,
     check_svg_invariants,
 )
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 PANEL_PML = """Sheet:
   width: 260mm

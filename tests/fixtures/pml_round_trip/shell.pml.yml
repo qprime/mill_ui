@@ -17,8 +17,6 @@ children:
     at:
       x: 400mm
       y: 200mm
-      width: 150mm
-      height: 150mm
     diameter: 150mm
     children:
     - Shell:

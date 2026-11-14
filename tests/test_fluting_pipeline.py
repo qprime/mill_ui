@@ -233,32 +233,6 @@ def test_ramped_engrave_rejects_invalid_ramp(ramp):
 # =============================================================================
 
 
-def test_fluting_json_round_trip_feature_ramp():
-    from layout_ast.emitters import _feature_to_dict
-    from layout_ast.parsers import _parse_feature
-
-    feature = Feature(type="engrave", depth_mm=3.0, ramp_mm=15.0)
-    d = _feature_to_dict(feature)
-    assert d["ramp_mm"] == 15.0
-
-    restored = _parse_feature(d)
-    assert restored.ramp_mm == 15.0
-    assert restored.depth_mm == 3.0
-    assert restored.type == "engrave"
-
-
-def test_fluting_json_round_trip_feature_ramp_none():
-    from layout_ast.emitters import _feature_to_dict
-    from layout_ast.parsers import _parse_feature
-
-    feature = Feature(type="engrave", depth_mm=3.0)
-    d = _feature_to_dict(feature)
-    assert "ramp_mm" not in d
-
-    restored = _parse_feature(d)
-    assert restored.ramp_mm is None
-
-
 def test_fluting_pml_round_trip():
     from pml.yaml_formatter import format_pml_yaml
 

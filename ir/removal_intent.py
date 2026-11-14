@@ -323,6 +323,7 @@ class RemovalIntent:
     allowance: Allowance = field(default_factory=Allowance)
     constraints: Constraints = field(default_factory=Constraints)
     feeds_override: FeedsOverride | None = None
+    tool_name: str | None = None
     ramp_mm: float | None = None
     heightfield_tools: tuple[HeightfieldToolAssignment, ...] = field(default_factory=tuple)
 

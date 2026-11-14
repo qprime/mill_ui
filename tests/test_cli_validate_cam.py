@@ -11,6 +11,8 @@ from cli.mill import write_recipe_outputs
 from cli.validate_cam import EXIT_FAIL, EXIT_PASS, EXIT_WARN, main
 from validation.recipes import recipe_at
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 FRAME_PML = """Sheet:
   width: 200mm
   height: 150mm
@@ -408,52 +410,6 @@ def test_standalone_multi_sheet_pml_returns_supported_mode_guidance_without_trac
     assert "ResolutionAssertionError" not in stderr
 
 
-def test_standalone_packed_pml_uses_saved_custom_tool_context(tmp_path):
-    from config.machine_loader import Endmill, FeedsEntry
-
-    folder = tmp_path / "rail"
-    folder.mkdir()
-    source = folder / "rail.pml.yml"
-    source.write_text("""Sheet: {physical_width: 600mm, physical_height: 600mm, thickness: 19mm, margin: 10mm}
-children:
-- Beam: {name: rail, length: 300mm, width: 40mm, thickness: 19mm, layers: 2}
-""")
-    recipe = recipe_at(folder)
-    assert recipe is not None
-    runs, _ = write_recipe_outputs(
-        recipe,
-        folder / "output",
-        kerf_mm=5,
-        endmills=[Endmill("custom3", 3, 20, 3, 2, "straight")],
-        feeds=[FeedsEntry("custom3", "mdf", 0.05, 18000, 2, 0.3)],
-    )
-    assert len(runs) == 1
-    code, stdout, stderr = run_cli(
-        "--pml",
-        str(source),
-        "--svg",
-        str(folder / "output" / "rail.svg"),
-        "--gcode",
-        str(folder / "output" / "profile-3.00mm.nc"),
-        "--quiet",
-    )
-    assert code in (EXIT_PASS, EXIT_WARN), stderr
-    result = json.loads(stdout)["validation_result"]
-    assert result["assertions"]["total"] > 0
-    assert result["assertions"]["failed"] == 0
-
-
-def test_standalone_packed_pml_without_context_fails_explicitly(tmp_path):
-    source = tmp_path / "legacy.pml.yml"
-    source.write_text(MULTI_SHEET_PML)
-    svg = tmp_path / "legacy.svg"
-    svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
-    code, _, stderr = run_cli("--pml", str(source), "--svg", str(svg))
-    assert code == EXIT_FAIL
-    assert "saved compilation context is missing" in stderr
-    assert "Traceback" not in stderr
-
-
 def test_standalone_single_sheet_pml_keeps_explicit_artifacts_from_different_directories(tmp_path):
     recipe = _make_recipe(tmp_path)
     other = tmp_path / "copied"
@@ -473,26 +429,3 @@ def test_standalone_single_sheet_pml_keeps_explicit_artifacts_from_different_dir
         "--quiet",
     )
     assert code in (EXIT_PASS, EXIT_WARN), stderr
-
-
-def test_standalone_explicit_pml_rejects_conflicting_build_contexts(tmp_path):
-    first = tmp_path / "first"
-    second = tmp_path / "second"
-    first.mkdir()
-    second.mkdir()
-    a = _make_recipe(first)
-    b = _make_recipe(second)
-    recipe = recipe_at(b)
-    assert recipe is not None
-    write_recipe_outputs(recipe, b / "output", kerf_mm=6.35)
-    code, _, stderr = run_cli(
-        "--pml",
-        str(a / "example.pml.yml"),
-        "--svg",
-        str(a / "output" / "frame.svg"),
-        "--gcode",
-        str(next((b / "output").glob("*.nc"))),
-    )
-    assert code == EXIT_FAIL
-    assert "conflicting compilation contexts" in stderr
-    assert "Traceback" not in stderr

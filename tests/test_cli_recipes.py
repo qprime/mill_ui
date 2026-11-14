@@ -25,6 +25,8 @@ from validation.recipe_docs import parse_detect_rule, readme_problems, rule_matc
 from validation.recipes import find_recipe, find_recipes, misplaced_inputs, recipe_at, recipe_job_stem
 from validation.runner import validate_recipe
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 CATALOG = """categories:
   doors:
     title: Doors
@@ -101,8 +103,8 @@ CABINET_NEST = """Nest:
 """
 
 
-def _altmill() -> MachineConfig:
-    return load_machine_by_name("altmill_4x4")
+def _test_machine() -> MachineConfig:
+    return load_machine_by_name("test_router")
 
 
 def _write_dir(directory: Path, files: Mapping[str, str]) -> Path:
@@ -295,7 +297,7 @@ def test_gate_passes_with_no_recipes(tmp_path: Path):
     root = _make_root(tmp_path)
 
     assert regenerate_tree(root) == []
-    assert check_tree(root, _altmill()) == []
+    assert check_tree(root, _test_machine()) == []
 
 
 def test_regenerated_tree_passes_the_check(tmp_path: Path):
@@ -303,7 +305,7 @@ def test_regenerated_tree_passes_the_check(tmp_path: Path):
     _make_recipe(root, "doors", "door")
 
     assert regenerate_tree(root) == []
-    assert check_tree(root, _altmill()) == []
+    assert check_tree(root, _test_machine()) == []
 
 
 def test_check_reports_a_stale_output_file(tmp_path: Path):
@@ -312,7 +314,7 @@ def test_check_reports_a_stale_output_file(tmp_path: Path):
     regenerate_recipe(recipe)
     (recipe.path / "output" / "metrics.json").write_text("{}")
 
-    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _altmill()))
+    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _test_machine()))
 
     assert len(failures) == 1
     assert failures[0].startswith("door: metrics.json differs: ")
@@ -324,7 +326,7 @@ def test_gate_rejects_design_errors_even_when_outputs_match(tmp_path: Path):
     assert recipe is not None
     regenerate_recipe(recipe)
 
-    failures = check_recipe_outputs(recipe, _altmill())
+    failures = check_recipe_outputs(recipe, _test_machine())
 
     assert len(failures) == 2
     assert "door.pml.yml sheet 1: Cutting edge extends" in failures[0]
@@ -338,7 +340,7 @@ def test_run_on_recipes_reports_an_unreadable_source(tmp_path: Path):
     assert recipe is not None
     recipe.pml_sources[0].write_text("Sheet: [")
 
-    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _altmill()))
+    failures = run_on_recipes([recipe], lambda r: check_recipe_outputs(r, _test_machine()))
 
     assert len(failures) == 1
     assert failures[0].startswith("door: ")
@@ -364,7 +366,7 @@ def test_recipes_rule_naming_a_missing_recipe_fails(tmp_path: Path):
     root = _make_root(tmp_path, CATALOG + "        detect: [{recipes: [nope]}]\n")
     regenerate_tree(root)
 
-    assert check_tree(root, _altmill()) == [
+    assert check_tree(root, _test_machine()) == [
         "catalog.yml: capability 'Multi-sheet partitioning' names recipe 'nope', which does not exist"
     ]
 
@@ -394,7 +396,7 @@ def test_untracked_or_stale_generated_document_is_reported(tmp_path: Path):
     (root / "panels").mkdir()
     (root / "panels" / "README.md").write_text("# Panels\n")
 
-    failures = check_tree(root, _altmill(), repo_root=tmp_path)
+    failures = check_tree(root, _test_machine(), repo_root=tmp_path)
 
     assert any(
         f.startswith(f"Generated document is no longer generated: {root / 'panels' / 'README.md'}") for f in failures
@@ -423,7 +425,7 @@ def test_recipe_readme_requires_demonstrates_and_blueprint(tmp_path: Path):
     assert readme_problems(nest_recipe) == ["README.md embeds no image from its own output/ that exists"]
 
 
-def test_recipe_must_fit_altmill(tmp_path: Path):
+def test_recipe_must_fit_test_machine(tmp_path: Path):
     root = _make_root(tmp_path)
     pml_recipe = recipe_at(_make_recipe(root, "doors", "big", {"big.pml.yml": OVERSIZED_PML}))
     nest_recipe = recipe_at(_write_dir(root / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST}))
@@ -431,10 +433,10 @@ def test_recipe_must_fit_altmill(tmp_path: Path):
     assert nest_recipe is not None
     regenerate_recipe(pml_recipe)
 
-    assert any("does not fit altmill_4x4" in problem for problem in check_recipe_outputs(pml_recipe, _altmill()))
+    assert any("does not fit Test router" in problem for problem in check_recipe_outputs(pml_recipe, _test_machine()))
     assert any(
-        problem.startswith("job.nest.yml does not fit altmill_4x4: Job y_max")
-        for problem in check_nest_recipe(nest_recipe, _altmill())
+        problem.startswith("job.nest.yml does not fit Test router: Job y_max")
+        for problem in check_nest_recipe(nest_recipe, _test_machine())
     )
 
 
@@ -468,7 +470,9 @@ def test_cli_recipe_runs_source_named_after_recipe(tmp_path: Path):
 
 
 def test_cli_recipe_runs_nest_only_folder(tmp_path: Path):
-    folder = _write_dir(tmp_path / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST})
+    folder = _write_dir(
+        tmp_path / "production" / "job", {"job.nest.yml": LONG_SHEET_NEST.replace("height: 2440mm", "height: 1220mm")}
+    )
 
     result = _run_mill_recipe(folder)
 
@@ -500,7 +504,7 @@ def test_nest_recipe_generates_and_checks_machining_outputs(tmp_path: Path, arti
     regenerate_recipe(recipe)
 
     assert readme_problems(recipe) == []
-    assert check_recipe_outputs(recipe, _altmill()) == []
+    assert check_recipe_outputs(recipe, _test_machine()) == []
     summary = json.loads((recipe.path / "output" / "machining_summary.json").read_text())
     assert summary["total_sheets"] == 2
     assert summary["kerf_mm"] == 6.35
@@ -508,7 +512,7 @@ def test_nest_recipe_generates_and_checks_machining_outputs(tmp_path: Path, arti
         assert sheet["feature_counts"] == {"pocket": 1, "profile": 1}
     (recipe.path / "output" / artifact).write_text("stale\n")
 
-    assert any(f"{artifact} differs" in error for error in check_recipe_outputs(recipe, _altmill()))
+    assert any(f"{artifact} differs" in error for error in check_recipe_outputs(recipe, _test_machine()))
 
 
 def test_recipe_compiles_both_pml_and_nest_sources(tmp_path: Path):
@@ -526,7 +530,7 @@ def test_recipe_compiles_both_pml_and_nest_sources(tmp_path: Path):
     assert (recipe.path / "output" / "doors.nest_sheet_1.svg").exists()
     metrics = json.loads(outputs["metrics"].read_text())
     assert metrics["build"]["kerf_mm"] is None
-    assert metrics["build"]["source_kerfs_mm"] == {"part.pml.yml": 9.525, "doors.nest.yml": 6.35}
+    assert metrics["build"]["source_kerfs_mm"] == {"part.pml.yml": None, "doors.nest.yml": 6.35}
 
 
 def test_nest_recipe_kerf_override_applies_to_packing_and_machining(tmp_path: Path):
@@ -547,7 +551,7 @@ def test_nest_recipe_rejects_unplaced_parts(tmp_path: Path):
     recipe = recipe_at(_make_recipe(_make_root(tmp_path), "doors", "job", {"job.nest.yml": nest}))
     assert recipe is not None
 
-    with pytest.raises(ValueError, match=r"job\.nest\.yml: parts do not fit.*2x door"):
+    with pytest.raises(ValueError, match=r"Nesting: parts do not fit.*door"):
         regenerate_recipe(recipe)
 
 
@@ -643,13 +647,13 @@ def test_actual_library_cutter_reaches_recipe_packing_and_planning(tmp_path):
     (path / "box.pml.yml").write_text(PACKED_BOX_PML)
     recipe = recipe_at(path)
     assert recipe is not None
-    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=5, endmills=endmills, feeds=feeds)
+    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=3, endmills=endmills, feeds=feeds)
     assert min(b.x_min for b in _profile_bounds([run.result.ast for run in runs])) == pytest.approx(3)
     assert all(p.tool_selection.diameter == 3 for run in runs for p in run.result.passes if p.op == "profile")
     assert all(not run.result.errors for run in runs)
     metrics = json.loads((path / "output" / "metrics.json").read_text())
-    assert metrics["build"]["kerf_mm"] == 5
-    assert metrics["build"]["requested_kerf_mm"] == 5
+    assert metrics["build"]["kerf_mm"] == 3
+    assert metrics["build"]["requested_kerf_mm"] == 3
     assert metrics["build"]["selected_profile_diameter_mm"] == 3
 
 
@@ -685,52 +689,12 @@ def test_recipe_and_project_paths_agree_with_an_explicit_kerf(tmp_path):
     source.write_text(PACKED_BOX_PML)
     recipe = recipe_at(path)
     assert recipe is not None
-    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=5)
-    project = load_pml_asts(source, kerf_mm=5)
+    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=6.35)
+    project = load_pml_asts(source, kerf_mm=6.35)
     assert [run.result.ast for run in runs] == project
     assert project[0].machining_clearance is not None
     assert project[0].machining_clearance.profile_diameter_mm == 6.35
     assert min(b.x_min for b in _profile_bounds(project)) == pytest.approx(6.35)
-
-
-def test_custom_cutter_snapshot_drives_validation_without_default_tool_reselection(tmp_path):
-    from unittest.mock import patch
-
-    from cam.compilation import CompilationContext
-    from config.machine_loader import Endmill, FeedsEntry
-    from resolution.layout_resolver import resolve_layout_multi
-
-    folder = tmp_path / "custom"
-    folder.mkdir()
-    (folder / "beam.pml.yml").write_text(PACKED_BEAM_PML)
-    recipe = recipe_at(folder)
-    assert recipe is not None
-    endmills = [Endmill("custom3", 3, 20, 3, 2, "straight")]
-    feeds = [FeedsEntry("custom3", "mdf", 0.05, 18000, 2, 0.3)]
-    runs, _ = write_recipe_outputs(recipe, folder / "output", kerf_mm=5, endmills=endmills, feeds=feeds)
-    metrics_path = folder / "output" / "metrics.json"
-    metrics = json.loads(metrics_path.read_text())
-    saved = metrics["build"]["compilation_contexts"]["beam.pml.yml"]
-    assert CompilationContext.from_dict(saved).profile_diameter_mm == 3
-    with patch("cam.compilation.resolve_layout_multi", wraps=resolve_layout_multi) as spy:
-        result = validate_recipe(folder)
-    assert spy.call_args.kwargs["machining_clearance"].profile_diameter_mm == 3
-    assert not result.assertions.failed
-    assert not result.invariants.failed
-    assert runs[0].result.ast.machining_clearance is not None
-    assert runs[0].result.ast.machining_clearance.profile_diameter_mm == 3
-    saved["selected_profile_diameter_mm"] = 3.175
-    metrics_path.write_text(json.dumps(metrics))
-    with pytest.raises(ValueError, match="fingerprint or selected cutter disagrees"):
-        validate_recipe(folder)
-
-
-def test_packed_recipe_validation_requires_saved_context_instead_of_guessing_defaults(tmp_path):
-    folder = tmp_path / "legacy"
-    folder.mkdir()
-    (folder / "beam.pml.yml").write_text(PACKED_BEAM_PML)
-    with pytest.raises(ValueError, match="saved compilation context is missing"):
-        validate_recipe(folder)
 
 
 def test_auto_gap_uses_actual_cutter_and_retries_real_relief_sweeps(tmp_path):
@@ -750,27 +714,6 @@ def test_auto_gap_uses_actual_cutter_and_retries_real_relief_sweeps(tmp_path):
     assert asts[0].config["layout_gaps"][0]["gap_mm"] > 3.175
     assert asts == load_pml_asts(path, kerf_mm=3.175)
     assert all(not run.result.errors for run in run_sheets(asts, source=path.name, job_stem="relief", kerf_mm=3.175))
-
-
-def test_auto_gap_actual_tool_snapshot_round_trip(tmp_path):
-    from cam.compilation import load_pml_asts, saved_compilation_context
-    from config.machine_loader import Endmill, FeedsEntry
-    from layout_ast.layout import LayoutAST
-
-    source = tmp_path / "box.pml.yml"
-    source.write_text(PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto"))
-    endmills = [Endmill("only_3mm", 3, 20, 3, 2, "straight")]
-    feeds = [FeedsEntry("only_3mm", "mdf", 0.05, 18000, 2, 0.3)]
-    (ast,) = load_pml_asts(source, kerf_mm=5, endmills=endmills, feeds=feeds)
-    assert ast.config["layout_gaps"] == [{"policy": "auto", "gap_mm": 3}]
-    path = tmp_path / "packed.json"
-    path.write_text(ast.to_json())
-    restored = LayoutAST.from_json(str(path))
-    assert restored == ast
-    assert all(item.part_id for item in restored.items if item.feature)
-    saved = saved_compilation_context(restored)
-    assert saved is not None
-    assert saved.profile_diameter_mm == 3
 
 
 def test_numeric_gap_rejects_relief_collision_without_repacking(tmp_path):
@@ -845,7 +788,7 @@ def test_auto_preflight_and_emission_share_surface_and_face_preparation(tmp_path
         assert planned[0] == emitted[0]
         assert planned[1] == emitted[1]
         assert planned[2] == emitted[2]
-        assert planned[1]["safe_z"] == (safe_z if safe_z is not None else 6)
+        assert planned[1]["safe_z"] == (safe_z if safe_z is not None else 3)
         assert planned[1]["stock"].width == 600
         assert planned[1]["profile_opts"] == {"cut_through_mm": 0.2}
     assert any(pocket.surface_cooling for call in preflight for pocket in call[0].pockets)
@@ -867,49 +810,3 @@ def test_ownership_error_is_not_retried_by_automatic_preflight(tmp_path, monkeyp
     with pytest.raises(ValueError, match="ambiguous part ownership"):
         load_pml_asts(path, kerf_mm=3.175)
     assert len(calls) == 1
-
-
-def test_manufacturing_nesting_entrypoints_use_same_cutter_and_preserve_contract(tmp_path, monkeypatch):
-    import cli.nest as nest_cli
-    import cli.recipes as recipes_cli
-    from cam.compilation import saved_compilation_context
-    from cli.mill import _load_recipe_source
-    from layout_ast.layout import LayoutAST
-    from pml.yaml_parser import parse_nest_yaml
-
-    source = """Nest:
-  algorithm: maxrects
-  Sheet: {width: 300mm, height: 200mm, thickness: 6mm}
-  kerf: 7mm
-  margin: 10mm
-  parts:
-    - {name: panel, width: 100mm, height: 100mm, quantity: 2}
-"""
-    folder = _make_recipe(_make_root(tmp_path), "panels", "nested", {"job.nest.yml": source})
-    path = folder / "job.nest.yml"
-    recipe = recipe_at(folder)
-    assert recipe is not None
-    (expected,), requested = _load_recipe_source(path, None)
-    context = saved_compilation_context(expected)
-    assert context is not None
-    assert requested == 7
-    assert context.profile_diameter_mm != requested
-    geometry_only = nest_cli.nest_job(parse_nest_yaml(source))["output"][0]
-    assert geometry_only.items != expected.items
-    monkeypatch.setattr(sys, "argv", ["nest", str(path), "-o", str(folder / "nested")])
-    nest_cli.main()
-    restored = LayoutAST.from_json(str(folder / "nested" / "job_sheet_1.json"))
-    assert json.loads(restored.to_json()) == json.loads(expected.to_json())
-    manifest = json.loads((folder / "nested" / "job_manifest.json").read_text())
-    assert manifest["compilation"] == context.to_dict()
-    checked = []
-    original = nest_cli.nest_machining_job
-
-    def capture(job):
-        result, tools = original(job)
-        checked.extend(result["output"])
-        return result, tools
-
-    monkeypatch.setattr(recipes_cli, "nest_machining_job", capture)
-    assert not check_nest_recipe(recipe, load_machine_by_name("altmill_4x4"))
-    assert checked == [expected]

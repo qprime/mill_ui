@@ -7,13 +7,12 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
+from cam.compilation import default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
-from cam.compilation import saved_compilation_context
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
 from cli.nest import nest_machining_job
 from cli.project import (
     DEFAULT_KERF_MM,
-    DEFAULT_MACHINE,
     DEFAULT_MARGIN_MM,
     add_project_arg,
     get_project_dir,
@@ -25,13 +24,11 @@ from config.machine_loader import (
     Endmill,
     FeedsEntry,
     MachineConfig,
-    get_machines_dir,
     list_available_machines,
     load_endmills,
     load_feeds,
     load_machine_by_name,
 )
-from core.constants import RECIPE_KERF_MM
 from layout_ast.layout import LayoutAST
 from pml.revision_header import build_provenance, format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
@@ -193,16 +190,16 @@ def collect_input_files(project: str | None, input_arg: str | None) -> list[Path
         if input_path.is_file():
             return [input_path]
         if input_path.is_dir():
-            return sorted(input_path.glob("*.pml.yml"))
+            return sorted([*input_path.glob("*.pml.yml"), *input_path.glob("*.nest.yml")])
         print(f"Error: Input not found: {input_path}", file=sys.stderr)
         sys.exit(1)
 
     if project:
         project_dir = get_project_dir(project)
-        pml_files = sorted(project_dir.glob("*.pml.yml"))
+        pml_files = sorted([*project_dir.glob("*.pml.yml"), *project_dir.glob("*.nest.yml")])
         if pml_files:
             return pml_files
-        print(f"Error: No .pml.yml files found in {project_dir}", file=sys.stderr)
+        print(f"Error: No authored .pml.yml or .nest.yml files found in {project_dir}", file=sys.stderr)
         sys.exit(1)
 
     print("Error: --input or --project required", file=sys.stderr)
@@ -217,7 +214,7 @@ def _compile(
     source_path: Path,
     job_stem: str,
     *,
-    kerf_mm: float,
+    kerf_mm: float | None,
     theme: str,
     y_origin: str,
     generate_svg: bool,
@@ -301,47 +298,51 @@ def _load_machine(name: str | None) -> MachineConfig | None:
 
 
 def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | None]:
-    machines_dir = get_machines_dir()
-    endmills_path = Path(args.endmills) if args.endmills else machines_dir / "endmills.yml"
-    feeds_path = Path(args.feeds) if args.feeds else machines_dir / "feeds.yml"
-
-    if not endmills_path.exists() or not feeds_path.exists():
-        return None, None
-
-    try:
-        endmills_list = load_endmills(endmills_path)
-        feeds_list = load_feeds(feeds_path)
-        return endmills_list, feeds_list
-    except Exception as e:
-        print(f"Warning: Could not load endmill/feeds library: {e}", file=sys.stderr)
-        return None, None
+    endmills = load_endmills(Path(args.endmills)) if args.endmills else None
+    feeds = load_feeds(Path(args.feeds)) if args.feeds else None
+    if feeds is not None and endmills is None:
+        raise ValueError("--feeds requires --endmills; cutting parameters are explicit build inputs")
+    return endmills, feeds
 
 
 def process_file(
     input_path: Path,
     args,
     *,
-    kerf_mm: float,
+    kerf_mm: float | None,
     theme: str,
     machine_config: MachineConfig | None,
     endmills: list[Endmill] | None,
     feeds: list[FeedsEntry] | None,
 ) -> list[SheetRun]:
     input_name = input_path.name.lower()
-    tool_db = None
     if input_name.endswith(".json"):
-        asts = [LayoutAST.from_json(str(input_path))]
-        saved = saved_compilation_context(asts[0])
-        if saved is not None:
-            if args.kerf is None:
-                kerf_mm = saved.requested_kerf_mm
-            if args.endmills is None and args.feeds is None:
-                tool_db = saved.tool_db()
-    elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
-        asts = load_pml_asts(input_path, kerf_mm=args.kerf, default_kerf_mm=kerf_mm, endmills=endmills, feeds=feeds)
+        raise ValueError(
+            "Resolved-layout JSON is no longer a machining input. Rebuild from the original .pml.yml or .nest.yml source and current machine/preset configuration."
+        )
+    if input_name.endswith(".nest.yml"):
+        job = parse_nest_yaml(input_path.read_text(encoding="utf-8"))
+        if args.kerf is not None:
+            job = replace(job, kerf_mm=args.kerf, kerf_explicit=True)
+        result, _ = nest_machining_job(
+            job,
+            endmills=endmills,
+            feeds=feeds,
+            machine_config=machine_config,
+            preset_path=Path(args.preset) if args.preset else None,
+        )
+        asts = result["output"]
+    elif input_name.endswith((".pml.yml", ".pml", ".txt")):
+        asts = load_pml_asts(
+            input_path,
+            kerf_mm=args.kerf,
+            endmills=endmills,
+            feeds=feeds,
+            machine_config=machine_config,
+            preset_path=Path(args.preset) if args.preset else None,
+        )
     else:
-        print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
-        sys.exit(1)
+        raise ValueError(f"Unsupported input format: {input_name}; supply authored .pml.yml or .nest.yml")
 
     print(f"Compiling: {input_path.name}", file=sys.stderr)
     runs = _compile(
@@ -353,9 +354,6 @@ def process_file(
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
         machine_config=machine_config,
-        endmills=endmills,
-        feeds=feeds,
-        tool_db=tool_db,
     )
     _report_runs(runs)
     return runs
@@ -367,21 +365,27 @@ def _load_recipe_source(
     *,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
-) -> tuple[list[LayoutAST], float]:
+    machine_config: MachineConfig | None = None,
+    preset_path: Path | None = None,
+) -> tuple[list[LayoutAST], float | None]:
     if source.name.endswith(".nest.yml"):
         job = parse_nest_yaml(source.read_text(encoding="utf-8"))
         if kerf_mm is not None:
-            job = replace(job, kerf_mm=kerf_mm)
-        result, _ = nest_machining_job(job, endmills=endmills, feeds=feeds)
+            job = replace(job, kerf_mm=kerf_mm, kerf_explicit=True)
+        result, _ = nest_machining_job(
+            job, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
+        )
         unplaced = result["nesting_result"].unplaced_parts
         if unplaced:
             names = ", ".join(f"{part.quantity}x {part.name}" for part in unplaced)
             raise ValueError(f"{source.name}: parts do not fit the nesting sheets: {names}")
         if not result["output"]:
             raise ValueError(f"{source.name}: nesting produced 0 sheets")
-        return result["output"], job.kerf_mm
-    asts = load_pml_asts(source, kerf_mm=kerf_mm, default_kerf_mm=RECIPE_KERF_MM, endmills=endmills, feeds=feeds)
-    return asts, kerf_mm if kerf_mm is not None else RECIPE_KERF_MM
+        return result["output"], kerf_mm if kerf_mm is not None else job.kerf_mm if job.kerf_explicit else None
+    asts = load_pml_asts(
+        source, kerf_mm=kerf_mm, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
+    )
+    return asts, kerf_mm
 
 
 def write_recipe_outputs(
@@ -395,11 +399,15 @@ def write_recipe_outputs(
     machine_config: MachineConfig | None = None,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
+    preset_path: Path | None = None,
 ) -> tuple[list[SheetRun], dict[str, Path]]:
+    machine_config = machine_config or load_machine_by_name(default_machine_name(recipe=True))
     runs = []
     source_kerfs = {}
     for source in recipe.sources:
-        asts, source_kerf = _load_recipe_source(source, kerf_mm, endmills=endmills, feeds=feeds)
+        asts, source_kerf = _load_recipe_source(
+            source, kerf_mm, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
+        )
         source_kerfs[source.name] = source_kerf
         source_runs = _compile(
             asts,
@@ -410,8 +418,6 @@ def write_recipe_outputs(
             y_origin=y_origin,
             generate_svg=generate_svg,
             machine_config=machine_config,
-            endmills=endmills,
-            feeds=feeds,
         )
         runs.extend(source_runs)
     kerfs = set(source_kerfs.values())
@@ -442,7 +448,8 @@ def process_recipe(recipe_dir: Path, args) -> None:
         theme=args.theme if args.theme is not None else RECIPE_THEME,
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
-        machine_config=_load_machine(args.machine),
+        machine_config=_load_machine(args.machine or default_machine_name(recipe=True)),
+        preset_path=Path(args.preset) if args.preset else None,
         endmills=endmills,
         feeds=feeds,
     )
@@ -519,7 +526,7 @@ Exit codes:
         "-k",
         type=float,
         default=None,
-        help=f"Tool kerf in mm (default: {DEFAULT_KERF_MM})",
+        help="Exact profile diameter constraint (default: selected machine preset)",
     )
     parser.add_argument(
         "--theme",
@@ -545,9 +552,12 @@ Exit codes:
         help="Y=0 reference: back (lower-left origin) or front (default: back)",
     )
     parser.add_argument(
+        "--preset", default=None, help="Explicit cutting preset YAML input (default: selected machine reference)"
+    )
+    parser.add_argument(
         "--machine",
         default=None,
-        help=f"Machine config name in machines/cnc/ (default: {DEFAULT_MACHINE}; recipes run without one unless given)",
+        help="Machine configuration name (default: machines/defaults.yml)",
     )
     parser.add_argument(
         "--endmills",
@@ -557,7 +567,7 @@ Exit codes:
     parser.add_argument(
         "--feeds",
         default=None,
-        help="Path to feeds YAML (default: machines/feeds.yml)",
+        help="Explicit cutter/material feeds YAML; requires --endmills (default: machine cutting preset)",
     )
 
     init_group = parser.add_argument_group("project initialization")
@@ -622,9 +632,9 @@ Exit codes:
             shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        machine_config = _load_machine(args.machine or DEFAULT_MACHINE)
+        machine_config = _load_machine(args.machine or default_machine_name())
         endmills_list, feeds_list = _load_tool_library(args)
-        kerf_mm = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
+        kerf_mm = args.kerf
         theme = args.theme if args.theme is not None else "dark"
 
         runs: list[SheetRun] = []

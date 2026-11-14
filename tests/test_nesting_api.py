@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -140,28 +138,6 @@ def test_nest_and_generate_ast():
     assert hasattr(ast, "items")
 
 
-def test_nest_and_generate_pml():
-    parts = [
-        {"name": "panel", "width_mm": 300, "height_mm": 300, "quantity": 2},
-    ]
-
-    result = nest_and_generate(
-        parts=parts,
-        sheet_width_mm=800,
-        sheet_height_mm=800,
-        sheet_thickness_mm=19,
-        output_format="pml",
-    )
-
-    assert result["output_format"] == "pml"
-    assert len(result["output"]) >= 1
-
-    pml = result["output"][0]
-    assert isinstance(pml, str)
-    assert "Sheet" in pml
-    assert "Rect" in pml
-
-
 def test_user_example():
     parts = [
         {"name": "large_door", "width_mm": 457, "height_mm": 597, "quantity": 20},
@@ -265,62 +241,3 @@ def test_actual_nesting_cutter_contract_and_holding_margin(algorithm):
         nest_and_generate(
             parts, 300, 200, 6, margin_mm=10, kerf_mm=3, algorithm=algorithm, machining_clearance=MachiningClearance(6)
         )
-
-
-def test_nesting_pml_preserves_part_local_ownership():
-    from pml import parse_pml
-
-    result = nest_and_generate(
-        [
-            {
-                "name": "door",
-                "width_mm": 100,
-                "height_mm": 120,
-                "quantity": 2,
-                "template": "Shaker",
-                "template_params": {"stile_w": 20, "rail_h": 20, "panel_recess": 3},
-            }
-        ],
-        300,
-        200,
-        12,
-        margin_mm=10,
-        kerf_mm=3,
-        output_format="pml",
-    )
-    for pml in result["output"]:
-        intents = ast_to_removal_intents(parse_pml(pml))
-        profiles = [i for i in intents if i.hint_type == "profile"]
-        assert len({i.part_id for i in profiles}) == len(profiles)
-        assert all(i.part_id is not None for i in intents)
-
-
-def test_nested_polygon_pml_keeps_placement_and_owner():
-    from pml import parse_pml
-
-    parts = [
-        {
-            "name": "triangle",
-            "width_mm": 100,
-            "height_mm": 80,
-            "quantity": 2,
-            "allow_rotation": False,
-            "shape": "Polygon",
-            "shape_params": {"points": [[-50, -40], [50, -40], [0, 40]]},
-        }
-    ]
-    kwargs: dict[str, Any] = {
-        "parts": parts,
-        "sheet_width_mm": 300,
-        "sheet_height_mm": 200,
-        "sheet_thickness_mm": 12,
-        "margin_mm": 10,
-        "kerf_mm": 3,
-    }
-    asts = nest_and_generate(**kwargs)["output"]
-    sources = nest_and_generate(**kwargs, output_format="pml")["output"]
-    original = [intent for ast in asts for intent in ast_to_removal_intents(ast)]
-    replayed = [intent for source in sources for intent in ast_to_removal_intents(parse_pml(source))]
-    assert [(intent.bounds, intent.part_id) for intent in replayed] == [
-        (intent.bounds, intent.part_id) for intent in original
-    ]

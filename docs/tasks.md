@@ -336,7 +336,7 @@ spoilboard surfacing is the explicit exception: its zero margin and edge overrun
 are intentional and labeled, rather than presented as a clamped part-cutting job.
 
 **Options:**
-- `--kerf 6.35` — Tool kerf in mm (default: 6.35 for projects, 3.175 for recipes)
+- `--kerf 6.35` — Exact profile diameter constraint; omitted uses the configured production role
 - `--theme dark` — Blueprint theme (dark/light/print)
 - `--no-svg` — Skip SVG generation
 - `--no-clean` — Don't clean output directory before writing
@@ -471,3 +471,19 @@ for i, ast in enumerate(asts):
 ```
 
 **Key point:** Use `resolve_layout_multi()` instead of `resolve_layout()`. The latter raises `ValueError` when the assembly requires multiple sheets. Partitioning is automatic — no PML syntax change needed. Mixed content (shapes + overflowing assembly) is an error.
+
+### Production source builds
+
+Use `python -m cli.mill --input part.pml.yml` or
+`python -m cli.nest job.nest.yml`. Machine selection applies to the whole job:
+`--machine genmitsu_4040_pro` uses its independent preset and travel limits.
+Configure supported cutting combinations before using that machine. Recipes use
+`machines/defaults.yml:recipe_machine`. `--preset path.yml` and `--endmills path.yml`
+are explicit current build inputs. To validate custom outputs, supply the same
+inputs to `cli.validate_cam`; no old metrics/manifest settings are recovered.
+
+Use `machining.tools` for a deliberate job-level role replacement and `tool` on
+an operation for an exact operation cutter. Parameters follow operation `feeds`
+> job `machining.feeds` > preset. A tool change re-resolves its own base settings.
+`--kerf` must match the configured profile tool exactly. No intermediate export
+or replay step is part of the manufacturing workflow.

@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 SIMPLE_PROFILE_PML = """Sheet:
   width: 450mm
   height: 650mm
@@ -89,70 +91,6 @@ def test_export_blueprint_produces_svg(tmp_path: Path):
     svg_content = expected_svg.read_text()
     assert "<svg" in svg_content, "SVG file missing <svg> tag"
     assert "</svg>" in svg_content, "SVG file missing closing </svg> tag"
-
-
-def test_convert_layout_pml_to_json(tmp_path: Path):
-    json_file = tmp_path / "output.json"
-
-    result = _run_cli(
-        [
-            "-m",
-            "cli.convert_layout",
-            "--from",
-            "pml",
-            "--to",
-            "json",
-            str(_write_simple_profile(tmp_path)),
-            str(json_file),
-        ]
-    )
-
-    assert json_file.exists(), f"JSON file not created. stderr: {result.stderr}"
-
-    data = json.loads(json_file.read_text())
-
-    assert "sheet" in data, "JSON missing 'sheet' key"
-    assert "items" in data, "JSON missing 'items' key"
-    assert data["sheet"]["width_mm"] == 450, f"Unexpected sheet width: {data['sheet']}"
-    assert data["sheet"]["height_mm"] == 650, f"Unexpected sheet height: {data['sheet']}"
-
-
-def test_convert_layout_json_to_pml(tmp_path: Path):
-    json_file = tmp_path / "intermediate.json"
-    pml_file = tmp_path / "roundtrip.pml.yml"
-
-    _run_cli(
-        [
-            "-m",
-            "cli.convert_layout",
-            "--from",
-            "pml",
-            "--to",
-            "json",
-            str(_write_simple_profile(tmp_path)),
-            str(json_file),
-        ]
-    )
-
-    _run_cli(
-        [
-            "-m",
-            "cli.convert_layout",
-            "--from",
-            "json",
-            "--to",
-            "pml",
-            str(json_file),
-            str(pml_file),
-        ]
-    )
-
-    assert pml_file.exists(), "PML roundtrip file not created"
-
-    pml_content = pml_file.read_text()
-    assert "Sheet" in pml_content, "PML missing 'Sheet' declaration"
-    assert "450" in pml_content, "PML missing sheet width"
-    assert "650" in pml_content, "PML missing sheet height"
 
 
 def test_cli_missing_input_fails():
@@ -268,6 +206,7 @@ def test_unmachinable_pocket_fails_and_removes_stale_programs(tmp_path: Path, wi
     assert list(out_dir.glob("*.nc"))
     source.write_text(
         SIMPLE_PROFILE_PML.replace("type: profile", "type: pocket")
+        .replace("      side: outside\n", "")
         .replace("depth: through", "depth: 3mm")
         .replace("width: 200mm", f"width: {width}mm")
         .replace("height: 150mm", f"height: {height}mm")
@@ -275,7 +214,7 @@ def test_unmachinable_pocket_fails_and_removes_stale_programs(tmp_path: Path, wi
     result = _run_cli(args, check=False)
     assert result.returncode != 0
     assert "Pocket 'part'" in result.stderr
-    assert "smallest flat tool 3.175 mm" in result.stderr
+    assert "infeasible" in result.stderr
     assert not list(out_dir.glob("*.nc"))
 
 
@@ -294,13 +233,13 @@ def test_cli_multi_file_run_keeps_every_file_and_writes_one_metrics_file(tmp_pat
     assert metrics["build"]["sources"] == ["a.pml.yml", "b.pml.yml"]
     assert metrics["errors"] == []
     assert sorted(path.name for path in out_dir.glob("*.nc")) == [
-        "a.pml.profile-6.35mm.nc",
-        "b.pml.profile-6.35mm.nc",
+        "a.pml.profile-9.53mm.nc",
+        "b.pml.profile-9.53mm.nc",
     ]
     summary = json.loads((out_dir / "machining_summary.json").read_text())
     assert [sheet["files"][0]["filename"] for sheet in summary["sheets"]] == [
-        "a.pml.profile-6.35mm.nc",
-        "b.pml.profile-6.35mm.nc",
+        "a.pml.profile-9.53mm.nc",
+        "b.pml.profile-9.53mm.nc",
     ]
     manifest = json.loads((out_dir / "manifest.json").read_text())
     assert manifest["sources"] == ["a.pml.yml", "b.pml.yml"]
@@ -328,7 +267,7 @@ def test_cli_unknown_machine_exits_1_and_lists_machines(tmp_path: Path):
 
     assert result.returncode == 1, result.stderr
     assert "Unknown machine 'no_such_mill'" in result.stderr
-    assert "altmill_4x4" in result.stderr
+    assert "test_router" in result.stderr
 
 
 def test_cli_default_machine_rejects_sheet_beyond_envelope(tmp_path: Path):
@@ -345,16 +284,17 @@ def test_cli_default_machine_rejects_sheet_beyond_envelope(tmp_path: Path):
     assert list(out_dir.glob("*.svg")) == []
 
 
-def test_cli_recipe_runs_without_default_machine(tmp_path: Path):
+def test_cli_recipe_uses_configured_production_machine(tmp_path: Path):
     recipe_dir = tmp_path / "big_recipe"
     recipe_dir.mkdir()
     (recipe_dir / "example.pml.yml").write_text(OVERSIZED_SHEET_PML)
 
-    _run_cli(["-m", "cli.mill", "--recipe", str(recipe_dir), "--no-svg"])
+    result = _run_cli(["-m", "cli.mill", "--recipe", str(recipe_dir), "--no-svg"], check=False)
+    assert result.returncode == 3
 
     metrics = json.loads((recipe_dir / "output" / "metrics.json").read_text())
-    assert metrics["errors"] == []
-    assert list((recipe_dir / "output").glob("*.nc"))
+    assert any("Machine bounds" in error for error in metrics["errors"])
+    assert not list((recipe_dir / "output").glob("*.nc"))
 
 
 def test_cli_recipe_run_omits_provenance(tmp_path: Path):
@@ -385,11 +325,11 @@ children:
 - Beam: {name: rail, length: 300mm, width: 40mm, thickness: 19mm, layers: 2}
 """)
     out_dir = tmp_path / "out"
-    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir), "--kerf", "5"])
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir), "--kerf", "6.35"])
     metrics = json.loads((out_dir / "metrics.json").read_text())
-    assert metrics["build"]["kerf_mm"] == 5
+    assert metrics["build"]["kerf_mm"] == 6.35
     assert metrics["build"]["selected_profile_diameter_mm"] == 6.35
-    assert metrics["build"]["requested_kerf_mm"] == 5
+    assert metrics["build"]["requested_kerf_mm"] == 6.35
     import re
 
     code = (out_dir / "profile-6.35mm.nc").read_text()
@@ -406,88 +346,19 @@ children:
 """
 
 
-def test_geometry_only_zero_kerf_preserves_legacy_clearance_and_cannot_be_machined_as_a_packed_job(tmp_path):
-    from adapters.ast_to_removal import ast_to_removal_intents
-    from layout_ast.layout import LayoutAST
-
-    source = tmp_path / "beam.pml.yml"
-    source.write_text(PACKED_REVIEW_BEAM)
-    target = tmp_path / "beam.json"
-    _run_cli(["-m", "cli.convert_layout", "--from", "pml", "--to", "json", str(source), str(target)])
-    layout = LayoutAST.from_json(str(target))
-    profiles = [intent for intent in ast_to_removal_intents(layout) if intent.hint_type == "profile"]
-    assert min(intent.bounds.x_min for intent in profiles) == pytest.approx(6.35)
-    result = _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(tmp_path / "out")], check=False)
-    assert result.returncode != 0
-    assert "--for-machining" in result.stderr
-    assert not list((tmp_path / "out").glob("*.nc"))
-
-
-@pytest.mark.parametrize("authored_kerf", [0, 1, 6.35])
-def test_machining_conversion_matches_direct_build_and_retains_tool_context(tmp_path, authored_kerf):
-    source = tmp_path / "beam.pml.yml"
-    source.write_text(PACKED_REVIEW_BEAM.replace("kerf: 0mm", f"kerf: {authored_kerf}mm"))
-    target = tmp_path / "beam.json"
-    _run_cli(
-        [
-            "-m",
-            "cli.convert_layout",
-            "--from",
-            "pml",
-            "--to",
-            "json",
-            "--for-machining",
-            "--kerf",
-            "3.175",
-            str(source),
-            str(target),
-        ]
-    )
-    converted = tmp_path / "converted"
-    direct = tmp_path / "direct"
-    _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(converted)])
-    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(direct), "--kerf", "3.175"])
-    assert (converted / "profile-3.17mm.nc").read_bytes() == (direct / "profile-3.17mm.nc").read_bytes()
-    mismatch = _run_cli(
-        ["-m", "cli.mill", "--input", str(target), "--out", str(tmp_path / "mismatch"), "--kerf", "6.35"], check=False
-    )
-    assert mismatch.returncode != 0
-    assert "Profile cutter changed after packing" in mismatch.stderr
-    assert not list((tmp_path / "mismatch").glob("*.nc"))
-
-
-def test_legacy_json_with_insufficient_cutter_clearance_emits_diagnostics_without_programs(tmp_path):
-    from pml import parse_pml
-
-    source = tmp_path / "legacy.json"
-    ast = parse_pml(PACKED_REVIEW_BEAM.replace("kerf: 0mm", "kerf: 1mm"))
-    ast.to_json(str(source))
-    output = tmp_path / "out"
-    output.mkdir()
-    (output / "stale.nc").write_text("G1 X0 Y0 Z-3")
-    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(output)], check=False)
-    assert result.returncode == 3
-    assert "margin zone" in result.stderr
-    assert not list(output.glob("*.nc"))
-    metrics = json.loads((output / "metrics.json").read_text())
-    assert metrics["errors"]
-    assert metrics["output_size"]["files"] == {}
-    assert list(output.glob("*.svg"))
-
-
 def test_mixed_sources_record_requested_and_actual_profile_diameters_consistently(tmp_path):
     inputs = tmp_path / "inputs"
     inputs.mkdir()
     (inputs / "beam.pml.yml").write_text(PACKED_REVIEW_BEAM)
     (inputs / "plain.pml.yml").write_text(SIMPLE_PROFILE_PML)
     out = tmp_path / "out"
-    _run_cli(["-m", "cli.mill", "--input", str(inputs), "--out", str(out), "--kerf", "5"])
+    _run_cli(["-m", "cli.mill", "--input", str(inputs), "--out", str(out), "--kerf", "6.35"])
     build = json.loads((out / "metrics.json").read_text())["build"]
-    assert build["kerf_mm"] == build["requested_kerf_mm"] == 5
+    assert build["kerf_mm"] == build["requested_kerf_mm"] == 6.35
     assert build["selected_profile_diameter_mm"] == 6.35
     assert "source_kerfs_mm" not in build
-    assert {c["requested_kerf_mm"] for c in build["compilation_contexts"].values()} == {5}
-    assert {c["selected_profile_diameter_mm"] for c in build["compilation_contexts"].values()} == {6.35}
+    assert {c["requested_kerf_mm"] for c in build["machining"].values()} == {6.35}
+    assert {c["selected_profile_diameter_mm"] for c in build["machining"].values()} == {6.35}
 
 
 def test_beam_fixed_gap_error_offers_a_supported_cutter_remedy(tmp_path):
@@ -531,48 +402,83 @@ children:
     feature: {type: profile, side: outside, depth: through}
 """)
     out = tmp_path / "out"
-    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--kerf", "5"], check=False)
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--kerf", "6.35"], check=False)
     assert result.returncode == 3
     assert "0.85mm into left margin zone" in result.stderr
     assert not list(out.glob("*.nc"))
 
 
-def test_custom_tool_machining_conversion_can_replay_the_saved_library(tmp_path):
-    source = tmp_path / "beam.pml.yml"
-    source.write_text(PACKED_REVIEW_BEAM)
-    endmills = tmp_path / "endmills.yml"
-    feeds = tmp_path / "feeds.yml"
-    endmills.write_text("""endmills:
-- {name: custom3, diameter_mm: 3, flute_length_mm: 20, shank_diameter_mm: 3, flutes: 2, type: straight}
+def test_legacy_layout_json_is_rejected_with_a_source_rebuild_instruction(tmp_path):
+    source = tmp_path / "old.json"
+    source.write_text('{"sheet":{},"items":[],"compilation":{"tools":"obsolete"}}')
+    output = tmp_path / "out"
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(output)], check=False)
+    assert result.returncode != 0
+    assert "original .pml.yml or .nest.yml source" in result.stderr
+    assert not list(output.glob("*.nc"))
+
+
+def test_operation_override_reaches_gcode_and_effective_setup_report(tmp_path):
+    source = tmp_path / "pocket.pml.yml"
+    source.write_text("""machining:
+  tools: {pocket: 'test_pocket'}
+  feeds: {feed_z: 500, feed_xy: 2000}
+Sheet: {width: 200mm, height: 200mm, thickness: 19mm}
+children:
+- Rect:
+    id: pocket
+    at: {x: 100mm, y: 100mm, width: 100mm, height: 100mm}
+    feature:
+      type: pocket
+      depth: 3mm
+      tool: 'test_flat_6'
+      feeds: {rpm: 14000, feed_xy: 900}
 """)
-    feeds.write_text("""feeds:
-- {endmill: custom3, material: mdf, chipload: 0.05, rpm: 18000, depth_per_pass: 2, plunge_factor: 0.3}
+    output = tmp_path / "out"
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(output), "--no-svg"])
+    code = (output / "pocket-6.35mm.nc").read_text()
+    assert "M3 S14000" in code
+    assert "F900.0" in code
+    summary = json.loads((output / "machining_summary.json").read_text())
+    (entry,) = summary["files"]
+    assert entry["tool_name"] == "test_flat_6"
+    assert (entry["rpm"], entry["feed_xy_mm_min"], entry["feed_z_mm_min"], entry["stepdown_mm"]) == (14000, 900, 500, 3)
+    assert summary["machining"]["preset"] == "test_cutting"
+    assert "compilation_contexts" not in (output / "metrics.json").read_text()
+
+
+def test_nest_build_machines_source_without_intermediate_exports(tmp_path):
+    source = tmp_path / "job.nest.yml"
+    source.write_text("""Nest:
+  algorithm: maxrects
+  Sheet: {width: 400mm, height: 400mm, thickness: 12mm, material: mdf}
+  machining:
+    tools: {profile: 'test_flat_6'}
+  parts:
+  - {name: panel, width: 100mm, height: 100mm, quantity: 2}
 """)
-    target = tmp_path / "beam.json"
-    _run_cli(
-        [
-            "-m",
-            "cli.convert_layout",
-            "--from",
-            "pml",
-            "--to",
-            "json",
-            "--for-machining",
-            "--kerf",
-            "5",
-            "--endmills",
-            str(endmills),
-            "--feeds",
-            str(feeds),
-            str(source),
-            str(target),
-        ]
+    output = tmp_path / "out"
+    _run_cli(["-m", "cli.nest", str(source), "-o", str(output)])
+    assert list(output.glob("*.nc")) and list(output.glob("*.svg"))
+    assert not list(output.glob("*.pml.yml"))
+    assert {path.name for path in output.glob("*.json")} == {"metrics.json", "machining_summary.json"}
+    build = json.loads((output / "metrics.json").read_text())["build"]
+    assert build["machining"][source.name]["selected_profile_tool"] == "test_flat_6"
+
+
+@pytest.mark.parametrize("module", ["cli.mill", "cli.nest", "cli.recipes", "cli.validate_cam"])
+def test_cli_imports_and_help_do_not_require_default_configuration(tmp_path, monkeypatch, module):
+    monkeypatch.setenv("MILL_UI_MACHINES_DIR", str(tmp_path / "no_configuration"))
+    result = _run_cli(["-m", module, "--help"])
+    assert result.returncode == 0
+    assert "usage:" in result.stdout
+
+
+def test_cli_uses_only_the_supplied_configuration_root(tmp_path, monkeypatch):
+    monkeypatch.setenv("MILL_UI_MACHINES_DIR", str(tmp_path / "missing_configuration"))
+    result = _run_cli(
+        ["-m", "cli.mill", "--input", str(_write_simple_profile(tmp_path)), "--out", str(tmp_path / "out")], check=False
     )
-    out = tmp_path / "out"
-    _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(out)])
-    assert (out / "profile-3.00mm.nc").exists()
-    build = json.loads((out / "metrics.json").read_text())["build"]
-    assert build["requested_kerf_mm"] == 5
-    assert build["selected_profile_diameter_mm"] == 3
-    snapshot = build["compilation_contexts"]["beam.json"]
-    assert [tool["name"] for tool in snapshot["tools"]] == ["custom3"]
+    assert result.returncode != 0
+    assert "missing_configuration/defaults.yml" in result.stderr
+    assert not list((tmp_path / "out").glob("*.nc"))

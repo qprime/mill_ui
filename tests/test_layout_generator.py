@@ -1,7 +1,6 @@
 from nesting.layout_generator import (
     nesting_result_to_asts,
     sheet_layout_to_ast,
-    sheet_layout_to_pml,
 )
 from nesting.types import NestedPart, NestingResult, PartSpec, SheetLayout, SheetSpec
 
@@ -114,56 +113,6 @@ def test_nesting_result_to_asts():
 
     assert len(asts) == 2
     assert all(ast.sheet.width_mm == 500 for ast in asts)
-
-
-def test_sheet_to_pml_simple():
-    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19, margin_mm=10)
-    part = PartSpec(name="panel", width_mm=400, height_mm=300)
-    placement = NestedPart(part_spec=part, x_mm=500, y_mm=500, instance_id=0)
-
-    layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
-    pml = sheet_layout_to_pml(layout)
-
-    assert "width: 1000mm" in pml
-    assert "height: 1000mm" in pml
-    assert "thickness: 19mm" in pml
-    assert "panel_0_rect" in pml
-    assert "x: 490mm" in pml
-    assert "y: 490mm" in pml
-    assert "width: 400mm" in pml
-    assert "height: 300mm" in pml
-    assert "type: profile" in pml
-    assert "depth: through" in pml
-
-
-def test_sheet_to_pml_shaker():
-    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
-    part = PartSpec(
-        name="door",
-        width_mm=400,
-        height_mm=600,
-        template="shaker",
-        template_params={"stile_w": 50, "panel_recess": 6},
-    )
-    placement = NestedPart(part_spec=part, x_mm=500, y_mm=500, instance_id=0)
-
-    layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,), sheet_index=0)
-    pml = sheet_layout_to_pml(layout)
-
-    assert "door_0" in pml or "door" in pml
-    assert "profile" in pml
-
-
-def test_sheet_to_pml_rotated():
-    sheet_spec = SheetSpec(width_mm=1000, height_mm=1000, thickness_mm=19)
-    part = PartSpec(name="panel", width_mm=200, height_mm=400)
-    placement = NestedPart(part_spec=part, x_mm=500, y_mm=500, rotated=True)
-
-    layout = SheetLayout(sheet_spec=sheet_spec, placements=(placement,))
-    pml = sheet_layout_to_pml(layout)
-
-    assert "width: 400mm" in pml
-    assert "height: 200mm" in pml
 
 
 def test_empty_sheet_to_ast():

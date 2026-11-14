@@ -113,6 +113,8 @@ def _dispatch_feature_intent(  # noqa: C901 — feature-type dispatcher
         if item.feature.onion_skin_mm is not None:
             hint[HintKeys.ONION_SKIN_MM] = item.feature.onion_skin_mm
         intent = profile_hint_to_removal_intent(hint, sheet_thickness_mm=sheet_thickness_mm)
+        if item.feature.tool_name is not None:
+            intent = replace(intent, tool_name=item.feature.tool_name)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent
@@ -129,24 +131,32 @@ def _dispatch_feature_intent(  # noqa: C901 — feature-type dispatcher
             intent = replace(intent, dogbone_reference_point=item.feature.dogbone_reference_point)
         if item.feature.rest is not None:
             intent = replace(intent, rest=item.feature.rest)
+        if item.feature.tool_name is not None:
+            intent = replace(intent, tool_name=item.feature.tool_name)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent
 
     elif item.feature.type == FeatureType.SURFACE:
         intent = pocket_hint_to_removal_intent(hint)
+        if item.feature.tool_name is not None:
+            intent = replace(intent, tool_name=item.feature.tool_name)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent
 
     elif item.feature.type == FeatureType.HOLE:
         intent = hole_hint_to_removal_intent(hint)
+        if item.feature.tool_name is not None:
+            intent = replace(intent, tool_name=item.feature.tool_name)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         return intent
 
     elif item.feature.type == FeatureType.ENGRAVE:
         intent = engrave_hint_to_removal_intent(hint)
+        if item.feature.tool_name is not None:
+            intent = replace(intent, tool_name=item.feature.tool_name)
         if item.feature.feeds_override is not None:
             intent = replace(intent, feeds_override=item.feature.feeds_override)
         if item.feature.ramp_mm is not None:
@@ -250,6 +260,7 @@ def _build_edge_feature_intent(
         allowance=Allowance(),
         constraints=Constraints(),
         feeds_override=item.feature.feeds_override,
+        tool_name=item.feature.tool_name,
     )
 
 

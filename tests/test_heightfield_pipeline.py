@@ -14,6 +14,8 @@ from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 
 def _write_synthetic_png(path: Path, size: int = 32) -> None:
     xs = np.linspace(-1.0, 1.0, size)

@@ -1,0 +1,327 @@
+# Modeled planning settings, not measured shop validation.
+# Profile: assumed 2-flute mortise compression; PCD: assumed single-tooth plunge cutter.
+# Exact models and spindle power have not been supplied. V-bits are existing example inventory.
+# Specialty/detail parameters migrated from the former library; no new inventory claims.
+name: AltMill production
+materials:
+  mdf:
+    roles:
+      profile:
+      - Example 3/8 carbide mortise compression
+      - 1/4 upcut spiral
+      - 1/8 downcut plunge
+      - 1/2 straight
+      pocket:
+      - Example 3/8 PCD straight plunge
+      - 1/4 upcut spiral
+      - 1/8 downcut plunge
+      hole:
+      - 1/4 upcut spiral
+      - 1/8 downcut plunge
+      engrave:
+      - 1mm engraving bit
+      vcarve:
+      - 90 degree v-bit
+      - 60 degree v-bit
+      surface:
+      - 1 inch surfacing bit
+      roundover:
+      - Example 6mm point roundover
+      specialty:
+      - 1/8 downcut plunge
+      - 1/4 upcut spiral
+      - 1/2 straight
+    parameters:
+      profile:
+        1/4 upcut spiral: &id001
+          rpm: 18000
+          feed_xy: 3600.0
+          feed_z: 1188.0
+          depth_per_pass: 3.0
+          stepover_percent: 40.0
+        1/8 upcut spiral: &id002
+          rpm: 18000
+          feed_xy: 2160.0
+          feed_z: 712.8
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+        1/8 downcut spiral: &id003
+          rpm: 18000
+          feed_xy: 1080.0
+          feed_z: 356.4
+          depth_per_pass: 1.5
+          stepover_percent: 40.0
+        1/4 compression: &id004
+          rpm: 18000
+          feed_xy: 3600.0
+          feed_z: 1188.0
+          depth_per_pass: 3.0
+          stepover_percent: 40.0
+        1/2 straight: &id005
+          rpm: 14000
+          feed_xy: 1680.0
+          feed_z: 420.0
+          depth_per_pass: 4.0
+          stepover_percent: 40.0
+        1/4 downcut SpeTool: &id006
+          rpm: 18000
+          feed_xy: 2880.0
+          feed_z: 720.0
+          depth_per_pass: 3.0
+          stepover_percent: 40.0
+        3/8 rougher 3F: &id007
+          rpm: 18000
+          feed_xy: 4320.0
+          feed_z: 2160.0
+          depth_per_pass: 6.0
+          stepover_percent: 40.0
+        1/2 upcut 2F SE: &id008
+          rpm: 18000
+          feed_xy: 3600.0
+          feed_z: 900.0
+          depth_per_pass: 4.5
+          stepover_percent: 40.0
+        1/8 downcut plunge: &id009
+          rpm: 18000
+          feed_xy: 1800.0
+          feed_z: 594.0
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+        1 inch surfacing bit: &id010
+          rpm: 12000
+          feed_xy: 4800.0
+          feed_z: 1200.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        Example 3/8 carbide mortise compression: &id011
+          rpm: 18000
+          feed_xy: 4500.0
+          feed_z: 1125.0
+          depth_per_pass: 6.0
+          stepover_percent: 40.0
+        Example 3/8 PCD straight plunge: &id012
+          rpm: 18000
+          feed_xy: 2520.0
+          feed_z: 630.0
+          depth_per_pass: 6.0
+          stepover_percent: 40.0
+      pocket:
+        1/4 upcut spiral: *id001
+        1/8 upcut spiral: *id002
+        1/8 downcut spiral: *id003
+        1/4 compression: *id004
+        1/2 straight: *id005
+        1/4 downcut SpeTool: *id006
+        3/8 rougher 3F: *id007
+        1/2 upcut 2F SE: *id008
+        1/8 downcut plunge: *id009
+        1 inch surfacing bit: *id010
+        Example 3/8 carbide mortise compression: *id011
+        Example 3/8 PCD straight plunge: *id012
+      hole:
+        1/4 upcut spiral: *id001
+        1/8 upcut spiral: *id002
+        1/8 downcut spiral: *id003
+        1/4 compression: *id004
+        1/2 straight: *id005
+        1/4 downcut SpeTool: *id006
+        3/8 rougher 3F: *id007
+        1/2 upcut 2F SE: *id008
+        1/8 downcut plunge: *id009
+        1 inch surfacing bit: *id010
+        Example 3/8 carbide mortise compression: *id011
+        Example 3/8 PCD straight plunge: *id012
+      surface:
+        1/4 upcut spiral: *id001
+        1/8 upcut spiral: *id002
+        1/8 downcut spiral: *id003
+        1/4 compression: *id004
+        1/2 straight: *id005
+        1/4 downcut SpeTool: *id006
+        3/8 rougher 3F: *id007
+        1/2 upcut 2F SE: *id008
+        1/8 downcut plunge: *id009
+        1 inch surfacing bit: *id010
+        Example 3/8 carbide mortise compression: *id011
+        Example 3/8 PCD straight plunge: *id012
+      specialty:
+        1/4 upcut spiral: *id001
+        1/8 upcut spiral: *id002
+        1/8 downcut spiral: *id003
+        1/4 compression: *id004
+        1/2 straight: *id005
+        60 degree v-bit: &id013
+          rpm: 18000
+          feed_xy: 1800.0
+          feed_z: 450.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        90 degree v-bit: &id014
+          rpm: 18000
+          feed_xy: 1800.0
+          feed_z: 450.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        1mm engraving bit: &id015
+          rpm: 18000
+          feed_xy: 1200.0
+          feed_z: 300.0
+          depth_per_pass: 0.5
+          stepover_percent: 40.0
+        1/8 ball nose 2F: &id016
+          rpm: 18000
+          feed_xy: 1800.0
+          feed_z: 594.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        1/2 ball nose 4F TiAlN: &id017
+          rpm: 14000
+          feed_xy: 2240.0
+          feed_z: 560.0
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+        tapered ball nose R1/32 ZrN: &id018
+          rpm: 20000
+          feed_xy: 800.0
+          feed_z: 200.0
+          depth_per_pass: 0.5
+          stepover_percent: 40.0
+        1/4 downcut SpeTool: *id006
+        3/8 rougher 3F: *id007
+        1/2 upcut 2F SE: *id008
+        1/4 ball nose 2F WEXWE: &id019
+          rpm: 18000
+          feed_xy: 2880.0
+          feed_z: 720.0
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+        1/8 ball nose long reach WEXWE: &id020
+          rpm: 18000
+          feed_xy: 1200.0
+          feed_z: 300.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        1/8 downcut plunge: *id009
+        1 inch surfacing bit: *id010
+        Example 6mm point roundover: &id021
+          rpm: 18000
+          feed_xy: 720.0
+          feed_z: 180.0
+          depth_per_pass: 1.0
+          stepover_percent: 40.0
+        Example 3/8 carbide mortise compression: *id011
+        Example 3/8 PCD straight plunge: *id012
+      vcarve:
+        60 degree v-bit: *id013
+        90 degree v-bit: *id014
+      engrave:
+        60 degree v-bit: *id013
+        90 degree v-bit: *id014
+        1mm engraving bit: *id015
+        1/8 ball nose 2F: *id016
+        1/2 ball nose 4F TiAlN: *id017
+        tapered ball nose R1/32 ZrN: *id018
+        1/4 ball nose 2F WEXWE: *id019
+        1/8 ball nose long reach WEXWE: *id020
+      roundover:
+        Example 6mm point roundover: *id021
+  plywood:
+    roles:
+      profile:
+      - Example 3/8 carbide mortise compression
+      - 1/4 upcut spiral
+      pocket:
+      - Example 3/8 PCD straight plunge
+      - 1/4 upcut spiral
+      hole:
+      - 1/4 upcut spiral
+      surface:
+      - 1 inch surfacing bit
+      specialty:
+      - 1/4 upcut spiral
+    parameters:
+      profile:
+        1/4 upcut spiral: &id022
+          rpm: 18000
+          feed_xy: 1440.0
+          feed_z: 360.0
+          depth_per_pass: 2.0
+          stepover_percent: 40.0
+        1/4 compression: &id023
+          rpm: 18000
+          feed_xy: 1440.0
+          feed_z: 360.0
+          depth_per_pass: 3.0
+          stepover_percent: 40.0
+        1/4 downcut SpeTool: &id024
+          rpm: 16000
+          feed_xy: 960.0
+          feed_z: 192.0
+          depth_per_pass: 1.5
+          stepover_percent: 40.0
+        3/8 rougher 3F: &id025
+          rpm: 18000
+          feed_xy: 3240.0
+          feed_z: 1296.0
+          depth_per_pass: 4.5
+          stepover_percent: 40.0
+        1/2 upcut 2F SE: &id026
+          rpm: 16000
+          feed_xy: 1600.0
+          feed_z: 400.0
+          depth_per_pass: 3.0
+          stepover_percent: 40.0
+        1 inch surfacing bit: &id027
+          rpm: 12000
+          feed_xy: 3840.0
+          feed_z: 768.0
+          depth_per_pass: 0.8
+          stepover_percent: 40.0
+        Example 3/8 carbide mortise compression: &id028
+          rpm: 18000
+          feed_xy: 4500.0
+          feed_z: 1125.0
+          depth_per_pass: 6.0
+          stepover_percent: 40.0
+        Example 3/8 PCD straight plunge: &id029
+          rpm: 18000
+          feed_xy: 2520.0
+          feed_z: 630.0
+          depth_per_pass: 6.0
+          stepover_percent: 40.0
+      pocket:
+        1/4 upcut spiral: *id022
+        1/4 compression: *id023
+        1/4 downcut SpeTool: *id024
+        3/8 rougher 3F: *id025
+        1/2 upcut 2F SE: *id026
+        1 inch surfacing bit: *id027
+        Example 3/8 carbide mortise compression: *id028
+        Example 3/8 PCD straight plunge: *id029
+      hole:
+        1/4 upcut spiral: *id022
+        1/4 compression: *id023
+        1/4 downcut SpeTool: *id024
+        3/8 rougher 3F: *id025
+        1/2 upcut 2F SE: *id026
+        1 inch surfacing bit: *id027
+        Example 3/8 carbide mortise compression: *id028
+        Example 3/8 PCD straight plunge: *id029
+      surface:
+        1/4 upcut spiral: *id022
+        1/4 compression: *id023
+        1/4 downcut SpeTool: *id024
+        3/8 rougher 3F: *id025
+        1/2 upcut 2F SE: *id026
+        1 inch surfacing bit: *id027
+        Example 3/8 carbide mortise compression: *id028
+        Example 3/8 PCD straight plunge: *id029
+      specialty:
+        1/4 upcut spiral: *id022
+        1/4 compression: *id023
+        1/4 downcut SpeTool: *id024
+        3/8 rougher 3F: *id025
+        1/2 upcut 2F SE: *id026
+        1 inch surfacing bit: *id027
+        Example 3/8 carbide mortise compression: *id028
+        Example 3/8 PCD straight plunge: *id029

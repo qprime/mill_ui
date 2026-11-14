@@ -49,118 +49,6 @@ children:
         Path(input_file).unlink()
 
 
-def test_cli_resolve_to_flat_pml():
-
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: outer
-      feature:
-        type: profile
-        side: outside
-        depth: through
-      children:
-        - Frame:
-            width: 50mm
-            children:
-              - Rect:
-                  id: inner
-                  feature:
-                    type: pocket
-                    depth: 6mm
-"""
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
-        f.write(pml)
-        input_file = f.name
-
-    try:
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "cli.parse_compositional_pml",
-                input_file,
-                "--resolve",
-                "--format",
-                "pml",
-            ],
-            capture_output=True,
-            text=True,
-        )
-
-        assert result.returncode == 0, f"CLI failed: {result.stderr}"
-        assert "✓ Parse successful" in result.stderr
-        assert "✓ Resolved to" in result.stderr
-        assert "sheet" in result.stdout.lower()
-
-        assert "AtPosition:" in result.stdout
-        assert "part_id:" in result.stdout
-
-    finally:
-        Path(input_file).unlink()
-
-
-def test_cli_resolve_to_json():
-
-    pml = """
-Sheet:
-  width: 400mm
-  height: 600mm
-  thickness: 19mm
-
-children:
-  - Rect:
-      id: outer
-      feature:
-        type: profile
-        side: outside
-        depth: through
-      children:
-        - Frame:
-            width: 50mm
-            children:
-              - Rect:
-                  id: inner
-                  feature:
-                    type: pocket
-                    depth: 6mm
-"""
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".pml.yml", delete=False) as f:
-        f.write(pml)
-        input_file = f.name
-
-    try:
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "cli.parse_compositional_pml",
-                input_file,
-                "--resolve",
-                "--format",
-                "json",
-            ],
-            capture_output=True,
-            text=True,
-        )
-
-        assert result.returncode == 0, f"CLI failed: {result.stderr}"
-        assert "✓ Parse successful" in result.stderr
-        assert "✓ Resolved to" in result.stderr
-        assert '"items"' in result.stdout
-        assert '"sheet"' in result.stdout
-
-    finally:
-        Path(input_file).unlink()
-
-
 def test_cli_error_on_missing_file():
 
     result = subprocess.run(
@@ -259,16 +147,17 @@ children:
                 "-m",
                 "cli.parse_compositional_pml",
                 input_file,
-                "--resolve",
                 "--format",
-                "json",
+                "yaml",
             ],
             capture_output=True,
             text=True,
         )
 
         assert result.returncode == 0, f"CLI failed: {result.stderr}"
-        assert "✓ Resolved to 20 flat items" in result.stderr
+        assert "✓ Parse successful" in result.stderr
+        assert "components:" in result.stdout
+        assert "UseComponent:" in result.stdout
 
     finally:
         Path(input_file).unlink()

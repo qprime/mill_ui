@@ -725,7 +725,7 @@ def test_wave_rejects_misleading_groove_key(extra):
 children:
 - Wave: {{count: 4, amplitude: 3mm, depth: 1mm, {extra}}}
 """
-    with pytest.raises(PMLParseError, match="renamed to 'spacing'"):
+    with pytest.raises(PMLParseError, match=r"Unknown Wave key.*groove.*renamed to 'spacing'.*PM-18"):
         parse_pml_yaml(pml)
 
 

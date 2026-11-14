@@ -55,7 +55,6 @@ Sheet:
 
 children:
   - Circle:
-      fit: true
       feature:
         type: pocket
         depth: 5mm
@@ -86,7 +85,6 @@ children:
       children:
         - Circle:
             id: badge
-            fit: true
             feature:
               type: profile
               side: outside
@@ -405,7 +403,6 @@ children:
                     - Cell:
                         children:
                           - Circle:
-                              fit: true
                               feature:
                                 type: pocket
                                 depth: 5mm

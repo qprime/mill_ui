@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1220.0,
     "height_mm": 1220.0,
@@ -9,6 +21,35 @@
     {
       "filename": "9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "generated_pocket_5"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -22,6 +63,67 @@
     {
       "filename": "9.53mm-compression.nc",
       "operation": "profile, profile_finish",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_1",
+            "generated_profile_10",
+            "generated_profile_2",
+            "generated_profile_3",
+            "generated_profile_4",
+            "generated_profile_6",
+            "generated_profile_8",
+            "waste_0_11"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        },
+        {
+          "operation": "profile_finish",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_1",
+            "generated_profile_2",
+            "generated_profile_3",
+            "generated_profile_8"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -35,34 +137,116 @@
       "estimated_runtime_min": 20.9
     },
     {
-      "filename": "12.70mm.nc",
-      "operation": "bore",
-      "tool_diameter_mm": 12.7,
-      "rpm": 18000.0,
-      "feed_xy_mm_min": 3600.0,
-      "feed_z_mm_min": 900.0,
-      "stepdown_mm": 4.5,
-      "max_depth_mm": 12.0,
-      "feature_count": 1,
-      "strategy": "helical_bore",
-      "estimated_runtime_min": 0.2
-    },
-    {
       "filename": "6.35mm.nc",
-      "operation": "bore",
+      "operation": "pocket, bore",
+      "tool_name": "1/4 upcut spiral",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "circle_7"
+          ],
+          "tool": {
+            "name": "1/4 upcut spiral",
+            "diameter": 6.35,
+            "kind": "flat",
+            "rotation": "upcut",
+            "depth_per_pass": 3.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0
+          }
+        },
+        {
+          "operation": "bore",
+          "feature_ids": [
+            "generated_hole_9_000",
+            "generated_hole_9_001",
+            "generated_hole_9_002",
+            "generated_hole_9_003",
+            "generated_hole_9_004",
+            "generated_hole_9_005",
+            "generated_hole_9_006",
+            "generated_hole_9_007",
+            "generated_hole_9_008",
+            "generated_hole_9_009",
+            "generated_hole_9_010",
+            "generated_hole_9_011",
+            "generated_hole_9_012",
+            "generated_hole_9_013",
+            "generated_hole_9_014",
+            "generated_hole_9_015"
+          ],
+          "tool": {
+            "name": "1/4 upcut spiral",
+            "diameter": 6.35,
+            "kind": "flat",
+            "rotation": "upcut",
+            "depth_per_pass": 3.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0
+          }
+        }
+      ],
       "tool_diameter_mm": 6.35,
       "rpm": 18000.0,
-      "feed_xy_mm_min": 2880.0,
-      "feed_z_mm_min": 720.0,
+      "feed_xy_mm_min": 3600.0,
+      "feed_z_mm_min": 1188.0,
       "stepdown_mm": 3.0,
       "max_depth_mm": 12.0,
-      "feature_count": 16,
-      "strategy": "helical_bore",
-      "estimated_runtime_min": 1.7
+      "feature_count": 17,
+      "strategy": "raster_pocket, helical_bore",
+      "estimated_runtime_min": 3.9
     },
     {
       "filename": "release-9.53mm.nc",
       "operation": "release",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "release",
+          "feature_ids": [
+            "generated_profile_4",
+            "generated_profile_6",
+            "generated_profile_8"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -76,7 +260,7 @@
       "estimated_runtime_min": 1.9
     }
   ],
-  "total_runtime_min": 30.7,
+  "total_runtime_min": 32.7,
   "feature_counts": {
     "hole": 17,
     "pocket": 1,
@@ -84,5 +268,5 @@
     "waste_cut": 1
   },
   "safe_z_mm": 25.0,
-  "kerf_mm": 9.525
+  "kerf_mm": null
 }

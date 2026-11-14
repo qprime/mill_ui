@@ -128,7 +128,7 @@ class TestRestPlannerPasses:
         return plan_passes(
             planner_input,
             config=config,
-            tool_db=normalize_tool_entries(TOOL_DB),
+            tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
             machine=machine,
             stock=stock,
         )
@@ -178,7 +178,7 @@ class TestRestPlannerPasses:
             plan_passes(
                 planner_input,
                 config=config,
-                tool_db=normalize_tool_entries(TOOL_DB),
+                tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
                 machine=machine,
                 stock=stock,
             )
@@ -207,7 +207,7 @@ class TestRestPlannerPasses:
             plan_passes(
                 planner_input,
                 config=config,
-                tool_db=normalize_tool_entries(TOOL_DB),
+                tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
                 machine=machine,
                 stock=stock,
             )
@@ -236,7 +236,7 @@ class TestRestPlannerPasses:
             plan_passes(
                 planner_input,
                 config=config,
-                tool_db=normalize_tool_entries(TOOL_DB),
+                tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
                 machine=machine,
                 stock=stock,
             )
@@ -265,7 +265,7 @@ class TestRestPlannerPasses:
             plan_passes(
                 planner_input,
                 config=config,
-                tool_db=normalize_tool_entries(TOOL_DB),
+                tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
                 machine=machine,
                 stock=stock,
             )
@@ -311,7 +311,7 @@ class TestRestAndEdgeTreatmentExclusion:
             plan_passes(
                 planner_input,
                 config=config,
-                tool_db=normalize_tool_entries(TOOL_DB),
+                tool_db=normalize_tool_entries(list(reversed(TOOL_DB))),
                 machine=machine,
                 stock=stock,
             )
@@ -474,23 +474,23 @@ class TestRestPMLFormatting:
 
 class TestPickToolByDiameter:
     def test_exact_match(self):
-        tools = normalize_tool_entries(TOOL_DB)
+        tools = normalize_tool_entries(list(reversed(TOOL_DB)))
         tool = pick_tool_by_diameter(tools, 6.35)
         assert tool.diameter == 6.35
 
     def test_kind_filter(self):
-        tools = normalize_tool_entries(TOOL_DB)
+        tools = normalize_tool_entries(list(reversed(TOOL_DB)))
         tool = pick_tool_by_diameter(tools, 6.35, kind="flat")
         assert tool.diameter == 6.35
         assert tool.kind == "flat"
 
     def test_kind_filter_excludes(self):
-        tools = normalize_tool_entries(TOOL_DB)
+        tools = normalize_tool_entries(list(reversed(TOOL_DB)))
         with pytest.raises(ValueError, match="not found"):
             pick_tool_by_diameter(tools, 6.35, kind="ball")
 
     def test_not_found(self):
-        tools = normalize_tool_entries(TOOL_DB)
+        tools = normalize_tool_entries(list(reversed(TOOL_DB)))
         with pytest.raises(ValueError, match="not found"):
             pick_tool_by_diameter(tools, 99.0)
 

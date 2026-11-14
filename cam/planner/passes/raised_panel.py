@@ -12,7 +12,7 @@ from layout_ast.raised_panel import RaisedPanelSpec
 
 from .edge import EdgeCutPlan, PocketCutPlan
 from .profile import polygon_shape
-from .tools import ToolSelection, pick_tool_for_edge, pick_tool_for_region
+from .tools import ToolSelection, pick_tool_for_edge, pick_tool_for_region, tools_for_role
 
 
 def build_raised_panel_plan(entry: EdgeFeatureInput, tools: Sequence[ToolSelection]) -> EdgeCutPlan:
@@ -35,7 +35,7 @@ def build_raised_panel_plan(entry: EdgeFeatureInput, tools: Sequence[ToolSelecti
     if groove.boundary.distance(field) < spec.slope_run_mm - 1e-6:
         raise ValueError(f"RaisedPanel '{entry.id}': V-bit slope would gouge the declared center field")
     try:
-        tool = pick_tool_for_edge(tools, angle_deg=spec.v_angle_deg)
+        tool = pick_tool_for_edge(tools_for_role(tools, "vcarve", entry.tool_name), angle_deg=spec.v_angle_deg)
     except ValueError as exc:
         raise ValueError(f"RaisedPanel '{entry.id}': {exc}") from exc
     if tool.v_angle_deg is None or not math.isclose(tool.v_angle_deg, spec.v_angle_deg, rel_tol=0, abs_tol=1e-6):
@@ -64,7 +64,7 @@ def build_raised_panel_plan(entry: EdgeFeatureInput, tools: Sequence[ToolSelecti
 
 def _pocket_plan(region: BaseGeometry, tools: Sequence[ToolSelection], depth: float, feature_id: str) -> PocketCutPlan:
     try:
-        tool = pick_tool_for_region(tools, region, cleanup_offset_mm=0)
+        tool = pick_tool_for_region(tools_for_role(tools, "pocket", depth_mm=depth), region, cleanup_offset_mm=0)
     except ValueError as exc:
         raise ValueError(f"RaisedPanel '{feature_id}': {exc}") from exc
     if tool is None:

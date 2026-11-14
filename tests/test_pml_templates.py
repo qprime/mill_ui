@@ -25,12 +25,14 @@ Template:
     my_width: 100mm
     my_depth: 5mm
 
-children:
-  - Rect:
-      id: panel
+  body:
+    Panel:
       children:
-        - Pocket:
-            depth: ${my_depth}
+        - Rect:
+            id: panel
+            children:
+              - Pocket:
+                  depth: ${my_depth}
 """
         result = parse_template_yaml(text)
         assert isinstance(result, TemplateDef)
@@ -43,13 +45,15 @@ children:
 Template:
   name: simple
 
-children:
-  - Rect:
-      id: panel
+  body:
+    Panel:
       children:
-        - Profile:
-            side: outside
-            depth: through
+        - Rect:
+            id: panel
+            children:
+              - Profile:
+                  side: outside
+                  depth: through
 """
         result = parse_template_yaml(text)
         assert result.name == "simple"
@@ -65,18 +69,20 @@ Template:
     rail_h: 57mm
     panel_recess: 6mm
 
-children:
-  - Rect:
-      id: door
+  body:
+    Panel:
       children:
-        - Profile:
-            side: outside
-            depth: through
-        - Frame:
-            width: ${stile_w}
+        - Rect:
+            id: door
             children:
-              - Pocket:
-                  depth: ${panel_recess}
+              - Profile:
+                  side: outside
+                  depth: through
+              - Frame:
+                  width: ${stile_w}
+                  children:
+                    - Pocket:
+                        depth: ${panel_recess}
 """
         result = parse_template_yaml(text)
         assert result.name == "shaker"
@@ -130,9 +136,11 @@ Template:
     width: 100mm
     style: pocket
 
-children:
-  - Rect:
-      id: panel
+  body:
+    Panel:
+      children:
+        - Rect:
+            id: panel
 """
         result = parse_template_yaml(text)
         assert result.params == {"width": 100.0, "style": "pocket"}
@@ -145,9 +153,11 @@ Template:
     depth: 6mm
     generator: concentric_border
 
-children:
-  - Rect:
-      id: panel
+  body:
+    Panel:
+      children:
+        - Rect:
+            id: panel
 """
         result = parse_template_yaml(text)
         assert result.params == {"depth": 6.0, "generator": "concentric_border"}
@@ -285,3 +295,44 @@ class TestShakerTemplate:
 
         assert pocket_w == pytest.approx(expected_pocket_w, rel=0.01)
         assert pocket_h == pytest.approx(expected_pocket_h, rel=0.01)
+
+
+class TestTemplateClosedKeys:
+    @pytest.mark.parametrize(
+        "source",
+        [
+            "Template: {name: part}\nchildren: [{Rect: {}}]",
+            "Template: {name: part, zz_unknown: 1}",
+        ],
+    )
+    def test_unknown_template_keys_rejected(self, source):
+        with pytest.raises(ParseError, match="PM-18"):
+            parse_template_yaml(source)
+
+    @pytest.mark.parametrize("param", ["stile_width", "outer_w", "outer_h"])
+    def test_expand_template_rejects_undeclared_and_reserved_params(self, param):
+        clear_template_cache()
+        with pytest.raises(ParseError, match=f"{param}.*PM-18"):
+            expand_template("shaker", {param: 50}, 400, 600, 19)
+
+    def test_substituted_body_checks_keys(self):
+        source = "Template: {name: part, params: {d: 2mm}, body: {Rect: {feature: {type: pocket, depht: '${d}'}}}}"
+        definition = parse_template_yaml(source)
+        with pytest.raises(ParseError, match=r"depht.*PM-18"):
+            parse_template_yaml(substitute_params(source, definition.params), parse_body=True)
+
+
+@pytest.mark.parametrize(
+    "body, error_path",
+    [
+        ("{Engrave: {depth: '${d}'}}", "Template.body"),
+        ("{AtPosition: {x: 50mm, y: 50mm, child: {Engrave: {depth: '${d}'}}}}", "Template.body.child"),
+        ("{Place: {layout: {Engrave: {depth: '${d}'}}}}", "Template.body.layout"),
+    ],
+)
+def test_template_rejects_standalone_feature_after_substitution(body, error_path):
+    source = "Template:\n  name: part\n  params: {d: 1mm}\n  body: " + body
+    definition = parse_template_yaml(source)
+    with pytest.raises(ParseError, match=r"Standalone Feature.*PM-18") as exc:
+        parse_template_yaml(substitute_params(source, definition.params), parse_body=True)
+    assert exc.value.path == error_path

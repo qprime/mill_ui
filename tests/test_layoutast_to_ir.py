@@ -12,6 +12,8 @@ from adapters.layoutast_to_ir import (
 from diagram_ir import Circle, DiagramIR, Path, Polyline, Rect, Text
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 
 def _make_sheet(w: float = 200.0, h: float = 150.0, t: float = 12.0, m: float = 0.0) -> Sheet:
     return Sheet(width_mm=w, height_mm=h, thickness_mm=t, margin_mm=m)
@@ -577,8 +579,24 @@ def test_edge_features_draw_planner_contours_and_actual_depth(kind, fields, dept
     item = replace(_make_profile_item("edge", 50, 30, 100, 80), feature=Feature(type=kind, depth_mm=9, **fields))
     tools = normalize_tool_entries(
         [
-            {"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90},
-            {"name": "r6", "kind": "roundover", "diameter": 25.4, "roundover_radius_mm": 6},
+            {
+                "name": "v90",
+                "kind": "v",
+                "diameter": 12.7,
+                "rpm": 18000,
+                "feed_xy": 1200,
+                "feed_z": 300,
+                "v_angle_deg": 90,
+            },
+            {
+                "name": "r6",
+                "kind": "roundover",
+                "diameter": 25.4,
+                "roundover_radius_mm": 6,
+                "rpm": 18000,
+                "feed_xy": 1200,
+                "feed_z": 300,
+            },
         ]
     )
 
@@ -603,7 +621,19 @@ def test_chamfer_drawing_follows_nominal_edge_for_both_sides(origin, inside):
             type="chamfer", depth_mm=2, side="inside" if inside else "outside", chamfer_width_mm=2, chamfer_angle_deg=45
         ),
     )
-    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+    tools = normalize_tool_entries(
+        [
+            {
+                "name": "v90",
+                "kind": "v",
+                "diameter": 12.7,
+                "rpm": 18000,
+                "feed_xy": 1200,
+                "feed_z": 300,
+                "v_angle_deg": 90,
+            }
+        ]
+    )
     diagram = layoutast_to_diagram_ir(
         LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools, y_origin=origin
     )
@@ -621,11 +651,23 @@ def test_bevel_drawing_retains_selected_angle_offset():
         _make_profile_item("edge", 50, 30, 100, 80),
         feature=Feature(type="bevel", depth_mm=2, bevel_width_mm=2, bevel_angle_deg=30, bevel_inner_depth_mm=1),
     )
-    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+    tools = normalize_tool_entries(
+        [
+            {
+                "name": "v60",
+                "kind": "v",
+                "diameter": 12.7,
+                "rpm": 18000,
+                "feed_xy": 1200,
+                "feed_z": 300,
+                "v_angle_deg": 60,
+            }
+        ]
+    )
     diagram = layoutast_to_diagram_ir(LayoutAST(sheet=_make_sheet(240, 200, m=10), items=(item,)), edge_tools=tools)
     layer = next(layer for layer in diagram.layers if layer.name == "BEVEL_CUTS")
     path = next(shape for shape in layer.items if isinstance(shape, Polyline))
-    assert min(p.x for p in path.points) == pytest.approx(85 - 2 / 3**0.5)
+    assert min(p.x for p in path.points) == pytest.approx(85 - 2 / 3)
 
 
 def test_missing_edge_tool_is_drawn_as_unplanned_reference():
@@ -656,7 +698,19 @@ def test_edge_drawing_honors_supplied_removal_intent_and_start_depth(other_face)
     intent = replace(
         item_to_removal_intent(item, 19), side="inside", depth_profile=DepthProfile.constant(z_top=-3, z_bottom=-5)
     )
-    tools = normalize_tool_entries([{"name": "v90", "kind": "v", "diameter": 12.7, "v_angle_deg": 90}])
+    tools = normalize_tool_entries(
+        [
+            {
+                "name": "v90",
+                "kind": "v",
+                "diameter": 12.7,
+                "rpm": 18000,
+                "feed_xy": 1200,
+                "feed_z": 300,
+                "v_angle_deg": 90,
+            }
+        ]
+    )
 
     intents = [replace(intent, face="back"), intent] if other_face else [intent]
     diagram = layoutast_to_diagram_ir(

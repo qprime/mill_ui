@@ -11,7 +11,7 @@
 | PM-1 | STRUCTURAL | DIMENSION_MM_SUFFIX | Accepts "NNNmm" format |
 | PM-2 | STRUCTURAL | DIMENSION_BARE_NUMBER | Accepts bare numbers (int/float) |
 | PM-3 | STRUCTURAL | THROUGH_SPECIAL | "through" is special depth value |
-| PM-4 | HARD | SINGLE_TYPE_KEY | Each node must have exactly one uppercase key |
+| PM-4 | HARD | SINGLE_TYPE_KEY | Each node mapping has exactly one key, its uppercase type key |
 | PM-5 | HARD | FEATURE_REQUIRES_TYPE | Feature dict must have "type" key |
 | PM-6 | POLICY | DEPTH_DEFAULT_THROUGH | depth defaults to "through" |
 | PM-7 | HARD | KEEPOUT_NO_NESTING | Neither Keepout nor Island may contain either zone type; both require nonempty geometry-only children |
@@ -25,6 +25,7 @@
 | PM-15 | HARD | COMPONENT_BIND_BEFORE_PARSE | Bind each component use's arguments over its defaults before parsing parameterized body dimensions and counts. |
 | PM-16 | HARD | COMPONENT_BINDING_ROUND_TRIP | Formatting preserves component templates, defaults and per-use arguments; reparsing recreates equal concrete instances. |
 | PM-17 | HARD | ISLAND_SHAPE_PRESERVED | Island exclusion retains its resolved area geometry; nonrectangular islands lower to polygon pocket boundaries/holes instead of bounding-box exclusions. Curves conservatively approximate within 0.001mm before NC rounding. |
+| PM-18 | HARD | CLOSED_KEY_SETS | Safety-critical parser contract: mappings admit only keys retained in the AST, NestJob or TemplateDef. Unknown or misplaced keys, standalone Feature nodes and unsupported parsed value shapes raise a parse error. |
 
 ---
 
@@ -49,20 +50,80 @@ width: 100      # bare number (interpreted as mm)
 
 ## Node Structure
 
-Each PML node must have exactly one uppercase key identifying its type:
+Each PML node mapping has exactly one key: the uppercase node type. All node options belong inside that mapping:
 
 ```yaml
 # Correct
 - Rect:
-    width: 100mm
-    height: 50mm
+    at: {x: 100mm, y: 100mm, width: 100mm, height: 50mm}
 
 # Wrong (multiple type keys)
-- Rect:
-    Circle:  # invalid
+- Rect: {}
+  Circle: {}
 ```
 
 ---
+
+## Closed Key Sets (PM-18)
+
+Every parsed PML, nest and template mapping has a closed key set. Allowed
+keys are those whose values reach the constructed AST, `NestJob` or
+`TemplateDef`, under the syntax's default and override rules. Unknown or
+misplaced keys raise `PMLParseError` (`NestParseError` for nest documents),
+identifying the context, unknown keys, allowed keys and `(PM-18 violation)`.
+Key checks precede required-key and value checks. The parser never guesses an
+alias or silently ignores a typo.
+
+Assembly keys are checked for the selected `box`, `carcass` or `cubby` type.
+Options implemented only by another type raise even when their authored value
+matches a default. The unimplemented PML `interfaces`, Assembly `children` and
+Assembly `show_dimensions` fields are rejected. Shape joinery is configured with
+the supported `top`, `bottom`, `back`, shelf or partition fields for that type.
+Use `Sheet.show_dimensions` for sheet blueprint dimensions.
+
+`Place.layout`, when supplied, must be a Grid configuration without children.
+Place the content under `Place.children`; omit `layout` to use the parent region.
+Other layout node types raise before resolution.
+
+Alternate Sheet size keys must imply the same physical size on each axis.
+`width` and `physical_width` specify physical width; `working_width` adds twice
+the margin. Height follows the same rule. Equivalent declarations are accepted;
+contradictory ones raise with the keys and implied sizes.
+
+Assembly `dimensions` is a fallback list of one to three dimensions in width,
+depth, height order. Explicit named dimensions override corresponding entries,
+including zero; missing named dimensions use the list. Malformed lists and
+invalid entries raise even when a named override is present. Duplicate
+`back_thickness` and `back.thickness` must agree. Nonzero `back.inset` must match
+an explicit `back_inset`; a zero joinery inset retains its existing meaning of
+using the assembly setback. Existing downstream back-fit checks still apply.
+
+Placement and size for Rect, RoundedRect and Ellipse belong in
+`at: {x, y, width, height}`. Circle and Polygon accept only `x` and `y` in `at`;
+their size comes from their shape parameters. Every supplied `at` requires
+both `x` and `y`, including an empty mapping.
+
+Line, Polyline and Spline accept `children` only as the single Feature-child
+shorthand; geometric children are rejected because these nodes do not retain them.
+
+A node that accepts a feature carries at most one: either `feature:` or one
+Feature child. Extra Feature children, features on containers that discard them,
+and generic `id`, `label` or `children` keys on nodes that do not retain them
+raise. Standalone Feature nodes also raise at document roots, in component or
+template bodies, as `AtPosition.child` and as `Place.layout`. A Feature must
+attach to a shape; retaining it in a layout field cannot supply that attachment.
+Parameterized component bodies are checked after binding, when instantiated.
+An empty `feature: {}` raises under PM-5; empty `feeds: {}` remains valid.
+
+A supplied `dogbone` accepts only a YAML boolean or a mapping of `style`,
+`diameter` and `overcut`. Other scalar values, lists and explicit null raise
+instead of selecting default relief. An omitted `dogbone` retains its existing
+default behavior.
+
+Assembly joinery values must be strings or mappings, and cubby `grid`
+must be a two-element list. Nest template arguments must be declared by the
+template; callers cannot supply the reserved `outer_w` or `outer_h` parameters.
+Parameterized component bodies are checked when instantiated, preserving PM-15.
 
 ## Required Keys by Node Type
 
@@ -81,9 +142,7 @@ Each PML node must have exactly one uppercase key identifying its type:
 
 ```yaml
 - Rect:
-    at: {x: 100, y: 100}  # center at (100, 100)
-    width: 50
-    height: 30
+    at: {x: 100, y: 100, width: 50, height: 30}  # center at (100, 100)
 # Actual bounds: x=[75, 125], y=[85, 115]
 ```
 
@@ -136,7 +195,8 @@ External `Template:` files retain their existing separate loader contract.
 
 Sheet can specify either:
 - `physical_width` / `physical_height` (total sheet size)
-- `width` / `height` (working area, margin=0 implied)
+- `width` / `height` (legacy physical sheet dimensions)
+- `working_width` / `working_height` (working dimensions; physical size adds twice the margin)
 
 Working area = physical - 2*margin
 

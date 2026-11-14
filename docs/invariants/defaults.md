@@ -10,7 +10,7 @@
 |-----------|---------|-------------------|
 | safe_z_mm | 5.0 mm | ir/removal_intent.py (Constraints), cam/config.py, validation/invariants/gcode_invariants.py |
 | pipeline retract height | PML `Sheet.safe_z`, else machine `defaults.safe_z_mm` (3.0 mm on altmill_4x4), else 6.0 mm | cam/pipeline.py (DEFAULT_SAFE_Z_MM), machines/cnc/altmill_4x4.yml |
-| default machine | altmill_4x4 for `cli.mill --project` / `--input` | cli/project.py (DEFAULT_MACHINE) |
+| default machine | altmill_4x4 for `cli.mill --project` / `--input` | machines/defaults.yml |
 | park_z_mm | 100.0 mm | config/machine_loader.py (MachineDefaults), cam/post/gcode.py (DEFAULT_PARK_Z_MM) |
 | max_stepdown_mm | 25.0 mm | validation/invariants/gcode_invariants.py |
 
@@ -34,7 +34,7 @@
 |-----------|---------|----------|
 | margin_mm | 10.0 mm | nesting/types.py (SheetSpec) |
 | margin_mm | 0.0 mm | layout_ast/layout.py (Sheet) |
-| material | "mdf" | layout_ast/layout.py (Sheet) — validated against feeds.yml via `available_materials()` |
+| material | "mdf" | layout_ast/layout.py (Sheet) — validated against selected preset at compilation |
 | layout_gap_mm | 10.0 mm | layout_ast/compositional.py (Assembly) |
 
 ---
@@ -44,7 +44,7 @@
 | Parameter | Default | Location |
 |-----------|---------|----------|
 | kerf_mm | 6.35 mm | nesting/types.py (DEFAULT_KERF_MM) |
-| recipe profile cutter | 9.525 mm | core/constants.py (RECIPE_KERF_MM); explicit PML/nest or CLI kerf overrides still apply |
+| production profile cutter | preset role assignment | machines/cutting_presets/altmill_production.yml; exact named/kerf constraints are validated |
 
 ---
 

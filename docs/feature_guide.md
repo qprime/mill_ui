@@ -520,7 +520,7 @@ A tool kerf set in the document.
 
 Spec: [pml/syntax_spec.md#document-structure](../pml/syntax_spec.md#document-structure)
 
-Recipes: [nested_cabinet_job](recipes/production/nested_cabinet_job/), [production_sheet](recipes/production/production_sheet/)
+Recipes: [production_sheet](recipes/production/production_sheet/)
 
 ### Safe Z
 

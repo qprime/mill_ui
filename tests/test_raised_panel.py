@@ -17,13 +17,14 @@ from cam.planner.passes.tools import ToolSelection
 from cam.planner.planner_input import PlannerInput
 from core.geometry import pocket_region
 from ir.removal_intent import DepthProfile
-from layout_ast.layout import LayoutAST
 from layout_ast.raised_panel import RaisedPanelSpec
 from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from validation import check_overlap
 from validation.removal_checks import check_cross_face_web, check_edge_feature
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 
 def _source(profile="gutter", field=2, angle=90, shape="Rect"):
@@ -129,11 +130,7 @@ def test_profiles_preserve_depths_and_keep_the_complete_cutter_in_the_cell(shape
 def test_profile_survives_pml_flat_ast_ir_and_planner_serialization(tmp_path, profile, field, angle):
     parsed = parse_pml_yaml(_source(profile, field, angle))
     assert parse_pml_yaml(format_pml_yaml(parsed)) == parsed
-    ast, _, raised, entry = _entry(_source(profile, field, angle))
-    path = tmp_path / "layout.json"
-    subset = replace(ast, items=tuple(i for i in ast.items if i.feature and i.feature.type == "raised_panel"))
-    path.write_text(subset.to_json())
-    assert LayoutAST.from_json(str(path)).items == subset.items
+    _ast, _, raised, entry = _entry(_source(profile, field, angle))
     planner = removal_intents_to_planner_input([raised])
     restored = PlannerInput.from_hints_dict(json.loads(json.dumps(planner.to_hints_dict())))
     assert restored.edge_features[0] == entry
@@ -173,7 +170,8 @@ def test_invalid_profiles_raise_instead_of_becoming_another_shape(changes, error
 
 
 @pytest.mark.parametrize(
-    "tools, error", [(_tools(60), "requires a 90"), ([_tools()[0]], "V-bit"), ([_tools()[-1]], "flat tool")]
+    "tools, error",
+    [(_tools(60), "required included angle 90"), ([_tools()[0]], "V-bit"), ([_tools()[-1]], "flat tool")],
 )
 def test_missing_required_cutting_capability_is_an_error(tools, error):
     _, _, _, entry = _entry(_source())
@@ -203,7 +201,7 @@ def test_missing_v_bit_blocks_the_setup_but_retains_a_diagnostic_blueprint():
     tools = [{"name": "flat", "diameter_mm": 3.175, "kind": "flat", "rpm": 18000, "feed_xy": 900, "feed_z": 250}]
     result = run_pipeline(ast, tool_db=tools, generate_svg=True)
     assert result.gcode == {}
-    assert any("V-bit" in str(error) for error in result.errors)
+    assert any("vcarve" in str(error) for error in result.errors)
     assert result.svg is not None
 
 

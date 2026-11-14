@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1220.0,
     "height_mm": 1220.0,
@@ -9,6 +21,42 @@
     {
       "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "beam_leg_1_cutout_5",
+            "beam_leg_1_squaremortise_1",
+            "beam_leg_2_cutout_13",
+            "beam_leg_2_squaremortise_9",
+            "beam_leg_3_cutout_21",
+            "beam_leg_3_squaremortise_17",
+            "beam_leg_4_cutout_29",
+            "beam_leg_4_squaremortise_25"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,11 +65,55 @@
       "max_depth_mm": 19.0,
       "feature_count": 8,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 6.1
+      "estimated_runtime_min": 5.8
     },
     {
       "filename": "pocket-6.35mm.nc",
       "operation": "pocket",
+      "tool_name": "1/4 upcut spiral",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "beam_apron_1_rabbet_35",
+            "beam_apron_2_rabbet_39",
+            "beam_apron_3_rabbet_43",
+            "beam_apron_4_rabbet_47",
+            "beam_leg_1_edgedado_2",
+            "beam_leg_1_edgedado_4",
+            "beam_leg_1_edgedado_7",
+            "beam_leg_2_edgedado_10",
+            "beam_leg_2_edgedado_12",
+            "beam_leg_2_edgedado_15",
+            "beam_leg_3_edgedado_18",
+            "beam_leg_3_edgedado_20",
+            "beam_leg_3_edgedado_23",
+            "beam_leg_4_edgedado_26",
+            "beam_leg_4_edgedado_28",
+            "beam_leg_4_edgedado_31"
+          ],
+          "tool": {
+            "name": "1/4 upcut spiral",
+            "diameter": 6.35,
+            "kind": "flat",
+            "rotation": "upcut",
+            "depth_per_pass": 3.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0
+          }
+        }
+      ],
       "tool_diameter_mm": 6.35,
       "rpm": 18000.0,
       "feed_xy_mm_min": 3600.0,
@@ -30,24 +122,104 @@
       "max_depth_mm": 19.0,
       "feature_count": 16,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 9.3
+      "estimated_runtime_min": 8.7
     },
     {
       "filename": "bore-6.35mm.nc",
       "operation": "bore",
+      "tool_name": "1/4 upcut spiral",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "bore",
+          "feature_ids": [
+            "beam_apron_1_drillhole_33",
+            "beam_apron_1_drillhole_34",
+            "beam_apron_2_drillhole_37",
+            "beam_apron_2_drillhole_38",
+            "beam_apron_3_drillhole_41",
+            "beam_apron_3_drillhole_42",
+            "beam_apron_4_drillhole_45",
+            "beam_apron_4_drillhole_46"
+          ],
+          "tool": {
+            "name": "1/4 upcut spiral",
+            "diameter": 6.35,
+            "kind": "flat",
+            "rotation": "upcut",
+            "depth_per_pass": 3.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0
+          }
+        }
+      ],
       "tool_diameter_mm": 6.35,
       "rpm": 18000.0,
-      "feed_xy_mm_min": 2880.0,
-      "feed_z_mm_min": 720.0,
+      "feed_xy_mm_min": 3600.0,
+      "feed_z_mm_min": 1188.0,
       "stepdown_mm": 3.0,
       "max_depth_mm": 10.0,
       "feature_count": 8,
       "strategy": "helical_bore",
-      "estimated_runtime_min": 0.6
+      "estimated_runtime_min": 0.5
     },
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "beam_apron_1_32",
+            "beam_apron_2_36",
+            "beam_apron_3_40",
+            "beam_apron_4_44",
+            "beam_leg_1_L0_0",
+            "beam_leg_1_L1_3",
+            "beam_leg_1_L2_6",
+            "beam_leg_2_L0_8",
+            "beam_leg_2_L1_11",
+            "beam_leg_2_L2_14",
+            "beam_leg_3_L0_16",
+            "beam_leg_3_L1_19",
+            "beam_leg_3_L2_22",
+            "beam_leg_4_L0_24",
+            "beam_leg_4_L1_27",
+            "beam_leg_4_L2_30"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -60,12 +232,12 @@
       "estimated_runtime_min": 14.8
     }
   ],
-  "total_runtime_min": 30.8,
+  "total_runtime_min": 29.8,
   "feature_counts": {
     "hole": 8,
     "pocket": 24,
     "profile": 16
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

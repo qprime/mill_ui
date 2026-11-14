@@ -7,7 +7,7 @@ from layout_ast.compositional import (
     TemplateDef,
 )
 from layout_ast.layout import Item, Sheet
-from pml.yaml_parser import parse_template_yaml, substitute_params
+from pml.yaml_parser import PMLParseError, parse_template_yaml, substitute_params
 from resolution.layout_resolver import LayoutResolver
 
 TEMPLATE_SEARCH_PATHS = [
@@ -49,6 +49,15 @@ def expand_template(
 ) -> list[Item]:
     template_def, raw_text = load_pml_template(template_name)
 
+    reserved = set(params) & {"outer_w", "outer_h"}
+    unknown = set(params) - set(template_def.params)
+    if reserved or unknown:
+        invalid = ", ".join(sorted(reserved | unknown))
+        allowed = ", ".join(sorted(set(template_def.params) - {"outer_w", "outer_h"}))
+        raise PMLParseError(
+            f"Unknown or reserved template param(s): {invalid}. Allowed params: {allowed} (PM-18 violation)",
+            template_name,
+        )
     resolved_params = {**template_def.params, **params}
     resolved_params["outer_w"] = region_width
     resolved_params["outer_h"] = region_height

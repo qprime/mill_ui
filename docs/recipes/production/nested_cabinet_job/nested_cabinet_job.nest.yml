@@ -6,7 +6,6 @@ Nest:
     height: 1220mm
     thickness: 18mm
 
-  kerf: 9.525mm
   gap_margin: 9.525mm
   margin: 10mm
 

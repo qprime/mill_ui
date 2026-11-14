@@ -988,7 +988,7 @@ children:
       children:
         - Pocket: {depth: 2mm}
 """
-    with pytest.raises(PMLParseError, match="does not accept 'children'"):
+    with pytest.raises(PMLParseError, match=r"Unknown Curve key.*children.*PM-18"):
         parse_pml_yaml(pml)
 
 
@@ -1060,7 +1060,7 @@ def test_curve_spirograph_round_trip():
     ids=lambda key: key.split(":")[0],
 )
 def test_curve_spirograph_rejects_removed_keys(removed: str):
-    with pytest.raises(PMLParseError, match="Unknown spirograph key"):
+    with pytest.raises(PMLParseError, match=r"Unknown Curve key.*PM-18"):
         parse_pml_yaml(_curve_pml(f"{_SPIROGRAPH_CURVE}            {removed}\n"))
 
 
@@ -1114,7 +1114,7 @@ def test_curve_rejects_unknown_key(curve_type: str, body: str):
             colour: red
 """
     )
-    with pytest.raises(PMLParseError, match=rf"Unknown {curve_type} key.*colour"):
+    with pytest.raises(PMLParseError, match=r"Unknown Curve key.*colour.*PM-18"):
         parse_pml_yaml(pml)
 
 
@@ -1381,12 +1381,13 @@ def test_phyllotaxis_rejects_scale_with_radius_on_hole():
         parse_pml_yaml(pml)
 
 
-def test_phyllotaxis_rejects_svg_scale_key():
+@pytest.mark.parametrize("key", ["scale", "svg_unit"])
+def test_phyllotaxis_rejects_svg_scale_key(key):
     pml = _phyllotaxis_pml(
         "",
-        "              type: svg\n              path: 'M 0 0 L 1 1'\n              size: 6mm\n              scale: fill",
+        f"              type: svg\n              path: 'M 0 0 L 1 1'\n              size: 6mm\n              {key}: 1",
     )
-    with pytest.raises(PMLParseError, match="does not accept 'scale'"):
+    with pytest.raises(PMLParseError, match=rf"Unknown Phyllotaxis element key.*{key}.*always fitted to 'size'.*PM-18"):
         parse_pml_yaml(pml)
 
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from layout_ast.layout import MachiningSpec
+
 _HOLDING_FIELDS = frozenset({"onion_skin_mm", "tab_count", "tab_height_mm", "tab_width_mm"})
 
 
@@ -71,6 +73,9 @@ class NestJob:
     gap_margin_mm: float = 0.0
     holding: HoldingSpec | None = None
     parts: list[NestPart] = field(default_factory=list)
+    material: str = "mdf"
+    machining: MachiningSpec = field(default_factory=MachiningSpec)
+    kerf_explicit: bool = False
 
 
 def nest_job_to_api_params(job: NestJob) -> dict[str, Any]:

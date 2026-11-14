@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import replace
 
 from layout_ast.layout import LayoutAST, Sheet
-from pml.lifter import lift_layout_ast
-from pml.yaml_formatter import format_pml_yaml
 
 from .template_expander import placement_to_items
 from .types import NestingResult, SheetLayout
@@ -43,18 +41,4 @@ def nesting_result_to_asts(result: NestingResult) -> list[LayoutAST]:
     return [sheet_layout_to_ast(sheet) for sheet in result.sheets]
 
 
-def sheet_layout_to_pml(sheet_layout: SheetLayout) -> str:
-    ast = sheet_layout_to_ast(sheet_layout)
-    return format_pml_yaml(lift_layout_ast(ast))
-
-
-def nesting_result_to_pml(result: NestingResult) -> list[str]:
-    return [sheet_layout_to_pml(sheet) for sheet in result.sheets]
-
-
-__all__ = [
-    "nesting_result_to_asts",
-    "nesting_result_to_pml",
-    "sheet_layout_to_ast",
-    "sheet_layout_to_pml",
-]
+__all__ = ["nesting_result_to_asts", "sheet_layout_to_ast"]

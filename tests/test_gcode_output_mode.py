@@ -9,9 +9,11 @@ from cam.model.stock import Stock
 from cam.pipeline import GcodeFile, GcodeNameCollisionError, _claim_gcode_name, gcode_file_groups, run_pipeline
 from cam.planner.passes import PassAccumulator
 from cam.planner.passes.tools import ToolSelection
-from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, RestSpec, Sheet
+from layout_ast.layout import Feature, Geometry, Item, LayoutAST, MachiningSpec, Placement, RestSpec, Sheet
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 TOOL_DB = [
     {"name": "1/8_endmill", "diameter": 3.175, "kind": "flat", "rpm": 14000, "feed_xy": 900, "feed_z": 300},
@@ -19,9 +21,12 @@ TOOL_DB = [
     {"name": "3/8_endmill", "diameter": 9.525, "kind": "flat", "rpm": 10000, "feed_xy": 700, "feed_z": 250},
 ]
 
+TOOL_DB.reverse()
+
 
 def _make_multi_tool_ast(gcode_output: str = "per-operation") -> LayoutAST:
     return LayoutAST(
+        machining=MachiningSpec(tools={"profile": "1/4_endmill", "pocket": "3/8_endmill"}),
         sheet=Sheet(
             width_mm=400,
             height_mm=300,
@@ -457,7 +462,7 @@ def test_same_diameter_vbits_get_one_file_each(mode, expected):
 
 
 def _record(op: str, **tool_fields):
-    tool = ToolSelection(name=op, diameter=6.35, kind="flat", rpm=18000, feed_xy=1200.0, feed_z=300.0)
+    tool = ToolSelection(name="shared tool", diameter=6.35, kind="flat", rpm=18000, feed_xy=1200.0, feed_z=300.0)
     accumulator = PassAccumulator(
         machine=Machine(), stock=Stock(width=300, height=200, thickness=19), safe_z=3.0, prime_spindle=False
     )

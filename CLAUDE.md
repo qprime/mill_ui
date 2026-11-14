@@ -24,7 +24,7 @@ The compiler architecture, declarative PML, validation layer, and SVG output all
 
 ## What This Is
 
-CAM system that generates G-code for CNC routers. Converts panel layouts (PML/JSON) through a semantic IR layer (RemovalIntent) to toolpaths.
+CAM system that generates G-code for CNC routers. Converts authored layouts (PML/nest) through a semantic IR layer (RemovalIntent) to toolpaths.
 
 Interfaces are authoritative and explicit: each interface describes a single
 (panel_a, edge_a) ↔ (panel_b, edge_b) relationship.
@@ -38,7 +38,7 @@ They must not infer topology, panel roles, or geometry beyond explicit inputs.
 
 ## Mental Model
 
-Compiler-style pipeline: `PML/JSON → LayoutAST → RemovalIntent IR → Planner → G-code`
+Compiler-style pipeline: `PML/nest → LayoutAST → RemovalIntent IR → Planner → G-code`
 
 RemovalIntent is the semantic layer—validates *what* to machine before *how* to machine it. Domains define *where*, generators define *what*.
 
@@ -69,6 +69,7 @@ gh issue view <number> --json title,body,state,labels,comments,author,createdAt,
 .venv/bin/python tools/run_tests.py                              # full suite
 .venv/bin/python tools/run_tests.py tests/test_foo.py -x -q      # single file, stop on first fail
 .venv/bin/python tools/run_tests.py -k finger_joint              # keyword filter
+.venv/bin/python tools/run_tests.py -m shipped_configuration -q  # explicit production-config checks
 
 # Lint / format (ruff, config in pyproject.toml)
 .venv/bin/python tools/run_ruff.py                               # lint repo

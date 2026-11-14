@@ -43,7 +43,6 @@ from cam.planner.passes.tools import (
     pick_tool_for_profile,
     pick_tool_for_region,
     pick_tool_for_roundover,
-    pick_tool_for_surface,
     stepdown_for_tool,
     stepover_for_tool,
 )
@@ -120,8 +119,8 @@ ROUNDOVER_10MM = {
     "roundover_radius_mm": 10.0,
 }
 
-ALL_TOOLS = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM, BALL_2MM, V_1MM])
-FLAT_ONLY = normalize_tool_entries([FLAT_3MM, FLAT_6MM, FLAT_12MM])
+ALL_TOOLS = normalize_tool_entries([FLAT_6MM_UPCUT, FLAT_12MM, FLAT_6MM, FLAT_3MM, V_1MM, BALL_2MM])
+FLAT_ONLY = normalize_tool_entries([FLAT_12MM, FLAT_6MM, FLAT_3MM])
 TOOLS_WITH_VBIT = normalize_tool_entries([FLAT_3MM, FLAT_6MM, VBIT_90])
 TOOLS_WITH_TWO_VBITS = normalize_tool_entries([FLAT_3MM, VBIT_60, VBIT_90])
 TOOLS_WITH_ROUNDOVER = normalize_tool_entries([FLAT_3MM, FLAT_6MM, ROUNDOVER_6MM])
@@ -145,52 +144,6 @@ def _accumulator(ramp_angle=3.0):
         prime_spindle=False,
         ramp_angle_deg=ramp_angle,
     )
-
-
-class TestDedicatedToolSelection:
-    @staticmethod
-    def _tools():
-        return normalize_tool_entries(
-            [
-                FLAT_3MM,
-                FLAT_6MM,
-                FLAT_12MM,
-                {**FLAT_12MM, "name": "surfacer", "diameter": 25.4, "purpose": "surface"},
-                {**FLAT_6MM, "name": "carbide profile", "diameter": 9.525, "purpose": "profile"},
-                {**FLAT_6MM, "name": "PCD pocket", "diameter": 9.525, "purpose": "pocket"},
-            ]
-        )
-
-    def test_dedicated_tools_are_selected_for_their_operations(self):
-        tools = self._tools()
-
-        assert pick_tool_for_profile(tools, kerf_mm=9.525).name == "carbide profile"
-        assert pick_tool_for_pocket(tools, required_width_mm=None, cleanup_offset_mm=0).name == "PCD pocket"
-        region_tool = pick_tool_for_region(tools, box(0, 0, 30, 30), cleanup_offset_mm=0)
-        assert region_tool is not None and region_tool.name == "PCD pocket"
-        assert pick_tool_for_surface(tools).name == "surfacer"
-        assert pick_tool_for_hole(tools, hole_diameter_mm=10).name == "6mm_flat"
-
-    def test_narrow_pockets_retain_a_fitting_detail_tool(self):
-        tools = self._tools()
-
-        assert pick_tool_for_pocket(tools, required_width_mm=5, cleanup_offset_mm=0.25).name == "3mm_flat"
-        region_tool = pick_tool_for_region(tools, box(0, 0, 30, 5), cleanup_offset_mm=0.25)
-        assert region_tool is not None and region_tool.name == "3mm_flat"
-
-    def test_holes_choose_largest_fit_and_preserve_later_equal_diameter_entries(self):
-        tools = normalize_tool_entries([FLAT_12MM, FLAT_6MM, FLAT_3MM, {**FLAT_6MM, "name": "plunge tool"}])
-
-        assert pick_tool_for_hole(tools, hole_diameter_mm=10).name == "plunge tool"
-
-    def test_compilation_snapshot_preserves_purposes_and_legacy_general_tools(self):
-        from cam.compilation import CompilationContext
-
-        context = CompilationContext("mdf", 9.525, tuple(self._tools()))
-        snapshot = context.to_dict()
-
-        assert "purpose" not in snapshot["tools"][0]
-        assert CompilationContext.from_dict(snapshot) == context
 
 
 class TestPickToolForPocket:
@@ -251,7 +204,7 @@ class TestPickToolForRegion:
         assert pick_tool_for_region(FLAT_ONLY, _square_ring(3.0), cleanup_offset_mm=0.25) is None
 
     def test_prefers_upcut_like_pick_tool_for_pocket(self):
-        tools = normalize_tool_entries([FLAT_6MM, FLAT_6MM_UPCUT, FLAT_12MM])
+        tools = normalize_tool_entries([FLAT_6MM_UPCUT, FLAT_6MM, FLAT_12MM])
         tool = pick_tool_for_region(tools, _square_ring(10.0), cleanup_offset_mm=0.25)
         assert tool is not None
         assert tool.name == "6mm_upcut"
@@ -262,13 +215,13 @@ class TestPickToolForProfile:
         tool = pick_tool_for_profile(FLAT_ONLY, kerf_mm=6.0)
         assert tool.diameter == 6.0
 
-    def test_closest_to_kerf(self):
-        tool = pick_tool_for_profile(FLAT_ONLY, kerf_mm=5.0)
-        assert tool.diameter == 6.0
+    def test_inexact_kerf_is_rejected(self):
+        with pytest.raises(ValueError, match="kerf constraint 5mm conflicts"):
+            pick_tool_for_profile(FLAT_ONLY, kerf_mm=5.0)
 
-    def test_no_kerf_picks_smallest(self):
+    def test_no_kerf_uses_first_approved_cutter(self):
         tool = pick_tool_for_profile(FLAT_ONLY, kerf_mm=None)
-        assert tool.diameter == 3.0
+        assert tool.diameter == 12.0
 
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="does not contain a flat tool"):
@@ -284,9 +237,9 @@ class TestPickToolForHole:
         tool = pick_tool_for_hole(FLAT_ONLY, hole_diameter_mm=6.0)
         assert tool.diameter == 6.0
 
-    def test_no_fitting_tool_falls_back_to_smallest(self):
-        tool = pick_tool_for_hole(FLAT_ONLY, hole_diameter_mm=2.0)
-        assert tool.diameter == 3.0
+    def test_no_fitting_tool_errors(self):
+        with pytest.raises(ValueError, match="no approved cutter fits"):
+            pick_tool_for_hole(FLAT_ONLY, hole_diameter_mm=2.0)
 
     def test_no_flat_tools_raises(self):
         with pytest.raises(ValueError, match="flat tool"):
@@ -305,7 +258,7 @@ class TestPickToolForEngrave:
     def test_falls_back_to_flat_when_no_specialty(self):
         tool = pick_tool_for_engrave(FLAT_ONLY)
         assert tool.kind == "flat"
-        assert tool.diameter == 3.0
+        assert tool.diameter == 12.0
 
 
 class TestStepdownForTool:
@@ -321,17 +274,17 @@ class TestStepdownForTool:
         tool = ToolSelection(name="t", diameter=12.0, kind="flat", rpm=1, feed_xy=1, feed_z=1)
         assert stepdown_for_tool(tool) == 3.0
 
-    def test_zero_depth_per_pass_uses_fallback(self):
-        tool = ToolSelection(name="t", diameter=6.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, depth_per_pass=0.0)
-        assert stepdown_for_tool(tool) == 3.0
+    def test_zero_depth_per_pass_is_rejected(self):
+        with pytest.raises(ValueError, match="depth_per_pass must be finite and positive"):
+            ToolSelection(name="t", diameter=6.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, depth_per_pass=0.0)
 
     def test_small_tool(self):
         tool = ToolSelection(name="t", diameter=1.0, kind="flat", rpm=1, feed_xy=1, feed_z=1)
         assert stepdown_for_tool(tool) == 0.5
 
-    def test_stepdown_clamped_from_subfloor_depth_per_pass(self):
+    def test_explicit_stepdown_is_not_clamped(self):
         tool = ToolSelection(name="t", diameter=6.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, depth_per_pass=0.001)
-        assert stepdown_for_tool(tool) == MIN_STEPDOWN_MM
+        assert stepdown_for_tool(tool) == 0.001
 
     def test_stepdown_clamped_from_tiny_diameter(self):
         tool = ToolSelection(name="t", diameter=0.005, kind="flat", rpm=1, feed_xy=1, feed_z=1)
@@ -347,9 +300,9 @@ class TestStepoverForTool:
         tool = ToolSelection(name="t", diameter=10.0, kind="flat", rpm=1, feed_xy=1, feed_z=1)
         assert stepover_for_tool(tool) == pytest.approx(4.0)
 
-    def test_zero_stepover_percent_uses_fallback(self):
-        tool = ToolSelection(name="t", diameter=10.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, stepover_percent=0.0)
-        assert stepover_for_tool(tool) == pytest.approx(4.0)
+    def test_zero_stepover_percent_is_rejected(self):
+        with pytest.raises(ValueError, match="stepover_percent must be finite and positive"):
+            ToolSelection(name="t", diameter=10.0, kind="flat", rpm=1, feed_xy=1, feed_z=1, stepover_percent=0.0)
 
 
 class TestStepdownFor:
@@ -887,7 +840,7 @@ class TestRectangleProfilePlanning:
         a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 6, id="a"), side="outside")
         b = replace(a, id="b", center_xy_mm=(164, 80))
 
-        with pytest.raises(ValueError, match=r"need 6\.000000mm"):
+        with pytest.raises(ValueError, match=r"Profile kerf constraint 3mm conflicts"):
             plan_passes(
                 PlannerInput(profiles=(a, b), kerf_width_mm=3),
                 config=Config(),
@@ -942,10 +895,11 @@ class TestRectangleProfilePlanning:
             a, id="b", center_xy_mm=(163, 80), feeds_override=FeedsOverride(rpm=12000, feed_xy=650, depth_per_pass=1)
         )
 
-        (record,) = self._plan((a, b))
-
-        assert [move.rpm for move in record.moves if isinstance(move, SetRpmMove)] == [18000, 12000]
-        feeds = {move.feed for move in record.moves if isinstance(move, SetFeedMove)}
+        records = self._plan((a, b))
+        assert len(records) == 2
+        moves = [move for record in records for move in record.moves]
+        assert [move.rpm for move in moves if isinstance(move, SetRpmMove)] == [18000, 12000]
+        feeds = {move.feed for move in moves if isinstance(move, SetFeedMove)}
         assert feeds == {1000, 650}
 
     @pytest.mark.parametrize("option", ["depth", "feeds", "allowance", "tabs", "onion_skin"])
@@ -1161,7 +1115,7 @@ class TestPlanPocketPasses:
     )
     def test_pocket_without_fitting_tool_is_an_error(self, pocket):
         acc = _accumulator()
-        with pytest.raises(ValueError, match=r"required cutting moves, got 0.*smallest flat tool 3 mm") as exc:
+        with pytest.raises(ValueError, match=r"infeasible|smallest flat tool 3 mm") as exc:
             plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         assert pocket.id in str(exc.value)
         assert pocket.shape in str(exc.value)
@@ -1175,7 +1129,7 @@ class TestPlanPocketPasses:
             id="empty_allowance",
             edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=20, finish_allowance_mm=20),
         )
-        with pytest.raises(ValueError, match=r"empty_allowance.*selected tool 12 mm"):
+        with pytest.raises(ValueError, match=r"empty_allowance.*12mm_flat.*12 mm"):
             plan_pocket_passes((valid, empty), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         assert acc.cut_move_count() > 0
 
@@ -1424,10 +1378,11 @@ class TestPlanHolePasses:
         assert len(records) == 1
         assert records[0].op == "pocket"
 
-    def test_non_circle_hole_skipped(self):
+    def test_non_circle_hole_is_rejected(self):
         acc = _accumulator()
         holes = (_feature("Rect", {"w_mm": 5.0, "h_mm": 5.0}, (50.0, 50.0), 10.0),)
-        plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
+        with pytest.raises(ValueError, match="holes require circles"):
+            plan_hole_passes(holes, accumulator=acc, tool_db=FLAT_ONLY)
         assert len(acc.passes()) == 0
 
 
@@ -1462,9 +1417,9 @@ class TestPlanEngravePasses:
         acc = _accumulator()
         plan_engrave_passes((first, second, third), accumulator=acc, tool_db=ALL_TOOLS)
         records = acc.passes()
-        assert len(records) == 1
-        assert records[0].count == 3
-        moves = records[0].moves
+        assert len(records) == 3
+        assert sum(record.count for record in records) == 3
+        moves = [move for record in records for move in record.moves]
         assert [m.rpm for m in moves if isinstance(m, SetRpmMove)] == [8000, 10000, V_1MM["rpm"]]
         assert [m.feed for m in moves if isinstance(m, SetFeedMove)] == [
             120,
@@ -1579,9 +1534,9 @@ class TestPickToolForEdge:
         with pytest.raises(ValueError, match="V-bit"):
             pick_tool_for_edge(FLAT_ONLY, angle_deg=90.0)
 
-    def test_single_vbit(self):
-        tool = pick_tool_for_edge(TOOLS_WITH_VBIT, angle_deg=60.0)
-        assert tool.v_angle_deg == 90.0
+    def test_incompatible_single_vbit_is_rejected(self):
+        with pytest.raises(ValueError, match="required included angle 60"):
+            pick_tool_for_edge(TOOLS_WITH_VBIT, angle_deg=60.0)
 
     def test_ignores_flat_tools(self):
         tool = pick_tool_for_edge(TOOLS_WITH_VBIT, angle_deg=90.0)
@@ -1611,7 +1566,7 @@ class TestPlanEdgeFeaturePasses:
 
     def test_chamfer_rejects_nearest_bit_that_would_change_width(self):
         entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 2, ChamferSpec(width_mm=2, angle_deg=30))
-        with pytest.raises(ValueError, match="cannot cut requested chamfer"):
+        with pytest.raises(ValueError, match="no V-bit with 120"):
             build_edge_cut_plan(entry, TOOLS_WITH_TWO_VBITS)
 
     def test_chamfer_must_fit_the_selected_cutter_radius(self):
@@ -1665,7 +1620,7 @@ class TestPlanEdgeFeaturePasses:
                 ChamferSpec(width_mm=2, angle_deg=45),
                 "Rect",
                 normalize_tool_entries([{**VBIT_90, "v_angle_deg": 0}]),
-                "v_angle_deg must be positive",
+                "no V-bit with 90",
             ),
             (ChamferSpec(width_mm=2, angle_deg=45), "Hexagon", TOOLS_WITH_VBIT, "unsupported shape"),
             (RoundoverSpec(radius_mm=6.0), "Rect", FLAT_ONLY, "no roundover bit with 6.0mm radius"),
@@ -1748,7 +1703,9 @@ class TestPassKey:
     def test_flat_tools_unaffected(self):
         tool = ToolSelection(name="flat", diameter=6.0, kind="flat", rpm=14000, feed_xy=900, feed_z=280)
         key = pass_key("profile", tool)
-        assert key == ("profile", 6.0, "flat", None, None, None)
+        assert key[0] == "profile"
+        assert key != pass_key("profile", replace(tool, name="other"))
+        assert key != pass_key("profile", replace(tool, feed_xy=600))
 
     def test_different_roundover_radii_different_keys(self):
         tool_6 = ToolSelection(
@@ -1788,13 +1745,13 @@ class TestPlanRoundoverPasses:
         [
             ({"roundover_radius_mm": 6.35}, "requires 6"),
             ({"diameter": 11}, "cannot contain radius"),
-            ({"diameter": float("nan")}, "cannot contain radius"),
+            ({"diameter": float("nan")}, "diameter must be finite"),
         ],
     )
     def test_selected_roundover_must_reproduce_the_requested_profile(self, tool_changes, message):
         entry = _edge_feature("Rect", {"w_mm": 50, "h_mm": 30}, (100, 75), 6, RoundoverSpec(radius_mm=6))
-        tool = replace(TOOLS_WITH_ROUNDOVER[-1], **tool_changes)
         with pytest.raises(ValueError, match=message):
+            tool = replace(TOOLS_WITH_ROUNDOVER[-1], **tool_changes)
             build_edge_cut_plan(entry, [tool])
 
     @pytest.mark.parametrize("diameter, expected_offset", [(12, 0), (18, 3), (25.4, 6.7)])
@@ -1906,7 +1863,13 @@ class TestMoveTiming:
         entry = summarise_gcode_file("6.35mm.nc", [pocket, dogbone])
 
         expected_s = 0.6 + 60.0 + 0.6 + (1200.0 / 5000.0 + 6.0 / 1000.0) * 60.0
-        assert entry == {
+        assert entry["tool_name"] == SUMMARY_TOOL.name
+        assert len(entry["effective_passes"]) == 2
+        assert {
+            k: v
+            for k, v in entry.items()
+            if k not in {"tool_name", "tool_geometry", "stepover_percent", "effective_passes"}
+        } == {
             "filename": "6.35mm.nc",
             "operation": "pocket, dogbone",
             "tool_diameter_mm": 6.35,

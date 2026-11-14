@@ -9,6 +9,8 @@ machines/
 ├── README.md           # This file
 ├── endmills.yml        # Endmill/bit library
 ├── spindles.yml        # Spindle specifications
+├── defaults.yml        # Production/recipe machine selection
+├── cutting_presets/    # Material role assignments and cutting parameters
 └── cnc/                # CNC machine definitions
     ├── altmill_4x4.yml
     └── genmitsu_4040_pro.yml
@@ -37,8 +39,6 @@ spoilboard:                    # Optional: spoilboard dimensions
 
 defaults:                      # Optional: default machining parameters
   safe_z_mm: 5.0              # Retract height above the stock top; a PML Sheet safe_z overrides it
-  feed_rate_mm_min: 1500      # Default XY feed rate
-  plunge_rate_mm_min: 500     # Default Z plunge rate
 ```
 
 ### Coordinate System
@@ -80,7 +80,6 @@ endmills:
     shank_diameter_mm: 6.35    # Shank diameter
     flutes: 2                  # Number of flutes
     type: upcut_spiral         # Tool type (see below)
-    purpose: general          # general | profile | pocket | surface; defaults to general
     v_angle_deg: 60            # Optional: V-bit angle (for v_bit type)
 ```
 
@@ -119,13 +118,10 @@ different entry strategy. Cutting diameter is modeled as exactly 9.525mm, with
 entry capabilities against the actual cutter before using these modeled programs
 on the machine. No coating-based speed multiplier is applied.
 
-Dedicated tools participate only in automatic selection for their declared
-purpose. Pocket selection tries a dedicated pocket cutter first, retaining
-smaller general-purpose cutters where the geometry requires them. A diameter tie
-in profile selection favors a dedicated profile cutter. Surface cutters cannot
-be selected automatically for holes. Explicit named tools retain their existing
-behavior. The library's later equal-diameter hole entry remains the tie-break,
-preserving its longer-reach plunge tools.
+Preset roles explicitly assign profile, pocket, surface and hole cutters.
+Approved alternatives are ordered in configuration; library order has no role.
+The same physical cutter may serve multiple roles. Explicit named tools remain
+binding and must have operation/material parameters and sufficient reach.
 
 Legacy detail tools also have updated MDF planning feeds: 1/8-inch upcut at
 2,160mm/min and 2mm stepdown, 1/4-inch upcut at 3,600mm/min, 1mm engraving at
@@ -267,8 +263,6 @@ for error in result.errors:
 
    defaults:
      safe_z_mm: 10.0
-     feed_rate_mm_min: 2000
-     plunge_rate_mm_min: 600
    ```
 
 2. Test loading:
@@ -285,3 +279,54 @@ for error in result.errors:
    for r in results:
        print(f"{r.id}: {r.status.value}")
    ```
+
+## Cutting preset configuration
+
+`defaults.yml` selects `machine` for production and `recipe_machine` for canonical
+recipe generation. Each `cnc/*.yml` references a `cutting_preset`; multiple machine
+instances can share it while enforcing their own `capabilities` and envelope.
+The physical library `endmills.yml` carries no exclusive purpose or selection
+priority. A cutter's name is its stable declarative reference.
+
+`cutting_presets/<name>.yml` contains `name` and `materials`. Each material has
+`roles` (role → ordered approved cutter names) and `parameters`
+(role → cutter name → `rpm`, `feed_xy`, `feed_z`, `depth_per_pass`,
+`stepover_percent`). YAML aliases share identical configured values without an
+inheritance system. Distinct operations may give one physical cutter different
+settings. No global feeds file is loaded by manufacturing.
+
+`altmill_production.yml` explicitly migrates the checkpoint's modeled AltMill
+MDF/detail settings and plywood combinations. Its main profile and PCD settings
+remain 18,000 RPM, 4,500/1,125 and 2,520/630 mm/min respectively, both 6mm stepdown;
+PCD stepover is 40%. Cutter models/flute counts remain assumptions, not confirmed
+production models. Existing example V-bits retain their explicit 60/90° geometry;
+no new confirmed V-bit model or spindle power is claimed. Dogbone relief uses
+an approved longer-reach 1/8-inch cutter rather than exceeding the short cutter's
+flutes. The historical timing comparison remains unchanged.
+
+`genmitsu.yml` intentionally has no supported cutting combinations: none were
+supplied or justified for that machine. Configure its own material roles and
+parameters before machining. It never receives scaled AltMill or old global
+feeds. Selecting it also applies its independent physical envelope. Known optional
+capability keys are `max_feed_xy`, `max_feed_z`, `rpm_min`, `rpm_max`,
+`max_shank_mm` and `rapid_z`; limits validate effective settings after overrides,
+never establish cutting settings or silently clamp them.
+
+Job and operation precedence is documented in [PML](../pml/syntax_spec.md#job-machining-and-named-operation-tools).
+`--preset` selects an explicit alternate preset file for the invocation;
+`--endmills` supplies an explicit library. Optional `--feeds` with `--endmills`
+is an explicit legacy cutter/material cutting input, never an automatic fallback.
+Use the same explicit inputs for validation. Outputs contain selected effective
+passes, not snapshots or build configuration to replay.
+
+## Selecting a configuration root
+
+`MILL_UI_MACHINES_DIR=/path/to/configuration` explicitly selects the directory
+containing `defaults.yml`, `cnc/`, `endmills.yml`, and `cutting_presets/`. An
+unset variable uses this repository directory. An invalid explicit root errors;
+it never falls back to the repository configuration. CLI/compiler imports do not
+read default-selection files; configuration is read when a build requests it.
+
+General tests create independent synthetic roots for every test, including CLI
+subprocesses. Checks of these shipped files are explicitly marked integration
+tests; see [testing invariants](../docs/invariants/testing.md#production-independent-machining-tests).

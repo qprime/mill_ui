@@ -5,6 +5,18 @@
       "source": "bookcase.pml.yml",
       "sheet_index": 1,
       "job_name": "bookcase_sheet_1",
+      "machining": {
+        "machine": "Sienci AltMill MK2 4x4",
+        "preset": "altmill_production",
+        "material": "mdf",
+        "requested_kerf_mm": null,
+        "selected_profile_diameter_mm": 9.525,
+        "selected_profile_tool": "Example 3/8 carbide mortise compression",
+        "job_overrides": {
+          "tools": {},
+          "feeds": {}
+        }
+      },
       "stock": {
         "width_mm": 1220.0,
         "height_mm": 1220.0,
@@ -15,6 +27,44 @@
         {
           "filename": "sheet_1.pocket-9.53mm.nc",
           "operation": "pocket",
+          "tool_name": "Example 3/8 PCD straight plunge",
+          "tool_geometry": {
+            "kind": "flat",
+            "v_angle_deg": null,
+            "flute_length_mm": 25.4
+          },
+          "stepover_percent": 40.0,
+          "effective_passes": [
+            {
+              "operation": "pocket",
+              "feature_ids": [
+                "assembly_left_side_dado_2",
+                "assembly_left_side_dado_3",
+                "assembly_left_side_dado_4",
+                "assembly_left_side_dado_5",
+                "assembly_left_side_dado_6",
+                "assembly_right_side_dado_10",
+                "assembly_right_side_dado_11",
+                "assembly_right_side_dado_12",
+                "assembly_right_side_dado_13",
+                "assembly_right_side_dado_9"
+              ],
+              "tool": {
+                "name": "Example 3/8 PCD straight plunge",
+                "diameter": 9.525,
+                "kind": "flat",
+                "rotation": null,
+                "depth_per_pass": 6.0,
+                "stepover_percent": 40.0,
+                "flute_length_mm": 25.4,
+                "flutes": 1,
+                "shank_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy": 2520.0,
+                "feed_z": 630.0
+              }
+            }
+          ],
           "tool_diameter_mm": 9.525,
           "rpm": 18000.0,
           "feed_xy_mm_min": 2520.0,
@@ -23,11 +73,49 @@
           "max_depth_mm": 9.0,
           "feature_count": 10,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 15.2
+          "estimated_runtime_min": 15.0
         },
         {
           "filename": "sheet_1.dogbone-9.53mm.nc",
           "operation": "dogbone",
+          "tool_name": "Example 3/8 PCD straight plunge",
+          "tool_geometry": {
+            "kind": "flat",
+            "v_angle_deg": null,
+            "flute_length_mm": 25.4
+          },
+          "stepover_percent": 40.0,
+          "effective_passes": [
+            {
+              "operation": "dogbone",
+              "feature_ids": [
+                "assembly_left_side_dado_2",
+                "assembly_left_side_dado_3",
+                "assembly_left_side_dado_4",
+                "assembly_left_side_dado_5",
+                "assembly_left_side_dado_6",
+                "assembly_right_side_dado_10",
+                "assembly_right_side_dado_11",
+                "assembly_right_side_dado_12",
+                "assembly_right_side_dado_13",
+                "assembly_right_side_dado_9"
+              ],
+              "tool": {
+                "name": "Example 3/8 PCD straight plunge",
+                "diameter": 9.525,
+                "kind": "flat",
+                "rotation": null,
+                "depth_per_pass": 6.0,
+                "stepover_percent": 40.0,
+                "flute_length_mm": 25.4,
+                "flutes": 1,
+                "shank_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy": 2520.0,
+                "feed_z": 630.0
+              }
+            }
+          ],
           "tool_diameter_mm": 9.525,
           "rpm": 18000.0,
           "feed_xy_mm_min": 2520.0,
@@ -36,11 +124,41 @@
           "max_depth_mm": 9.0,
           "feature_count": 40,
           "strategy": "dogbone",
-          "estimated_runtime_min": 6.2
+          "estimated_runtime_min": 5.9
         },
         {
           "filename": "sheet_1.profile-9.53mm.nc",
           "operation": "profile",
+          "tool_name": "Example 3/8 carbide mortise compression",
+          "tool_geometry": {
+            "kind": "flat",
+            "v_angle_deg": null,
+            "flute_length_mm": 25.4
+          },
+          "stepover_percent": 40.0,
+          "effective_passes": [
+            {
+              "operation": "profile",
+              "feature_ids": [
+                "generated_assembly_left_side_1_left_side_outer",
+                "generated_assembly_right_side_8_right_side_outer"
+              ],
+              "tool": {
+                "name": "Example 3/8 carbide mortise compression",
+                "diameter": 9.525,
+                "kind": "flat",
+                "rotation": "compression",
+                "depth_per_pass": 6.0,
+                "stepover_percent": 40.0,
+                "flute_length_mm": 25.4,
+                "flutes": 2,
+                "shank_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy": 4500.0,
+                "feed_z": 1125.0
+              }
+            }
+          ],
           "tool_diameter_mm": 9.525,
           "rpm": 18000.0,
           "feed_xy_mm_min": 4500.0,
@@ -53,17 +171,29 @@
           "estimated_runtime_min": 4.3
         }
       ],
-      "total_runtime_min": 25.7,
+      "total_runtime_min": 25.2,
       "feature_counts": {
         "pocket": 10,
         "profile": 2
       },
-      "safe_z_mm": 6.0
+      "safe_z_mm": 3.0
     },
     {
       "source": "bookcase.pml.yml",
       "sheet_index": 2,
       "job_name": "bookcase_sheet_2",
+      "machining": {
+        "machine": "Sienci AltMill MK2 4x4",
+        "preset": "altmill_production",
+        "material": "mdf",
+        "requested_kerf_mm": null,
+        "selected_profile_diameter_mm": 9.525,
+        "selected_profile_tool": "Example 3/8 carbide mortise compression",
+        "job_overrides": {
+          "tools": {},
+          "feeds": {}
+        }
+      },
       "stock": {
         "width_mm": 1220.0,
         "height_mm": 1220.0,
@@ -74,6 +204,37 @@
         {
           "filename": "sheet_2.profile-9.53mm.nc",
           "operation": "profile",
+          "tool_name": "Example 3/8 carbide mortise compression",
+          "tool_geometry": {
+            "kind": "flat",
+            "v_angle_deg": null,
+            "flute_length_mm": 25.4
+          },
+          "stepover_percent": 40.0,
+          "effective_passes": [
+            {
+              "operation": "profile",
+              "feature_ids": [
+                "generated_assembly_bottom_3_bottom_outer",
+                "generated_assembly_shelf_1_5_shelf_1_outer",
+                "generated_assembly_top_1_top_outer"
+              ],
+              "tool": {
+                "name": "Example 3/8 carbide mortise compression",
+                "diameter": 9.525,
+                "kind": "flat",
+                "rotation": "compression",
+                "depth_per_pass": 6.0,
+                "stepover_percent": 40.0,
+                "flute_length_mm": 25.4,
+                "flutes": 2,
+                "shank_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy": 4500.0,
+                "feed_z": 1125.0
+              }
+            }
+          ],
           "tool_diameter_mm": 9.525,
           "rpm": 18000.0,
           "feed_xy_mm_min": 4500.0,
@@ -90,12 +251,24 @@
       "feature_counts": {
         "profile": 3
       },
-      "safe_z_mm": 6.0
+      "safe_z_mm": 3.0
     },
     {
       "source": "bookcase.pml.yml",
       "sheet_index": 3,
       "job_name": "bookcase_sheet_3",
+      "machining": {
+        "machine": "Sienci AltMill MK2 4x4",
+        "preset": "altmill_production",
+        "material": "mdf",
+        "requested_kerf_mm": null,
+        "selected_profile_diameter_mm": 9.525,
+        "selected_profile_tool": "Example 3/8 carbide mortise compression",
+        "job_overrides": {
+          "tools": {},
+          "feeds": {}
+        }
+      },
       "stock": {
         "width_mm": 1220.0,
         "height_mm": 1220.0,
@@ -106,6 +279,36 @@
         {
           "filename": "sheet_3.profile-9.53mm.nc",
           "operation": "profile",
+          "tool_name": "Example 3/8 carbide mortise compression",
+          "tool_geometry": {
+            "kind": "flat",
+            "v_angle_deg": null,
+            "flute_length_mm": 25.4
+          },
+          "stepover_percent": 40.0,
+          "effective_passes": [
+            {
+              "operation": "profile",
+              "feature_ids": [
+                "generated_assembly_shelf_2_1_shelf_2_outer",
+                "generated_assembly_shelf_3_3_shelf_3_outer"
+              ],
+              "tool": {
+                "name": "Example 3/8 carbide mortise compression",
+                "diameter": 9.525,
+                "kind": "flat",
+                "rotation": "compression",
+                "depth_per_pass": 6.0,
+                "stepover_percent": 40.0,
+                "flute_length_mm": 25.4,
+                "flutes": 2,
+                "shank_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy": 4500.0,
+                "feed_z": 1125.0
+              }
+            }
+          ],
           "tool_diameter_mm": 9.525,
           "rpm": 18000.0,
           "feed_xy_mm_min": 4500.0,
@@ -122,9 +325,9 @@
       "feature_counts": {
         "profile": 2
       },
-      "safe_z_mm": 6.0
+      "safe_z_mm": 3.0
     }
   ],
-  "total_runtime_min": 34.8,
-  "kerf_mm": 9.525
+  "total_runtime_min": 34.3,
+  "kerf_mm": null
 }

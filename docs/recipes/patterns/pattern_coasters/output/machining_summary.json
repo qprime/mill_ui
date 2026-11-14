@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 700.0,
     "height_mm": 260.0,
@@ -9,6 +21,48 @@
     {
       "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "generated_voronoi_3_000",
+            "generated_voronoi_3_001",
+            "generated_voronoi_3_002",
+            "generated_voronoi_3_003",
+            "generated_voronoi_3_004",
+            "generated_voronoi_3_005",
+            "generated_voronoi_3_006",
+            "generated_voronoi_3_007",
+            "generated_voronoi_3_008",
+            "generated_voronoi_3_009",
+            "generated_voronoi_3_010",
+            "generated_voronoi_3_011",
+            "generated_voronoi_3_012",
+            "generated_voronoi_3_013"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,24 +71,126 @@
       "max_depth_mm": 2.0,
       "feature_count": 14,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 0.6
+      "estimated_runtime_min": 0.5
     },
     {
       "filename": "pocket-3.17mm.nc",
       "operation": "pocket",
+      "tool_name": "1/8 downcut plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 20.64
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket",
+          "feature_ids": [
+            "generated_border_7_000",
+            "generated_border_7_001",
+            "generated_border_7_002",
+            "generated_border_7_003",
+            "generated_border_7_004",
+            "generated_border_7_005"
+          ],
+          "tool": {
+            "name": "1/8 downcut plunge",
+            "diameter": 3.175,
+            "kind": "flat",
+            "rotation": "downcut",
+            "depth_per_pass": 2.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 20.64,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0
+          }
+        }
+      ],
       "tool_diameter_mm": 3.175,
       "rpm": 18000.0,
-      "feed_xy_mm_min": 2160.0,
-      "feed_z_mm_min": 712.8,
+      "feed_xy_mm_min": 1800.0,
+      "feed_z_mm_min": 594.0,
       "stepdown_mm": 2.0,
       "max_depth_mm": 2.0,
       "feature_count": 6,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 1.9
+      "estimated_runtime_min": 2.2
     },
     {
       "filename": "bore-3.17mm.nc",
       "operation": "bore",
+      "tool_name": "1/8 downcut plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 20.64
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "bore",
+          "feature_ids": [
+            "generated_phyllotaxis_hole_1_000",
+            "generated_phyllotaxis_hole_1_001",
+            "generated_phyllotaxis_hole_1_002",
+            "generated_phyllotaxis_hole_1_003",
+            "generated_phyllotaxis_hole_1_004",
+            "generated_phyllotaxis_hole_1_005",
+            "generated_phyllotaxis_hole_1_006",
+            "generated_phyllotaxis_hole_1_007",
+            "generated_phyllotaxis_hole_1_008",
+            "generated_phyllotaxis_hole_1_009",
+            "generated_phyllotaxis_hole_1_010",
+            "generated_phyllotaxis_hole_1_011",
+            "generated_phyllotaxis_hole_1_012",
+            "generated_phyllotaxis_hole_1_013",
+            "generated_phyllotaxis_hole_1_014",
+            "generated_phyllotaxis_hole_1_015",
+            "generated_phyllotaxis_hole_1_016",
+            "generated_phyllotaxis_hole_1_017",
+            "generated_phyllotaxis_hole_1_018",
+            "generated_phyllotaxis_hole_1_019",
+            "generated_phyllotaxis_hole_1_020",
+            "generated_phyllotaxis_hole_1_021",
+            "generated_phyllotaxis_hole_1_022",
+            "generated_phyllotaxis_hole_1_023",
+            "generated_phyllotaxis_hole_1_024",
+            "generated_phyllotaxis_hole_1_025",
+            "generated_phyllotaxis_hole_1_026",
+            "generated_phyllotaxis_hole_1_027",
+            "generated_phyllotaxis_hole_1_028",
+            "generated_phyllotaxis_hole_1_029",
+            "generated_phyllotaxis_hole_1_030",
+            "generated_phyllotaxis_hole_1_031",
+            "generated_phyllotaxis_hole_1_032",
+            "generated_phyllotaxis_hole_1_033",
+            "generated_phyllotaxis_hole_1_034",
+            "generated_phyllotaxis_hole_1_035",
+            "generated_phyllotaxis_hole_1_036",
+            "generated_phyllotaxis_hole_1_037",
+            "generated_phyllotaxis_hole_1_038",
+            "generated_phyllotaxis_hole_1_039"
+          ],
+          "tool": {
+            "name": "1/8 downcut plunge",
+            "diameter": 3.175,
+            "kind": "flat",
+            "rotation": "downcut",
+            "depth_per_pass": 2.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 20.64,
+            "flutes": 2,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0
+          }
+        }
+      ],
       "tool_diameter_mm": 3.175,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1800.0,
@@ -43,11 +199,109 @@
       "max_depth_mm": 4.0,
       "feature_count": 40,
       "strategy": "helical_bore",
-      "estimated_runtime_min": 1.5
+      "estimated_runtime_min": 1.1
     },
     {
       "filename": "engrave-1.00mm.nc",
       "operation": "engrave",
+      "tool_name": "1mm engraving bit",
+      "tool_geometry": {
+        "kind": "ball",
+        "v_angle_deg": null,
+        "flute_length_mm": 5.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "engrave",
+          "feature_ids": [
+            "generated_string_art_5_000",
+            "generated_string_art_5_001",
+            "generated_string_art_5_002",
+            "generated_string_art_5_003",
+            "generated_string_art_5_004",
+            "generated_string_art_5_005",
+            "generated_string_art_5_006",
+            "generated_string_art_5_007",
+            "generated_string_art_5_008",
+            "generated_string_art_5_009",
+            "generated_string_art_5_010",
+            "generated_string_art_5_011",
+            "generated_string_art_5_012",
+            "generated_string_art_5_013",
+            "generated_string_art_5_014",
+            "generated_string_art_5_015",
+            "generated_string_art_5_016",
+            "generated_string_art_5_017",
+            "generated_string_art_5_018",
+            "generated_string_art_5_019",
+            "generated_string_art_5_020",
+            "generated_string_art_5_021",
+            "generated_string_art_5_022",
+            "generated_string_art_5_023",
+            "generated_string_art_5_024",
+            "generated_string_art_5_025",
+            "generated_string_art_5_026",
+            "generated_string_art_5_027",
+            "generated_string_art_5_028",
+            "generated_string_art_5_029",
+            "generated_string_art_5_030",
+            "generated_string_art_5_031",
+            "generated_string_art_5_032",
+            "generated_string_art_5_033",
+            "generated_string_art_5_034",
+            "generated_string_art_5_035",
+            "generated_string_art_5_036",
+            "generated_string_art_5_037",
+            "generated_string_art_5_038",
+            "generated_string_art_5_039",
+            "generated_string_art_5_040",
+            "generated_string_art_5_041",
+            "generated_string_art_5_042",
+            "generated_string_art_5_043",
+            "generated_string_art_5_044",
+            "generated_string_art_5_045",
+            "generated_string_art_5_046",
+            "generated_string_art_5_047",
+            "generated_string_art_5_048",
+            "generated_string_art_5_049",
+            "generated_string_art_5_050",
+            "generated_string_art_5_051",
+            "generated_string_art_5_052",
+            "generated_string_art_5_053",
+            "generated_string_art_5_054",
+            "generated_string_art_5_055",
+            "generated_string_art_5_056",
+            "generated_string_art_5_057",
+            "generated_string_art_5_058",
+            "generated_string_art_5_059",
+            "generated_string_art_5_060",
+            "generated_string_art_5_061",
+            "generated_string_art_5_062",
+            "generated_string_art_5_063",
+            "generated_string_art_5_064",
+            "generated_string_art_5_065",
+            "generated_string_art_5_066",
+            "generated_string_art_5_067",
+            "generated_string_art_5_068",
+            "generated_string_art_5_069"
+          ],
+          "tool": {
+            "name": "1mm engraving bit",
+            "diameter": 1.0,
+            "kind": "ball",
+            "rotation": null,
+            "depth_per_pass": 0.5,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 5.0,
+            "flutes": 1,
+            "shank_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy": 1200.0,
+            "feed_z": 300.0
+          }
+        }
+      ],
       "tool_diameter_mm": 1.0,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1200.0,
@@ -56,11 +310,43 @@
       "max_depth_mm": 0.3,
       "feature_count": 70,
       "strategy": "engrave",
-      "estimated_runtime_min": 6.1
+      "estimated_runtime_min": 5.1
     },
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_2",
+            "generated_profile_4",
+            "generated_profile_6"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -73,13 +359,13 @@
       "estimated_runtime_min": 1.5
     }
   ],
-  "total_runtime_min": 11.6,
+  "total_runtime_min": 10.4,
   "feature_counts": {
     "engrave": 70,
     "hole": 40,
     "pocket": 20,
     "profile": 4
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

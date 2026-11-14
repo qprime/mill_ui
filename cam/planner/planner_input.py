@@ -124,7 +124,7 @@ class GeometryInput:
 
 @dataclass(frozen=True)
 class SurfaceCooling:
-    stepover_pct: float = 70.0
+    stepover_pct: float | None = None
     direction: str = "x"
     cool_every: int = 0
     cool_dwell_s: float = 0.0
@@ -135,7 +135,7 @@ def _parse_surface_cooling(sc: dict[str, Any] | None) -> SurfaceCooling | None:
     if sc is None:
         return None
     return SurfaceCooling(
-        stepover_pct=float(sc.get("stepover_pct", 70.0)),
+        stepover_pct=float(sc["stepover_pct"]) if sc.get("stepover_pct") is not None else None,
         direction=str(sc.get("direction", "x")),
         cool_every=int(sc.get("cool_every", 0)),
         cool_dwell_s=float(sc.get("cool_dwell_s", 0.0)),
@@ -159,6 +159,7 @@ class FeatureInput:
     rest: RestSpec | None = None
     edge_treatment: EdgeTreatmentInput | None = None
     feeds_override: FeedsOverride | None = None
+    tool_name: str | None = None
     surface_cooling: SurfaceCooling | None = None
     ramp_mm: float | None = None
 
@@ -293,6 +294,8 @@ class EdgeFeatureInput:
     start_depth_mm: float = 0.0
     side: str | None = None
     edge_feature: EdgeFeatureSpec | None = None
+    tool_name: str | None = None
+    feeds_override: FeedsOverride | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {

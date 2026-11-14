@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import pytest
+
 from adapters.ast_to_removal import ast_to_removal_intents
 from cam.pipeline import run_pipeline
 from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import resolve_layout
 from validation.removal_checks import check_working_area_bounds
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 
 class TestSheetWorkingArea:

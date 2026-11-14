@@ -95,9 +95,13 @@ def _number(value: float) -> str:
 
 def _format_surface(surface: SurfaceDecl) -> dict[str, Any]:
     result: dict[str, Any] = {"depth-per-pass": dim(surface.depth_mm)}
+    if surface.tool_name is not None:
+        result["tool"] = surface.tool_name
+    if surface.feeds_override is not None:
+        result["feeds"] = _format_feeds_override(surface.feeds_override)
     if surface.passes != 1:
         result["passes"] = surface.passes
-    if surface.stepover_pct != 70.0:
+    if surface.stepover_pct is not None:
         result["stepover"] = f"{_number(surface.stepover_pct)}%"
     if surface.direction != "x":
         result["direction"] = surface.direction
@@ -169,6 +173,15 @@ def _format_dogbone(dogbone: Any) -> Any:
     return dogbone_dict if dogbone_dict else True
 
 
+def _format_operation_settings(node: Any) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if node.tool_name is not None:
+        result["tool"] = node.tool_name
+    if node.feeds_override is not None:
+        result["feeds"] = _format_feeds_override(node.feeds_override)
+    return result
+
+
 def _format_feeds_override(feeds: Any) -> dict[str, Any] | None:
     if not isinstance(feeds, FeedsOverride):
         return None
@@ -229,6 +242,8 @@ def format_feature(feature: Feature) -> dict[str, Any]:
     if feature.onion_skin_mm is not None:
         result["onion_skin_mm"] = dim(feature.onion_skin_mm)
 
+    if feature.tool_name is not None:
+        result["tool"] = feature.tool_name
     feeds_dict = _format_feeds_override(feature.feeds_override)
     if feeds_dict is not None:
         result["feeds"] = feeds_dict
@@ -530,6 +545,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             result["tab_width"] = dim(node.tab_width_mm)
         if node.onion_skin_mm is not None:
             result["onion_skin_mm"] = dim(node.onion_skin_mm)
+        if node.tool_name is not None:
+            result["tool"] = node.tool_name
         feeds_dict = _format_feeds_override(node.feeds_override)
         if feeds_dict is not None:
             result["feeds"] = feeds_dict
@@ -539,6 +556,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         result: dict[str, Any] = {"depth": dim(node.depth_mm)}
         if node.face != "front":
             result["face"] = node.face
+        if node.tool_name is not None:
+            result["tool"] = node.tool_name
         feeds_dict = _format_feeds_override(node.feeds_override)
         if feeds_dict is not None:
             result["feeds"] = feeds_dict
@@ -555,10 +574,13 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             raised["profile"] = node.profile
         if node.v_angle_deg != 90:
             raised["v_angle"] = node.v_angle_deg
+        raised.update(_format_operation_settings(node))
         return {"RaisedPanel": raised}
 
     elif isinstance(node, ChamferGen):
-        return {"Chamfer": {"width": dim(node.width_mm), "depth": dim(node.depth_mm)}}
+        return {
+            "Chamfer": {"width": dim(node.width_mm), "depth": dim(node.depth_mm), **_format_operation_settings(node)}
+        }
 
     elif isinstance(node, WaveGen):
         wave: dict[str, Any] = {
@@ -629,7 +651,7 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         return {"Curve": {**curve, **_curve_shared_keys(node)}}
 
     elif isinstance(node, RoundoverGen):
-        return {"Roundover": {"radius": dim(node.radius_mm)}}
+        return {"Roundover": {"radius": dim(node.radius_mm), **_format_operation_settings(node)}}
 
     elif isinstance(node, ShellGen):
         shell: dict[str, Any] = {"wall": dim(node.wall_mm), "interior": node.interior}
@@ -1130,6 +1152,17 @@ def format_ellipse_node(node: Ellipse) -> dict[str, Any]:
     return result
 
 
+def _format_machining(ast: CompositionalLayoutAST) -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    if ast.machining.tools or ast.machining.feeds is not None:
+        data["machining"] = {}
+        if ast.machining.tools:
+            data["machining"]["tools"] = dict(ast.machining.tools)
+        if ast.machining.feeds is not None:
+            data["machining"]["feeds"] = _format_feeds_override(ast.machining.feeds)
+    return data
+
+
 def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
     data: dict[str, Any] = {}
 
@@ -1157,6 +1190,7 @@ def format_pml_yaml(ast: CompositionalLayoutAST) -> str:
     if not ast.sheet.show_dimensions:
         data["Sheet"]["show_dimensions"] = False
 
+    data.update(_format_machining(ast))
     if ast.surface is not None:
         data["Surface"] = _format_surface(ast.surface)
 

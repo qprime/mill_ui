@@ -4,6 +4,8 @@ import math
 import os
 import tempfile
 
+import pytest
+
 from cam.pipeline import run_pipeline
 from pml import parse_pml
 from validation.metrics.gcode_metrics import (
@@ -12,6 +14,8 @@ from validation.metrics.gcode_metrics import (
     extract_gcode_metrics,
     extract_gcode_metrics_from_content,
 )
+
+pytestmark = pytest.mark.usefixtures("machining_config")
 
 BRACKET_PML = """Sheet:
   width: 240mm

@@ -9,7 +9,7 @@ from cam.moves import CutMove, Move, RapidMove, SetFeedMove, SetRpmMove
 from cam.planner.planner_input import HeightfieldFeatureInput
 from ir.removal_intent import HeightfieldToolAssignment
 
-from ..tools import ToolSelection
+from ..tools import ToolCatalog, ToolSelection, tools_for_role
 from .bands import ToolSpec, compute_barriers
 from .common import load_surface, sample_barrier_at
 from .finish import _emit_finish_moves
@@ -126,6 +126,8 @@ def plan_heightfield_passes(
 def _resolve_tool(
     assignment: HeightfieldToolAssignment, tool_db: Sequence[ToolSelection], feature_id: str
 ) -> ToolSelection:
+    if isinstance(tool_db, ToolCatalog):
+        tool_db = tools_for_role(tool_db, "specialty", assignment.tool_name)
     matching = [t for t in tool_db if t.name == assignment.tool_name]
     if not matching:
         raise ValueError(f"Heightfield '{feature_id}': tool {assignment.tool_name!r} not found in machine tool_db")
@@ -155,7 +157,8 @@ def _plan_one_heightfield(
     )
 
     resolved_tools: list[tuple[HeightfieldToolAssignment, ToolSelection]] = [
-        (a, _resolve_tool(a, tool_db, feature.id)) for a in feature.tools
+        (a, _resolve_tool(a, tool_db, feature.id).validate_cut(feature.depth_mm + abs(feature.z_top)))
+        for a in feature.tools
     ]
 
     rough_pairs = [(a, t) for a, t in resolved_tools if a.role == "rough"]

@@ -1,4 +1,16 @@
 {
+  "machining": {
+    "machine": "Sienci AltMill MK2 4x4",
+    "preset": "altmill_production",
+    "material": "mdf",
+    "requested_kerf_mm": null,
+    "selected_profile_diameter_mm": 9.525,
+    "selected_profile_tool": "Example 3/8 carbide mortise compression",
+    "job_overrides": {
+      "tools": {},
+      "feeds": {}
+    }
+  },
   "stock": {
     "width_mm": 1100.0,
     "height_mm": 800.0,
@@ -9,6 +21,38 @@
     {
       "filename": "pocket_offset-9.53mm.nc",
       "operation": "pocket_offset",
+      "tool_name": "Example 3/8 PCD straight plunge",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "pocket_offset",
+          "feature_ids": [
+            "raised_panel_generated_raised_panel_1_panel",
+            "raised_panel_generated_raised_panel_2_panel",
+            "raised_panel_generated_raised_panel_4_panel",
+            "raised_panel_generated_raised_panel_6_panel"
+          ],
+          "tool": {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 1,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 2520.0,
+            "feed_z": 630.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 2520.0,
@@ -17,11 +61,43 @@
       "max_depth_mm": 6.0,
       "feature_count": 7,
       "strategy": "offset_pocket",
-      "estimated_runtime_min": 29.9
+      "estimated_runtime_min": 29.6
     },
     {
       "filename": "edge-12.70mm-90deg.nc",
       "operation": "edge",
+      "tool_name": "90 degree v-bit",
+      "tool_geometry": {
+        "kind": "v",
+        "v_angle_deg": 90.0,
+        "flute_length_mm": 12.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "edge",
+          "feature_ids": [
+            "raised_panel_generated_raised_panel_1_panel",
+            "raised_panel_generated_raised_panel_3_panel",
+            "raised_panel_generated_raised_panel_6_panel"
+          ],
+          "tool": {
+            "name": "90 degree v-bit",
+            "diameter": 12.7,
+            "kind": "v",
+            "rotation": null,
+            "depth_per_pass": 1.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 12.0,
+            "flutes": 1,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 450.0,
+            "v_angle_deg": 90.0
+          }
+        }
+      ],
       "tool_diameter_mm": 12.7,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1800.0,
@@ -35,6 +111,37 @@
     {
       "filename": "edge-12.70mm-60deg.nc",
       "operation": "edge",
+      "tool_name": "60 degree v-bit",
+      "tool_geometry": {
+        "kind": "v",
+        "v_angle_deg": 60.0,
+        "flute_length_mm": 12.0
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "edge",
+          "feature_ids": [
+            "raised_panel_generated_raised_panel_2_panel",
+            "raised_panel_generated_raised_panel_4_panel"
+          ],
+          "tool": {
+            "name": "60 degree v-bit",
+            "diameter": 12.7,
+            "kind": "v",
+            "rotation": null,
+            "depth_per_pass": 1.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 12.0,
+            "flutes": 1,
+            "shank_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy": 1800.0,
+            "feed_z": 450.0,
+            "v_angle_deg": 60.0
+          }
+        }
+      ],
       "tool_diameter_mm": 12.7,
       "rpm": 18000.0,
       "feed_xy_mm_min": 1800.0,
@@ -48,6 +155,36 @@
     {
       "filename": "profile-9.53mm.nc",
       "operation": "profile",
+      "tool_name": "Example 3/8 carbide mortise compression",
+      "tool_geometry": {
+        "kind": "flat",
+        "v_angle_deg": null,
+        "flute_length_mm": 25.4
+      },
+      "stepover_percent": 40.0,
+      "effective_passes": [
+        {
+          "operation": "profile",
+          "feature_ids": [
+            "generated_profile_0",
+            "generated_profile_5"
+          ],
+          "tool": {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "flute_length_mm": 25.4,
+            "flutes": 2,
+            "shank_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0
+          }
+        }
+      ],
       "tool_diameter_mm": 9.525,
       "rpm": 18000.0,
       "feed_xy_mm_min": 4500.0,
@@ -58,14 +195,14 @@
       "strategy": "tabbed_profile",
       "holding": "tabs 4x3mm",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 4.8
+      "estimated_runtime_min": 4.7
     }
   ],
-  "total_runtime_min": 50.2,
+  "total_runtime_min": 49.8,
   "feature_counts": {
     "profile": 2,
     "raised_panel": 5
   },
-  "safe_z_mm": 6.0,
-  "kerf_mm": 9.525
+  "safe_z_mm": 3.0,
+  "kerf_mm": null
 }

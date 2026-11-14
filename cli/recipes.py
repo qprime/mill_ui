@@ -9,6 +9,7 @@ import tempfile
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 
+from cam.compilation import default_machine_name
 from cli.mill import write_recipe_outputs
 from cli.nest import nest_machining_job
 from config.machine_loader import MachineConfig, load_machine_by_name
@@ -28,7 +29,6 @@ from validation.recipe_docs import (
 from validation.recipes import OUTPUT_DIR_NAME, RECIPES_ROOT, Recipe, find_recipes, misplaced_inputs
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RECIPE_MACHINE = "altmill_4x4"
 MIN_NEST_UTILIZATION = 0.3
 REGEN_HINT = "run `python -m cli.recipes --regen`"
 
@@ -75,19 +75,19 @@ def untracked_recipe_files(repo_root: Path, root: Path, documents: Iterable[Path
     return [path for path in listing.stdout.splitlines() if f"/{OUTPUT_DIR_NAME}/" in path or path in generated]
 
 
-def _fit_problems(result: InvariantResult, label: str) -> list[str]:
-    return [f"{label} does not fit {RECIPE_MACHINE}: {failure}" for failure in result.failures]
+def _fit_problems(result: InvariantResult, label: str, machine: MachineConfig) -> list[str]:
+    return [f"{label} does not fit {machine.machine.name}: {failure}" for failure in result.failures]
 
 
 def check_recipe_outputs(recipe: Recipe, machine: MachineConfig) -> list[str]:
     with tempfile.TemporaryDirectory() as scratch:
         generated = Path(scratch) / OUTPUT_DIR_NAME
-        runs, _ = write_recipe_outputs(recipe, generated)
+        runs, _ = write_recipe_outputs(recipe, generated, machine_config=machine)
         problems = compare_output_dirs(recipe.path / OUTPUT_DIR_NAME, generated)
     for run in runs:
         problems += [f"{run.source} sheet {run.sheet_index}: {error}" for error in run.result.errors]
         problems += _fit_problems(
-            check_sheet_fits_machine(run.result.ast, machine), f"{run.source} sheet {run.sheet_index}"
+            check_sheet_fits_machine(run.result.ast, machine), f"{run.source} sheet {run.sheet_index}", machine
         )
     return problems
 
@@ -102,8 +102,8 @@ def check_nest_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
             y_min=job.margin_mm,
             y_max=job.sheet_height_mm - job.margin_mm,
         )
-        problems += _fit_problems(check_job_fits_machine(bounds, machine), source.name)
-        result, _ = nest_machining_job(job)
+        problems += _fit_problems(check_job_fits_machine(bounds, machine), source.name, machine)
+        result, _ = nest_machining_job(job, machine_config=machine)
         if result["total_sheets"] == 0:
             problems.append(f"{source.name}: nesting produced 0 sheets")
         elif result["utilization"] < MIN_NEST_UTILIZATION:
@@ -177,7 +177,7 @@ def main() -> int:
         print(f"Regenerated {recipe_count} recipe(s) and the recipe documents: {len(failures)} failure(s)")
         return 1 if failures else 0
 
-    failures = check_tree(RECIPES_ROOT, load_machine_by_name(RECIPE_MACHINE), REPO_ROOT)
+    failures = check_tree(RECIPES_ROOT, load_machine_by_name(default_machine_name(recipe=True)), REPO_ROOT)
     for failure in failures:
         print(f"  FAIL: {failure}", file=sys.stderr)
     print(f"Checked {recipe_count} recipe(s): {len(failures)} failure(s)")

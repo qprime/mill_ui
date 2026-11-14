@@ -177,6 +177,7 @@ def _feature_from_profile_gen(node: ProfileGen) -> Feature:
         tab_width_mm=node.tab_width_mm,
         onion_skin_mm=node.onion_skin_mm,
         feeds_override=node.feeds_override,
+        tool_name=node.tool_name,
     )
 
 
@@ -1155,6 +1156,7 @@ class LayoutResolver:
                     depth_mm=node.depth_mm,
                     face=node.face,
                     feeds_override=node.feeds_override,
+                    tool_name=node.tool_name,
                 ),
                 shape_id=self._next_shape_id("generated_pocket"),
             )
@@ -1173,6 +1175,7 @@ class LayoutResolver:
                     depth_mm=node.depth_mm,
                     face=node.face,
                     feeds_override=node.feeds_override,
+                    tool_name=node.tool_name,
                 ),
                 shape_id=self._next_shape_id("generated_pocket"),
             )
@@ -1203,7 +1206,12 @@ class LayoutResolver:
 
         shape_id_prefix = self._next_shape_id("raised_panel")
         items.extend(
-            raised_panel_generator(domain, generator_params, allow_empty=False, shape_id_prefix=shape_id_prefix)
+            replace(item, feature=replace(item.feature, tool_name=node.tool_name, feeds_override=node.feeds_override))
+            if item.feature is not None
+            else item
+            for item in raised_panel_generator(
+                domain, generator_params, allow_empty=False, shape_id_prefix=shape_id_prefix
+            )
         )
 
     def _handle_chamfer_gen(
@@ -1230,6 +1238,8 @@ class LayoutResolver:
                 feature=Feature(
                     type="chamfer",
                     depth_mm=node.depth_mm,
+                    tool_name=node.tool_name,
+                    feeds_override=node.feeds_override,
                     chamfer_width_mm=node.width_mm,
                     chamfer_angle_deg=chamfer_angle,
                 ),
@@ -1249,6 +1259,8 @@ class LayoutResolver:
                 feature=Feature(
                     type="chamfer",
                     depth_mm=node.depth_mm,
+                    tool_name=node.tool_name,
+                    feeds_override=node.feeds_override,
                     chamfer_width_mm=node.width_mm,
                     chamfer_angle_deg=chamfer_angle,
                 ),
@@ -1276,6 +1288,8 @@ class LayoutResolver:
                 feature=Feature(
                     type="roundover",
                     depth_mm=node.radius_mm,
+                    tool_name=node.tool_name,
+                    feeds_override=node.feeds_override,
                     roundover_radius_mm=node.radius_mm,
                 ),
                 shape_id=self._next_shape_id("generated_roundover"),
@@ -1294,6 +1308,8 @@ class LayoutResolver:
                 feature=Feature(
                     type="roundover",
                     depth_mm=node.radius_mm,
+                    tool_name=node.tool_name,
+                    feeds_override=node.feeds_override,
                     roundover_radius_mm=node.radius_mm,
                 ),
                 shape_id=self._next_shape_id("generated_roundover"),
@@ -3581,6 +3597,7 @@ class LayoutResolver:
             project=self.ast.project,
             kerf_width_mm=self.ast.kerf_width_mm,
             config=config,
+            machining=self.ast.machining,
             machining_clearance=self._machining_clearance,
         )
 
@@ -3614,6 +3631,8 @@ class LayoutResolver:
                     placement=Placement(center_xy_mm=(cx, cy)),
                     feature=Feature(
                         type="surface",
+                        tool_name=surface.tool_name,
+                        feeds_override=surface.feeds_override,
                         depth_mm=(k + 1) * surface.depth_mm,
                     ),
                     params=pass_params,
@@ -3848,6 +3867,7 @@ def resolve_layout_multi(
                 kerf_width_mm=ast.kerf_width_mm,
                 config={"layout_gaps": resolver._layout_gaps} if resolver._layout_gaps else {},
                 machining_clearance=machining_clearance,
+                machining=ast.machining,
             )
         )
 

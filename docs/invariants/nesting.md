@@ -97,8 +97,10 @@ This reduces the packing bin on both sides of each axis and insets placements
 without changing nominal part dimensions or part-to-part gap.
 
 `cli.nest`, recipe compilation and recipe validation share that tool selection.
-`cli.nest` writes a JSON layout retaining its machining contract and tool snapshot
-alongside the editable PML export; use JSON to replay the saved cutter context.
+`cli.nest` packs and machines the original `.nest.yml` in one invocation, with
+in-memory AST handoffs. It writes final manufacturing/review outputs through the
+canonical pipeline writer. Resolved layouts, flattened PML and tool snapshots
+are neither exported nor accepted as machining inputs.
 
 Packing results describe physical sheet placements. At the LayoutAST boundary,
 subtract the physical sheet margin from each placement. The generated layout

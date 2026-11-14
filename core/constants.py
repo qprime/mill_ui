@@ -1,8 +1,6 @@
 import math
 
 PROJECT_KERF_MM = 6.35
-RECIPE_KERF_MM = 9.525
-TOOL_PURPOSES = frozenset({"general", "profile", "pocket", "surface"})
 
 
 class HintKeys:

@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-import time
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
-from cam.compilation import CompilationContext, compilation_context
+from cam.compilation import CompilationContext, compilation_context, default_machine_name
 from cli.project import (
-    DEFAULT_KERF_MM,
     DEFAULT_MARGIN_MM,
     add_project_arg,
     get_project_dir,
@@ -20,13 +17,11 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
-from config.machine_loader import Endmill, FeedsEntry
-from layout_ast.layout import LayoutAST, MachiningClearance
-from nesting import nest_and_generate, nest_parts
-from pml.lifter import lift_layout_ast
+from config.machine_loader import Endmill, FeedsEntry, MachineConfig
+from layout_ast.layout import MachiningClearance
+from nesting import nest_and_generate
 from pml.nest_parser import NestJob, nest_job_to_api_params
 from pml.revision_header import format_pml_header
-from pml.yaml_formatter import format_pml_yaml
 from pml.yaml_parser import NestParseError, parse_nest_yaml
 
 
@@ -35,7 +30,7 @@ def generate_nest_scaffold(
     sheet_height: float,
     thickness: float,
     margin: float,
-    kerf: float,
+    kerf: float | None,
 ) -> str:
     working_width = sheet_width - 2 * margin
     working_height = sheet_height - 2 * margin
@@ -49,6 +44,7 @@ def generate_nest_scaffold(
     header += "# The nesting algorithm accounts for kerf spacing automatically.\n"
     header += "\n"
 
+    kerf_line = f"  kerf: {kerf}mm\n" if kerf is not None else ""
     nest = f"""{header}Nest:
   algorithm: maxrects
 
@@ -57,8 +53,7 @@ def generate_nest_scaffold(
     height: {sheet_height:.0f}mm
     thickness: {thickness:.1f}mm
 
-  kerf: {kerf}mm
-  margin: {margin:.0f}mm
+{kerf_line}  margin: {margin:.0f}mm
 
   parts:
     - name: TODO
@@ -84,7 +79,7 @@ def init_project(args) -> None:
         sys.exit(1)
 
     margin = args.margin if args.margin is not None else DEFAULT_MARGIN_MM
-    kerf = args.kerf if args.kerf is not None else DEFAULT_KERF_MM
+    kerf = args.kerf
 
     if args.project:
         project_dir = get_project_dir(args.project)
@@ -112,19 +107,7 @@ def init_project(args) -> None:
 
     print(f"  Physical sheet: {sheet_width:.0f}x{sheet_height:.0f}mm", file=sys.stderr)
     print(f"  Margin: {margin:.0f}mm", file=sys.stderr)
-    print(f"  Kerf: {kerf}mm", file=sys.stderr)
-
-
-def run_export_svg(ast: LayoutAST, pml_path: Path, output_dir: Path, theme: str) -> Path:
-    from adapters.ast_to_removal import ast_to_removal_intents
-    from export.blueprint_svg import render_blueprint_svg
-
-    removal_intents = ast_to_removal_intents(ast)
-    svg_string = render_blueprint_svg(ast, removal_intents=removal_intents, theme=theme)
-
-    svg_path = output_dir / f"{pml_path.stem}.blueprint.{theme}.svg"
-    svg_path.write_text(svg_string, encoding="utf-8")
-    return svg_path
+    print(f"  Profile cutter: {str(kerf) + 'mm' if kerf is not None else 'machine preset'}", file=sys.stderr)
 
 
 def nest_job(job: NestJob, *, machining_clearance: MachiningClearance | None = None) -> dict[str, Any]:
@@ -136,227 +119,112 @@ def nest_job(job: NestJob, *, machining_clearance: MachiningClearance | None = N
 
 
 def nest_machining_job(
-    job: NestJob, *, endmills: list[Endmill] | None = None, feeds: list[FeedsEntry] | None = None
+    job: NestJob,
+    *,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
+    machine_config: MachineConfig | None = None,
+    preset_path: Path | None = None,
 ) -> tuple[dict[str, Any], CompilationContext]:
-    context = compilation_context("mdf", job.kerf_mm, endmills=endmills, feeds=feeds)
+    from cam.compilation import profile_machining_spec, profile_required_reach
+    from nesting.template_expander import placement_to_items
+    from nesting.types import NestedPart, PartSpec
+
+    preview_items = []
+    for part in job.parts:
+        spec = PartSpec(
+            name=part.name,
+            width_mm=part.width_mm,
+            height_mm=part.height_mm,
+            quantity=1,
+            template=part.template,
+            template_params=part.template_params,
+            shape=part.shape,
+            shape_params=part.shape_params,
+        )
+        preview_items.extend(
+            placement_to_items(NestedPart(part_spec=spec, x_mm=0, y_mm=0, rotated=False), job.sheet_thickness_mm)
+        )
+    machining = profile_machining_spec(job.machining, tuple(preview_items))
+    context = compilation_context(
+        job.material,
+        job.kerf_mm if job.kerf_explicit else None,
+        endmills=endmills,
+        feeds=feeds,
+        machine_config=machine_config,
+        machining=machining,
+        preset_path=preset_path,
+        profile_reach_mm=profile_required_reach(tuple(preview_items), job.sheet_thickness_mm, packing=True),
+    )
+    job = replace(job, kerf_mm=context.clearance().profile_diameter_mm)
     result = nest_job(job, machining_clearance=context.clearance())
+    if result["nesting_result"].unplaced_parts:
+        names = [part.name for part in result["nesting_result"].unplaced_parts]
+        raise ValueError(f"Nesting: parts do not fit the selected sheet: {names}")
     result["output"] = [
-        replace(ast, config={**ast.config, "compilation": context.to_dict()}) for ast in result["output"]
+        replace(ast, sheet=replace(ast.sheet, material=job.material), machining=machining, machining_context=context)
+        for ast in result["output"]
     ]
     return result, context
 
 
-def main():  # noqa: C901 — CLI entry point
-    parser = argparse.ArgumentParser(
-        description="Run nesting from .nest.yml file and output PML layouts",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
+def main() -> None:
+    from cam.pipeline import write_run_outputs
+    from cli.mill import _compile, _load_machine, _load_tool_library, _report_outputs, _report_runs
 
-  python -m cli.nest --project my_table job.nest.yml
-
-  python -m cli.nest job.nest.yml -o output/ --export-svg
-
-  python -m cli.nest job.nest.yml -o output/ --export-svg --theme print
-
-  python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
-
-  python -m cli.nest --project cabinet --init_project --sheet 1220x1220 --thickness 19
-
-Output files:
-  PML:  {prefix}_{N}.pml.yml (one per sheet)
-  SVG:  {prefix}_{N}.blueprint.{theme}.svg (if --export-svg)
-  JSON: {prefix}_{N}.json (machining layout with saved cutter context)
-        {prefix}_manifest.json (nesting summary)
-        """,
-    )
+    parser = argparse.ArgumentParser(description="Pack and machine authored .nest.yml in one source build")
     add_project_arg(parser)
-    parser.add_argument("input", nargs="?", default=None, help="Input .nest.yml file")
-    parser.add_argument(
-        "-o", "--output", default=None, help="Output directory (default: project/output or current directory)"
-    )
-    parser.add_argument("--prefix", default=None, help="Prefix for output files (default: derived from input filename)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-
-    export_group = parser.add_argument_group("export options")
-    export_group.add_argument("--export-svg", action="store_true", help="Export SVG blueprints for each sheet")
-    export_group.add_argument(
-        "--theme", "-t", default="dark", choices=["dark", "light", "print"], help="SVG blueprint theme (default: dark)"
-    )
-
-    init_group = parser.add_argument_group("project initialization")
-    init_group.add_argument(
-        "--init_project",
-        action="store_true",
-        help="Generate a starter .nest.yml file",
-    )
-    init_group.add_argument(
-        "--sheet",
-        default=None,
-        help="Physical sheet dimensions as WxH in mm (e.g., 1220x2440)",
-    )
-    init_group.add_argument(
-        "--thickness",
-        type=float,
-        default=None,
-        help="Material thickness in mm",
-    )
-    init_group.add_argument(
-        "--margin",
-        type=float,
-        default=None,
-        help=f"Margin/clamp zone in mm (default: {DEFAULT_MARGIN_MM})",
-    )
-    init_group.add_argument(
-        "--kerf",
-        type=float,
-        default=None,
-        help=f"Tool kerf in mm (default: {DEFAULT_KERF_MM})",
-    )
-
+    parser.add_argument("input", nargs="?")
+    parser.add_argument("-o", "--output", default=None)
+    parser.add_argument("--prefix", default=None)
+    parser.add_argument("--machine", default=None)
+    parser.add_argument("--preset", default=None)
+    parser.add_argument("--endmills", default=None)
+    parser.add_argument("--feeds", default=None)
+    parser.add_argument("--kerf", type=float, default=None)
+    parser.add_argument("--theme", default="dark")
+    parser.add_argument("--no-svg", action="store_true")
+    parser.add_argument("--export-svg", action="store_true")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("--init_project", action="store_true")
+    parser.add_argument("--sheet", default=None)
+    parser.add_argument("--thickness", type=float, default=None)
+    parser.add_argument("--margin", type=float, default=None)
     args = parser.parse_args()
-
     if args.init_project:
         init_project(args)
         return
-
     if not args.input:
-        print("Error: input file required (or use --init_project)", file=sys.stderr)
-        sys.exit(1)
-
-    input_path = resolve_input_path(args.project, args.input)
-    output_dir = resolve_output_dir(args.project, args.output)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    if args.verbose:
-        print(f"Reading {input_path}...")
-
+        parser.error("supply the original .nest.yml source")
+    source = resolve_input_path(args.project, args.input)
     try:
-        source = input_path.read_text()
-        job = parse_nest_yaml(source)
-    except NestParseError as e:
-        print(f"Parse error: {e}", file=sys.stderr)
-        sys.exit(1)
-    except FileNotFoundError:
-        print(f"File not found: {input_path}", file=sys.stderr)
-        sys.exit(1)
-
-    if args.verbose:
-        print(f"Algorithm: {job.algorithm}")
-        print(f"Sheet: {job.sheet_width_mm}mm x {job.sheet_height_mm}mm x {job.sheet_thickness_mm}mm")
-        print(f"Kerf: {job.kerf_mm}mm, Margin: {job.margin_mm}mm")
-        print(f"Parts: {len(job.parts)}")
-        for part in job.parts:
-            template_info = f" (template: {part.template})" if part.template else ""
-            print(f"  - {part.quantity}x {part.name}: {part.width_mm}mm x {part.height_mm}mm{template_info}")
-
-    if args.verbose:
-        print("\nRunning nesting...")
-
-    start_time = time.perf_counter()
-
-    if args.kerf is not None:
-        job = replace(job, kerf_mm=args.kerf)
-    result, context = nest_machining_job(job)
-
-    nest_time = time.perf_counter() - start_time
-
-    if args.verbose:
-        print(f"  Total sheets: {result['total_sheets']}")
-        print(f"  Utilization: {result['utilization'] * 100:.1f}%")
-        print(f"  Nesting time: {nest_time * 1000:.1f}ms")
-
-    validation_params = nest_job_to_api_params(job)
-    validation_params["validate"] = True
-    validation_params["machining_clearance"] = context.clearance()
-    validation_result = nest_parts(**validation_params)
-
-    validation = validation_result["validation"]
-    if not validation["is_valid"]:
-        print("\nValidation FAILED:", file=sys.stderr)
-        for error in validation["errors"]:
-            print(f"  ERROR: {error['message']}", file=sys.stderr)
-        sys.exit(1)
-
-    if validation["warnings"]:
-        for warning in validation["warnings"]:
-            print(f"  WARNING: {warning['message']}")
-
-    if args.verbose:
-        print("\nWriting output files...")
-
-    asts = result["output"]
-    output_files = []
-    svg_files = []
-
-    if args.prefix is not None:
-        prefix = args.prefix
-    else:
-        stem = input_path.stem
-        prefix = stem.removesuffix(".nest") if stem.endswith(".nest") else stem
-
-    for sheet_idx, ast in enumerate(asts):
-        sheet_name = f"{prefix}_sheet_{sheet_idx + 1}"
-        pml_path = output_dir / f"{sheet_name}.pml.yml"
-
-        pml_content = format_pml_yaml(lift_layout_ast(ast))
-
-        header = format_pml_header()
-        header += f"# {sheet_name}.pml.yml\n"
-        header += f"# Generated from {input_path.name}\n"
-        header += f"# Algorithm: {job.algorithm}\n"
-        header += f"# Items: {len(ast.items)}\n"
-        header += "\n"
-
-        pml_path.write_text(header + pml_content)
-        ast.to_json(str(output_dir / f"{sheet_name}.json"))
-        output_files.append(sheet_name)
-
-        if args.verbose:
-            print(f"  {pml_path.name}: {len(ast.items)} items")
-
-        if args.export_svg:
-            svg_path = run_export_svg(ast, pml_path, output_dir, args.theme)
-            svg_files.append(svg_path.name)
-            if args.verbose:
-                print(f"  {svg_path.name}")
-
-    manifest: dict[str, Any] = {
-        "source": input_path.name,
-        "algorithm": job.algorithm,
-        "sheet": {
-            "width_mm": job.sheet_width_mm,
-            "height_mm": job.sheet_height_mm,
-            "thickness_mm": job.sheet_thickness_mm,
-        },
-        "compilation": context.to_dict(),
-        "kerf_mm": job.kerf_mm,
-        "margin_mm": job.margin_mm,
-        "nesting": {
-            "total_sheets": result["total_sheets"],
-            "utilization": result["utilization"],
-            "utilization_percent": f"{result['utilization'] * 100:.1f}%",
-            "nesting_time_ms": round(nest_time * 1000, 2),
-        },
-        "output_files": {
-            "pml": [f"{name}.pml.yml" for name in output_files],
-            "json": [f"{name}.json" for name in output_files],
-        },
-    }
-
-    if svg_files:
-        manifest["output_files"]["svg"] = svg_files
-
-    manifest_path = output_dir / f"{prefix}_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2))
-
-    if args.verbose:
-        print(f"  {manifest_path.name}")
-
-    print(f"\nGenerated {len(output_files)} PML.yml files in {output_dir}/")
-    if svg_files:
-        print(f"Generated {len(svg_files)} SVG blueprints")
-    print(f"Utilization: {result['utilization'] * 100:.1f}%")
+        job = parse_nest_yaml(source.read_text(encoding="utf-8"))
+        if args.kerf is not None:
+            job = replace(job, kerf_mm=args.kerf, kerf_explicit=True)
+        machine = _load_machine(args.machine or default_machine_name())
+        endmills, feeds = _load_tool_library(args)
+        result, _ = nest_machining_job(
+            job,
+            machine_config=machine,
+            endmills=endmills,
+            feeds=feeds,
+            preset_path=Path(args.preset) if args.preset else None,
+        )
+        runs = _compile(
+            result["output"],
+            source,
+            args.prefix or source.name.removesuffix(".nest.yml"),
+            kerf_mm=args.kerf,
+            theme=args.theme,
+            y_origin="back",
+            generate_svg=not args.no_svg,
+            machine_config=machine,
+        )
+        outputs = write_run_outputs(runs, resolve_output_dir(args.project, args.output))
+        _report_runs(runs)
+        _report_outputs(runs, outputs)
+    except (ValueError, NestParseError) as exc:
+        parser.exit(1, f"Error: {exc}\n")
 
 
 if __name__ == "__main__":

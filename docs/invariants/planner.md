@@ -81,7 +81,8 @@ Tool-library entries may include explicitly identified recipe example tools when
 the owner authorizes them. These describe modeled geometry and example feeds,
 not verified shop inventory. Do not silently invent availability or substitute
 another machining strategy to make a failing recipe appear successful.
-The tool selectors retain nearest-angle/radius lookup. A selected tool must also
+Tool selection requires the requested V angle (0.01° numeric tolerance) and
+roundover radius. A selected tool must also
 be able to produce the requested geometry; selection and planning failures must
 be surfaced rather than warned away.
 
@@ -159,15 +160,20 @@ Bridges between contours must not replace a required boundary segment.
 
 ## Outside Profiles and Shared Cuts
 
-Tool-library purpose restricts automatic flat-tool selection. Dedicated profile,
-pocket and surface cutters are eligible only for that operation; general tools
-remain eligible for all operations and holes. A dedicated pocket cutter is tried
-before general cutters, with geometry checks retaining smaller detail tools when
-it does not fit. Profile selection matches the requested kerf and prefers a
-dedicated profile tool on a diameter tie. Hole selection uses the largest fitting
-general cutter, independently of library ordering. Explicit named-tool requests
-retain their existing behavior. Compilation snapshots preserve dedicated purposes;
-legacy general-tool snapshots keep their existing representation.
+Tool identity and physical capabilities live in the library. Material/operation
+role assignments and cutting parameters live in the selected machine's preset.
+A cutter can serve multiple roles with different parameters. Resolution order is
+operation tool → job role → preset role; an absent assignment errors. Default
+alternatives are an explicit ordered list tested for geometry/reach. Explicit
+tools are binding and cannot fall back to those alternatives or other inventory.
+Parameters resolve for the selected preset/material/role/cutter, then job feeds,
+then operation feeds. Required data, finite positive settings, cutter reach and
+known machine limits are checked; invalid settings are never clamped.
+
+One profile cutter is resolved per sheet before packing. Conflicting named
+profile overrides fail before packing. Cutter identity and effective settings
+keep planner records distinct; final file grouping may join passes of the same
+physical tool while retaining their effective feeds and spindle commands.
 
 Rectangle profiles use the canonical closed-profile operation with the requested
 `inside`, `outside`, or `on` cutter offset. Isolated or incompatible profiles keep

@@ -1,0 +1,4 @@
+name: Genmitsu 4040-PRO
+# No machine-specific cutting combinations have been validated or supplied.
+# Configure material roles and parameters here before machining.
+materials: {}

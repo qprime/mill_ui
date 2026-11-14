@@ -21,7 +21,8 @@ from cam.compilation import (
     compilation_context,
     plan_face_passes,
     prepare_face_input,
-    saved_compilation_context,
+    profile_machining_spec,
+    profile_required_reach,
 )
 from cam.model.machine import Machine
 from cam.model.stock import Stock
@@ -31,8 +32,8 @@ from cam.planner.passes import PassRecord
 from cam.planner.passes.summary import summarise_gcode_file
 from cam.planner.passes.tools import (
     ToolSelection,
-    pass_key,
     pick_tool_for_engrave,
+    tools_for_role,
 )
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
@@ -40,7 +41,7 @@ from config.machine_loader import (
     FeedsEntry,
     MachineConfig,
 )
-from core.constants import BACK_SVG_SUFFIX, PROJECT_KERF_MM, FeatureType
+from core.constants import BACK_SVG_SUFFIX, FeatureType
 from ir.removal_intent import RemovalIntent
 from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
@@ -134,7 +135,16 @@ def _tool_suffixes(tools: Sequence[ToolSelection]) -> list[str]:
 def gcode_file_groups(passes: Sequence[PassRecord], *, per_tool: bool) -> list[tuple[str, list[PassRecord]]]:
     groups: dict[tuple[Any, ...], list[PassRecord]] = {}
     for p in passes:
-        identity = pass_key(p.op, p.tool_selection)
+        tool = p.tool_selection
+        identity = (
+            p.op,
+            tool.name,
+            tool.diameter,
+            tool.kind,
+            tool.rotation,
+            tool.v_angle_deg,
+            tool.roundover_radius_mm,
+        )
         groups.setdefault((p.op == "release", *identity[1:]) if per_tool else identity, []).append(p)
 
     by_base: dict[str, list[list[PassRecord]]] = {}
@@ -150,6 +160,10 @@ def gcode_file_groups(passes: Sequence[PassRecord], *, per_tool: bool) -> list[t
             named.append((base, sharing[0]))
             continue
         suffixes = _tool_suffixes([group[0].tool_selection for group in sharing])
+        if len(set(suffixes)) != len(suffixes):
+            suffixes = [
+                "".join(c if c.isalnum() else "_" for c in group[0].tool_selection.name).strip("_") for group in sharing
+            ]
         named.extend(
             (f"{base}-{suffix}" if suffix else base, group) for suffix, group in zip(suffixes, sharing, strict=True)
         )
@@ -170,7 +184,7 @@ def _plan_and_emit_face(
     *,
     gcode_prefix: str,
     kerf_mm: float,
-    tools: list[Any],
+    tools: Sequence[ToolSelection],
     machine: Machine,
     stock: Stock,
     safe_z: float,
@@ -284,20 +298,28 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
 ) -> PipelineResult:
-    saved = saved_compilation_context(ast)
-    if saved is not None and saved.material != ast.sheet.material:
-        raise ValueError("CompilationContext: saved material does not match the layout material")
-    if ast.config.get("requires_machining_clearance") and ast.machining_clearance is None:
-        raise ValueError(
-            "Converted packed geometry has no cutter context; convert the original PML with --for-machining"
+    context = ast.machining_context
+    if (
+        context is None
+        or (kerf_mm is not None and kerf_mm != context.requested_kerf_mm)
+        or tool_db is not None
+        or endmills is not None
+        or feeds is not None
+        or (machine_config is not None and context.machine_config != machine_config)
+    ):
+        context = compilation_context(
+            ast.sheet.material,
+            kerf_mm,
+            tool_db=tool_db,
+            endmills=endmills,
+            feeds=feeds,
+            machine_config=machine_config,
+            machining=profile_machining_spec(ast.machining, ast.items),
+            profile_reach_mm=profile_required_reach(ast.items, ast.sheet.thickness_mm),
         )
-    if kerf_mm is None:
-        kerf_mm = saved.requested_kerf_mm if saved is not None else PROJECT_KERF_MM
-    if tool_db is None and endmills is None and feeds is None and saved is not None:
-        tool_db = saved.tool_db()
-    context = compilation_context(ast.sheet.material, kerf_mm, tool_db=tool_db, endmills=endmills, feeds=feeds)
-    effective_tool_db = context.tool_db()
-    tools = list(context.tools)
+    machine_config = context.machine_config
+    tools = context.tools
+
     if ast.machining_clearance is not None:
         selected = context.profile_diameter_mm
         expected = ast.machining_clearance.profile_diameter_mm
@@ -305,8 +327,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             raise ValueError(
                 f"Profile cutter changed after packing: resolved {expected:g}mm, selected {selected}mm; resolve the layout again"
             )
-    if context.profile_diameter_mm is not None:
-        kerf_mm = context.profile_diameter_mm
+    kerf_mm = context.profile_diameter_mm or 0.0
 
     errors: list[str] = []
     warnings: list[str] = []
@@ -323,10 +344,13 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     for warning in constraint_audit.warnings:
         warnings.append(f"Constraint audit: {warning}")
 
-    engrave_diameter = (
-        pick_tool_for_engrave(tools).diameter
-        if tools and any(intent.hint_type == FeatureType.ENGRAVE for intent in non_surface_intents)
-        else None
+    engrave_diameter = max(
+        (
+            pick_tool_for_engrave(tools_for_role(tools, "engrave", intent.tool_name, intent.depth_mm())).diameter
+            for intent in non_surface_intents
+            if intent.hint_type == FeatureType.ENGRAVE
+        ),
+        default=None,
     )
     overlap_result = check_overlap(non_surface_intents, engrave_tool_diameter_mm=engrave_diameter)
     if overlap_result.has_issues():
@@ -342,7 +366,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         warnings.append(issue.message)
 
     v_angles: list[float] | None = [
-        float(t["v_angle_deg"]) for t in effective_tool_db if t.get("kind") == "v" and t.get("v_angle_deg") is not None
+        float(t.v_angle_deg) for t in tools if t.kind == "v" and t.v_angle_deg is not None
     ] or None
 
     for intent in intents:
@@ -433,7 +457,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         height=ast.sheet.height_mm,
         thickness=ast.sheet.thickness_mm,
     )
-    machine = Machine(name="default_grbl")
+    machine = context.machine()
 
     back_items = ast.face_items("back")
     front_ast = replace(ast, items=ast.face_items("front"))
@@ -645,14 +669,14 @@ def build_run_metrics(
         context = run.result.compilation_context
         if context is None:
             continue
-        data = context.to_dict()
+        data = context.setup_summary()
         if run.source in contexts and contexts[run.source] != data:
             raise ValueError(f"Source {run.source}: sheets have inconsistent compilation contexts")
         contexts[run.source] = data
     if contexts:
         requests = {source: data["requested_kerf_mm"] for source, data in contexts.items()}
         selected = {source: data["selected_profile_diameter_mm"] for source, data in contexts.items()}
-        build["compilation_contexts"] = contexts
+        build["machining"] = contexts
         build["requested_kerf_mm"] = next(iter(set(requests.values()))) if len(set(requests.values())) == 1 else None
         build["selected_profile_diameter_mm"] = (
             next(iter(set(selected.values()))) if len(set(selected.values())) == 1 else None
@@ -741,6 +765,7 @@ def _sheet_machining_summary(result: PipelineResult, filenames: dict[str, str]) 
         for name, gcode_file in result.gcode_files.items()
     ]
     return {
+        "machining": result.compilation_context.setup_summary() if result.compilation_context else {},
         "stock": {
             "width_mm": sheet.width_mm,
             "height_mm": sheet.height_mm,

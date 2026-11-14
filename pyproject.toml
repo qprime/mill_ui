@@ -26,7 +26,8 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--cov=. --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail"
+addopts = "--cov=. --cov-branch --cov-report=term-missing:skip-covered --no-cov-on-fail -m 'not shipped_configuration'"
+markers = ["shipped_configuration: explicit integration checks of the repository machine/tool/preset files"]
 
 [tool.coverage.run]
 omit = [

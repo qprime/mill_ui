@@ -6,12 +6,12 @@ from typing import Any
 from layout_ast.layout import MachiningClearance
 from pml.nest_parser import HoldingSpec
 
-from .layout_generator import nesting_result_to_asts, nesting_result_to_pml
+from .layout_generator import nesting_result_to_asts
 from .sheet_packer import pack_sheets
 from .types import PartSpec, SheetSpec
 from .validation import validate_nesting_result
 
-_VALID_OUTPUT_FORMATS = ("ast", "pml")
+_VALID_OUTPUT_FORMATS = ("ast",)
 _VALID_ALGORITHMS = ("guillotine", "maxrects")
 
 
@@ -131,8 +131,6 @@ def nest_and_generate(
     algorithm: str = "maxrects",
     machining_clearance: MachiningClearance | None = None,
 ) -> dict[str, Any]:
-    if machining_clearance is not None and output_format == "pml":
-        raise ValueError("Machining-aware nesting requires AST/JSON output to retain the selected cutter contract")
     if output_format not in _VALID_OUTPUT_FORMATS:
         raise ValueError(f"Invalid output_format '{output_format}'. Must be one of: {', '.join(_VALID_OUTPUT_FORMATS)}")
 
@@ -168,7 +166,7 @@ def nest_and_generate(
     asts = nesting_result_to_asts(result)
     if machining_clearance is not None:
         asts = [replace(ast, machining_clearance=machining_clearance) for ast in asts]
-    output = nesting_result_to_pml(result) if output_format == "pml" else asts
+    output = asts
 
     return {
         "nesting_result": result,

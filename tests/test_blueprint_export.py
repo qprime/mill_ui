@@ -10,6 +10,8 @@ from layout_ast.compositional import CompositionalLayoutAST, Frame, PocketGen, P
 from layout_ast.layout import Feature, Geometry, Item, LayoutAST, Placement, Sheet
 from resolution.layout_resolver import LayoutResolver
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 GOLDEN_DIR = Path(__file__).parent / "fixtures" / "blueprint_golden"
 
 

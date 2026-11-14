@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from cam.pipeline import DEFAULT_SAFE_Z_MM, run_pipeline
+from cam.pipeline import run_pipeline
 from config.machine_loader import CNCMachine2D, Endmill, MachineConfig, MachineDefaults, Spoilboard2D
 from ir.removal_intent import Bounds2D
 from layout_ast.layout import LayoutAST, Sheet
@@ -19,6 +19,8 @@ from validation.machine_checks import (
     validate_machine_config,
 )
 
+pytestmark = pytest.mark.usefixtures("machining_config")
+
 
 def _machine(
     x_min: float = 0.0,
@@ -27,13 +29,14 @@ def _machine(
     y_max: float = 1000.0,
 ) -> MachineConfig:
     return MachineConfig(
+        cutting_preset="test_cutting",
         machine=CNCMachine2D(
             name="test",
             envelope_x_min=x_min,
             envelope_x_max=x_max,
             envelope_y_min=y_min,
             envelope_y_max=y_max,
-        )
+        ),
     )
 
 
@@ -292,7 +295,9 @@ class TestRunPipelineMachineConfig:
         assert result.svg is None
 
     def test_machine_safe_z_applies_when_sheet_sets_none(self):
-        machine = MachineConfig(machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0))
+        machine = MachineConfig(
+            machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0), cutting_preset="test_cutting"
+        )
         result = run_pipeline(_profile_ast(), machine_config=machine, generate_svg=False)
 
         assert result.errors == []
@@ -300,7 +305,9 @@ class TestRunPipelineMachineConfig:
         assert {p.setup.safe_z for p in result.passes} == {3.0}
 
     def test_sheet_safe_z_overrides_machine(self):
-        machine = MachineConfig(machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0))
+        machine = MachineConfig(
+            machine=_machine().machine, defaults=MachineDefaults(safe_z_mm=3.0), cutting_preset="test_cutting"
+        )
         result = run_pipeline(_profile_ast("  safe_z: 15mm\n"), machine_config=machine, generate_svg=False)
 
         assert {p.setup.safe_z for p in result.passes} == {15.0}
@@ -308,4 +315,4 @@ class TestRunPipelineMachineConfig:
     def test_pipeline_default_safe_z_without_machine(self):
         result = run_pipeline(_profile_ast(), generate_svg=False)
 
-        assert {p.setup.safe_z for p in result.passes} == {DEFAULT_SAFE_Z_MM}
+        assert {p.setup.safe_z for p in result.passes} == {3.0}

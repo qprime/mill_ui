@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import math
+from itertools import pairwise
+
+import pytest
 
 from cam.model.machine import Machine
 from cam.model.setup import Setup
@@ -181,6 +184,77 @@ class TestRampExplicitXYZ:
 
 
 class TestProfileKeepdown:
+    def test_open_reversal_emitted_program_preserves_each_segment_at_each_depth(self):
+        from cam.post.gcode import write_gcode
+        from cam.types import Vec2
+        from validation.core import Verdict
+        from validation.invariants.gcode_invariants import check_gcode_invariants_from_content
+        from validation.metrics.gcode_metrics import _parse_moves
+
+        shape = Shape2D((Vec2(10.1234, 20.5678), Vec2(80.1234, 20.5678), Vec2(80.1234, 60.5678)))
+        setup = _setup()
+        moves = profile_outline(shape, setup, depth_mm=7, step_down=3, reverse_open_passes=True)
+        content = write_gcode(moves, safe_z=setup.safe_z)
+        parsed = _parse_moves(content.splitlines())
+
+        for layer, depth in enumerate((3, 6, 7)):
+            points = shape.points if layer % 2 == 0 else shape.points[::-1]
+            actual = [
+                ((a["x"], a["y"]), (b["x"], b["y"]))
+                for a, b in pairwise(parsed)
+                if b["type"] == "feed" and a["z"] == b["z"] == -depth
+            ]
+            expected = [((round(a.x, 3), round(a.y, 3)), (round(b.x, 3), round(b.y, 3))) for a, b in pairwise(points)]
+            assert actual == expected
+        results = check_gcode_invariants_from_content(content)
+        assert [(result.id, result.failures) for result in results if result.status == Verdict.FAIL] == []
+
+    def test_open_boundary_reversal_forwarded_through_binding(self):
+        from cam.types import Vec2
+
+        shape = Shape2D((Vec2(10, 20), Vec2(80, 20), Vec2(80, 60)))
+        moves = profile_outline(shape, _setup(), depth_mm=7, step_down=3, reverse_open_passes=True)
+
+        assert len(_rapid_moves(moves)) == 1
+        assert len([m for m in moves if isinstance(m, RetractMove)]) == 1
+        cuts = _cut_moves(moves)
+        assert [m.z for m in cuts if m.z is not None] == [-3, -6, -7]
+        assert [(m.x, m.y) for m in cuts if m.x is not None] == [
+            (80, 20),
+            (80, 60),
+            (80, 20),
+            (10, 20),
+            (80, 20),
+            (80, 60),
+        ]
+
+    @pytest.mark.parametrize("ramp_angle", [0.0, 3.0])
+    @pytest.mark.parametrize("size", [1.0, 100.0])
+    def test_open_reversal_option_leaves_closed_paths_unchanged(self, ramp_angle, size):
+        shape = _rect_shape(size, size)
+        setup = _setup(ramp_angle)
+
+        assert profile_outline(shape, setup, 7, 3, reverse_open_passes=True) == profile_outline(shape, setup, 7, 3)
+
+    @pytest.mark.parametrize("depth", [0.0, 2.0, 7.0])
+    def test_open_reversal_disabled_preserves_default_output(self, depth):
+        from cam.types import Vec2
+
+        shape = Shape2D((Vec2(10, 20), Vec2(80, 20), Vec2(80, 60)))
+        setup = _setup()
+        baseline = profile_outline(shape, setup, depth, 3)
+
+        assert profile_outline(shape, setup, depth, 3, reverse_open_passes=False) == baseline
+        assert len([m for m in baseline if isinstance(m, RetractMove)]) == math.ceil(depth / 3)
+        if depth <= 3:
+            assert profile_outline(shape, setup, depth, 3, reverse_open_passes=True) == baseline
+
+    def test_empty_boundary_reversal_preserves_output(self):
+        shape = Shape2D(())
+        setup = _setup()
+
+        assert profile_outline(shape, setup, 7, 3, reverse_open_passes=True) == profile_outline(shape, setup, 7, 3)
+
     def test_keepdown_no_intermediate_retracts(self):
         setup = _setup(3.0)
         shape = _rect_shape(200.0, 200.0)

@@ -44,10 +44,10 @@
       "feature_count": 7,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 66.0
+      "estimated_runtime_min": 65.0
     }
   ],
-  "total_runtime_min": 118.1,
+  "total_runtime_min": 117.1,
   "feature_counts": {
     "chamfer": 1,
     "pocket": 2,

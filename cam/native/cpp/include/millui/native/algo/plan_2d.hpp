@@ -40,8 +40,8 @@ void emit_ramp_or_plunge(Path& moves, std::span<const Vec2> path, double prev_z,
                                 double step_down_mm, double safe_z_mm, double ramp_angle_deg = 0.0,
                                 PocketStrategy strategy = PocketStrategy::Spiral);
 [[nodiscard]] Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm,
-                                 double step_down_mm, double safe_z_mm,
-                                 double ramp_angle_deg = 0.0);
+                                 double step_down_mm, double safe_z_mm, double ramp_angle_deg = 0.0,
+                                 bool reverse_open_passes = false);
 [[nodiscard]] Paths plan_drill(const std::vector<Hole>& holes, const Tool& tool, double peck_mm,
                                double safe_z_mm,
                                double retract_clearance_mm = kDefaultRetractClearanceMm);

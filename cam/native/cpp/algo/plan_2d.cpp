@@ -297,7 +297,8 @@ Paths plan_pocket(const PlanarFace& face, const Tool& tool, double step_over_mm,
 }
 
 Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth_mm,
-                   double step_down_mm, double safe_z, double ramp_angle_deg) {
+                   double step_down_mm, double safe_z, double ramp_angle_deg,
+                   bool reverse_open_passes) {
     const double depth_target = -std::abs(total_depth_mm);
 
     Paths paths(1);
@@ -309,9 +310,13 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
 
     const double step_down = step_down_mm <= 0.0 ? kProfileDefaultStepDownMm : step_down_mm;
 
-    bool closed = boundary.size() >= 2 && std::abs(boundary.front().x - boundary.back().x) < kEps &&
-                  std::abs(boundary.front().y - boundary.back().y) < kEps;
-    double use_ramp = (ramp_angle_deg > kEps && closed) ? ramp_angle_deg : 0.0;
+    const bool closed = boundary.size() >= 2 &&
+                        std::abs(boundary.front().x - boundary.back().x) < kEps &&
+                        std::abs(boundary.front().y - boundary.back().y) < kEps;
+    const double use_ramp = (ramp_angle_deg > kEps && closed) ? ramp_angle_deg : 0.0;
+    const bool reverse_open = reverse_open_passes && !closed;
+    bool reverse_path = false;
+    bool first_layer = true;
 
     double z = 0.0;
     double prev_z = 0.0;
@@ -334,21 +339,25 @@ Paths plan_profile(const Polygon& boundary, const Tool& tool, double total_depth
             emit_ramp_or_plunge(moves, rev_path, prev_z, z, use_ramp, safe_z, tool.feed_xy,
                                 tool.feed_z, can_keepdown);
         } else {
-            const Vec2& start = boundary.front();
-            moves.push_back(make_rapid(start.x, start.y, safe_z));
+            if (!reverse_open || first_layer) {
+                const Vec2& start = boundary.front();
+                moves.push_back(make_rapid(start.x, start.y, safe_z));
+            }
             moves.push_back(make_cut(std::nullopt, std::nullopt, z, tool.feed_z));
         }
 
         moves.push_back(make_set_feed(tool.feed_xy));
         for (std::size_t i = 1; i < boundary.size(); ++i) {
-            const Vec2& p = boundary[i];
+            const Vec2& p = boundary[reverse_path ? boundary.size() - 1 - i : i];
             moves.push_back(make_cut(p.x, p.y, std::nullopt));
         }
 
-        if (is_last_pass || !(use_ramp > kEps)) {
+        if (is_last_pass || (use_ramp <= kEps && !reverse_open)) {
             moves.push_back(make_retract(safe_z));
         }
         prev_z = z;
+        reverse_path = reverse_open && !reverse_path;
+        first_layer = false;
     }
 
     return paths;

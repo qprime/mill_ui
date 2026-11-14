@@ -13,10 +13,10 @@
         }
       },
       "complexity": {
-        "total_moves": 9429,
-        "rapid_moves": 518,
+        "total_moves": 8781,
+        "rapid_moves": 194,
         "cut_moves": 7425,
-        "rapid_ratio": 0.055
+        "rapid_ratio": 0.022
       },
       "fidelity": {
         "tool_changes": 4,
@@ -39,13 +39,13 @@
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 5523
+            "move_count": 4875
           }
         ]
       },
       "output_size": {
-        "total_bytes": 210552,
-        "total_lines": 8992,
+        "total_bytes": 198174,
+        "total_lines": 8344,
         "files": {
           "pocket-12.70mm": {
             "bytes": 7682,
@@ -60,8 +60,8 @@
             "lines": 3082
           },
           "profile-3.17mm": {
-            "bytes": 139737,
-            "lines": 5185
+            "bytes": 127359,
+            "lines": 4537
           }
         }
       },
@@ -95,10 +95,10 @@
         }
       },
       "complexity": {
-        "total_moves": 8864,
-        "rapid_moves": 413,
+        "total_moves": 8360,
+        "rapid_moves": 161,
         "cut_moves": 7204,
-        "rapid_ratio": 0.047
+        "rapid_ratio": 0.019
       },
       "fidelity": {
         "tool_changes": 4,
@@ -121,13 +121,13 @@
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 5078
+            "move_count": 4574
           }
         ]
       },
       "output_size": {
-        "total_bytes": 197770,
-        "total_lines": 8466,
+        "total_bytes": 188224,
+        "total_lines": 7962,
         "files": {
           "pocket-12.70mm": {
             "bytes": 3467,
@@ -142,8 +142,8 @@
             "lines": 212
           },
           "profile-3.17mm": {
-            "bytes": 130297,
-            "lines": 4752
+            "bytes": 120751,
+            "lines": 4248
           }
         }
       },

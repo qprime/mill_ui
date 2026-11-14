@@ -98,6 +98,80 @@ TEST_CASE("emit_ramp_or_plunge on an empty path emits nothing") {
     CHECK(moves.empty());
 }
 
+TEST_CASE("plan_profile reverses every open segment once per layer without intermediate retracts") {
+    const Polygon boundary = {{10.0, 20.0}, {40.0, 20.0}, {40.0, 60.0}, {75.0, 60.0}};
+    const Tool tool = make_tool(6.0);
+    constexpr double kStepDownMm = 2.0;
+    constexpr double kSafeZMm = 5.0;
+    for (const double depth_mm : {1.0, 4.0, 5.0, 6.0}) {
+        CAPTURE(depth_mm);
+        const Paths paths =
+            plan_profile(boundary, tool, depth_mm, kStepDownMm, kSafeZMm, 3.0, true);
+        REQUIRE(paths.size() == 1);
+        const Path& moves = paths.front();
+        const int layers = static_cast<int>(std::ceil(depth_mm / kStepDownMm));
+        std::size_t cut_index = 0;
+        int rapid_count = 0;
+        int retract_count = 0;
+        double z_mm = kSafeZMm;
+        double feed = tool.feed_xy;
+        Vec2 position = boundary.front();
+        for (const Move& move : moves) {
+            if (const auto* rapid = std::get_if<Rapid>(&move)) {
+                ++rapid_count;
+                CHECK(cut_index == 0);
+                CHECK(rapid->x == boundary.front().x);
+                CHECK(rapid->y == boundary.front().y);
+                CHECK(rapid->z == kSafeZMm);
+            } else if (const auto* set_feed = std::get_if<SetFeed>(&move)) {
+                feed = set_feed->feed;
+            } else if (const auto* cut = std::get_if<Cut>(&move)) {
+                const std::size_t layer = cut_index / boundary.size();
+                const std::size_t vertex = cut_index % boundary.size();
+                const bool reversed = layer % 2 != 0;
+                const double target_z_mm =
+                    -std::min(depth_mm, static_cast<double>(layer + 1) * kStepDownMm);
+                if (vertex == 0) {
+                    REQUIRE(cut->z.has_value());
+                    CHECK_FALSE(cut->x.has_value());
+                    CHECK_FALSE(cut->y.has_value());
+                    CHECK(near(*cut->z, target_z_mm));
+                    CHECK(cut->feed == tool.feed_z);
+                    const Vec2& start = reversed ? boundary.back() : boundary.front();
+                    CHECK(near(position.x, start.x));
+                    CHECK(near(position.y, start.y));
+                    if (layer > 0) {
+                        CHECK(z_mm - *cut->z > 0.0);
+                        CHECK(z_mm - *cut->z <= kStepDownMm);
+                    }
+                    z_mm = *cut->z;
+                } else {
+                    const Vec2& expected =
+                        boundary[reversed ? boundary.size() - 1 - vertex : vertex];
+                    CHECK(cut->x == expected.x);
+                    CHECK(cut->y == expected.y);
+                    CHECK_FALSE(cut->z.has_value());
+                    CHECK(near(z_mm, target_z_mm));
+                    CHECK(near(feed, tool.feed_xy));
+                    position = expected;
+                }
+                if (cut->feed) {
+                    feed = *cut->feed;
+                }
+                ++cut_index;
+            } else if (const auto* retract = std::get_if<Retract>(&move)) {
+                ++retract_count;
+                CHECK(near(z_mm, -depth_mm));
+                CHECK(retract->z == kSafeZMm);
+            }
+        }
+        CHECK(cut_index == static_cast<std::size_t>(layers) * boundary.size());
+        CHECK(rapid_count == 1);
+        CHECK(retract_count == 1);
+        REQUIRE(std::holds_alternative<Retract>(moves.back()));
+    }
+}
+
 TEST_CASE("build_inset_rings terminates at the minimum step over on a large pocket") {
     auto convex = ConvexPolygon::try_from(square(500.0));
     REQUIRE(convex.has_value());

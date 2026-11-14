@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from itertools import pairwise
 
 import pytest
 from shapely import get_parts, maximum_inscribed_circle
@@ -20,6 +21,7 @@ from cam.ops.bore import pocket_circle_concentric
 from cam.ops.engrave import engrave_lines
 from cam.ops.face import face_zigzag
 from cam.ops.pocket import pocket_offset_loops
+from cam.ops.profile import profile_outline
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator, PassRecord, plan_passes
 from cam.planner.passes.edge import build_edge_cut_plan, plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
@@ -459,6 +461,100 @@ class TestRectangleProfilePlanning:
             stock=Stock(300, 200, 19),
             profile_opts=profile_opts,
         )[0]
+
+    @pytest.mark.parametrize("offset_y", [0.0, 20.0])
+    def test_shared_open_paths_keep_down_with_unchanged_outlines_and_attribution(self, offset_y):
+        from validation.toolpath_checks import verify_passes_preserve_parts, verify_passes_within_working_area
+
+        a = replace(_feature("Rect", {"w_mm": 100, "h_mm": 60}, (60, 80), 4.75, id="a"), side="outside")
+        b = replace(a, id="b", center_xy_mm=(163, 80 + offset_y))
+        profiles = (a, b)
+        (group,) = merge_profiles(profiles, tool_diameter_mm=3, config=Config())
+        (record,) = self._plan(profiles, profile_opts={"cut_through_mm": 0.2})
+        shapes = (*group.seams, *group.unshared_contours, *group.outlines)
+        contributors = (*group.seam_feature_ids, *(("a", "b") for _ in (*group.unshared_contours, *group.outlines)))
+
+        assert record.count == len(shapes)
+        assert len(record.move_ranges) == len(shapes)
+        for shape, ids, (start, end, actual_ids) in zip(shapes, contributors, record.move_ranges, strict=True):
+            assert actual_ids == ids
+            moves = record.moves[start:end]
+            if shape.points[0] == shape.points[-1]:
+                assert moves == profile_outline(shape, record.setup, 4.95, step_down=1.5)
+                continue
+            assert sum(isinstance(move, RapidMove) for move in moves) == 1
+            assert sum(isinstance(move, RetractMove) for move in moves) == 1
+            segments = _cut_segments(moves)
+            for layer, depth in enumerate((1.5, 3.0, 4.5, 4.95)):
+                points = shape.points if layer % 2 == 0 else shape.points[::-1]
+                actual = [(a[:2], b[:2]) for a, b in segments if a[2] == b[2] == -depth]
+                expected = [((a.x, a.y), (b.x, b.y)) for a, b in pairwise(points)]
+                assert actual == expected
+            plunges = [(a[2], b[2]) for a, b in segments if a[:2] == b[:2] and b[2] < a[2]]
+            assert plunges == [(record.setup.safe_z, -1.5), (-1.5, -3.0), (-3.0, -4.5), (-4.5, -4.95)]
+
+        assert verify_passes_preserve_parts([record], PlannerInput(profiles=profiles), {}) == ()
+        assert verify_passes_within_working_area([record], 300, 200) == ()
+
+    def test_shared_group_unshared_corner_contours_keep_down_at_every_depth(self):
+        boundaries = (
+            (
+                (11.5, 11.5),
+                (11.5, 108.5),
+                (98.5, 108.5),
+                (98.5, 62.5),
+                (102.5, 62.5),
+                (102.5, 61.5),
+                (98.5, 61.5),
+                (98.5, 11.5),
+            ),
+            (
+                (101.5, 11.5),
+                (101.5, 58.5),
+                (105.5, 58.5),
+                (105.5, 65.5),
+                (101.5, 65.5),
+                (101.5, 108.5),
+                (188.5, 108.5),
+                (188.5, 11.5),
+            ),
+        )
+        profiles = tuple(
+            replace(_feature("Polygon", {"points": points}, (0, 0), 4.75, id=name), side="outside")
+            for name, points in zip(("left", "right"), boundaries, strict=True)
+        )
+        config = Config(min_overlap_mm=10)
+        (group,) = merge_profiles(profiles, tool_diameter_mm=3, config=config)
+        passes, _, _, errors = plan_passes(
+            PlannerInput(profiles=profiles, kerf_width_mm=3),
+            config=config,
+            tool_db=FLAT_ONLY,
+            machine=Machine(),
+            stock=Stock(300, 200, 19),
+            profile_opts={"cut_through_mm": 0.2},
+        )
+
+        assert errors == []
+        (record,) = passes
+        assert len(group.unshared_contours) == 2
+        offset = len(group.seams)
+        ranges = record.move_ranges[offset : offset + len(group.unshared_contours)]
+        for shape, (start, end, ids) in zip(group.unshared_contours, ranges, strict=True):
+            assert len(shape.points) == 4
+            assert shape.points[0] != shape.points[-1]
+            a, b, c = shape.points[:3]
+            assert (b.x - a.x) * (c.y - b.y) != (b.y - a.y) * (c.x - b.x)
+            assert ids == ("left", "right")
+            moves = record.moves[start:end]
+            assert sum(isinstance(move, RapidMove) for move in moves) == 1
+            assert sum(isinstance(move, RetractMove) for move in moves) == 1
+            segments = _cut_segments(moves)
+            assert sum(a[:2] != b[:2] for a, b in segments) == 12
+            for layer, depth in enumerate((1.5, 3.0, 4.5, 4.95)):
+                points = shape.points if layer % 2 == 0 else shape.points[::-1]
+                actual = [(a[:2], b[:2]) for a, b in segments if a[2] == b[2] == -depth]
+                expected = [((a.x, a.y), (b.x, b.y)) for a, b in pairwise(points)]
+                assert actual == expected
 
     @pytest.mark.parametrize("merge", [True, False])
     @pytest.mark.parametrize(

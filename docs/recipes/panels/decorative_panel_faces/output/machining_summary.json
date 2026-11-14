@@ -70,10 +70,10 @@
       "feature_count": 8,
       "strategy": "contour",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 77.1
+      "estimated_runtime_min": 66.4
     }
   ],
-  "total_runtime_min": 227.7,
+  "total_runtime_min": 217.0,
   "feature_counts": {
     "engrave": 101,
     "pocket": 38,

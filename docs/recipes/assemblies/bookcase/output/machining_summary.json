@@ -50,10 +50,10 @@
           "feature_count": 2,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 53.2
+          "estimated_runtime_min": 49.9
         }
       ],
-      "total_runtime_min": 84.2,
+      "total_runtime_min": 80.9,
       "feature_counts": {
         "pocket": 10,
         "profile": 2
@@ -83,10 +83,10 @@
           "feature_count": 3,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 64.8
+          "estimated_runtime_min": 59.2
         }
       ],
-      "total_runtime_min": 64.8,
+      "total_runtime_min": 59.2,
       "feature_counts": {
         "profile": 3
       },
@@ -115,16 +115,16 @@
           "feature_count": 2,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 45.6
+          "estimated_runtime_min": 42.8
         }
       ],
-      "total_runtime_min": 45.6,
+      "total_runtime_min": 42.8,
       "feature_counts": {
         "profile": 2
       },
       "safe_z_mm": 6.0
     }
   ],
-  "total_runtime_min": 194.6,
+  "total_runtime_min": 182.9,
   "kerf_mm": 3.175
 }

@@ -237,15 +237,17 @@ PYBIND11_MODULE(_native, m) {
     m.def(
         "plan_profile",
         [](const py::sequence& boundary, const py::object& tool_obj, double total_depth_mm,
-           double step_down_mm, double safe_z_mm, double ramp_angle_deg) {
+           double step_down_mm, double safe_z_mm, double ramp_angle_deg, bool reverse_open_passes) {
             Polygon poly = polygon_from_py(boundary);
             Tool tool = tool_from_py(tool_obj);
             checked_step_scalar(step_down_mm, "plan_profile", "step_down_mm");
             return paths_to_flat_list(algo::plan_profile(poly, tool, total_depth_mm, step_down_mm,
-                                                         safe_z_mm, ramp_angle_deg));
+                                                         safe_z_mm, ramp_angle_deg,
+                                                         reverse_open_passes));
         },
         py::arg("boundary"), py::arg("tool"), py::arg("total_depth_mm"), py::arg("step_down_mm"),
-        py::arg("safe_z_mm"), py::arg("ramp_angle_deg") = 0.0);
+        py::arg("safe_z_mm"), py::arg("ramp_angle_deg") = 0.0,
+        py::arg("reverse_open_passes") = false);
 
     m.def(
         "plan_drill",

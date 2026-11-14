@@ -106,7 +106,9 @@ def pocket_raster(
     ]
 
 
-def profile_outline(shape, setup, *, depth_mm: float, stepdown_mm: float) -> list[Move]:
+def profile_outline(
+    shape, setup, *, depth_mm: float, stepdown_mm: float, reverse_open_passes: bool = False
+) -> list[Move]:
     _require_native()
     boundary = _poly_from_shape(shape)
     ramp = float(setup.ramp_angle_deg)
@@ -119,6 +121,7 @@ def profile_outline(shape, setup, *, depth_mm: float, stepdown_mm: float) -> lis
             float(stepdown_mm),
             float(setup.safe_z),
             ramp_angle_deg=ramp,
+            reverse_open_passes=reverse_open_passes,
         )
     ]
 

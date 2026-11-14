@@ -191,6 +191,14 @@ contours and are cut before the union outlines. Only accepted seams replace
 the corresponding per-profile traversals. All contours use the existing
 profile operation; ramp entries follow boundary segments without corner shortcuts.
 
+Shared open paths enter once and alternate traversal direction at successive
+depths. Between layers the cutter feeds down at its current endpoint by at most
+one stepdown, then covers every path segment once at the new depth. Only the
+final layer retracts. This is an explicit native option enabled by the shared
+profile planner; ordinary open paths retain their existing entry/retract cycles,
+and closed contours retain their existing ramp behavior. Separate shared paths
+remain separate, with unchanged ordering, contributor IDs and holding exclusions.
+
 Two outside profiles require at least the selected cutter's diameter
 between retained material regions, including each profile's largest positive
 rough/finish allowance, even when merging is disabled. Touching nominal

@@ -332,7 +332,11 @@ def plan_shared_profiles(
         for shape, contributors in shapes:
             record.add_moves(
                 profile_outline(
-                    shape, record.setup, group.depth_mm + cut_through_mm, step_down=stepdown_for_tool(tool)
+                    shape,
+                    record.setup,
+                    group.depth_mm + cut_through_mm,
+                    step_down=stepdown_for_tool(tool),
+                    reverse_open_passes=True,
                 ),
                 feature_ids=contributors,
                 increment=1,

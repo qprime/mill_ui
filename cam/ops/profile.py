@@ -4,10 +4,13 @@ from cam.native import core as native_core
 from cam.shape import Shape2D
 
 
-def profile_outline(shape: Shape2D, setup: Setup, depth_mm: float, step_down: float = 2.0) -> list[Move]:
+def profile_outline(
+    shape: Shape2D, setup: Setup, depth_mm: float, step_down: float = 2.0, *, reverse_open_passes: bool = False
+) -> list[Move]:
     return native_core.profile_outline(
         shape,
         setup,
         depth_mm=float(depth_mm),
         stepdown_mm=float(step_down),
+        reverse_open_passes=reverse_open_passes,
     )

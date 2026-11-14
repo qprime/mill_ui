@@ -18,7 +18,7 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
-from layout_ast.layout import LayoutAST
+from layout_ast.layout import LayoutAST, MachiningClearance
 from nesting import nest_and_generate, nest_parts
 from pml.lifter import lift_layout_ast
 from pml.nest_parser import NestJob, nest_job_to_api_params
@@ -124,9 +124,11 @@ def run_export_svg(ast: LayoutAST, pml_path: Path, output_dir: Path, theme: str)
     return svg_path
 
 
-def nest_job(job: NestJob) -> dict[str, Any]:
+def nest_job(job: NestJob, *, machining_clearance: MachiningClearance | None = None) -> dict[str, Any]:
     api_params = nest_job_to_api_params(job)
     api_params["output_format"] = "ast"
+    if machining_clearance is not None:
+        api_params["machining_clearance"] = machining_clearance
     return nest_and_generate(**api_params)
 
 

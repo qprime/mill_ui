@@ -540,6 +540,7 @@ class AtPosition:
     width_mm: float | None = None
     height_mm: float | None = None
     child: Any = None
+    part_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -699,7 +700,7 @@ class AssemblyDecl:
     top: str | InterfaceConfig | None = None
     bottom: str | InterfaceConfig | None = "captured"
     children: tuple[Any, ...] = ()
-    layout_gap_mm: float = 10.0
+    layout_gap_mm: float | Literal["auto"] = 10.0
     show_labels: bool = False
     show_edge_colors: bool = False
     show_dimensions: bool = True
@@ -809,6 +810,7 @@ class BeamDecl:
     face_features: tuple[BeamFeatureDecl, ...] = ()
     end_features: tuple[BeamFeatureDecl, ...] = ()
     edge_features: tuple[BeamFeatureDecl, ...] = ()
+    layout_gap_mm: float | Literal["auto"] = 10.0
     show_labels: bool = False
 
 

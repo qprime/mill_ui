@@ -32,17 +32,19 @@ Machine the inside faces upward. The right-side blank is mirrored; the top's
 depth direction is also reversed, placing its rear groove at the correct edge.
 Corrected parts pack onto two sheets; the earlier oversized back required three.
 
+2 sheets.
+
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
-- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 feature(s), to 9mm
-- `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 32 feature(s), to 9mm
-- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 2 feature(s), to 18.2mm
+- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 operation(s), to 9mm
+- `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 32 operation(s), to 9mm
+- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 2 contour(s), to 18.2mm
 
 Sheet 2: 1220 × 1220 × 18mm mdf.
 
-- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 feature(s), to 9mm
-- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 8 feature(s), to 9mm
-- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 4 feature(s), to 18.2mm
+- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 operation(s), to 9mm
+- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 8 operation(s), to 9mm
+- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 7 contour(s), to 18.2mm
 
 ## Run
 

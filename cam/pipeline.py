@@ -42,7 +42,10 @@ from validation.removal_checks import (
     check_toolpath_clearance,
     check_working_area_bounds,
 )
-from validation.toolpath_checks import verify_passes_avoid_keepouts
+from validation.toolpath_checks import (
+    verify_layout_cutting_clearance,
+    verify_passes_avoid_keepouts,
+)
 
 NON_DETERMINISTIC_METRICS = frozenset({"timing"})
 DEFAULT_SAFE_Z_MM = 6.0
@@ -231,7 +234,9 @@ def _plan_and_emit_face(
     )
     errors.extend(issue.message for issue in physical_bounds.errors)
     warnings.extend(issue.message for issue in physical_bounds.warnings)
-    blocked = bool(planner_errors) or bool(physical_bounds.errors)
+    collisions = verify_layout_cutting_clearance(passes, planner_input, ast, intents)
+    errors.extend(collision.message for collision in collisions)
+    blocked = bool(planner_errors) or bool(physical_bounds.errors) or bool(collisions)
     if planner_input.keepouts:
         keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
         for _, group in groups:
@@ -603,6 +608,9 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             },
         },
     }
+
+    if ast.config.get("layout_gaps"):
+        metrics["packing"] = {"gaps": ast.config["layout_gaps"], "preflight": ast.config.get("packing_preflight", [])}
 
     return PipelineResult(
         compilation_context=context,

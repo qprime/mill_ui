@@ -4,7 +4,7 @@ import math
 import os
 from collections.abc import Callable, Sequence
 from dataclasses import replace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from assembly.joinery import Butt, Captured, Finger, HalfLap
 from assembly.panel import PanelSpec
@@ -475,6 +475,7 @@ class LayoutResolver:
         self._shape_counter = 0
         self._validate = validate
         self._beam_structures: list[dict] = []
+        self._layout_gaps: list[dict[str, Any]] = []
 
     @property
     def _profile_diameter_mm(self) -> float:
@@ -483,10 +484,35 @@ class LayoutResolver:
         kerf = self.ast.kerf_width_mm
         return 6.35 if kerf is None or kerf == 0.0 else kerf
 
+    def _layout_gap(self, gap: float | Literal["auto"]) -> float:
+        if gap == "auto":
+            if self._machining_clearance is None:
+                raise ResolutionAssertionError("layout_gap: auto requires an actual selected profile cutter context")
+            from nesting.types import SheetSpec
+
+            sheet = SheetSpec(
+                self.ast.sheet.width_mm,
+                self.ast.sheet.height_mm,
+                self.ast.sheet.thickness_mm,
+                margin_mm=self.ast.sheet.margin_mm,
+                kerf_mm=self._profile_diameter_mm,
+                gap_margin_mm=self._machining_clearance.gap_margin_mm,
+            )
+            resolved = sheet.gap_mm
+            self._layout_gaps.append({"policy": "auto", "gap_mm": resolved})
+            return resolved
+        self._check_layout_gap(gap)
+        return gap
+
+    def _layout_edge_clearance(self, gap: float | Literal["auto"]) -> float:
+        extra = self._machining_clearance.gap_margin_mm if gap == "auto" and self._machining_clearance else 0.0
+        return self._profile_diameter_mm + extra
+
     def _check_layout_gap(self, gap_mm: float) -> None:
         if self._machining_clearance is not None and gap_mm < self._profile_diameter_mm:
             raise ResolutionAssertionError(
-                f"Layout gap {gap_mm:g}mm must be at least selected profile cutter diameter {self._profile_diameter_mm:g}mm"
+                f"Layout gap {gap_mm:g}mm must be at least selected profile cutter diameter {self._profile_diameter_mm:g}mm. "
+                f"Select an available flat profile cutter no wider than {gap_mm:g}mm, increase layout_gap, or use auto."
             )
 
     def _next_shape_id(self, prefix: str) -> str:
@@ -2770,19 +2796,18 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
-        self._check_layout_gap(node.layout_gap_mm)
+        gap = self._layout_gap(node.layout_gap_mm)
         assembly = self._build_assembly(node)
         panel_specs = assembly.resolve()
 
-        tool_radius = self._profile_diameter_mm / 2.0
-        edge_clearance = 2 * tool_radius
+        edge_clearance = self._layout_edge_clearance(node.layout_gap_mm)
 
         items.extend(
             self._panels_to_items(
                 self._row_wrap_positions(
                     panel_specs,
                     region,
-                    gap_mm=node.layout_gap_mm,
+                    gap_mm=gap,
                     edge_clearance_mm=edge_clearance,
                 ),
                 show_labels=node.show_labels,
@@ -3027,6 +3052,8 @@ class LayoutResolver:
         result_items: list[Item] = []
 
         for spec, x_cursor, y_cursor in panel_positions:
+            first_item = len(result_items)
+            part_id = self._next_shape_id(f"part_{spec.name}")
             if abs(spec.thickness_mm - self.ast.sheet.thickness_mm) > _STOCK_THICKNESS_TOLERANCE_MM:
                 raise ValueError(
                     f"Assembly panel '{spec.name}' thickness {spec.thickness_mm}mm does not match sheet thickness "
@@ -3223,6 +3250,8 @@ class LayoutResolver:
                     shape_id=self._next_shape_id(f"assembly_{spec.name}_notch_dogbone"),
                 )
                 result_items.append(notch_item)
+
+            result_items[first_item:] = [replace(item, part_id=part_id) for item in result_items[first_item:]]
 
         return result_items
 
@@ -3427,16 +3456,10 @@ class LayoutResolver:
                 f"from other stock cannot be machined in this program"
             )
 
-        tool_radius = self._profile_diameter_mm / 2.0
-        edge_clearance = 2 * tool_radius
+        edge_clearance = self._layout_edge_clearance(node.layout_gap_mm)
         sheet_size = region.width - 2 * edge_clearance
         panel_specs = beam_spec.expand(sheet_size)
-        gap = 10.0
-        if self._machining_clearance is not None and gap < self._profile_diameter_mm:
-            raise ResolutionAssertionError(
-                f"Beam '{node.name}' uses fixed {gap:g}mm spacing; selected cutter {self._profile_diameter_mm:g}mm is too wide. "
-                f"Select an available flat profile cutter no wider than {gap:g}mm; Beam has no configurable gap."
-            )
+        gap = self._layout_gap(node.layout_gap_mm)
 
         segments = beam_spec.layer_segments(sheet_size)
 
@@ -3519,10 +3542,13 @@ class LayoutResolver:
                 shape_id=self._next_shape_id(f"beam_{spec.name}"),
                 label=panel_label,
             )
+            first_item = len(items)
             items.append(panel_item)
 
             if panel_index_is_layer_index:
                 items.extend(self._beam_layer_feature_items(beam_spec, layer_idx, (x_cursor, y_cursor), left_exts))
+
+            items[first_item:] = [replace(item, part_id=panel_item.shape_id) for item in items[first_item:]]
 
     def resolve(self) -> LayoutAST:
         sheet_region = ResolvedRegion(
@@ -3539,6 +3565,8 @@ class LayoutResolver:
             items.extend(self._desugar_surface(self.ast.surface))
 
         config: dict = {}
+        if self._layout_gaps:
+            config["layout_gaps"] = self._layout_gaps
         if self._beam_structures:
             config["beam_structures"] = self._beam_structures
 
@@ -3678,7 +3706,28 @@ class LayoutResolver:
         node_type = type(node)
 
         if node_type in handler_map:
+            first_item = len(items)
             handler_map[node_type](self, node, region, items, params)
+            items[first_item:] = [
+                replace(item, shape_id=self._next_shape_id(item.type.lower()))
+                if item.feature is not None and not item.shape_id
+                else item
+                for item in items[first_item:]
+            ]
+            if isinstance(node, AtPosition) and node.part_id is not None:
+                items[first_item:] = [replace(item, part_id=node.part_id) for item in items[first_item:]]
+            if isinstance(node, (Rect, Polygon, Circle, RoundedRect, Arch, Ellipse, Triangle, Place, AtPosition)):
+                emitted = items[first_item:]
+                profiles = [
+                    item
+                    for item in emitted
+                    if item.feature is not None and item.feature.type == "profile" and item.feature.side == "outside"
+                ]
+                if len(profiles) == 1:
+                    part_id = profiles[0].part_id or profiles[0].shape_id or self._next_shape_id("part")
+                    items[first_item:] = [
+                        replace(item, part_id=part_id) if item.part_id is None else item for item in emitted
+                    ]
 
 
 def resolve_layout(
@@ -3742,10 +3791,8 @@ def resolve_layout_multi(
 
     working_w = ast.sheet.working_width_mm
     working_h = ast.sheet.working_height_mm
-    resolver._check_layout_gap(assembly_node.layout_gap_mm)
-    tool_radius = resolver._profile_diameter_mm / 2.0
-    edge_clearance = 2 * tool_radius
-    gap = assembly_node.layout_gap_mm
+    gap = resolver._layout_gap(assembly_node.layout_gap_mm)
+    edge_clearance = resolver._layout_edge_clearance(assembly_node.layout_gap_mm)
 
     partition = partition_panels(
         panel_specs,
@@ -3794,7 +3841,7 @@ def resolve_layout_multi(
                 items=tuple(panel_items),
                 project=ast.project,
                 kerf_width_mm=ast.kerf_width_mm,
-                config={},
+                config={"layout_gaps": resolver._layout_gaps} if resolver._layout_gaps else {},
                 machining_clearance=machining_clearance,
             )
         )

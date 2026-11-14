@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -235,3 +237,90 @@ def test_nested_machining_reserves_cutter_clearance_in_working_coordinates(algor
     assert not check_working_area_bounds(
         [intent], ast.sheet.working_width_mm, ast.sheet.working_height_mm, tool_radius_mm=kerf / 2
     ).has_issues()
+
+
+@pytest.mark.parametrize("algorithm", ["guillotine", "maxrects"])
+def test_actual_nesting_cutter_contract_and_holding_margin(algorithm):
+    from layout_ast.layout import MachiningClearance
+
+    parts = [
+        {"name": "p", "width_mm": 100, "height_mm": 60, "quantity": 2, "holding": {"tab_count": 3, "tab_height_mm": 2}}
+    ]
+    result = nest_and_generate(
+        parts,
+        223,
+        90,
+        6,
+        margin_mm=10,
+        kerf_mm=3,
+        gap_margin_mm=3,
+        algorithm=algorithm,
+        machining_clearance=MachiningClearance(3),
+    )
+    asts = result["output"]
+    assert all(a.machining_clearance == MachiningClearance(3) for a in asts)
+    intents = [i for a in asts for i in ast_to_removal_intents(a)]
+    assert len({i.part_id for i in intents}) == 2
+    with pytest.raises(ValueError, match="smaller than selected profile cutter"):
+        nest_and_generate(
+            parts, 300, 200, 6, margin_mm=10, kerf_mm=3, algorithm=algorithm, machining_clearance=MachiningClearance(6)
+        )
+
+
+def test_nesting_pml_preserves_part_local_ownership():
+    from pml import parse_pml
+
+    result = nest_and_generate(
+        [
+            {
+                "name": "door",
+                "width_mm": 100,
+                "height_mm": 120,
+                "quantity": 2,
+                "template": "Shaker",
+                "template_params": {"stile_w": 20, "rail_h": 20, "panel_recess": 3},
+            }
+        ],
+        300,
+        200,
+        12,
+        margin_mm=10,
+        kerf_mm=3,
+        output_format="pml",
+    )
+    for pml in result["output"]:
+        intents = ast_to_removal_intents(parse_pml(pml))
+        profiles = [i for i in intents if i.hint_type == "profile"]
+        assert len({i.part_id for i in profiles}) == len(profiles)
+        assert all(i.part_id is not None for i in intents)
+
+
+def test_nested_polygon_pml_keeps_placement_and_owner():
+    from pml import parse_pml
+
+    parts = [
+        {
+            "name": "triangle",
+            "width_mm": 100,
+            "height_mm": 80,
+            "quantity": 2,
+            "allow_rotation": False,
+            "shape": "Polygon",
+            "shape_params": {"points": [[-50, -40], [50, -40], [0, 40]]},
+        }
+    ]
+    kwargs: dict[str, Any] = {
+        "parts": parts,
+        "sheet_width_mm": 300,
+        "sheet_height_mm": 200,
+        "sheet_thickness_mm": 12,
+        "margin_mm": 10,
+        "kerf_mm": 3,
+    }
+    asts = nest_and_generate(**kwargs)["output"]
+    sources = nest_and_generate(**kwargs, output_format="pml")["output"]
+    original = [intent for ast in asts for intent in ast_to_removal_intents(ast)]
+    replayed = [intent for source in sources for intent in ast_to_removal_intents(parse_pml(source))]
+    assert [(intent.bounds, intent.part_id) for intent in replayed] == [
+        (intent.bounds, intent.part_id) for intent in original
+    ]

@@ -37,6 +37,7 @@ def partition_panels(
     usable_height_mm: float,
     gap_mm: float = 10.0,
     edge_clearance_mm: float = 0.0,
+    algorithm: str = "maxrects",
 ) -> PartitionResult:
     from nesting.sheet_packer import pack_sheets
     from nesting.types import PartSpec, SheetSpec
@@ -48,8 +49,8 @@ def partition_panels(
         encoded = encode_panel_id(idx, panel.name)
         ps = PartSpec(
             name=encoded,
-            width_mm=panel.width_mm + gap_mm,
-            height_mm=panel.height_mm + gap_mm,
+            width_mm=panel.width_mm,
+            height_mm=panel.height_mm,
             quantity=1,
             allow_rotation=False,
         )
@@ -61,10 +62,10 @@ def partition_panels(
         height_mm=usable_height_mm,
         thickness_mm=1.0,
         margin_mm=edge_clearance_mm,
-        kerf_mm=0.0,
+        kerf_mm=gap_mm,
     )
 
-    result = pack_sheets(part_specs, sheet_spec)
+    result = pack_sheets(part_specs, sheet_spec, algorithm=algorithm)
 
     sheets: list[tuple[PanelPlacement, ...]] = []
     for sheet_layout in result.sheets:

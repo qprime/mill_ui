@@ -253,3 +253,47 @@ def test_json_roundtrip_preserves_material_and_output_mode_for_machining_context
     path = tmp_path / "plywood.json"
     ast.to_json(str(path))
     assert LayoutAST.from_json(str(path)) == ast
+
+
+def test_clearance_retry_and_part_ownership_survive_json(tmp_path):
+    from layout_ast.layout import Feature, Geometry, Item, MachiningClearance, Placement, Sheet
+
+    ast = LayoutAST(
+        Sheet(200, 200, 6),
+        (
+            Item(
+                "shape",
+                "Rect",
+                Geometry({"w_mm": 100, "h_mm": 60}),
+                Placement((80, 80)),
+                Feature("profile", side="outside", depth_mm=6),
+                part_id="part_a",
+            ),
+        ),
+        machining_clearance=MachiningClearance(3, gap_margin_mm=6),
+    )
+    path = tmp_path / "owned.json"
+    path.write_text(ast.to_json())
+    assert LayoutAST.from_json(str(path)) == ast
+
+
+def test_json_profile_does_not_silently_accept_direction_requirements(tmp_path):
+    import pytest
+
+    for key in ("direction", "cut_direction", "finish_direction"):
+        data = {
+            "sheet": {"width_mm": 200, "height_mm": 200, "thickness_mm": 6},
+            "items": [
+                {
+                    "kind": "shape",
+                    "type": "Rect",
+                    "geometry": {"w_mm": 100, "h_mm": 80},
+                    "placement": {"center_xy_mm": [100, 100]},
+                    "feature": {"type": "profile", "side": "outside", "depth_mm": 6, key: "climb"},
+                }
+            ],
+        }
+        path = tmp_path / "direction.json"
+        path.write_text(json.dumps(data))
+        with pytest.raises(ValueError, match=key):
+            LayoutAST.from_json(str(path))

@@ -157,7 +157,7 @@ to the next contour. The outer contour starts at the actual end of its entry
 ramp and must be completed at depth, including the edge used for ramping.
 Bridges between contours must not replace a required boundary segment.
 
-## Rectangle Profiles and Shared Cuts
+## Outside Profiles and Shared Cuts
 
 Rectangle profiles use the canonical closed-profile operation with the requested
 `inside`, `outside`, or `on` cutter offset. Isolated or incompatible profiles keep
@@ -183,7 +183,7 @@ compensated centerline collapses is rejected.
 A shared cut preserves both nominal parts. It is eligible only where compensated
 outside tool centerlines coincide, with identical depth and no per-feature feeds,
 allowance, tabs, onion skin, ramp distance, or nonzero start depth. Any job using
-tabs or onion skin keeps ordinary profiles. Connected compatible rectangles use
+tabs or onion skin keeps ordinary profiles. Connected compatible Rect and Polygon profiles use
 shared seams followed by closed contours around their union, including holes.
 Partial seams retain the rest of the boundary. A union may also remove internal
 boundaries that failed the seam threshold; those remain ordinary per-profile
@@ -191,7 +191,7 @@ contours and are cut before the union outlines. Only accepted seams replace
 the corresponding per-profile traversals. All contours use the existing
 profile operation; ramp entries follow boundary segments without corner shortcuts.
 
-Two outside rectangle profiles require at least the selected cutter's diameter
+Two outside profiles require at least the selected cutter's diameter
 between retained material regions, including each profile's largest positive
 rough/finish allowance, even when merging is disabled. Touching nominal
 rectangles cannot share a cut while preserving dimensions and are rejected.
@@ -201,7 +201,19 @@ cutter can still cause the planner to reject that spacing.
 `merge_epsilon_mm <= 0` disables sharing. A positive value enables it but never
 permits moving separated tool centerlines together: only floating-point precision
 (1e-9 mm) is used to identify coincident paths. Existing minimum-overlap settings
-continue to limit eligible seams.
+continue to limit eligible seams. General segments require opposite-facing
+retained boundaries; partial and T intersections are noded into unique atomic
+intervals with contributor IDs. All planned shared sweeps are checked against
+the original retained polygons. Rectangles use this same implementation.
+
+Tab/onion jobs require at least twice the selected diameter between parts,
+including positive allowances, so ordinary neighboring profiles cannot remove
+each other's holding stock. Disabling merging alone does not prove holding safety.
+Sweep checks use 0.001mm output tolerance for retained material and 0.002mm for
+the conservative external tab envelope; mathematical path coincidence remains
+1e-9mm. Common slots do not promise climb finishing on both opposing walls.
+Explicit per-feature allowance, feed or ramp requirements exclude sharing;
+original rough/finish/release stages remain unchanged.
 
 ---
 

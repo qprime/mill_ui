@@ -179,13 +179,14 @@ def placement_to_items(
     sheet_thickness_mm: float,
 ) -> list[Item]:
     prefix = f"{placement.part_spec.name}_{placement.instance_id}_"
-    return expand_part_to_items(
+    items = expand_part_to_items(
         part_spec=placement.part_spec,
         center_xy=(placement.x_mm, placement.y_mm),
         rotated=placement.rotated,
         sheet_thickness_mm=sheet_thickness_mm,
         shape_id_prefix=prefix,
     )
+    return [replace(item, part_id=prefix) for item in items]
 
 
 __all__ = [

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import fields
 from pathlib import Path
 from typing import Any
 
@@ -130,10 +131,16 @@ def _parse_item(item_data: dict[str, Any]) -> Item:
             placement=placement,
             feature=feature,
             shape_id=shape_id,
+            part_id=item_data.get("part_id"),
         )
 
 
 def _parse_feature(feature_data: dict[str, Any]) -> Feature:
+    if feature_data.get("type", "profile") == "profile":
+        supported = {field.name for field in fields(Feature)} | {"depth"}
+        unsupported = sorted(set(feature_data) - supported)
+        if unsupported:
+            raise ValueError(f"Unsupported profile feature keys: {', '.join(unsupported)}")
     feature_type = feature_data["type"]
     depth = feature_data.get("depth")
     depth_mm = feature_data.get("depth_mm")

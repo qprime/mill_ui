@@ -20,7 +20,7 @@ Sheet 1200 × 800 × 6mm mdf.
 
 - `pocket-3.17mm.nc`: pocket, 3.175mm tool, 24 feature(s), to 3mm
 - `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 496 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 24 feature(s), to 6.2mm
+- `profile-3.17mm.nc`: profile, 3.175mm tool, 77 contour(s), to 6.2mm
 
 ## Run
 

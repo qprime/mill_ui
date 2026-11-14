@@ -16,8 +16,8 @@ Sheet 1220 × 1220 × 19mm MDF, with a 10mm margin. Twelve panel recesses cut to
 
 ## Outputs
 
+- `machining_summary.json`
+- `metrics.json`
 - `multi_panel_doors.svg`
 - `pocket-12.70mm.nc`
 - `profile-3.17mm.nc`
-- `machining_summary.json`
-- `metrics.json`

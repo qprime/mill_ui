@@ -17,7 +17,7 @@ children:
       internal_joinery: half_lap
       finger_width: 15mm
       clearance: 0.12mm
-      layout_gap: 10mm
+      layout_gap: auto
       back:
         joinery: captured
         receiving: a

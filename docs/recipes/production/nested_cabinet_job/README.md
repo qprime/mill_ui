@@ -14,8 +14,9 @@ two 397 × 180mm Shaker drawer fronts, one 300 × 700mm side panel, two
 turntable. The doors have 57mm stiles, 70mm rails and a 6mm center recess;
 the drawer fronts use the Shaker template defaults.
 
-The job is `nested_cabinet_job.nest.yml`. Its 6.35mm kerf sets part spacing and
-reserves outside-profile cutter clearance inside the 10mm sheet margin.
+The job is `nested_cabinet_job.nest.yml`. Its 6.35mm kerf plus an explicit
+6.35mm gap margin reserve disjoint kerfs around holding stock. The actual
+selected cutter also reserves perimeter clearance inside the 10mm sheet margin.
 Both generated blueprints show that clamp no-cut zone. Part dimensions are
 preserved; packing may rotate parts by 90°.
 
@@ -24,18 +25,20 @@ program. The side panel overrides that default with four 10mm-wide, 3mm-high
 tabs. As specified by nesting's holding rules, template parts use their own
 profile features; the job's holding default does not add skin or tabs to them.
 
-Sheet 1 contains eight parts, including all four templated fronts. Sheet 2
-contains the remaining corner shelf and turntable. Overall utilization is
-45.5%; the second sheet's 7.6% utilization is a known packing limitation.
+Sheet 1 contains six parts: both upper doors, the side panel, both shelves
+and one drawer front. Sheet 2 holds the other drawer front, both corner shelves
+and the turntable. Overall utilization is 45.5%; sheet 2 uses 16.7%. The wider
+spacing preserves holding stock while retaining the two-sheet layout.
 This is a mixed nesting example, not a complete cabinet assembly.
 
 ## Machining programs
 
-- `sheet_1.pocket-12.70mm.nc`: four template recesses, 12.7mm tool, to 6mm
-- `sheet_1.profile-6.35mm.nc`: eight profiles with their respective holding settings
-- `sheet_1.release-6.35mm.nc`: release the three onion-skinned parts on sheet 1
-- `sheet_2.profile-6.35mm.nc`: two profiles leaving 0.3mm onion skin
-- `sheet_2.release-6.35mm.nc`: release both parts on sheet 2
+- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 3 operation(s), to 6mm
+- `sheet_1.profile-6.35mm.nc`: profile, 6.35mm tool, 6 contour(s), to 18.2mm
+- `sheet_1.release-6.35mm.nc`: release, 6.35mm tool, 2 contour(s), to 18.2mm
+- `sheet_2.profile-6.35mm.nc`: profile, 6.35mm tool, 4 contour(s), to 18.2mm
+- `sheet_2.release-6.35mm.nc`: release, 6.35mm tool, 3 contour(s), to 18.2mm
+- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 operation(s), to 6mm
 
 ## Run
 
@@ -47,13 +50,14 @@ all other recipes; `python -m cli.recipes` checks their contents and design erro
 
 ## Outputs
 
+- `machining_summary.json`
+- `manifest.json`
+- `metrics.json`
 - `nested_cabinet_job_sheet_1.svg`
 - `nested_cabinet_job_sheet_2.svg`
 - `sheet_1.pocket-12.70mm.nc`
 - `sheet_1.profile-6.35mm.nc`
 - `sheet_1.release-6.35mm.nc`
+- `sheet_2.pocket-12.70mm.nc`
 - `sheet_2.profile-6.35mm.nc`
 - `sheet_2.release-6.35mm.nc`
-- `machining_summary.json`
-- `metrics.json`
-- `manifest.json`

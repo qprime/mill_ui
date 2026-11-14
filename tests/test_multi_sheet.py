@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from pml.yaml_parser import parse_pml_yaml
+from pml.yaml_parser import PMLParseError, parse_pml_yaml
 from resolution.layout_resolver import ResolutionAssertionError, resolve_layout, resolve_layout_multi
 from validation.removal_checks import check_working_area_bounds
 
@@ -275,3 +275,29 @@ children:
         for ast in results:
             ids = [item.shape_id for item in ast.items if item.shape_id]
             assert len(ids) == len(set(ids)), "Shape IDs should be unique within a sheet"
+
+
+@pytest.mark.parametrize("gap", ["auto", "10mm", "0mm"])
+def test_layout_gap_round_trip_and_geometry_context(gap):
+    from layout_ast.layout import MachiningClearance
+    from pml.yaml_formatter import format_pml_yaml
+
+    source = SMALL_BOX_PML.replace("    type: box", f"    layout_gap: {gap}\n    type: box")
+    parsed = parse_pml_yaml(source)
+    assert parse_pml_yaml(format_pml_yaml(parsed)) == parsed
+    if gap == "auto":
+        with pytest.raises(ResolutionAssertionError, match="requires an actual selected"):
+            resolve_layout_multi(parsed)
+        for diameter in (3.175, 6.35):
+            asts = resolve_layout_multi(parsed, machining_clearance=MachiningClearance(diameter))
+            assert all(a.config["layout_gaps"] == [{"policy": "auto", "gap_mm": diameter}] for a in asts)
+            assert all(intent.part_id is not None for a in asts for intent in ast_to_removal_intents(a))
+    else:
+        assert resolve_layout_multi(parsed)
+
+
+@pytest.mark.parametrize("gap", ["-1mm", ".nan", "banana"])
+def test_invalid_layout_gap_errors(gap):
+    source = SMALL_BOX_PML.replace("    type: box", f"    layout_gap: {gap}\n    type: box")
+    with pytest.raises((ValueError, PMLParseError), match=r"dimension|layout_gap|parse"):
+        parse_pml_yaml(source)

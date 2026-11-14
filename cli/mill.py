@@ -7,8 +7,8 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
+from cam.compilation import compilation_context, saved_compilation_context
 from cam.compilation import load_pml_asts as load_pml_asts
-from cam.compilation import saved_compilation_context
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
 from cli.nest import nest_job
 from cli.project import (
@@ -372,7 +372,8 @@ def _load_recipe_source(
         job = parse_nest_yaml(source.read_text(encoding="utf-8"))
         if kerf_mm is not None:
             job = replace(job, kerf_mm=kerf_mm)
-        result = nest_job(job)
+        context = compilation_context("mdf", job.kerf_mm, endmills=endmills, feeds=feeds)
+        result = nest_job(job, machining_clearance=context.clearance())
         unplaced = result["nesting_result"].unplaced_parts
         if unplaced:
             names = ", ".join(f"{part.quantity}x {part.name}" for part in unplaced)

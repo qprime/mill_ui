@@ -497,7 +497,7 @@ def test_beam_fixed_gap_error_offers_a_supported_cutter_remedy(tmp_path):
         ["-m", "cli.mill", "--input", str(source), "--out", str(tmp_path / "out"), "--kerf", "12.7"], check=False
     )
     assert result.returncode != 0
-    assert "Beam 'rail' uses fixed 10mm spacing" in result.stderr
+    assert "Layout gap 10mm must be at least selected profile cutter diameter 12.7mm" in result.stderr
     assert "Select an available flat profile cutter no wider than 10mm" in result.stderr
 
 

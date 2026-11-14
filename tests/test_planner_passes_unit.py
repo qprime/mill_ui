@@ -23,7 +23,7 @@ from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator, PassRecord, plan_passes
 from cam.planner.passes.edge import build_edge_cut_plan, plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
-from cam.planner.passes.merge_shared_edges import _overlap_len, _rect_edges, merge_rect_profiles
+from cam.planner.passes.merge_shared_edges import merge_rect_profiles
 from cam.planner.passes.pocket import (
     plan_engrave_passes,
     plan_hole_passes,
@@ -422,43 +422,6 @@ class TestFaceZigzag:
         assert rapid_xs[1] == pytest.approx(100.0)
 
 
-class TestRectEdges:
-    def test_four_edges(self):
-        edges = _rect_edges(50, 50, 20, 10, 0)
-        assert len(edges) == 4
-
-    def test_edge_orientations(self):
-        edges = _rect_edges(50, 50, 20, 10, 0)
-        v_edges = [e for e in edges if e.orient == "v"]
-        h_edges = [e for e in edges if e.orient == "h"]
-        assert len(v_edges) == 2
-        assert len(h_edges) == 2
-
-    def test_edge_coordinates(self):
-        edges = _rect_edges(50, 50, 20, 10, 0)
-        v_coords = sorted(e.coord for e in edges if e.orient == "v")
-        h_coords = sorted(e.coord for e in edges if e.orient == "h")
-        assert v_coords == pytest.approx([40.0, 60.0])
-        assert h_coords == pytest.approx([45.0, 55.0])
-
-
-class TestOverlapLen:
-    def test_full_overlap(self):
-        assert _overlap_len(0, 10, 0, 10) == pytest.approx(10.0)
-
-    def test_partial_overlap(self):
-        assert _overlap_len(0, 10, 5, 15) == pytest.approx(5.0)
-
-    def test_no_overlap(self):
-        assert _overlap_len(0, 5, 10, 15) == pytest.approx(0.0)
-
-    def test_contained(self):
-        assert _overlap_len(0, 20, 5, 10) == pytest.approx(5.0)
-
-    def test_touching(self):
-        assert _overlap_len(0, 5, 5, 10) == pytest.approx(0.0)
-
-
 def _feature(shape, geometry, center, depth, start_depth=0.0, id="test"):
     points_raw = geometry.get("points")
     points = tuple((float(p[0]), float(p[1])) for p in points_raw) if points_raw else None
@@ -726,7 +689,8 @@ class TestRectangleProfilePlanning:
         assert len({end[2] for _, end in shared}) == len(shared)
 
     @pytest.mark.parametrize("ring", [False, True])
-    def test_connected_groups_preserve_all_seams_and_hole_boundaries(self, ring):
+    @pytest.mark.parametrize("polygon", [False, True])
+    def test_connected_groups_preserve_all_seams_and_hole_boundaries(self, ring, polygon):
         cells = ((x, y) for x in range(3 if ring else 2) for y in range(3 if ring else 2))
         profiles = tuple(
             replace(
@@ -737,6 +701,9 @@ class TestRectangleProfilePlanning:
             if not ring or (x, y) != (1, 1)
         )
 
+        if polygon:
+            geometry = GeometryInput("Polygon", ShapeGeometry(points=((-50, -30), (50, -30), (50, 30), (-50, 30))))
+            profiles = tuple(replace(p, shape="Polygon", geometry=geometry) for p in profiles)
         (group,) = merge_rect_profiles(profiles, tool_diameter_mm=3, config=Config())
 
         assert group.profile_indices == tuple(range(len(profiles)))
@@ -853,9 +820,9 @@ class TestRectangleProfilePlanning:
                 b, edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=0, finish_allowance_mm=0)
             )
         elif option == "tabs":
-            b = replace(b, tabs=TabsInput(count=4, height_mm=2, width_mm=8))
+            b = replace(b, tabs=TabsInput(count=4, height_mm=2, width_mm=8), center_xy_mm=(166, 80))
         else:
-            b = replace(b, onion_skin_mm=0.3)
+            b = replace(b, onion_skin_mm=0.3, center_xy_mm=(166, 80))
         passes, summary, _, _ = plan_passes(
             PlannerInput(profiles=(a, b), kerf_width_mm=3),
             config=Config(),
@@ -1911,3 +1878,120 @@ def test_cut_count_queries_do_not_revisit_accumulated_move_history():
     for _ in range(100):
         assert acc.cut_move_count() == 1000
     assert history.traversed == 0
+
+
+def _polygon_profile(center=(100, 100), *, notched=False, id="polygon"):
+    points = (
+        [(-50, -40), (50, -40), (50, 20), (30, 20), (30, 40), (-50, 40)]
+        if notched
+        else [(-50, -40), (50, -40), (50, 40), (-50, 40)]
+    )
+    return replace(_feature("Polygon", {"points": points}, center, 6, id=id), side="outside")
+
+
+@pytest.mark.parametrize("notched", [False, True])
+@pytest.mark.parametrize("mixed", [False, True])
+def test_polygon_common_cut_preserves_material_and_runs_once_per_depth(notched, mixed):
+    from cam.planner.passes.merge_shared_edges import merge_profiles, profile_material_region
+
+    a = _polygon_profile(notched=notched)
+    b = (
+        replace(_feature("Rect", {"w_mm": 100, "h_mm": 80}, (203, 100), 6, id="right"), side="outside")
+        if mixed
+        else _polygon_profile((203, 100), id="right")
+    )
+    (group,) = merge_profiles((a, b), tool_diameter_mm=3, config=Config())
+    assert group.seam_contributors == ((0, 1),)
+    assert group.seam_feature_ids == ((a.id, b.id),)
+    seam = LineString([(p.x, p.y) for p in group.seams[0].points])
+    assert seam.length >= 60
+    (record,) = TestRectangleProfilePlanning._plan((a, b))
+    coverage: dict[float, float] = {}
+    for start, end in _cut_segments(record.moves):
+        if min(start[2], end[2]) >= 0:
+            continue
+        segment = LineString((start[:2], end[:2]))
+        for profile in (a, b):
+            assert segment.buffer(1.5).intersection(profile_material_region(profile).buffer(-0.001)).area < 1e-8
+        overlap = segment.intersection(seam).length
+        if start[2] == end[2] and overlap > 0:
+            coverage[end[2]] = coverage.get(end[2], 0) + overlap
+    assert set(coverage) == {-1.5, -3.0, -4.5, -6.0}
+    assert all(length == pytest.approx(seam.length) for length in coverage.values())
+
+
+@pytest.mark.parametrize("offset", [0.00001, 0.01, 0.09])
+def test_polygon_centerlines_with_real_separation_never_merge(offset):
+    from cam.planner.passes.merge_shared_edges import merge_profiles
+
+    assert not merge_profiles(
+        (_polygon_profile(), _polygon_profile((203 + offset, 100), id="b")),
+        tool_diameter_mm=3,
+        config=Config(merge_epsilon_mm=1),
+    )
+
+
+@pytest.mark.parametrize("angle", [17, 45, 123])
+def test_oblique_polygon_seams_use_actual_compensation(angle):
+    import math
+
+    from shapely.affinity import rotate
+
+    from cam.planner.passes.merge_shared_edges import merge_profiles
+
+    region = rotate(box(-50, -40, 50, 40), angle, origin=(0, 0))
+    points = list(region.exterior.coords)[:-1]
+    shift = 103 * math.cos(math.radians(angle)), 103 * math.sin(math.radians(angle))
+    a = replace(_feature("Polygon", {"points": points}, (100, 100), 6, id="a"), side="outside")
+    b = replace(a, id="b", center_xy_mm=(100 + shift[0], 100 + shift[1]))
+    (group,) = merge_profiles((a, b), tool_diameter_mm=3, config=Config())
+    assert len(group.seams) == 1
+    assert LineString([(p.x, p.y) for p in group.seams[0].points]).length == pytest.approx(83)
+
+
+@pytest.mark.parametrize("holding", ["tabs", "skin"])
+@pytest.mark.parametrize("merge", [True, False])
+def test_misaligned_holding_profiles_reject_coincident_gap(holding, merge):
+    from cam.planner.planner_input import TabsInput
+
+    a, b = _polygon_profile(id="a"), _polygon_profile((203, 100), id="b")
+    if holding == "tabs":
+        a, b = replace(a, tabs=TabsInput(3, 2, 8)), replace(b, tabs=TabsInput(4, 2, 8))
+    else:
+        a, b = replace(a, onion_skin_mm=0.3), replace(b, onion_skin_mm=0.5)
+    with pytest.raises(ValueError, match="protected holding stock"):
+        TestRectangleProfilePlanning._plan((a, b), merge=merge)
+    safe = replace(b, center_xy_mm=(206, 100))
+    records = TestRectangleProfilePlanning._plan((a, safe), merge=merge)
+    assert sum(record.count for record in records if record.op == "profile") == 2
+
+
+@pytest.mark.parametrize("option", ["start", "ramp", "feeds", "allowance", "depth"])
+def test_polygon_shared_cut_exclusions(option):
+    from cam.planner.passes.merge_shared_edges import merge_profiles
+
+    a, b = _polygon_profile(), _polygon_profile((203, 100), id="b")
+    changes: dict[str, dict[str, object]] = {
+        "start": {"start_depth_mm": 1},
+        "ramp": {"ramp_mm": 7},
+        "feeds": {"feeds_override": FeedsOverride(feed_xy=650)},
+        "allowance": {"edge_treatment": EdgeTreatmentInput("allowance", rough_allowance_mm=0)},
+        "depth": {"depth_mm": 3},
+    }
+    assert not merge_profiles((a, replace(b, **changes[option])), tool_diameter_mm=3, config=Config())
+
+
+def test_atomic_seams_discard_subprecision_noding_fragments():
+    from cam.planner.passes.merge_shared_edges import _atomic_seams
+    from cam.shape import Shape2D
+    from cam.types import Vec2
+
+    seams = (
+        Shape2D((Vec2(0, 0), Vec2(100, 0))),
+        Shape2D((Vec2(50, 0), Vec2(100 + 1e-13, 0))),
+        Shape2D((Vec2(100, 0), Vec2(150, 0))),
+    )
+    atomic = _atomic_seams(seams)
+    lines = [LineString([(p.x, p.y) for p in seam.points]) for seam in atomic]
+    assert all(line.length > 1e-9 for line in lines)
+    assert sum(line.length for line in lines) == pytest.approx(150)

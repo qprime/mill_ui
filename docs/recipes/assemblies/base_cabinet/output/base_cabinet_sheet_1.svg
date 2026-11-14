@@ -50,26 +50,26 @@
     <rect x="1210.000" y="10.000" width="10.000" height="1200.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 13.175 486.825 L 13.175 1106.825 L 88.175 1106.825 L 88.175 1206.825 L 573.175 1206.825 L 573.175 486.825 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_0_left_side_outer" />
-    <path d="M 583.175 1206.825 L 1068.175 1206.825 L 1068.175 1106.825 L 1143.175 1106.825 L 1143.175 486.825 L 583.175 486.825 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_5_right_side_outer" />
+    <path d="M 13.175 486.825 L 13.175 1106.825 L 88.175 1106.825 L 88.175 1206.825 L 573.175 1206.825 L 573.175 486.825 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_left_side_1_left_side_outer" />
+    <path d="M 576.350 1206.825 L 1061.350 1206.825 L 1061.350 1106.825 L 1136.350 1106.825 L 1136.350 486.825 L 576.350 486.825 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_assembly_right_side_7_right_side_outer" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 11.588 485.238 L 11.588 1108.412 L 86.588 1108.412 L 86.588 1208.412 L 574.762 1208.412 L 574.762 485.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_left_side_0_left_side_outer_toolpath" />
-    <path d="M 581.587 1208.412 L 1069.763 1208.412 L 1069.763 1108.412 L 1144.763 1108.412 L 1144.763 485.238 L 581.587 485.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_right_side_5_right_side_outer_toolpath" />
+    <path d="M 11.588 485.238 L 11.588 1108.412 L 86.588 1108.412 L 86.588 1208.412 L 574.762 1208.412 L 574.762 485.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_left_side_1_left_side_outer_toolpath" />
+    <path d="M 574.762 1208.412 L 1062.938 1208.412 L 1062.938 1108.412 L 1137.938 1108.412 L 1137.938 485.238 L 574.762 485.238 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_assembly_right_side_7_right_side_outer_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <rect x="13.175" y="486.825" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_1" />
-    <rect x="88.175" y="1088.625" width="485.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_2" />
-    <rect x="542.975" y="495.825" width="18.200" height="602.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_3" />
-    <rect x="13.175" y="787.625" width="530.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_4" />
-    <rect x="583.175" y="486.825" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_6" />
-    <rect x="583.175" y="1088.625" width="485.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_7" />
-    <rect x="595.175" y="495.825" width="18.200" height="602.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_8" />
-    <rect x="613.175" y="787.625" width="530.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_9" />
+    <rect x="13.175" y="486.825" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_2" />
+    <rect x="88.175" y="1088.625" width="485.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_3" />
+    <rect x="542.975" y="495.825" width="18.200" height="602.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_4" />
+    <rect x="13.175" y="787.625" width="530.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_left_side_dado_5" />
+    <rect x="576.350" y="486.825" width="560.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_8" />
+    <rect x="576.350" y="1088.625" width="485.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_9" />
+    <rect x="588.350" y="495.825" width="18.200" height="602.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_10" />
+    <rect x="606.350" y="787.625" width="530.000" height="18.200" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="assembly_right_side_dado_11" />
   </g>
   <g id="LABELS" class="labels">
-    <text x="293.175" y="846.825" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_0_left_side_outer_label">LEFT SIDE</text>
-    <text x="863.175" y="846.825" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_5_right_side_outer_label">RIGHT SIDE</text>
+    <text x="293.175" y="846.825" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_left_side_1_left_side_outer_label">LEFT SIDE</text>
+    <text x="856.350" y="846.825" text-anchor="middle" dominant-baseline="middle" fill="#ffcc00" font-family="monospace" font-size="8px" font-weight="bold" id="generated_assembly_right_side_7_right_side_outer_label">RIGHT SIDE</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="13.175000000000011" y1="486.82500000000005" x2="13.175000000000011" y2="466.82500000000005" stroke="#5ab9ea" stroke-width="1" />
@@ -182,12 +182,12 @@
     <text x="20.0" y="1299.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
     <text x="30.0" y="1311.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 9.0mm</text>
     <text x="20.0" y="1323.5875" fill="#cccccc" font-family="monospace" font-size="10px">Parts (8):</text>
-    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_1</text>
-    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_2</text>
-    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_3</text>
-    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_4</text>
-    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_6</text>
-    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_7</text>
+    <text x="30.0" y="1335.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_2</text>
+    <text x="30.0" y="1347.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_3</text>
+    <text x="30.0" y="1359.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_4</text>
+    <text x="30.0" y="1371.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_left_side_dado_5</text>
+    <text x="30.0" y="1383.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_10</text>
+    <text x="30.0" y="1395.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_11</text>
     <text x="30.0" y="1407.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_8</text>
     <text x="30.0" y="1419.5875" fill="#cccccc" font-family="monospace" font-size="10px">• assembly_right_side_dado_9</text>
   </g>

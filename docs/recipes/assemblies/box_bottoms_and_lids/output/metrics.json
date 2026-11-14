@@ -7,10 +7,10 @@
     }
   },
   "complexity": {
-    "total_moves": 11560,
-    "rapid_moves": 568,
-    "cut_moves": 9416,
-    "rapid_ratio": 0.049
+    "total_moves": 13172,
+    "rapid_moves": 801,
+    "cut_moves": 10138,
+    "rapid_ratio": 0.061
   },
   "fidelity": {
     "tool_changes": 3,
@@ -28,13 +28,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 4720
+        "move_count": 6332
       }
     ]
   },
   "output_size": {
-    "total_bytes": 253854,
-    "total_lines": 10896,
+    "total_bytes": 288900,
+    "total_lines": 12362,
     "files": {
       "pocket-3.17mm": {
         "bytes": 20585,
@@ -45,10 +45,37 @@
         "lines": 5616
       },
       "profile-3.17mm": {
-        "bytes": 133953,
-        "lines": 4568
+        "bytes": 168999,
+        "lines": 6034
       }
     }
+  },
+  "packing": {
+    "gaps": [
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      }
+    ],
+    "preflight": [
+      {
+        "attempt": 1,
+        "gap_margin_mm": 0.0,
+        "reasons": []
+      }
+    ]
   },
   "errors": [],
   "warnings": [],

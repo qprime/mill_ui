@@ -79,7 +79,7 @@ children:
       id: block_40
       label: "Block 40x40"
       at:
-        x: 223.2mm
+        x: 206.375mm
         y: 98.2mm
         width: 40mm
         height: 40mm

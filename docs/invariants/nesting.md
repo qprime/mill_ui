@@ -31,7 +31,20 @@ The context arrives from orchestration before resolution, including when the
 requested kerf differs from an available cutter. Perimeter clearance therefore
 accounts for the complete outside cut rather than only its centerline. Numeric
 part gaps retain their authored total separation and must accommodate the cutter.
-This does not change the standalone nesting APIs or introduce automatic gaps.
+Numeric gaps and their omitted 10mm default retain their legacy meaning.
+Explicit `layout_gap: auto` uses the actual cutter plus measured extra clearance
+through the existing SheetSpec gap formula. Geometry-only auto resolution requires
+a supplied machining context; it never substitutes an authored kerf.
+
+Assembly partitioning sends nominal dimensions and the gap to the packer. Its
+results retain the original PanelSpec identities and impose no trailing gap at
+the final sheet edge. Both packers obey this contract.
+
+Automatic machining resolution preflights every sheet and retries at most four
+times with conservatively increased clearance, preserving dimensions and
+rotation/grain policy. Attempts and final gaps are recorded. Numeric gaps are
+never enlarged. Protected tabs/onion stock requires disjoint neighboring kerfs;
+ordinary profiles with holding therefore need at least twice the cutter diameter.
 
 ## Part Dimensions
 

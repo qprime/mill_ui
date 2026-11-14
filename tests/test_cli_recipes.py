@@ -305,9 +305,11 @@ def test_gate_rejects_design_errors_even_when_outputs_match(tmp_path: Path):
 
     failures = check_recipe_outputs(recipe, _altmill())
 
-    assert len(failures) == 1
+    assert len(failures) == 2
     assert "door.pml.yml sheet 1: Cutting edge extends" in failures[0]
     assert "left margin zone" in failures[0]
+
+    assert "Cutter sweep" in failures[1]
 
 
 def test_run_on_recipes_reports_an_unreadable_source(tmp_path: Path):
@@ -708,3 +710,78 @@ def test_packed_recipe_validation_requires_saved_context_instead_of_guessing_def
     (folder / "beam.pml.yml").write_text(PACKED_BEAM_PML)
     with pytest.raises(ValueError, match="saved compilation context is missing"):
         validate_recipe(folder)
+
+
+def test_auto_gap_uses_actual_cutter_and_retries_real_relief_sweeps(tmp_path):
+    from cam.compilation import load_pml_asts
+    from cam.pipeline import run_sheets
+
+    source = PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto").replace(
+        "bottom: none", "bottom:\n      joinery: captured\n      dado_depth: 6mm\n      dogbone: {overcut: 30mm}"
+    )
+    path = tmp_path / "relief.pml.yml"
+    path.write_text(source)
+    asts = load_pml_asts(path, kerf_mm=3.175)
+    attempts = asts[0].config["packing_preflight"]
+    assert len(attempts) > 1
+    assert attempts[0]["reasons"]
+    assert not attempts[-1]["reasons"]
+    assert asts[0].config["layout_gaps"][0]["gap_mm"] > 3.175
+    assert asts == load_pml_asts(path, kerf_mm=3.175)
+    assert all(not run.result.errors for run in run_sheets(asts, source=path.name, job_stem="relief", kerf_mm=3.175))
+
+
+def test_auto_gap_actual_tool_snapshot_round_trip(tmp_path):
+    from cam.compilation import load_pml_asts, saved_compilation_context
+    from config.machine_loader import Endmill, FeedsEntry
+    from layout_ast.layout import LayoutAST
+
+    source = tmp_path / "box.pml.yml"
+    source.write_text(PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto"))
+    endmills = [Endmill("only_3mm", 3, 20, 3, 2, "straight")]
+    feeds = [FeedsEntry("only_3mm", "mdf", 0.05, 18000, 2, 0.3)]
+    (ast,) = load_pml_asts(source, kerf_mm=5, endmills=endmills, feeds=feeds)
+    assert ast.config["layout_gaps"] == [{"policy": "auto", "gap_mm": 3}]
+    path = tmp_path / "packed.json"
+    path.write_text(ast.to_json())
+    restored = LayoutAST.from_json(str(path))
+    assert restored == ast
+    assert all(item.part_id for item in restored.items if item.feature)
+    saved = saved_compilation_context(restored)
+    assert saved is not None
+    assert saved.profile_diameter_mm == 3
+
+
+def test_numeric_gap_rejects_relief_collision_without_repacking(tmp_path):
+    from cam.compilation import load_pml_asts
+    from cam.pipeline import run_pipeline
+
+    path = tmp_path / "numeric.pml.yml"
+    path.write_text(
+        PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: 3.175mm").replace(
+            "bottom: none", "bottom:\n      joinery: captured\n      dado_depth: 6mm\n      dogbone: {overcut: 30mm}"
+        )
+    )
+    (ast,) = load_pml_asts(path, kerf_mm=3.175)
+    assert "packing_preflight" not in ast.config
+    result = run_pipeline(ast, kerf_mm=3.175, generate_svg=False)
+    assert any("Cutter sweep" in error for error in result.errors)
+    assert not result.gcode
+
+
+def test_auto_preflight_stops_after_four_failed_attempts(tmp_path, monkeypatch):
+    from cam.compilation import load_pml_asts
+    from validation.toolpath_checks import PartCollision
+
+    calls = []
+
+    def persistent_collision(*args, **kwargs):
+        calls.append(1)
+        return (PartCollision(("feature",), "neighbor", 0.1, "persistent neighbor collision"),)
+
+    monkeypatch.setattr("validation.toolpath_checks.verify_passes_preserve_parts", persistent_collision)
+    path = tmp_path / "auto.pml.yml"
+    path.write_text(PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto"))
+    with pytest.raises(ValueError, match="four bounded preflight attempts"):
+        load_pml_asts(path, kerf_mm=3.175)
+    assert len(calls) == 4

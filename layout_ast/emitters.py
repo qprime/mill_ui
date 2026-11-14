@@ -40,6 +40,8 @@ def _ast_to_dict(ast: LayoutAST) -> dict[str, Any]:
 
     if ast.machining_clearance is not None:
         data["machining_clearance"] = {"profile_diameter_mm": ast.machining_clearance.profile_diameter_mm}
+        if ast.machining_clearance.gap_margin_mm:
+            data["machining_clearance"]["gap_margin_mm"] = ast.machining_clearance.gap_margin_mm
 
     if ast.config:
         data["config"] = ast.config
@@ -80,6 +82,8 @@ def _item_to_dict(item: Item) -> dict[str, Any]:
         data["placement"] = _placement_to_dict(item.placement)
     if item.feature is not None:
         data["feature"] = _feature_to_dict(item.feature)
+    if item.part_id is not None:
+        data["part_id"] = item.part_id
     if item.shape_id is not None:
         data["shape_id"] = item.shape_id
 

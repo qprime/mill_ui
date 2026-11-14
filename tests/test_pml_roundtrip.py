@@ -794,3 +794,30 @@ children:
 
     assert comp_ast.sheet.safe_z_mm == 15.0
     assert reparsed.sheet.safe_z_mm == 15.0
+
+
+def test_gap_schema_matches_auto_and_numeric_parser_contract():
+    from importlib import import_module
+    from pathlib import Path
+
+    schema = json.loads((Path(__file__).resolve().parents[1] / "pml/schema/pml.schema.json").read_text())
+    validator = import_module("jsonschema").Draft202012Validator(
+        {"$ref": "#/$defs/layoutGap", "$defs": schema["$defs"]}
+    )
+    for value in ("auto", "0mm", "3.175mm", 0, 10):
+        assert validator.is_valid(value)
+    for invalid_value in ("automatic", "-1mm", -1, None):
+        assert not validator.is_valid(invalid_value)
+
+
+def test_profile_direction_and_finishing_requests_are_not_silently_ignored():
+    import pytest
+
+    for key in ("direction", "cut_direction", "finish_direction", "ramp_mm"):
+        sources = (
+            f"Sheet: {{width: 300mm, height: 200mm, thickness: 6mm}}\nchildren:\n- Rect:\n    children:\n    - Profile: {{side: outside, {key}: climb}}\n",
+            f"Sheet: {{width: 300mm, height: 200mm, thickness: 6mm}}\nchildren:\n- Rect:\n    feature: {{type: profile, side: outside, {key}: climb}}\n",
+        )
+        for source in sources:
+            with pytest.raises(PMLParseError, match=key):
+                parse_pml_yaml(source)

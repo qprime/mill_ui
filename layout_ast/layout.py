@@ -144,13 +144,17 @@ class Item:
     shape_id: str | None = None
     id: str | None = None
     label: str | None = None
+    part_id: str | None = None
 
 
 @dataclass(frozen=True)
 class MachiningClearance:
     profile_diameter_mm: float
+    gap_margin_mm: float = 0.0
 
     def __post_init__(self) -> None:
+        if not math.isfinite(self.gap_margin_mm) or self.gap_margin_mm < 0:
+            raise ValueError("MachiningClearance: gap_margin_mm must be finite and nonnegative")
         if not math.isfinite(self.profile_diameter_mm) or self.profile_diameter_mm <= 0:
             raise ValueError(
                 f"MachiningClearance: profile_diameter_mm must be finite and positive, got {self.profile_diameter_mm}"

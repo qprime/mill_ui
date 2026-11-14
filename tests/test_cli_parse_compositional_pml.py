@@ -99,7 +99,8 @@ children:
         assert "✓ Resolved to" in result.stderr
         assert "sheet" in result.stdout.lower()
 
-        assert "at:" in result.stdout or "at " in result.stdout
+        assert "AtPosition:" in result.stdout
+        assert "part_id:" in result.stdout
 
     finally:
         Path(input_file).unlink()

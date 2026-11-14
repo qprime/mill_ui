@@ -61,7 +61,7 @@ children:
                               field_depth: 2mm
 
   - AtPosition:
-      x: 768.2mm
+      x: 684.55mm
       y: 353.21mm
       width: 450mm
       height: 700mm

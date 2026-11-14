@@ -75,7 +75,7 @@ def ast_to_removal_intents(
 
 
 def item_to_removal_intent(item: Item, sheet_thickness_mm: float) -> RemovalIntent:
-    intent = _dispatch_feature_intent(item, sheet_thickness_mm)
+    intent = replace(_dispatch_feature_intent(item, sheet_thickness_mm), part_id=item.part_id)
     if item.feature is not None and item.feature.face != "front":
         return replace(intent, face=item.feature.face)
     return intent

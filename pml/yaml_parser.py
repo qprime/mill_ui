@@ -319,11 +319,21 @@ def _parse_rest(data: dict, path: str) -> RestSpec | None:
     return None
 
 
+_PROFILE_NODE_KEYS = ("side", "depth", "tab_count", "tab_height", "tab_width", "onion_skin_mm", "feeds")
+
+
 def parse_feature(data: dict, path: str = "", sheet_thickness_mm: float = 0.0) -> Feature:
     feature_type = data.get("type")
     if feature_type is None:
         raise PMLParseError("Feature missing 'type'", path)
 
+    if feature_type == "profile":
+        _reject_unknown_keys(
+            data,
+            ("type", "face", "corner_cleanup", "dogbone", "rest", "rest_tool", *_PROFILE_NODE_KEYS),
+            "profile feature",
+            path,
+        )
     depth = data.get("depth", "through")
     is_through = DepthMode.is_through(depth)
 
@@ -444,7 +454,7 @@ def _parse_assembly_node(node_data: dict, children: tuple, path: str) -> Any:
         top=top,
         bottom=bottom,
         children=children,
-        layout_gap_mm=parse_dimension(node_data.get("layout_gap", "10mm")),
+        layout_gap_mm=_parse_layout_gap(node_data.get("layout_gap", "10mm")),
         show_labels=node_data.get("show_labels", False),
         show_edge_colors=node_data.get("show_edge_colors", False),
         show_dimensions=node_data.get("show_dimensions", True),
@@ -584,8 +594,18 @@ def _parse_beam_node(node_data: dict, path: str) -> Any:
         face_features=face_features,
         end_features=end_features,
         edge_features=edge_features,
+        layout_gap_mm=_parse_layout_gap(node_data.get("layout_gap", "10mm")),
         show_labels=node_data.get("show_labels", False),
     )
+
+
+def _parse_layout_gap(value: Any) -> float | Literal["auto"]:
+    if value == "auto":
+        return "auto"
+    gap = parse_dimension(value)
+    if not math.isfinite(gap) or gap < 0:
+        raise PMLParseError(f"layout_gap must be auto or a finite nonnegative dimension, got {value!r}")
+    return gap
 
 
 def _parse_radial_node(node_data: dict, path: str) -> Any:
@@ -1240,6 +1260,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "Profile":
+        _reject_unknown_keys(node_data, _PROFILE_NODE_KEYS, "Profile", path)
         depth = parse_dimension_or_through(node_data.get("depth", "through"))
         return ProfileGen(
             side=_require(node_data, "side", f"{path}.Profile"),
@@ -1395,6 +1416,7 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
             width_mm=parse_dimension(node_data["width"]) if "width" in node_data else None,
             height_mm=parse_dimension(node_data["height"]) if "height" in node_data else None,
             child=child,
+            part_id=node_data.get("part_id"),
         )
 
     elif node_type == "Subtract":
@@ -2019,6 +2041,7 @@ def parse_nest_yaml(source: str) -> NestJob:  # noqa: C901 — nest config parse
         sheet_thickness_mm=sheet_thickness,
         kerf_mm=kerf_mm,
         margin_mm=margin_mm,
+        gap_margin_mm=parse_dimension(nest_block.get("gap_margin", "0mm")),
         holding=job_holding,
         parts=parts,
     )

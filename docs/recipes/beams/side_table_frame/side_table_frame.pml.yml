@@ -13,6 +13,7 @@ children:
       height: 210mm
       child:
         Beam:
+          layout_gap: auto
           name: leg_1
           length: 530mm
           width: 57mm
@@ -53,6 +54,7 @@ children:
       height: 210mm
       child:
         Beam:
+          layout_gap: auto
           name: leg_2
           length: 530mm
           width: 57mm
@@ -93,6 +95,7 @@ children:
       height: 210mm
       child:
         Beam:
+          layout_gap: auto
           name: leg_3
           length: 530mm
           width: 57mm
@@ -133,6 +136,7 @@ children:
       height: 210mm
       child:
         Beam:
+          layout_gap: auto
           name: leg_4
           length: 530mm
           width: 57mm
@@ -173,6 +177,7 @@ children:
       height: 110mm
       child:
         Beam:
+          layout_gap: auto
           name: apron_1
           length: 320mm
           width: 90mm
@@ -221,6 +226,7 @@ children:
       height: 110mm
       child:
         Beam:
+          layout_gap: auto
           name: apron_2
           length: 320mm
           width: 90mm
@@ -269,6 +275,7 @@ children:
       height: 110mm
       child:
         Beam:
+          layout_gap: auto
           name: apron_3
           length: 320mm
           width: 90mm
@@ -317,6 +324,7 @@ children:
       height: 110mm
       child:
         Beam:
+          layout_gap: auto
           name: apron_4
           length: 320mm
           width: 90mm

@@ -13,10 +13,10 @@
         }
       },
       "complexity": {
-        "total_moves": 916,
-        "rapid_moves": 58,
-        "cut_moves": 688,
-        "rapid_ratio": 0.063
+        "total_moves": 914,
+        "rapid_moves": 70,
+        "cut_moves": 662,
+        "rapid_ratio": 0.077
       },
       "fidelity": {
         "tool_changes": 3,
@@ -34,13 +34,13 @@
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 244
+            "move_count": 242
           }
         ]
       },
       "output_size": {
-        "total_bytes": 20528,
-        "total_lines": 878,
+        "total_bytes": 19976,
+        "total_lines": 889,
         "files": {
           "pocket-12.70mm": {
             "bytes": 6837,
@@ -51,10 +51,25 @@
             "lines": 408
           },
           "profile-3.17mm": {
-            "bytes": 6595,
-            "lines": 230
+            "bytes": 6043,
+            "lines": 241
           }
         }
+      },
+      "packing": {
+        "gaps": [
+          {
+            "policy": "auto",
+            "gap_mm": 3.175
+          }
+        ],
+        "preflight": [
+          {
+            "attempt": 1,
+            "gap_margin_mm": 0.0,
+            "reasons": []
+          }
+        ]
       },
       "errors": [],
       "warnings": []
@@ -71,10 +86,10 @@
         }
       },
       "complexity": {
-        "total_moves": 552,
-        "rapid_moves": 18,
-        "cut_moves": 432,
-        "rapid_ratio": 0.033
+        "total_moves": 737,
+        "rapid_moves": 93,
+        "cut_moves": 419,
+        "rapid_ratio": 0.126
       },
       "fidelity": {
         "tool_changes": 3,
@@ -92,16 +107,16 @@
           {
             "name": "profile",
             "tool_diameter_mm": 3.175,
-            "move_count": 384
+            "move_count": 569
           }
         ]
       },
       "output_size": {
-        "total_bytes": 13955,
-        "total_lines": 526,
+        "total_bytes": 15632,
+        "total_lines": 744,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 1820,
+            "bytes": 1815,
             "lines": 72
           },
           "dogbone-12.70mm": {
@@ -109,10 +124,25 @@
             "lines": 114
           },
           "profile-3.17mm": {
-            "bytes": 10273,
-            "lines": 340
+            "bytes": 11955,
+            "lines": 558
           }
         }
+      },
+      "packing": {
+        "gaps": [
+          {
+            "policy": "auto",
+            "gap_mm": 3.175
+          }
+        ],
+        "preflight": [
+          {
+            "attempt": 1,
+            "gap_margin_mm": 0.0,
+            "reasons": []
+          }
+        ]
       },
       "errors": [],
       "warnings": []

@@ -68,6 +68,7 @@ class NestJob:
     sheet_thickness_mm: float
     kerf_mm: float = 6.35
     margin_mm: float = 10.0
+    gap_margin_mm: float = 0.0
     holding: HoldingSpec | None = None
     parts: list[NestPart] = field(default_factory=list)
 
@@ -98,6 +99,7 @@ def nest_job_to_api_params(job: NestJob) -> dict[str, Any]:
         "sheet_thickness_mm": job.sheet_thickness_mm,
         "kerf_mm": job.kerf_mm,
         "margin_mm": job.margin_mm,
+        "gap_margin_mm": job.gap_margin_mm,
         "algorithm": job.algorithm,
     }
 

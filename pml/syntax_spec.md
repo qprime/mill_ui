@@ -1514,7 +1514,7 @@ Grid of cubbies with perimeter and internal joinery:
 | finger_width | no | 12mm | Target finger width |
 | finger_count | no | - | Explicit finger count (alternative to width) |
 | clearance | no | 0.12mm | Joint fit clearance |
-| layout_gap | no | 10mm | Gap between laid-out panels |
+| layout_gap | no | 10mm | Total nominal panel separation, or `auto` for cutter-aware packing |
 | show_labels | no | false | Display panel name labels |
 | show_edge_colors | no | false | Display edge color visualization |
 
@@ -1828,6 +1828,7 @@ Laminated 3D member that expands to multiple panel layers. Beams enable building
 | width | yes | - | Cross-section height (V dimension) |
 | thickness | yes | - | Per-layer sheet thickness |
 | layers | yes | - | Number of layers (int) or explicit LayerSpec list |
+| layout_gap | no | 10mm | Total nominal layer/segment separation, or `auto` |
 | role | no | - | Beam role: POST, RAIL, LEG, APRON, STRETCHER, STILE, MUNTIN |
 | show_labels | no | false | Display panel name labels on each beam segment |
 
@@ -2299,3 +2300,49 @@ JSON Schema files for IDE validation:
 - `pml/schema/nest.schema.json` - Nesting job schema
 
 Configure your IDE to use these schemas for `.pml.yml` files.
+
+### Cutter-aware packing and common cuts
+
+`Assembly.layout_gap` and `Beam.layout_gap` accept `auto` or a finite,
+nonnegative dimension. Omitting the property retains the 10mm default. A numeric
+value is the complete nominal edge-to-edge separation; it is never added to the
+cutter diameter or silently enlarged. For example, a 3.175mm cutter and a 10mm
+numeric gap leave a 6.825mm waste web between separate profile kerfs.
+
+`layout_gap: auto` requires machining orchestration to select the actual profile
+cutter before resolution. Geometry-only resolution must receive a
+`MachiningClearance`; it cannot invent a cutter from an authored `kerf`. Automatic
+spacing uses `SheetSpec.gap_mm = kerf_mm + gap_margin_mm`, starting with the actual
+diameter. Normal machining preflight checks the planned cutter sweeps against
+neighboring retained parts, their holding stock, working-area margins and fixture
+keepouts. It can repack up to four times with measured conservative extra
+clearance; `metrics.json` records every attempt and the resolved gaps. A failed
+preflight produces no machining program. Numeric gaps fail with an actionable
+error when incompatible. Perimeter clearance reserves the full cutter sweep.
+Nominal panels, joinery, grain and rotation policy are unchanged.
+
+Compatible outside Rect and Polygon profiles can share coincident straight,
+opposite-facing compensated segments, including partial seams and angled edges.
+The same contour constructor is used for ordinary and shared profiles. Shared
+seams run before the union's closed outlines, including its holes; rejected short
+seams retain their original cuts. Matching depth, cutter and starting surface are
+required. Per-feature feeds, allowance, ramp settings or nonzero starting depth
+exclude that profile. Any tab or onion-skin holding in a job disables sharing.
+Holding profiles require two cutter diameters of separation so neighboring kerfs
+cannot remove their retention bridges. Explicit layouts must retain that space.
+
+Common slots have two opposing retained walls: one traverse cannot climb-finish
+both. Sharing follows the ordinary profile operation's direction and ramp policy,
+without promising two-wall climb finishing. Explicit allowance/finishing or
+per-feature direction-related feed/ramp requirements keep ordinary operations.
+Unsupported Profile/profile-feature keys, including explicit cutting-direction
+requests, error at parsing rather than silently accepting a two-wall finishing
+promise. Curved intersections, polygon interlocking and new rotations are outside this
+optimization. Coincidence uses only 1e-9mm numerical precision; enabling
+`merge_epsilon_mm` never authorizes moving separated centerlines together.
+
+Resolved items and removal intents carry a semantic `part_id`, independently of
+machining geometry. Assembly, beam, shape children and nesting expansion preserve
+this ownership. Generated PML can retain it explicitly on `AtPosition.part_id`;
+all machining children of that placement belong to the named part. This permits
+separate pocket/profile items without guessing ownership from adjacency.

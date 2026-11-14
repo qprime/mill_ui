@@ -1,10 +1,10 @@
 {
   "constraint_audit": {},
   "complexity": {
-    "total_moves": 9912,
-    "rapid_moves": 172,
-    "cut_moves": 8864,
-    "rapid_ratio": 0.017
+    "total_moves": 9896,
+    "rapid_moves": 268,
+    "cut_moves": 8656,
+    "rapid_ratio": 0.027
   },
   "fidelity": {
     "tool_changes": 4,
@@ -27,13 +27,13 @@
       {
         "name": "profile",
         "tool_diameter_mm": 3.175,
-        "move_count": 1536
+        "move_count": 1520
       }
     ]
   },
   "output_size": {
-    "total_bytes": 298632,
-    "total_lines": 9648,
+    "total_bytes": 294554,
+    "total_lines": 9736,
     "files": {
       "pocket-12.70mm": {
         "bytes": 11383,
@@ -48,10 +48,53 @@
         "lines": 6928
       },
       "profile-3.17mm": {
-        "bytes": 39945,
-        "lines": 1312
+        "bytes": 35867,
+        "lines": 1400
       }
     }
+  },
+  "packing": {
+    "gaps": [
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      },
+      {
+        "policy": "auto",
+        "gap_mm": 3.175
+      }
+    ],
+    "preflight": [
+      {
+        "attempt": 1,
+        "gap_margin_mm": 0.0,
+        "reasons": []
+      }
+    ]
   },
   "errors": [],
   "warnings": [],

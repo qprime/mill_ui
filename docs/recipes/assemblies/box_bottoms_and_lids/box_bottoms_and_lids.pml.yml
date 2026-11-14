@@ -21,7 +21,7 @@ children:
           joinery: finger
           finger_width: 12mm
           clearance: 0.12mm
-          layout_gap: 10mm
+          layout_gap: auto
           bottom:
             joinery: captured
             receiving: a
@@ -49,7 +49,7 @@ children:
           joinery: finger
           finger_width: 12mm
           clearance: 0.12mm
-          layout_gap: 10mm
+          layout_gap: auto
           bottom:
             joinery: dado
             receiving: a
@@ -77,7 +77,7 @@ children:
           joinery: finger
           finger_width: 12mm
           clearance: 0.12mm
-          layout_gap: 10mm
+          layout_gap: auto
           bottom:
             joinery: finger
             finger_width: 12mm
@@ -103,7 +103,7 @@ children:
           joinery: finger
           finger_width: 12mm
           clearance: 0.12mm
-          layout_gap: 10mm
+          layout_gap: auto
           bottom:
             joinery: captured
             receiving: b

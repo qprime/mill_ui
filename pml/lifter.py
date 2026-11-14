@@ -9,7 +9,7 @@ from layout_ast.compositional import (
     Rect,
     RoundedRect,
 )
-from layout_ast.layout import Item, LayoutAST, Sheet
+from layout_ast.layout import Item, LayoutAST
 
 
 def _lift_item(item: Item) -> AtPosition | None:
@@ -23,7 +23,7 @@ def _lift_item(item: Item) -> AtPosition | None:
         w = data["w_mm"]
         h = data["h_mm"]
         rect = Rect(feature=item.feature, id=item.shape_id, label=item.label)
-        return AtPosition(x_mm=cx, y_mm=cy, width_mm=w, height_mm=h, child=rect)
+        return AtPosition(x_mm=cx, y_mm=cy, part_id=item.part_id, width_mm=w, height_mm=h, child=rect)
 
     elif item.type == "Circle":
         diameter = data.get("diameter_mm")
@@ -36,7 +36,7 @@ def _lift_item(item: Item) -> AtPosition | None:
             label=item.label,
         )
         size = diameter if diameter else (radius * 2 if radius else None)
-        return AtPosition(x_mm=cx, y_mm=cy, width_mm=size, height_mm=size, child=circle)
+        return AtPosition(x_mm=cx, y_mm=cy, part_id=item.part_id, width_mm=size, height_mm=size, child=circle)
 
     elif item.type == "RoundedRect":
         w = data["w_mm"]
@@ -63,29 +63,23 @@ def _lift_item(item: Item) -> AtPosition | None:
             label=item.label,
             corners=corners,
         )
-        return AtPosition(x_mm=cx, y_mm=cy, width_mm=w, height_mm=h, child=rounded_rect)
+        return AtPosition(x_mm=cx, y_mm=cy, part_id=item.part_id, width_mm=w, height_mm=h, child=rounded_rect)
 
     elif item.type == "Polygon":
-        points = tuple(tuple(p) for p in data.get("points", []))
+        points = tuple((cx + px, cy + py) for px, py in data.get("points", []))
         polygon = Polygon(
             points=points,
             feature=item.feature,
             id=item.shape_id,
             label=item.label,
         )
-        return AtPosition(x_mm=cx, y_mm=cy, child=polygon)
+        return AtPosition(x_mm=cx, y_mm=cy, part_id=item.part_id, child=polygon)
 
     raise ValueError(f"Unknown shape type: {item.type!r}")
 
 
 def lift_layout_ast(ast: LayoutAST) -> CompositionalLayoutAST:
-    sheet = Sheet(
-        width_mm=ast.sheet.width_mm,
-        height_mm=ast.sheet.height_mm,
-        thickness_mm=ast.sheet.thickness_mm,
-        margin_mm=ast.sheet.margin_mm,
-        gcode_output=ast.sheet.gcode_output,
-    )
+    sheet = ast.sheet
 
     children = []
     for item in ast.items:

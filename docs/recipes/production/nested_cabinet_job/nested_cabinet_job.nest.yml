@@ -7,6 +7,7 @@ Nest:
     thickness: 18mm
 
   kerf: 6.35mm
+  gap_margin: 6.35mm
   margin: 10mm
 
   holding:

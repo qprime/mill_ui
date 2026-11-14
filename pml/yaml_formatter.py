@@ -377,7 +377,7 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         return {"Panel": result if result else None}
 
     elif isinstance(node, AtPosition):
-        if node.child and isinstance(node.child, Rect):
+        if node.part_id is None and node.child and isinstance(node.child, Rect):
             rect_data = format_rect_node(node.child)
             rect_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             if node.width_mm is not None:
@@ -385,11 +385,11 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             if node.height_mm is not None:
                 rect_data["at"]["height"] = dim(node.height_mm)
             return {"Rect": rect_data}
-        elif node.child and isinstance(node.child, Circle):
+        elif node.part_id is None and node.child and isinstance(node.child, Circle):
             circle_data = format_circle_node(node.child)
             circle_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             return {"Circle": circle_data}
-        elif node.child and isinstance(node.child, RoundedRect):
+        elif node.part_id is None and node.child and isinstance(node.child, RoundedRect):
             rr_data = format_rounded_rect_node(node.child)
             rr_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             if node.width_mm is not None:
@@ -397,11 +397,11 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             if node.height_mm is not None:
                 rr_data["at"]["height"] = dim(node.height_mm)
             return {"RoundedRect": rr_data}
-        elif node.child and isinstance(node.child, Polygon):
+        elif node.part_id is None and node.child and isinstance(node.child, Polygon):
             poly_data = format_polygon_node(node.child)
             poly_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             return {"Polygon": poly_data}
-        elif node.child and isinstance(node.child, Ellipse):
+        elif node.part_id is None and node.child and isinstance(node.child, Ellipse):
             ell_data = format_ellipse_node(node.child)
             ell_data["at"] = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
             if node.width_mm is not None:
@@ -411,6 +411,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             return {"Ellipse": ell_data}
         else:
             result = {"x": dim(node.x_mm), "y": dim(node.y_mm)}
+            if node.part_id is not None:
+                result["part_id"] = node.part_id
             if node.width_mm is not None:
                 result["width"] = dim(node.width_mm)
             if node.height_mm is not None:
@@ -944,7 +946,7 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
         if node.bottom != "captured":
             result["bottom"] = _format_interface_value(node.bottom) if node.bottom is not None else None
         if node.layout_gap_mm != 10.0:
-            result["layout_gap"] = dim(node.layout_gap_mm)
+            result["layout_gap"] = "auto" if node.layout_gap_mm == "auto" else dim(node.layout_gap_mm)
         if node.show_labels:
             result["show_labels"] = True
         if node.show_edge_colors:
@@ -1021,6 +1023,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             "width": dim(node.width_mm),
             "thickness": dim(node.thickness_mm),
         }
+        if node.layout_gap_mm != 10.0:
+            result["layout_gap"] = "auto" if node.layout_gap_mm == "auto" else dim(node.layout_gap_mm)
         if isinstance(node.layers, int):
             if node.layers != 1:
                 result["layers"] = node.layers

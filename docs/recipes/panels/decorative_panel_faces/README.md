@@ -20,7 +20,7 @@ Sheet 1100 × 900 × 19mm mdf.
 - `pocket-9.53mm.nc`: pocket, 9.525mm tool, 8 feature(s), to 6mm
 - `pocket-3.17mm.nc`: pocket, 3.175mm tool, 26 feature(s), to 3mm
 - `engrave-1.00mm.nc`: engrave, 1mm tool, 101 feature(s), to 4mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 6 feature(s), to 19.2mm
+- `profile-3.17mm.nc`: profile, 3.175mm tool, 8 contour(s), to 19.2mm
 
 ## Run
 

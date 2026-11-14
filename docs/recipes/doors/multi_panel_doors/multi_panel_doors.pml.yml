@@ -43,7 +43,7 @@ children:
                             depth: 6mm
 
   - AtPosition:
-      x: 623.2mm
+      x: 589.55mm
       y: 403.2mm
       width: 360mm
       height: 800mm
@@ -65,7 +65,7 @@ children:
                             depth: 6mm
 
   - AtPosition:
-      x: 993.2mm
+      x: 945.9mm
       y: 403.2mm
       width: 340mm
       height: 800mm

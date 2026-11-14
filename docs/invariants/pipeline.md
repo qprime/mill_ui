@@ -93,7 +93,25 @@ for the actual profile-tool selection. Geometry-only resolution without a
 machining context retains its legacy behavior: an omitted or zero authored kerf
 uses 6.35mm for packing. A positive authored kerf is preserved. Numeric layout
 gaps are preserved and incompatible selected cutters error instead of shrinking
-parts or spacing. Automatic gaps and polygon common cuts remain separate work.
+parts or spacing. Explicit automatic gaps require this actual-cutter context and record their
+bounded preflight/repacking attempts. A geometry-only call with numeric gaps
+retains its existing behavior.
+
+## Part Ownership and Sweep Preflight
+
+Items and RemovalIntent carry optional semantic `part_id` metadata. Resolvers
+preserve it across assembly, beam, shape-child and template expansion and through
+JSON/PML conversion. No cutter paths or computed regions enter semantic records.
+Planner move ranges retain contributing feature IDs, including shared groups and
+deferred finishing/release, so sweep checks distinguish a feature's own part from
+neighboring retained geometry. A legacy single-workpiece layout remains usable
+without ownership; multiple independent parts must identify local operations.
+
+Every setup checks actual planned cutter segments and radii before emission,
+including pockets, relief and edge tools. Neighbor material and holding stock,
+working-area margins and keepouts are protected. Explicit full-bed surface
+operations keep their authorized margin exception. Failed setups emit no NC.
+Automatic resolution runs these checks before returning any packed sheets.
 
 ## Reproducible Compilation Context
 

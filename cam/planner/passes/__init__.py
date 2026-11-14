@@ -15,7 +15,7 @@ from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 from cam.shape import Shape2D
 
 from .edge import plan_edge_feature_passes
-from .merge_shared_edges import merge_rect_profiles, plan_shared_rect_profiles, validate_rect_profile_clearance
+from .merge_shared_edges import merge_profiles, plan_shared_profiles, validate_profile_clearance
 from .pocket import (
     plan_corner_cleanup_passes,
     plan_dogbone_passes,
@@ -55,6 +55,8 @@ class PassRecord:
     moves: list[Move] = field(default_factory=list)
     count: int = 0
     _cut_moves: int = field(init=False, repr=False)
+    feature_ids: tuple[str, ...] = ()
+    move_ranges: list[tuple[int, int, tuple[str, ...]]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self._cut_moves = sum(isinstance(move, CutMove) for move in self.moves)
@@ -67,9 +69,12 @@ class PassRecord:
         return replace(self.setup, tool=tool.as_model())
 
     def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
+        start = len(self.moves)
         for move in moves:
             self.moves.append(move)
             self._cut_moves += isinstance(move, CutMove)
+        if len(self.moves) > start:
+            self.move_ranges.append((start, len(self.moves), self.feature_ids))
         if increment:
             self.count += int(increment)
 
@@ -91,6 +96,7 @@ class PassAccumulator:
         self._ramp_angle_deg = float(ramp_angle_deg)
         self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
+        self.feature_ids: tuple[str, ...] = ()
         self._warnings: list[str] = []
         self._errors: list[str] = []
 
@@ -118,6 +124,7 @@ class PassAccumulator:
         key = pass_key(operation, tool)
         if key not in self._records:
             self._records[key] = self._make_record(operation, tool)
+        self._records[key].feature_ids = self.feature_ids
         return self._records[key]
 
     def set_feature_tool(self, feature_id: str, tool: ToolSelection) -> None:
@@ -183,14 +190,27 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         ramp_angle_deg=float(config.ramp_angle_deg),
     )
 
-    plan_pocket_passes(planner_input.pockets, accumulator=accumulator, tool_db=tool_db, config=config)
-    plan_hole_passes(planner_input.holes, accumulator=accumulator, tool_db=tool_db)
-    plan_engrave_passes(planner_input.engraves, accumulator=accumulator, tool_db=tool_db)
-    plan_corner_cleanup_passes(planner_input.corner_cleanups, accumulator=accumulator, tool_db=tool_db)
-    plan_dogbone_passes(planner_input.dogbones, accumulator=accumulator, tool_db=tool_db)
-    plan_heightfield_passes(planner_input.heightfields, accumulator=accumulator, tool_db=tool_db, config=config)
-
-    plan_edge_feature_passes(planner_input.edge_features, accumulator=accumulator, tool_db=tool_db)
+    for pocket in planner_input.pockets:
+        accumulator.feature_ids = (pocket.id,)
+        plan_pocket_passes((pocket,), accumulator=accumulator, tool_db=tool_db, config=config)
+    for hole in planner_input.holes:
+        accumulator.feature_ids = (hole.id,)
+        plan_hole_passes((hole,), accumulator=accumulator, tool_db=tool_db)
+    for engrave in planner_input.engraves:
+        accumulator.feature_ids = (engrave.id,)
+        plan_engrave_passes((engrave,), accumulator=accumulator, tool_db=tool_db)
+    for cleanup in planner_input.corner_cleanups:
+        accumulator.feature_ids = (cleanup.pocket_id,)
+        plan_corner_cleanup_passes((cleanup,), accumulator=accumulator, tool_db=tool_db)
+    for dogbone in planner_input.dogbones:
+        accumulator.feature_ids = (dogbone.pocket_id,)
+        plan_dogbone_passes((dogbone,), accumulator=accumulator, tool_db=tool_db)
+    for heightfield in planner_input.heightfields:
+        accumulator.feature_ids = (heightfield.id,)
+        plan_heightfield_passes((heightfield,), accumulator=accumulator, tool_db=tool_db, config=config)
+    for edge in planner_input.edge_features:
+        accumulator.feature_ids = (edge.id,)
+        plan_edge_feature_passes((edge,), accumulator=accumulator, tool_db=tool_db)
 
     kerf_mm = planner_input.kerf_width_mm
 
@@ -230,15 +250,17 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         if _tabs_for_feature(rec) and _onion_skin_for_feature(rec) > 0.0:
             raise ValueError(f"Profile '{rec.id}': onion skin and tabs cannot be combined")
 
+    mergeable_profiles = [rec for rec in profiles if rec.shape.lower() in {"rect", "polygon"}]
     rect_profiles = [rec for rec in profiles if rec.shape.lower() == "rect"]
     circle_profiles = [rec for rec in profiles if rec.shape.lower() == "circle"]
     polygon_profiles = [rec for rec in profiles if rec.shape.lower() == "polygon"]
     rounded_rect_profiles = [rec for rec in profiles if rec.shape.lower() == "roundedrect"]
 
     deferred_finishes: list[tuple[FeatureInput, Shape2D, ToolSelection]] = []
-    deferred_releases: list[tuple[Shape2D, Setup, ToolSelection, float]] = []
+    deferred_releases: list[tuple[FeatureInput, Shape2D, Setup, ToolSelection, float]] = []
 
     def _add_profile_moves(rec: FeatureInput, shape: Shape2D, tool: ToolSelection, *, finishing: bool = False) -> None:
+        accumulator.feature_ids = (rec.id,)
         skin = _onion_skin_for_feature(rec)
         tabs = _tabs_for_feature(rec)
         nominal_depth = max(0.0, rec.depth_mm)
@@ -264,7 +286,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 cut_through_mm=cut_through_mm,
             )
             record.add_moves(rough_moves, increment=1)
-            deferred_releases.append((shape, setup, tool, finish_depth))
+            deferred_releases.append((rec, shape, setup, tool, finish_depth))
         else:
             adjusted_tabs = {**tabs, "height_mm": tabs["height_mm"] + cut_through_mm} if tabs else None
             record.add_moves(
@@ -287,22 +309,26 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
 
     merged_seams = 0
     merged_indices: set[int] = set()
-    if rect_profiles:
+    if profiles:
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
-        validate_rect_profile_clearance(rect_profiles, profile_tool.diameter)
+        validate_profile_clearance(
+            profiles, profile_tool.diameter, holding=any_profile_has_tabs or any_profile_has_onion_skin
+        )
         groups = (
-            merge_rect_profiles(rect_profiles, tool_diameter_mm=profile_tool.diameter, config=config)
+            merge_profiles(mergeable_profiles, tool_diameter_mm=profile_tool.diameter, config=config)
             if merge_enabled
             else ()
         )
-        if groups:
+        for group in groups:
+            accumulator.feature_ids = tuple(mergeable_profiles[index].id for index in group.profile_indices)
             record = accumulator.get_record("profile", profile_tool)
-            merged_seams = plan_shared_rect_profiles(
-                groups, record=record, tool=profile_tool, cut_through_mm=cut_through_mm
+            merged_seams += plan_shared_profiles(
+                (group,), record=record, tool=profile_tool, cut_through_mm=cut_through_mm
             )
-            merged_indices = {index for group in groups for index in group.profile_indices}
-    for index, rec in enumerate(rect_profiles):
-        if index not in merged_indices:
+        merged_indices = {index for group in groups for index in group.profile_indices}
+    merged_ids = {id(mergeable_profiles[index]) for index in merged_indices}
+    for rec in rect_profiles:
+        if id(rec) not in merged_ids:
             profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
             profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
             width = float(rec.geometry.geometry.w_mm or 0.0)
@@ -357,6 +383,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             _plan_profile_stage(rec, shape, profile_tool)
 
     for rec in polygon_profiles:
+        if id(rec) in merged_ids:
+            continue
         profile_tool = pick_tool_for_profile(tool_db, kerf_mm=kerf_mm)
         profile_tool = apply_feeds_override(profile_tool, rec.feeds_override)
         raw_points = rec.geometry.geometry.points
@@ -443,7 +471,8 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     for feature, finish_shape, finish_tool in deferred_finishes:
         _add_profile_moves(feature, finish_shape, finish_tool, finishing=True)
 
-    for shape_def, deferred_setup, release_tool, finish_depth in deferred_releases:
+    for feature, shape_def, deferred_setup, release_tool, finish_depth in deferred_releases:
+        accumulator.feature_ids = (feature.id,)
         release_record = accumulator.get_record("release", release_tool)
         release_record.add_moves(
             onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth), increment=1

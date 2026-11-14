@@ -308,6 +308,7 @@ class RemovalIntent:
     shape: str = ""
     side: str | None = None
     face: str = "front"
+    part_id: str | None = None
     original_id: str | None = None
     shape_geometry: ShapeGeometry = field(default_factory=ShapeGeometry)
     corner_cleanup_tool_diameter_mm: float | None = None
@@ -390,8 +391,13 @@ class RemovalIntent:
             result["side"] = self.side
         if self.face != "front":
             result["face"] = self.face
-        if self.original_id is not None:
-            result["original_id"] = self.original_id
+        result.update(
+            {
+                key: value
+                for key, value in (("part_id", self.part_id), ("original_id", self.original_id))
+                if value is not None
+            }
+        )
         if self.corner_cleanup_tool_diameter_mm is not None:
             result["corner_cleanup_tool_diameter_mm"] = self.corner_cleanup_tool_diameter_mm
         if self.rest is not None:

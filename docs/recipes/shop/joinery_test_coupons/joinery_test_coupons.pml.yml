@@ -24,7 +24,7 @@ children:
           bottom: none
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -44,7 +44,7 @@ children:
           bottom: none
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -63,7 +63,7 @@ children:
           bottom: none
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -82,7 +82,7 @@ children:
           bottom: none
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -101,7 +101,7 @@ children:
           bottom: captured
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -120,7 +120,7 @@ children:
           bottom: dado
           top: none
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true
 
   - AtPosition:
@@ -139,5 +139,5 @@ children:
           perimeter_joinery: butt
           internal_joinery: half_lap
           clearance: 0.2mm
-          layout_gap: 10mm
+          layout_gap: auto
           show_labels: true

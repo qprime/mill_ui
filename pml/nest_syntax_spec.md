@@ -432,3 +432,20 @@ python -m pml.convert_to_yaml job.nest.yml            # Convert in place
 **See Also:**
 - [PML Syntax Specification](syntax_spec.md) - For single-sheet layouts
 - [Feature guide](../docs/feature_guide.md#cutting-parts-out) - Nesting recipes
+
+## Cutter and holding clearance
+
+`Nest.gap_margin` is an optional nonnegative dimension, default `0mm`. The total
+nominal separation remains `kerf + gap_margin`. For a 6.35mm cutter with tabs or
+onion skin, use `kerf: 6.35mm` and `gap_margin: 6.35mm` to reserve disjoint kerfs
+and preserve retention stock. Holding is never removed to tighten a nest.
+
+The machining recipe route selects the actual profile cutter before packing,
+reserves that diameter at the working-area edges, and saves the cutter contract
+on each AST. An incompatible numeric gap or a different cutter on replay errors
+explicitly. `nest_parts` and `nest_and_generate` remain usable for geometry-only
+packing; their optional `machining_clearance` supplies the actual cutter when
+known. Machining-aware output requires AST/JSON to retain that contract. Plain
+PML export remains geometry-only and is checked against the cutter selected when
+it is later machined. PML export preserves explicit part ownership through
+`AtPosition.part_id`, including the separate operations inside templates.

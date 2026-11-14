@@ -23,7 +23,7 @@ children:
       id: serving_tray
       label: "Serving Tray"
       radius: 30mm
-      at: {x: 453.2mm, y: 516.46mm, width: 300mm, height: 200mm}
+      at: {x: 416.375mm, y: 516.46mm, width: 300mm, height: 200mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:
@@ -38,7 +38,7 @@ children:
   - Ellipse:
       id: oval_tray
       label: "Oval Tray"
-      at: {x: 793.2mm, y: 516.46mm, width: 280mm, height: 180mm}
+      at: {x: 712.725mm, y: 516.46mm, width: 280mm, height: 180mm}
       children:
         - Profile: {side: outside, depth: through}
         - Inset:

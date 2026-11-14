@@ -51,21 +51,21 @@
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
     <path d="M 16.380 383.620 L 256.380 383.620 L 256.380 83.620 L 16.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
-    <path d="M 301.380 383.620 L 541.380 383.620 L 541.380 83.620 L 301.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_2" />
-    <path d="M 586.380 383.620 L 826.380 383.620 L 826.380 83.620 L 586.380 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_4" />
+    <path d="M 281.780 383.620 L 521.780 383.620 L 521.780 83.620 L 281.780 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_2" />
+    <path d="M 547.180 383.620 L 787.180 383.620 L 787.180 83.620 L 547.180 83.620 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_4" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
     <path d="M 14.792 385.207 L 257.967 385.207 L 257.967 82.033 L 14.792 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
-    <path d="M 299.793 385.207 L 542.967 385.207 L 542.967 82.033 L 299.793 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_2_toolpath" />
-    <path d="M 584.793 385.207 L 827.967 385.207 L 827.967 82.033 L 584.793 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_4_toolpath" />
+    <path d="M 280.192 385.207 L 523.367 385.207 L 523.367 82.033 L 280.192 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_2_toolpath" />
+    <path d="M 545.592 385.207 L 788.767 385.207 L 788.767 82.033 L 545.592 82.033 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_4_toolpath" />
   </g>
   <g id="CHAMFER_CUTS" class="chamfer-cuts">
     <path d="M 16.380 383.620 L 256.380 383.620 L 256.380 83.620 L 16.380 83.620 L 16.380 383.620 Z" stroke="#8bd49c" fill="none" stroke-width="1.5" stroke-dasharray="6,2" id="generated_chamfer_1_edge_cut" />
     <text x="136.380" y="233.620" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_chamfer_1_edge_depth">Chamfer 6.000mm</text>
   </g>
   <g id="ROUNDOVER_CUTS" class="roundover-cuts">
-    <path d="M 301.380 383.620 L 541.380 383.620 L 541.380 83.620 L 301.380 83.620 L 301.380 383.620 Z" stroke="#cba6f7" fill="none" stroke-width="1.5" stroke-dasharray="2,2" id="generated_roundover_3_edge_cut" />
-    <text x="421.380" y="233.620" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover 6.000mm</text>
+    <path d="M 281.780 383.620 L 521.780 383.620 L 521.780 83.620 L 281.780 83.620 L 281.780 383.620 Z" stroke="#cba6f7" fill="none" stroke-width="1.5" stroke-dasharray="2,2" id="generated_roundover_3_edge_cut" />
+    <text x="401.780" y="233.620" text-anchor="middle" dominant-baseline="middle" fill="#e8e8e8" stroke="none" font-family="monospace" font-size="8px" id="generated_roundover_3_edge_depth">Roundover 6.000mm</text>
   </g>
   <g id="DIMENSIONS" class="dimensions">
     <line x1="16.379999999999995" y1="83.62" x2="16.379999999999995" y2="63.620000000000005" stroke="#5ab9ea" stroke-width="1" />

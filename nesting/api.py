@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
+from layout_ast.layout import MachiningClearance
 from pml.nest_parser import HoldingSpec
 
 from .layout_generator import nesting_result_to_asts, nesting_result_to_pml
@@ -63,6 +65,7 @@ def nest_parts(
     max_sheets: int | None = None,
     validate: bool = True,
     algorithm: str = "maxrects",
+    machining_clearance: MachiningClearance | None = None,
 ) -> dict[str, Any]:
     if algorithm not in _VALID_ALGORITHMS:
         raise ValueError(f"Invalid algorithm '{algorithm}'. Must be one of: {', '.join(_VALID_ALGORITHMS)}")
@@ -78,12 +81,20 @@ def nest_parts(
         gap_margin_mm=gap_margin_mm,
     )
 
+    edge_clearance = sheet_spec.resolved_kerf_mm
+    if machining_clearance is not None:
+        edge_clearance = machining_clearance.profile_diameter_mm
+        if sheet_spec.gap_mm < edge_clearance:
+            raise ValueError(
+                f"Nesting gap {sheet_spec.gap_mm:g}mm is smaller than selected profile cutter {edge_clearance:g}mm"
+            )
+
     result = pack_sheets(
         part_specs,
         sheet_spec,
         max_sheets=max_sheets,
         algorithm=algorithm,
-        edge_clearance_mm=sheet_spec.resolved_kerf_mm,
+        edge_clearance_mm=edge_clearance,
     )
 
     response = {
@@ -118,7 +129,10 @@ def nest_and_generate(
     gap_margin_mm: float = 0.0,
     output_format: str = "ast",
     algorithm: str = "maxrects",
+    machining_clearance: MachiningClearance | None = None,
 ) -> dict[str, Any]:
+    if machining_clearance is not None and output_format == "pml":
+        raise ValueError("Machining-aware nesting requires AST/JSON output to retain the selected cutter contract")
     if output_format not in _VALID_OUTPUT_FORMATS:
         raise ValueError(f"Invalid output_format '{output_format}'. Must be one of: {', '.join(_VALID_OUTPUT_FORMATS)}")
 
@@ -136,14 +150,25 @@ def nest_and_generate(
         gap_margin_mm=gap_margin_mm,
     )
 
+    edge_clearance = sheet_spec.resolved_kerf_mm
+    if machining_clearance is not None:
+        edge_clearance = machining_clearance.profile_diameter_mm
+        if sheet_spec.gap_mm < edge_clearance:
+            raise ValueError(
+                f"Nesting gap {sheet_spec.gap_mm:g}mm is smaller than selected profile cutter {edge_clearance:g}mm"
+            )
+
     result = pack_sheets(
         part_specs,
         sheet_spec,
         algorithm=algorithm,
-        edge_clearance_mm=sheet_spec.resolved_kerf_mm,
+        edge_clearance_mm=edge_clearance,
     )
 
-    output = nesting_result_to_pml(result) if output_format == "pml" else nesting_result_to_asts(result)
+    asts = nesting_result_to_asts(result)
+    if machining_clearance is not None:
+        asts = [replace(ast, machining_clearance=machining_clearance) for ast in asts]
+    output = nesting_result_to_pml(result) if output_format == "pml" else asts
 
     return {
         "nesting_result": result,

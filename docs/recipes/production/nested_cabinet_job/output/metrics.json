@@ -13,10 +13,10 @@
         }
       },
       "complexity": {
-        "total_moves": 1693,
-        "rapid_moves": 25,
-        "cut_moves": 1531,
-        "rapid_ratio": 0.015
+        "total_moves": 1023,
+        "rapid_moves": 20,
+        "cut_moves": 902,
+        "rapid_ratio": 0.02
       },
       "fidelity": {
         "tool_changes": 3,
@@ -24,35 +24,35 @@
           {
             "name": "pocket",
             "tool_diameter_mm": 12.7,
-            "move_count": 712
+            "move_count": 639
           },
           {
             "name": "profile",
             "tool_diameter_mm": 6.35,
-            "move_count": 842
+            "move_count": 356
           },
           {
             "name": "release",
             "tool_diameter_mm": 6.35,
-            "move_count": 139
+            "move_count": 28
           }
         ]
       },
       "output_size": {
-        "total_bytes": 48189,
-        "total_lines": 1654,
+        "total_bytes": 28346,
+        "total_lines": 1008,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 20461,
-            "lines": 712
+            "bytes": 18360,
+            "lines": 643
           },
           "profile-6.35mm": {
-            "bytes": 23476,
-            "lines": 796
+            "bytes": 9255,
+            "lines": 327
           },
           "release-6.35mm": {
-            "bytes": 4252,
-            "lines": 146
+            "bytes": 731,
+            "lines": 38
           }
         }
       },
@@ -65,37 +65,46 @@
       "job_name": "nested_cabinet_job_sheet_2",
       "constraint_audit": {},
       "complexity": {
-        "total_moves": 1126,
-        "rapid_moves": 4,
-        "cut_moves": 1088,
-        "rapid_ratio": 0.004
+        "total_moves": 1796,
+        "rapid_moves": 9,
+        "cut_moves": 1717,
+        "rapid_ratio": 0.005
       },
       "fidelity": {
-        "tool_changes": 2,
+        "tool_changes": 3,
         "passes": [
+          {
+            "name": "pocket",
+            "tool_diameter_mm": 12.7,
+            "move_count": 73
+          },
           {
             "name": "profile",
             "tool_diameter_mm": 6.35,
-            "move_count": 888
+            "move_count": 1374
           },
           {
             "name": "release",
             "tool_diameter_mm": 6.35,
-            "move_count": 238
+            "move_count": 349
           }
         ]
       },
       "output_size": {
-        "total_bytes": 32827,
-        "total_lines": 1136,
+        "total_bytes": 52026,
+        "total_lines": 1797,
         "files": {
+          "pocket-12.70mm": {
+            "bytes": 2090,
+            "lines": 84
+          },
           "profile-6.35mm": {
-            "bytes": 25412,
-            "lines": 888
+            "bytes": 39138,
+            "lines": 1357
           },
           "release-6.35mm": {
-            "bytes": 7415,
-            "lines": 248
+            "bytes": 10798,
+            "lines": 356
           }
         }
       },

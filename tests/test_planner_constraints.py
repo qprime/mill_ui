@@ -563,10 +563,7 @@ Sheet:
 children:
   - Rect:
       id: part1
-      w: 50mm
-      h: 50mm
-      x: 100mm
-      y: 100mm
+      at: {width: 50mm, height: 50mm, x: 100mm, y: 100mm}
       children:
         - Profile:
             side: outside
@@ -590,10 +587,7 @@ Sheet:
 children:
   - Rect:
       id: part1
-      w: 50mm
-      h: 50mm
-      x: 50mm
-      y: 50mm
+      at: {width: 50mm, height: 50mm, x: 50mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -601,10 +595,7 @@ children:
             onion_skin_mm: 0.3
   - Rect:
       id: part2
-      w: 50mm
-      h: 50mm
-      x: 150mm
-      y: 50mm
+      at: {width: 50mm, height: 50mm, x: 150mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -612,10 +603,7 @@ children:
             onion_skin_mm: 0.3
   - Rect:
       id: part3
-      w: 50mm
-      h: 50mm
-      x: 250mm
-      y: 50mm
+      at: {width: 50mm, height: 50mm, x: 250mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -639,10 +627,7 @@ Sheet:
 children:
   - Rect:
       id: part_a
-      w: 40mm
-      h: 40mm
-      x: 50mm
-      y: 50mm
+      at: {width: 40mm, height: 40mm, x: 50mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -650,10 +635,7 @@ children:
             onion_skin_mm: 0.3
   - Rect:
       id: part_b
-      w: 60mm
-      h: 60mm
-      x: 150mm
-      y: 50mm
+      at: {width: 60mm, height: 60mm, x: 150mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -677,10 +659,7 @@ Sheet:
 children:
   - Rect:
       id: part1
-      w: 50mm
-      h: 50mm
-      x: 100mm
-      y: 100mm
+      at: {width: 50mm, height: 50mm, x: 100mm, y: 100mm}
       children:
         - Profile:
             side: outside
@@ -700,10 +679,7 @@ Sheet:
 children:
   - Rect:
       id: onion_part
-      w: 50mm
-      h: 50mm
-      x: 50mm
-      y: 50mm
+      at: {width: 50mm, height: 50mm, x: 50mm, y: 50mm}
       children:
         - Profile:
             side: outside
@@ -711,10 +687,7 @@ children:
             onion_skin_mm: 0.3
   - Rect:
       id: plain_part
-      w: 50mm
-      h: 50mm
-      x: 200mm
-      y: 50mm
+      at: {width: 50mm, height: 50mm, x: 200mm, y: 50mm}
       children:
         - Profile:
             side: outside

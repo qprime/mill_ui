@@ -7,6 +7,7 @@ Sheet:
   material: mdf
 children:
   - Beam:
+      layout_gap: auto
       name: long_rail
       length: 2000mm
       width: 100mm

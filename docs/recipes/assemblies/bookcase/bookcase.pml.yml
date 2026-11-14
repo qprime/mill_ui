@@ -14,7 +14,7 @@ children:
       thickness: 18mm
       joinery: butt
       clearance: 0.12mm
-      layout_gap: 10mm
+      layout_gap: auto
       cap_style: between_sides
       top:
         joinery: dado

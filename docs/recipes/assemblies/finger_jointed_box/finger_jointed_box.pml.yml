@@ -15,7 +15,7 @@ children:
       joinery: finger
       finger_width: 12mm
       clearance: 0.12mm
-      layout_gap: 10mm
+      layout_gap: auto
       top: none
       bottom:
         joinery: captured

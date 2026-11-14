@@ -4,6 +4,14 @@
 
 **Demonstrates:** Three tool-matched raised-panel profiles in rectangular and arched doors.
 
+## Door type
+
+These are one-piece raised panel doors. Each door is carved from a single sheet:
+`RaisedPanel` cuts the recess, slope and field into the board, and the uncut
+border is the frame. A 5-piece door is different: it is assembled from two
+stiles, two rails and a separate floating panel. This recipe does not make
+5-piece doors.
+
 ## What gets cut
 
 The doors are each 450 × 700mm, with a 60mm frame. The rectangular door has a

@@ -145,3 +145,20 @@ class TestPartitionPanels:
             edge_clearance_mm=10.0,
         )
         assert len(result_with_clear.unplaceable) == 1
+
+
+def test_nominal_panels_exactly_fill_bin_without_trailing_gap():
+    for algorithm in ("guillotine", "maxrects"):
+        panels = [_panel("same", 100, 50), _panel("same", 100, 50)]
+        result = partition_panels(panels, 209, 56, gap_mm=3, edge_clearance_mm=3, algorithm=algorithm)
+        assert not result.unplaceable
+        assert len(result.sheets) == 1
+        placements = sorted(result.sheets[0], key=lambda p: p.x_min_mm)
+        assert [p.x_min_mm for p in placements] == [3, 106]
+        assert all(p.y_min_mm == 3 for p in placements)
+        assert {id(p.panel) for p in placements} == {id(p) for p in panels}
+        assert all(p.panel.width_mm == 100 and p.panel.height_mm == 50 for p in placements)
+        assert (
+            partition_panels(panels, 208.999, 56, gap_mm=3, edge_clearance_mm=3, algorithm=algorithm).sheets
+            != result.sheets
+        )

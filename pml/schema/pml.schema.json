@@ -37,6 +37,25 @@
         {"type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?mm$"}
       ]
     },
+    "layoutGap": {
+      "oneOf": [
+        {"const": "auto"},
+        {"type": "number", "minimum": 0},
+        {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?mm$"}
+      ]
+    },
+    "beamNode": {
+      "type": "object",
+      "required": ["length", "width", "thickness"],
+      "properties": {
+        "name": {"type": "string"},
+        "length": {"$ref": "#/$defs/dimension"},
+        "width": {"$ref": "#/$defs/dimension"},
+        "thickness": {"$ref": "#/$defs/dimension"},
+        "layout_gap": {"$ref": "#/$defs/layoutGap"},
+        "layers": {"oneOf": [{"type": "integer", "minimum": 1}, {"type": "array"}]}
+      }
+    },
     "depthOrThrough": {
       "oneOf": [
         {"type": "number"},
@@ -119,6 +138,7 @@
         "EngraveText": {"$ref": "#/$defs/engraveTextNode"},
         "WasteCuts": {"$ref": "#/$defs/wasteCutsNode"},
         "Assembly": {"$ref": "#/$defs/assemblyNode"},
+        "Beam": {"$ref": "#/$defs/beamNode"},
         "UseComponent": {"$ref": "#/$defs/useComponentNode"}
       }
     },
@@ -404,6 +424,7 @@
       "type": "object",
       "required": ["x", "y"],
       "properties": {
+        "part_id": {"type": "string", "minLength": 1},
         "x": {"$ref": "#/$defs/dimension"},
         "y": {"$ref": "#/$defs/dimension"},
         "width": {"$ref": "#/$defs/dimension"},
@@ -569,7 +590,7 @@
         "clearance": {"$ref": "#/$defs/dimension"},
         "include_top": {"type": "boolean"},
         "include_bottom": {"type": "boolean"},
-        "layout_gap": {"$ref": "#/$defs/dimension"},
+        "layout_gap": {"$ref": "#/$defs/layoutGap"},
         "bottom_style": {"type": "string", "enum": ["captured", "finger", "dado"]},
         "top_style": {"type": "string", "enum": ["captured", "finger", "dado"]},
         "dado_inset": {"$ref": "#/$defs/dimension"},

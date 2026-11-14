@@ -28,17 +28,17 @@ and shelves using HalfLap joints.
 
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
-- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 10 feature(s), to 9mm
-- `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 40 feature(s), to 9mm
-- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 2 feature(s), to 18.2mm
+- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 10 operation(s), to 9mm
+- `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 40 operation(s), to 9mm
+- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 2 contour(s), to 18.2mm
 
 Sheet 2: 1220 × 1220 × 18mm mdf.
 
-- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 18.2mm
+- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 3 contour(s), to 18.2mm
 
 Sheet 3: 1220 × 1220 × 18mm mdf.
 
-- `sheet_3.profile-3.17mm.nc`: profile, 3.175mm tool, 2 feature(s), to 18.2mm
+- `sheet_3.profile-3.17mm.nc`: profile, 3.175mm tool, 2 contour(s), to 18.2mm
 
 ## Run
 

@@ -605,3 +605,64 @@ M30
         assert tab_result.details["tabs_at_max_depth"] is True
     finally:
         os.unlink(temp_path)
+
+
+def test_emitted_polygon_seam_sweeps_preserve_finished_spans_and_depth_sections():
+    from shapely.geometry import LineString, Polygon, box
+    from shapely.ops import unary_union
+
+    from validation.metrics.gcode_metrics import _parse_moves
+
+    source = """Sheet: {width: 320mm, height: 200mm, thickness: 6mm, margin: 10mm}
+children:
+- Polygon:
+    id: left
+    points: [[40mm, 40mm], [140mm, 40mm], [140mm, 100mm], [120mm, 100mm], [120mm, 120mm], [40mm, 120mm]]
+    children:
+    - Profile: {side: outside, depth: through}
+- Rect:
+    id: right
+    at: {x: 193mm, y: 80mm, width: 100mm, height: 80mm}
+    children:
+    - Profile: {side: outside, depth: through}
+"""
+    result = run_pipeline(
+        parse_pml(source),
+        kerf_mm=3,
+        tool_db=[
+            {
+                "name": "flat3",
+                "diameter": 3,
+                "kind": "flat",
+                "rpm": 12000,
+                "feed_xy": 900,
+                "feed_z": 300,
+                "depth_per_pass": 1.5,
+            }
+        ],
+    )
+    assert not result.errors
+    material = (Polygon([(50, 50), (150, 50), (150, 110), (130, 110), (130, 130), (50, 130)]), box(153, 50, 253, 130))
+    seam = LineString([(151.5, 48.5), (151.5, 111.5)])
+    at_depth: dict[float, list] = {}
+    seam_lengths: dict[float, float] = {}
+    for content in result.gcode.values():
+        moves = _parse_moves(content.splitlines())
+        previous = None
+        for move in moves:
+            if previous is not None and move["type"] == "feed" and min(move["z"], previous["z"]) < 0:
+                line = LineString([(previous["x"], previous["y"]), (move["x"], move["y"])])
+                for part in material:
+                    assert line.buffer(1.5).intersection(part.buffer(-0.001)).area < 1e-7
+                if move["z"] == previous["z"]:
+                    at_depth.setdefault(move["z"], []).append(line.buffer(1.5))
+                    seam_lengths[move["z"]] = seam_lengths.get(move["z"], 0) + line.intersection(seam).length
+            previous = move
+    assert seam_lengths
+    assert all(abs(length - 63) < 0.001 for length in seam_lengths.values())
+    for sweeps in at_depth.values():
+        cut = unary_union(sweeps)
+        for part in material:
+            finished = part.difference(cut)
+            assert abs(finished.area - part.area) < 0.001
+            assert finished.bounds == part.bounds

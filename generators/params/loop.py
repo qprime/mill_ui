@@ -76,7 +76,7 @@ class WaveParams(BaseParams):
     depth_mm: float
     direction_rad: float = 0.0
     phase_rad: float = 0.0
-    tool_width_mm: float = 3.175
+    spacing_mm: float = 3.175
     wave_count: int | None = None
 
     def __post_init__(self) -> None:
@@ -86,8 +86,8 @@ class WaveParams(BaseParams):
             raise ValueError(f"WaveParams: wavelength_mm must be positive, got {self.wavelength_mm}")
         if self.depth_mm <= 0:
             raise ValueError(f"WaveParams: depth_mm must be positive, got {self.depth_mm}")
-        if self.tool_width_mm <= 0:
-            raise ValueError(f"WaveParams: tool_width_mm must be positive, got {self.tool_width_mm}")
+        if self.spacing_mm <= 0:
+            raise ValueError(f"WaveParams: spacing_mm must be positive, got {self.spacing_mm}")
         if self.wave_count is not None and self.wave_count <= 0:
             raise ValueError(f"WaveParams: wave_count must be positive or None, got {self.wave_count}")
 

@@ -702,7 +702,7 @@ children:
             count: 4
             amplitude: 8mm
             wavelength: 50mm
-            groove: 3mm
+            spacing: 3mm
             depth: 1mm
 """
     flat = resolve_layout(parse_pml_yaml(pml))
@@ -732,7 +732,7 @@ children:
                   count: 4
                   amplitude: 8mm
                   wavelength: 50mm
-                  groove: 3mm
+                  spacing: 3mm
                   depth: 1mm
 """
     flat = resolve_layout(parse_pml_yaml(pml))

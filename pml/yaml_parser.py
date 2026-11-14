@@ -1281,11 +1281,15 @@ def parse_node(data: dict, path: str = "") -> Any:  # noqa: C901 — PML node-ty
         )
 
     elif node_type == "Wave":
+        if "groove" in node_data:
+            raise PMLParseError(
+                "Wave 'groove' was renamed to 'spacing'; engraving width comes from the selected tool", f"{path}.Wave"
+            )
         return WaveGen(
             wave_count=_require(node_data, "count", f"{path}.Wave"),
             amplitude_mm=parse_dimension(_require(node_data, "amplitude", f"{path}.Wave")),
             wavelength_mm=parse_dimension(_require(node_data, "wavelength", f"{path}.Wave")),
-            groove_width_mm=parse_dimension(_require(node_data, "groove", f"{path}.Wave")),
+            spacing_mm=parse_dimension(_require(node_data, "spacing", f"{path}.Wave")),
             depth_mm=parse_dimension(_require(node_data, "depth", f"{path}.Wave")),
         )
 

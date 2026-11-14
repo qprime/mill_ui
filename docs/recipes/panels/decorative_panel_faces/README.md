@@ -6,6 +6,8 @@
 
 ## What gets cut
 
+Wave uses 6.35mm centerline spacing; its engraving width comes from the selected tool.
+
 Six 300 × 400mm panels, one per face style: X-panel, louvers, wave, diamond lattice, fluting, concentric border.
 
 The diamond lattice intentionally crosses two families of 6.35mm-wide grooves,

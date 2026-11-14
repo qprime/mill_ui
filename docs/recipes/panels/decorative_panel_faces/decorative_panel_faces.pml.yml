@@ -46,7 +46,7 @@ children:
                   count: 6
                   amplitude: 10mm
                   wavelength: 80mm
-                  groove: 6.35mm
+                  spacing: 6.35mm
                   depth: 3mm
 
   - Rect:

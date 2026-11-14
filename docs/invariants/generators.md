@@ -88,6 +88,12 @@ If `tab_count == 0`, tab dimensions are ignored.
 
 ---
 
+## Wave Engraving
+
+Wave emits clipped engraving centerlines. Its `spacing_mm` sets their offset,
+independently of the selected cutter width. PML exposes this as `spacing`; the
+misleading former `groove` key errors explicitly.
+
 ## Output Coordinates
 
 Generators emit Items in absolute sheet coordinates, not domain-local coordinates. Coordinate transformation happens before output.

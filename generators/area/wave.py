@@ -77,7 +77,7 @@ def wave_generator(
             f"is {min_dimension / 2}mm."
         )
 
-    wave_spacing = params.tool_width_mm
+    wave_spacing = params.spacing_mm
 
     local_bounds = get_local_bounds(domain)
     local_y_min, local_y_max = local_bounds.y_min, local_bounds.y_max
@@ -115,7 +115,7 @@ def wave_generator(
 
         sheet_wave = local_to_sheet_batch(local_wave, domain)
 
-        clipped_segments = clip_polylines_to_domain([sheet_wave], domain, min_length_mm=params.tool_width_mm)
+        clipped_segments = clip_polylines_to_domain([sheet_wave], domain, min_length_mm=params.spacing_mm)
 
         for segment in clipped_segments:
             items.append(

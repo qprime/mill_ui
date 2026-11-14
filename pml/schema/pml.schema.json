@@ -323,12 +323,13 @@
     },
     "waveNode": {
       "type": "object",
-      "required": ["count", "amplitude", "wavelength", "groove", "depth"],
+      "additionalProperties": false,
+      "required": ["count", "amplitude", "wavelength", "spacing", "depth"],
       "properties": {
         "count": {"type": "integer", "minimum": 1},
         "amplitude": {"$ref": "#/$defs/dimension"},
         "wavelength": {"$ref": "#/$defs/dimension"},
-        "groove": {"$ref": "#/$defs/dimension"},
+        "spacing": {"$ref": "#/$defs/dimension"},
         "depth": {"$ref": "#/$defs/dimension"}
       }
     },

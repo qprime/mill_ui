@@ -564,7 +564,7 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
                 "count": node.wave_count,
                 "amplitude": dim(node.amplitude_mm),
                 "wavelength": dim(node.wavelength_mm),
-                "groove": dim(node.groove_width_mm),
+                "spacing": dim(node.spacing_mm),
                 "depth": dim(node.depth_mm),
             }
         }

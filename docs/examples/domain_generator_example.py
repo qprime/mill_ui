@@ -114,7 +114,7 @@ def create_wave_panel(
             amplitude_mm=amplitude,
             wavelength_mm=wavelength,
             depth_mm=pattern_depth,
-            tool_width_mm=3.175,
+            spacing_mm=3.175,
         ),
     )
 

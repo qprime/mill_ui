@@ -52,9 +52,9 @@ PARSE_CASES = [
         id="chamfer",
     ),
     pytest.param(
-        "Wave:\n            count: 5\n            amplitude: 10mm\n            wavelength: 60mm\n            groove: 3mm\n            depth: 2mm",
+        "Wave:\n            count: 5\n            amplitude: 10mm\n            wavelength: 60mm\n            spacing: 3mm\n            depth: 2mm",
         WaveGen,
-        {"wave_count": 5, "amplitude_mm": 10.0, "wavelength_mm": 60.0, "groove_width_mm": 3.0, "depth_mm": 2.0},
+        {"wave_count": 5, "amplitude_mm": 10.0, "wavelength_mm": 60.0, "spacing_mm": 3.0, "depth_mm": 2.0},
         id="wave",
     ),
 ]
@@ -292,7 +292,7 @@ children:
             count: 5
             amplitude: 10mm
             wavelength: 60mm
-            groove: 3mm
+            spacing: 3mm
             depth: 2mm
 """
     comp_ast = parse_pml_yaml(pml)
@@ -392,7 +392,7 @@ children:
             count: 5
             amplitude: 10mm
             wavelength: 60mm
-            groove: 3mm
+            spacing: 3mm
             depth: 2mm
 """
     comp_ast = parse_pml_yaml(pml)
@@ -717,3 +717,30 @@ children:
         assert item.feature.depth_mm == 0.3
         assert item.shape_id is not None
         assert item.shape_id.startswith("generated_string_art")
+
+
+@pytest.mark.parametrize("extra", ["groove: 3mm", "spacing: 4mm, groove: 3mm"])
+def test_wave_rejects_misleading_groove_key(extra):
+    from pml import PMLParseError
+
+    pml = f"""Sheet: {{width: 200mm, height: 200mm, thickness: 19mm}}
+children:
+- Wave: {{count: 4, amplitude: 3mm, wavelength: 50mm, depth: 1mm, {extra}}}
+"""
+    with pytest.raises(PMLParseError, match="renamed to 'spacing'"):
+        parse_pml_yaml(pml)
+
+
+def test_wave_spacing_roundtrip_and_engraving_intent():
+    from pml import format_pml_yaml
+
+    pml = """Sheet: {width: 200mm, height: 200mm, thickness: 19mm}
+children:
+- Wave: {count: 4, amplitude: 3mm, wavelength: 50mm, spacing: 6.35mm, depth: 1mm}
+"""
+    ast = parse_pml_yaml(pml)
+    assert ast == parse_pml_yaml(format_pml_yaml(ast))
+    intents = ast_to_removal_intents(resolve_layout(ast))
+    assert intents
+    assert all(intent.hint_type == "engrave" for intent in intents)
+    assert all(intent.depth_profile.z_bottom == -1.0 for intent in intents)

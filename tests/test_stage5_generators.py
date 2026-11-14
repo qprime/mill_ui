@@ -43,7 +43,7 @@ def test_wave_params_valid():
         depth_mm=2.0,
         direction_rad=math.pi / 4,
         phase_rad=math.pi / 2,
-        tool_width_mm=6.0,
+        spacing_mm=6.0,
         wave_count=5,
     )
 
@@ -323,9 +323,9 @@ def test_wave_in_circle_stays_inside_circle():
     assert endpoint_gap_from_square > 5.0
 
 
-def test_wave_drops_pieces_shorter_than_groove():
+def test_wave_drops_pieces_shorter_than_spacing():
     domain = Domain.from_rectangle(200, 100, center=(100, 50))
-    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, tool_width_mm=3.0)
+    params = WaveParams(amplitude_mm=10.0, wavelength_mm=30.0, depth_mm=3.0, spacing_mm=3.0)
 
     items = wave_generator(domain, params)
 

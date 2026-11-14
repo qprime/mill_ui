@@ -499,7 +499,7 @@ def stress_test_fine_wave():
         amplitude_mm=5.0,
         wavelength_mm=10.0,  # Many waves
         depth_mm=2.0,
-        tool_width_mm=2.0,  # Dense spacing
+        spacing_mm=2.0,  # Dense spacing
     )
 
     start = time.perf_counter()

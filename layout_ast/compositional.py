@@ -237,7 +237,7 @@ class WaveGen:
     wave_count: int
     amplitude_mm: float
     wavelength_mm: float
-    groove_width_mm: float
+    spacing_mm: float
     depth_mm: float
 
 

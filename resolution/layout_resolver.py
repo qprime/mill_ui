@@ -1630,7 +1630,7 @@ class LayoutResolver:
             amplitude_mm=node.amplitude_mm,
             wavelength_mm=node.wavelength_mm,
             depth_mm=node.depth_mm,
-            tool_width_mm=node.groove_width_mm,
+            spacing_mm=node.spacing_mm,
             wave_count=node.wave_count,
         )
 

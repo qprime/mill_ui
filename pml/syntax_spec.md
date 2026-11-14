@@ -1137,14 +1137,16 @@ Star pattern:
 
 #### Wave
 
-Wavy groove pattern:
+Wavy engraving pattern. `spacing` is the vertical offset between adjacent wave
+centerlines before rotation; engraving width comes from the selected tool and
+cutting depth. The former `groove` key is rejected with a migration message.
 
 ```yaml
 - Wave:
     count: 5
     amplitude: 10mm
     wavelength: 60mm
-    groove: 3mm
+    spacing: 3mm
     depth: 2mm
 ```
 

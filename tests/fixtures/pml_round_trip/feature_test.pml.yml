@@ -54,7 +54,7 @@ children:
         count: 4
         amplitude: 8mm
         wavelength: 30mm
-        groove: 3mm
+        spacing: 3mm
         depth: 2mm
     at:
       x: 440mm

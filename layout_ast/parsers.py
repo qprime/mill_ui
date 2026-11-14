@@ -67,6 +67,8 @@ def parse_layout_json(path: str) -> LayoutAST:
         raise ValueError("Layout JSON missing required 'sheet' field")
     sheet_data = data["sheet"]
     sheet = Sheet(
+        material=sheet_data.get("material", "mdf"),
+        gcode_output=sheet_data.get("gcode_output", "per-operation"),
         width_mm=float(sheet_data["width_mm"]),
         height_mm=float(sheet_data["height_mm"]),
         thickness_mm=float(sheet_data["thickness_mm"]),

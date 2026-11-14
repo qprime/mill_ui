@@ -387,7 +387,8 @@ children:
     out_dir = tmp_path / "out"
     _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir), "--kerf", "5"])
     metrics = json.loads((out_dir / "metrics.json").read_text())
-    assert metrics["build"]["kerf_mm"] == 6.35
+    assert metrics["build"]["kerf_mm"] == 5
+    assert metrics["build"]["selected_profile_diameter_mm"] == 6.35
     assert metrics["build"]["requested_kerf_mm"] == 5
     import re
 
@@ -396,3 +397,182 @@ children:
     assert positions
     assert min(x for x, _ in positions) - 6.35 / 2 == pytest.approx(10, abs=0.001)
     assert min(y for _, y in positions) - 6.35 / 2 == pytest.approx(10, abs=0.001)
+
+
+PACKED_REVIEW_BEAM = """kerf: 0mm
+Sheet: {physical_width: 600mm, physical_height: 600mm, thickness: 19mm, margin: 10mm}
+children:
+- Beam: {name: rail, length: 300mm, width: 40mm, thickness: 19mm, layers: 2}
+"""
+
+
+def test_geometry_only_zero_kerf_preserves_legacy_clearance_and_cannot_be_machined_as_a_packed_job(tmp_path):
+    from adapters.ast_to_removal import ast_to_removal_intents
+    from layout_ast.layout import LayoutAST
+
+    source = tmp_path / "beam.pml.yml"
+    source.write_text(PACKED_REVIEW_BEAM)
+    target = tmp_path / "beam.json"
+    _run_cli(["-m", "cli.convert_layout", "--from", "pml", "--to", "json", str(source), str(target)])
+    layout = LayoutAST.from_json(str(target))
+    profiles = [intent for intent in ast_to_removal_intents(layout) if intent.hint_type == "profile"]
+    assert min(intent.bounds.x_min for intent in profiles) == pytest.approx(6.35)
+    result = _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(tmp_path / "out")], check=False)
+    assert result.returncode != 0
+    assert "--for-machining" in result.stderr
+    assert not list((tmp_path / "out").glob("*.nc"))
+
+
+@pytest.mark.parametrize("authored_kerf", [0, 1, 6.35])
+def test_machining_conversion_matches_direct_build_and_retains_tool_context(tmp_path, authored_kerf):
+    source = tmp_path / "beam.pml.yml"
+    source.write_text(PACKED_REVIEW_BEAM.replace("kerf: 0mm", f"kerf: {authored_kerf}mm"))
+    target = tmp_path / "beam.json"
+    _run_cli(
+        [
+            "-m",
+            "cli.convert_layout",
+            "--from",
+            "pml",
+            "--to",
+            "json",
+            "--for-machining",
+            "--kerf",
+            "3.175",
+            str(source),
+            str(target),
+        ]
+    )
+    converted = tmp_path / "converted"
+    direct = tmp_path / "direct"
+    _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(converted)])
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(direct), "--kerf", "3.175"])
+    assert (converted / "profile-3.17mm.nc").read_bytes() == (direct / "profile-3.17mm.nc").read_bytes()
+    mismatch = _run_cli(
+        ["-m", "cli.mill", "--input", str(target), "--out", str(tmp_path / "mismatch"), "--kerf", "6.35"], check=False
+    )
+    assert mismatch.returncode != 0
+    assert "Profile cutter changed after packing" in mismatch.stderr
+    assert not list((tmp_path / "mismatch").glob("*.nc"))
+
+
+def test_legacy_json_with_insufficient_cutter_clearance_emits_diagnostics_without_programs(tmp_path):
+    from pml import parse_pml
+
+    source = tmp_path / "legacy.json"
+    ast = parse_pml(PACKED_REVIEW_BEAM.replace("kerf: 0mm", "kerf: 1mm"))
+    ast.to_json(str(source))
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "stale.nc").write_text("G1 X0 Y0 Z-3")
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(output)], check=False)
+    assert result.returncode == 3
+    assert "margin zone" in result.stderr
+    assert not list(output.glob("*.nc"))
+    metrics = json.loads((output / "metrics.json").read_text())
+    assert metrics["errors"]
+    assert metrics["output_size"]["files"] == {}
+    assert list(output.glob("*.svg"))
+
+
+def test_mixed_sources_record_requested_and_actual_profile_diameters_consistently(tmp_path):
+    inputs = tmp_path / "inputs"
+    inputs.mkdir()
+    (inputs / "beam.pml.yml").write_text(PACKED_REVIEW_BEAM)
+    (inputs / "plain.pml.yml").write_text(SIMPLE_PROFILE_PML)
+    out = tmp_path / "out"
+    _run_cli(["-m", "cli.mill", "--input", str(inputs), "--out", str(out), "--kerf", "5"])
+    build = json.loads((out / "metrics.json").read_text())["build"]
+    assert build["kerf_mm"] == build["requested_kerf_mm"] == 5
+    assert build["selected_profile_diameter_mm"] == 6.35
+    assert "source_kerfs_mm" not in build
+    assert {c["requested_kerf_mm"] for c in build["compilation_contexts"].values()} == {5}
+    assert {c["selected_profile_diameter_mm"] for c in build["compilation_contexts"].values()} == {6.35}
+
+
+def test_beam_fixed_gap_error_offers_a_supported_cutter_remedy(tmp_path):
+    source = tmp_path / "beam.pml.yml"
+    source.write_text(PACKED_REVIEW_BEAM)
+    result = _run_cli(
+        ["-m", "cli.mill", "--input", str(source), "--out", str(tmp_path / "out"), "--kerf", "12.7"], check=False
+    )
+    assert result.returncode != 0
+    assert "Beam 'rail' uses fixed 10mm spacing" in result.stderr
+    assert "Select an available flat profile cutter no wider than 10mm" in result.stderr
+
+
+def test_physical_clearance_failure_preserves_the_independent_back_setup(tmp_path):
+    source = tmp_path / "two_faces.pml.yml"
+    source.write_text("""Sheet: {physical_width: 200mm, physical_height: 200mm, thickness: 19mm, margin: 10mm}
+children:
+- Rect:
+    at: {x: 1mm, y: 80mm, width: 2mm, height: 60mm}
+    feature: {type: profile, side: outside, depth: through}
+- Circle:
+    diameter: 20mm
+    at: {x: 80mm, y: 80mm}
+    feature: {type: pocket, face: back, depth: 2mm}
+""")
+    out = tmp_path / "out"
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out)], check=False)
+    assert result.returncode == 3
+    programs = list(out.glob("*.nc"))
+    assert programs and all(path.name.startswith("back-") for path in programs)
+    assert (out / "two_faces.pml.svg").exists()
+    assert (out / "two_faces.pml.back.svg").exists()
+
+
+def test_requested_kerf_cannot_understate_the_actual_cutter_in_bounds_checks(tmp_path):
+    source = tmp_path / "part.pml.yml"
+    source.write_text("""Sheet: {physical_width: 200mm, physical_height: 200mm, thickness: 19mm, margin: 10mm}
+children:
+- Rect:
+    at: {x: 55.5mm, y: 90mm, width: 100mm, height: 60mm}
+    feature: {type: profile, side: outside, depth: through}
+""")
+    out = tmp_path / "out"
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--kerf", "5"], check=False)
+    assert result.returncode == 3
+    assert "0.85mm into left margin zone" in result.stderr
+    assert not list(out.glob("*.nc"))
+
+
+def test_custom_tool_machining_conversion_can_replay_the_saved_library(tmp_path):
+    source = tmp_path / "beam.pml.yml"
+    source.write_text(PACKED_REVIEW_BEAM)
+    endmills = tmp_path / "endmills.yml"
+    feeds = tmp_path / "feeds.yml"
+    endmills.write_text("""endmills:
+- {name: custom3, diameter_mm: 3, flute_length_mm: 20, shank_diameter_mm: 3, flutes: 2, type: straight}
+""")
+    feeds.write_text("""feeds:
+- {endmill: custom3, material: mdf, chipload: 0.05, rpm: 18000, depth_per_pass: 2, plunge_factor: 0.3}
+""")
+    target = tmp_path / "beam.json"
+    _run_cli(
+        [
+            "-m",
+            "cli.convert_layout",
+            "--from",
+            "pml",
+            "--to",
+            "json",
+            "--for-machining",
+            "--kerf",
+            "5",
+            "--endmills",
+            str(endmills),
+            "--feeds",
+            str(feeds),
+            str(source),
+            str(target),
+        ]
+    )
+    out = tmp_path / "out"
+    _run_cli(["-m", "cli.mill", "--input", str(target), "--out", str(out)])
+    assert (out / "profile-3.00mm.nc").exists()
+    build = json.loads((out / "metrics.json").read_text())["build"]
+    assert build["requested_kerf_mm"] == 5
+    assert build["selected_profile_diameter_mm"] == 3
+    snapshot = build["compilation_contexts"]["beam.json"]
+    assert [tool["name"] for tool in snapshot["tools"]] == ["custom3"]

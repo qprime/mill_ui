@@ -2,11 +2,35 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
+from cam.compilation import load_pml_asts
 from cli.project import add_project_arg, get_project_dir, resolve_input_path
 from layout_ast.layout import LayoutAST
-from pml import PMLParseError, format_pml, parse_pml
+from pml import PMLParseError, format_pml, parse_pml_yaml
+from resolution.layout_resolver import requires_machining_clearance, resolve_layout
+
+
+def resolve_conversion_pml(input_text: str, input_path: Path | None, args) -> LayoutAST:
+    if args.for_machining:
+        from config.machine_loader import get_machines_dir, load_endmills, load_feeds
+
+        if input_path is None:
+            raise ValueError("Machining conversion requires a source file")
+        endmills = load_endmills(args.endmills or get_machines_dir() / "endmills.yml")
+        feeds = load_feeds(args.feeds or get_machines_dir() / "feeds.yml")
+        asts = load_pml_asts(input_path, kerf_mm=args.kerf, endmills=endmills, feeds=feeds)
+        if len(asts) != 1:
+            raise ValueError(
+                f"Source resolves to {len(asts)} sheets; one layout JSON cannot represent a multi-sheet job"
+            )
+        return asts[0]
+    parsed = parse_pml_yaml(input_text)
+    ast = resolve_layout(parsed)
+    if requires_machining_clearance(parsed.root):
+        ast = replace(ast, config={**ast.config, "requires_machining_clearance": True})
+    return ast
 
 
 def main():
@@ -52,7 +76,19 @@ Examples:
         help="Output file path (or stdout if omitted)",
     )
 
+    parser.add_argument(
+        "--for-machining",
+        action="store_true",
+        help="Resolve PML with actual profile tooling and preserve its build context in JSON",
+    )
+    parser.add_argument("--kerf", type=float, default=None, help="Requested profile diameter for --for-machining")
+    parser.add_argument("--endmills", default=None, help="Tool library for --for-machining")
+    parser.add_argument("--feeds", default=None, help="Feeds library for --for-machining")
     args = parser.parse_args()
+    if args.for_machining and (args.input_format != "pml" or args.output_format != "json" or not args.input_file):
+        parser.error("--for-machining requires a PML input file and JSON output")
+    if not args.for_machining and any(value is not None for value in (args.kerf, args.endmills, args.feeds)):
+        parser.error("tool options require --for-machining")
 
     try:
         if args.input_file:
@@ -65,7 +101,7 @@ Examples:
             input_text = sys.stdin.read()
 
         if args.input_format == "pml":
-            ast = parse_pml(input_text)
+            ast = resolve_conversion_pml(input_text, input_path if args.input_file else None, args)
         elif args.input_format == "json":
             if not args.input_file:
                 print("Error: JSON input requires a file path (stdin not supported for JSON)", file=sys.stderr)

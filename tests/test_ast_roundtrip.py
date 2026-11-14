@@ -244,3 +244,12 @@ def test_json_roundtrip_keeps_the_packed_cutter_contract(tmp_path):
     restored = LayoutAST.from_json(str(path))
     assert restored == ast
     assert json.loads(path.read_text())["machining_clearance"] == {"profile_diameter_mm": 3.175}
+
+
+def test_json_roundtrip_preserves_material_and_output_mode_for_machining_context(tmp_path):
+    from layout_ast.layout import Sheet
+
+    ast = LayoutAST(sheet=Sheet(600, 600, 19, material="plywood", gcode_output="per-tool"), items=())
+    path = tmp_path / "plywood.json"
+    ast.to_json(str(path))
+    assert LayoutAST.from_json(str(path)) == ast

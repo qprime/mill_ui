@@ -1,5 +1,8 @@
 import math
 
+PROJECT_KERF_MM = 6.35
+RECIPE_KERF_MM = 3.175
+
 
 class HintKeys:
     ID = "id"

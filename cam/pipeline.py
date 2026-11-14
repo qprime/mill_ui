@@ -10,6 +10,7 @@ from typing import Any
 
 from adapters.ast_to_removal import ast_to_removal_intents
 from adapters.removal_to_planner import removal_intents_to_planner_input
+from cam.compilation import CompilationContext, compilation_context, saved_compilation_context
 from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.stock import Stock
@@ -19,22 +20,18 @@ from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.summary import summarise_gcode_file
 from cam.planner.passes.tools import (
     ToolSelection,
-    normalize_tool_entries,
     pass_key,
     pick_tool_for_engrave,
-    pick_tool_for_profile,
 )
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
     Endmill,
     FeedsEntry,
     MachineConfig,
-    build_tool_db,
-    load_machine_tool_db,
 )
-from core.constants import BACK_SVG_SUFFIX, FeatureType
+from core.constants import BACK_SVG_SUFFIX, PROJECT_KERF_MM, FeatureType
 from ir.removal_intent import RemovalIntent
-from layout_ast.layout import LayoutAST, MachiningClearance, mirror_item_about_x
+from layout_ast.layout import LayoutAST, mirror_item_about_x
 from validation.removal_checks import (
     check_back_face_support,
     check_cross_face_web,
@@ -74,6 +71,7 @@ class PipelineResult:
     warnings: list[str]
     svg_back: str | None = None
     gcode_files: dict[str, GcodeFile] = field(default_factory=dict)
+    compilation_context: CompilationContext | None = None
 
 
 @dataclass(frozen=True)
@@ -225,7 +223,15 @@ def _plan_and_emit_face(
     errors.extend(planner_errors)
 
     groups = gcode_file_groups(passes, per_tool=ast.sheet.gcode_output == "per-tool")
-    blocked = bool(planner_errors)
+    physical_bounds = check_working_area_bounds(
+        [intent for intent in intents if "surface_pass_" not in intent.region_id],
+        ast.sheet.working_width_mm,
+        ast.sheet.working_height_mm,
+        tool_radius_mm=kerf_mm / 2,
+    )
+    errors.extend(issue.message for issue in physical_bounds.errors)
+    warnings.extend(issue.message for issue in physical_bounds.warnings)
+    blocked = bool(planner_errors) or bool(physical_bounds.errors)
     if planner_input.keepouts:
         keepout_dicts = [k.to_dict() for k in planner_input.keepouts]
         for _, group in groups:
@@ -292,26 +298,10 @@ def _plan_and_emit_face(
     )
 
 
-def resolve_profile_clearance(
-    material: str,
-    kerf_mm: float,
-    *,
-    endmills: list[Endmill] | None = None,
-    feeds: list[FeedsEntry] | None = None,
-) -> MachiningClearance:
-    tool_db = (
-        build_tool_db(endmills, feeds, material)
-        if endmills is not None and feeds is not None
-        else load_machine_tool_db(material)
-    )
-    tool = pick_tool_for_profile(normalize_tool_entries(tool_db), kerf_mm=kerf_mm)
-    return MachiningClearance(profile_diameter_mm=tool.diameter)
-
-
 def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     ast: LayoutAST,
     *,
-    kerf_mm: float = 6.35,
+    kerf_mm: float | None = None,
     tool_db: list[dict[str, Any]] | None = None,
     generate_svg: bool = True,
     svg_theme: str = "dark",
@@ -322,21 +312,29 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
 ) -> PipelineResult:
-    if tool_db is not None:
-        effective_tool_db = tool_db
-    elif endmills is not None and feeds is not None:
-        effective_tool_db = build_tool_db(endmills, feeds, ast.sheet.material)
-    else:
-        effective_tool_db = load_machine_tool_db(ast.sheet.material)
-    tools = normalize_tool_entries(effective_tool_db)
+    saved = saved_compilation_context(ast)
+    if saved is not None and saved.material != ast.sheet.material:
+        raise ValueError("CompilationContext: saved material does not match the layout material")
+    if ast.config.get("requires_machining_clearance") and ast.machining_clearance is None:
+        raise ValueError(
+            "Converted packed geometry has no cutter context; convert the original PML with --for-machining"
+        )
+    if kerf_mm is None:
+        kerf_mm = saved.requested_kerf_mm if saved is not None else PROJECT_KERF_MM
+    if tool_db is None and endmills is None and feeds is None and saved is not None:
+        tool_db = saved.tool_db()
+    context = compilation_context(ast.sheet.material, kerf_mm, tool_db=tool_db, endmills=endmills, feeds=feeds)
+    effective_tool_db = context.tool_db()
+    tools = list(context.tools)
     if ast.machining_clearance is not None:
-        selected = pick_tool_for_profile(tools, kerf_mm=kerf_mm)
+        selected = context.profile_diameter_mm
         expected = ast.machining_clearance.profile_diameter_mm
-        if abs(selected.diameter - expected) > 1e-9:
+        if selected is None or abs(selected - expected) > 1e-9:
             raise ValueError(
-                f"Profile cutter changed after packing: resolved {expected:g}mm, selected {selected.diameter:g}mm; resolve the layout again"
+                f"Profile cutter changed after packing: resolved {expected:g}mm, selected {selected}mm; resolve the layout again"
             )
-        kerf_mm = selected.diameter
+    if context.profile_diameter_mm is not None:
+        kerf_mm = context.profile_diameter_mm
 
     errors: list[str] = []
     warnings: list[str] = []
@@ -404,19 +402,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         for issue in face_result.warnings:
             warnings.append(issue.message)
 
-    tool_radius = kerf_mm / 2.0
-    bounds_result = check_working_area_bounds(
-        non_surface_intents,
-        ast.sheet.working_width_mm,
-        ast.sheet.working_height_mm,
-        tool_radius_mm=tool_radius,
-    )
-    if bounds_result.has_issues():
-        for issue in bounds_result.errors:
-            errors.append(issue.message)
-        for issue in bounds_result.warnings:
-            warnings.append(issue.message)
-
     clearance_result = check_toolpath_clearance(intents, kerf_mm)
     if clearance_result.has_issues():
         for issue in clearance_result.errors:
@@ -457,6 +442,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
 
     if constraint_audit.has_errors() or exceeds_machine:
         return PipelineResult(
+            compilation_context=context,
             ast=ast,
             intents=intents,
             passes=[],
@@ -492,6 +478,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
         except ValueError as exc:
             errors.append(f"Back-face mirror: {exc}")
             return PipelineResult(
+                compilation_context=context,
                 ast=ast,
                 intents=intents,
                 passes=[],
@@ -618,6 +605,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     }
 
     return PipelineResult(
+        compilation_context=context,
         ast=ast,
         intents=intents,
         passes=passes,
@@ -679,6 +667,30 @@ def build_run_metrics(
         build["source"] = sources[0]
     else:
         build["sources"] = sources
+
+    contexts: dict[str, dict[str, Any]] = {}
+    for run in runs:
+        context = run.result.compilation_context
+        if context is None:
+            continue
+        data = context.to_dict()
+        if run.source in contexts and contexts[run.source] != data:
+            raise ValueError(f"Source {run.source}: sheets have inconsistent compilation contexts")
+        contexts[run.source] = data
+    if contexts:
+        requests = {source: data["requested_kerf_mm"] for source, data in contexts.items()}
+        selected = {source: data["selected_profile_diameter_mm"] for source, data in contexts.items()}
+        build["compilation_contexts"] = contexts
+        build["requested_kerf_mm"] = next(iter(set(requests.values()))) if len(set(requests.values())) == 1 else None
+        build["selected_profile_diameter_mm"] = (
+            next(iter(set(selected.values()))) if len(set(selected.values())) == 1 else None
+        )
+        build["kerf_mm"] = build["requested_kerf_mm"]
+        build.pop("source_kerfs_mm", None)
+        if len(set(requests.values())) > 1:
+            build["source_kerfs_mm"] = requests
+        if len(set(selected.values())) > 1:
+            build["source_profile_diameters_mm"] = selected
 
     metrics: dict[str, Any]
     if len(runs) == 1:

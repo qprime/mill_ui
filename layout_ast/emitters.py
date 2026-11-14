@@ -53,6 +53,10 @@ def _sheet_to_dict(sheet: Sheet) -> dict[str, Any]:
         "height_mm": sheet.height_mm,
         "thickness_mm": sheet.thickness_mm,
     }
+    if sheet.material != "mdf":
+        data["material"] = sheet.material
+    if sheet.gcode_output != "per-operation":
+        data["gcode_output"] = sheet.gcode_output
     if sheet.margin_mm != 0.0:
         data["margin_mm"] = sheet.margin_mm
     if not sheet.show_dimensions:

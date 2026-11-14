@@ -480,7 +480,8 @@ class LayoutResolver:
     def _profile_diameter_mm(self) -> float:
         if self._machining_clearance is not None:
             return self._machining_clearance.profile_diameter_mm
-        return self.ast.kerf_width_mm if self.ast.kerf_width_mm is not None else 6.35
+        kerf = self.ast.kerf_width_mm
+        return 6.35 if kerf is None or kerf == 0.0 else kerf
 
     def _check_layout_gap(self, gap_mm: float) -> None:
         if self._machining_clearance is not None and gap_mm < self._profile_diameter_mm:
@@ -3431,7 +3432,11 @@ class LayoutResolver:
         sheet_size = region.width - 2 * edge_clearance
         panel_specs = beam_spec.expand(sheet_size)
         gap = 10.0
-        self._check_layout_gap(gap)
+        if self._machining_clearance is not None and gap < self._profile_diameter_mm:
+            raise ResolutionAssertionError(
+                f"Beam '{node.name}' uses fixed {gap:g}mm spacing; selected cutter {self._profile_diameter_mm:g}mm is too wide. "
+                f"Select an available flat profile cutter no wider than {gap:g}mm; Beam has no configurable gap."
+            )
 
         segments = beam_spec.layer_segments(sheet_size)
 

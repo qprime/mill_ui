@@ -5,8 +5,10 @@ import re
 import sys
 from pathlib import Path
 
+from core.constants import PROJECT_KERF_MM
+
 DEFAULT_MARGIN_MM = 10.0
-DEFAULT_KERF_MM = 6.35
+DEFAULT_KERF_MM = PROJECT_KERF_MM
 DEFAULT_MACHINE = "altmill_4x4"
 
 

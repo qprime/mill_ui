@@ -27,6 +27,11 @@ Missing sheet artifacts error explicitly. Results retain each sheet and aggregat
 all invariant/assertion checks; any sheet failure fails the job. Multi-sheet
 goldens use a `sheets` mapping keyed by `sheet_1`, `sheet_2`, and so on.
 
+Packed recipe validation uses the saved compilation context for its source,
+including the normalized custom tool library. A missing context or invalid
+fingerprint fails explicitly; neither a diameter in legacy metrics nor the
+current default library substitutes for the actual build inputs.
+
 ## Depth Validation
 
 - Gradient depth must not exceed sheet thickness

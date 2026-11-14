@@ -625,7 +625,9 @@ def test_actual_library_cutter_reaches_recipe_packing_and_planning(tmp_path):
     assert all(p.tool_selection.diameter == 3 for run in runs for p in run.result.passes if p.op == "profile")
     assert all(not run.result.errors for run in runs)
     metrics = json.loads((path / "output" / "metrics.json").read_text())
-    assert metrics["build"]["kerf_mm"] == 3
+    assert metrics["build"]["kerf_mm"] == 5
+    assert metrics["build"]["requested_kerf_mm"] == 5
+    assert metrics["build"]["selected_profile_diameter_mm"] == 3
 
 
 def test_packed_context_rejects_a_changed_profile_library(tmp_path):
@@ -666,3 +668,43 @@ def test_recipe_and_project_paths_agree_with_an_explicit_kerf(tmp_path):
     assert project[0].machining_clearance is not None
     assert project[0].machining_clearance.profile_diameter_mm == 6.35
     assert min(b.x_min for b in _profile_bounds(project)) == pytest.approx(6.35)
+
+
+def test_custom_cutter_snapshot_drives_validation_without_default_tool_reselection(tmp_path):
+    from unittest.mock import patch
+
+    from cam.compilation import CompilationContext
+    from config.machine_loader import Endmill, FeedsEntry
+    from resolution.layout_resolver import resolve_layout_multi
+
+    folder = tmp_path / "custom"
+    folder.mkdir()
+    (folder / "beam.pml.yml").write_text(PACKED_BEAM_PML)
+    recipe = recipe_at(folder)
+    assert recipe is not None
+    endmills = [Endmill("custom3", 3, 20, 3, 2, "straight")]
+    feeds = [FeedsEntry("custom3", "mdf", 0.05, 18000, 2, 0.3)]
+    runs, _ = write_recipe_outputs(recipe, folder / "output", kerf_mm=5, endmills=endmills, feeds=feeds)
+    metrics_path = folder / "output" / "metrics.json"
+    metrics = json.loads(metrics_path.read_text())
+    saved = metrics["build"]["compilation_contexts"]["beam.pml.yml"]
+    assert CompilationContext.from_dict(saved).profile_diameter_mm == 3
+    with patch("cam.compilation.resolve_layout_multi", wraps=resolve_layout_multi) as spy:
+        result = validate_recipe(folder)
+    assert spy.call_args.kwargs["machining_clearance"].profile_diameter_mm == 3
+    assert not result.assertions.failed
+    assert not result.invariants.failed
+    assert runs[0].result.ast.machining_clearance is not None
+    assert runs[0].result.ast.machining_clearance.profile_diameter_mm == 3
+    saved["selected_profile_diameter_mm"] = 3.175
+    metrics_path.write_text(json.dumps(metrics))
+    with pytest.raises(ValueError, match="fingerprint or selected cutter disagrees"):
+        validate_recipe(folder)
+
+
+def test_packed_recipe_validation_requires_saved_context_instead_of_guessing_defaults(tmp_path):
+    folder = tmp_path / "legacy"
+    folder.mkdir()
+    (folder / "beam.pml.yml").write_text(PACKED_BEAM_PML)
+    with pytest.raises(ValueError, match="saved compilation context is missing"):
+        validate_recipe(folder)

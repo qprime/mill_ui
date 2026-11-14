@@ -90,9 +90,35 @@ Entry-point cutter defaults remain unchanged: recipes request 3.175mm and
 projects 6.35mm; an explicit CLI kerf overrides that request. An authored PML
 `kerf` retains its existing geometry-generation meaning and does not substitute
 for the actual profile-tool selection. Geometry-only resolution without a
-machining context retains its explicit kerf/default behavior. Numeric layout
+machining context retains its legacy behavior: an omitted or zero authored kerf
+uses 6.35mm for packing. A positive authored kerf is preserved. Numeric layout
 gaps are preserved and incompatible selected cutters error instead of shrinking
 parts or spacing. Automatic gaps and polygon common cuts remain separate work.
+
+## Reproducible Compilation Context
+
+`cam.compilation` is the shared orchestration boundary for PML resolution and
+tool selection; validation does not import `cam.pipeline`. A frozen context
+retains the requested kerf, material and normalized tool-library snapshot. Its
+serialized version, selected profile diameter and fingerprint are checked when
+read. Recipe metrics record this context per source, so validation can resolve
+custom-tool jobs without reselecting from the current default library. Missing
+or inconsistent context on a packed recipe requires a rebuild.
+
+`build.kerf_mm` consistently means the requested kerf for compatibility.
+`requested_kerf_mm` states it explicitly; `selected_profile_diameter_mm` records
+the actual cutter. Mixed source requests use `source_kerfs_mm`; mixed actual
+diameters use `source_profile_diameters_mm`. `compilation_contexts` retains the
+complete per-source inputs. These fields are written by the canonical artifact
+writer from each pipeline result, not guessed by CLI entry points.
+
+Geometry-only PML-to-JSON conversion marks packed layouts as requiring a cutter
+context. Use `convert_layout --for-machining` with optional kerf/tool/feeds
+arguments to produce a single-sheet JSON job with that context. Replaying it
+uses the saved tools unless explicitly overridden; a different profile diameter
+requires resolution from the original PML. Legacy flat JSON is never repacked by
+inferred topology. It still passes actual-cutter physical-clearance checks before
+any setup G-code is emitted. JSON preserves material and output grouping.
 
 ## Layer Separation
 

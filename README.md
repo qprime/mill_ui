@@ -198,7 +198,8 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19` | Generate starter PML |
 | `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary` | Validate CAM outputs |
-| `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert between formats |
+| `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert geometry between formats |
+| `python -m cli.convert_layout --from pml --to json --for-machining --kerf 3.175 input.pml.yml output.json` | Preserve selected tooling and packing clearance for JSON machining |
 | `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
 
 ## Project Structure

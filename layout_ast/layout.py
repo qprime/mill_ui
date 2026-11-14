@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
@@ -146,6 +147,17 @@ class Item:
 
 
 @dataclass(frozen=True)
+class MachiningClearance:
+    profile_diameter_mm: float
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.profile_diameter_mm) or self.profile_diameter_mm <= 0:
+            raise ValueError(
+                f"MachiningClearance: profile_diameter_mm must be finite and positive, got {self.profile_diameter_mm}"
+            )
+
+
+@dataclass(frozen=True)
 class LayoutAST:
     sheet: Sheet
     items: tuple[Item, ...]
@@ -155,6 +167,7 @@ class LayoutAST:
     cam: dict[str, Any] | None = None
     layout: dict[str, Any] | None = None
     config: dict[str, Any] = field(default_factory=dict)
+    machining_clearance: MachiningClearance | None = None
 
     def face_items(self, face: str) -> tuple[Item, ...]:
         return tuple(i for i in self.items if item_face(i) == face)

@@ -152,6 +152,7 @@ from layout_ast.layout import (
     Geometry,
     Item,
     LayoutAST,
+    MachiningClearance,
     Placement,
 )
 
@@ -461,12 +462,31 @@ class ResolutionAssertionError(Exception):
 
 
 class LayoutResolver:
-    def __init__(self, ast: CompositionalLayoutAST, validate: bool = False):
+    def __init__(
+        self,
+        ast: CompositionalLayoutAST,
+        validate: bool = False,
+        *,
+        machining_clearance: MachiningClearance | None = None,
+    ):
         self.ast = ast
+        self._machining_clearance = machining_clearance
         self.components = ast.components
         self._shape_counter = 0
         self._validate = validate
         self._beam_structures: list[dict] = []
+
+    @property
+    def _profile_diameter_mm(self) -> float:
+        if self._machining_clearance is not None:
+            return self._machining_clearance.profile_diameter_mm
+        return self.ast.kerf_width_mm if self.ast.kerf_width_mm is not None else 6.35
+
+    def _check_layout_gap(self, gap_mm: float) -> None:
+        if self._machining_clearance is not None and gap_mm < self._profile_diameter_mm:
+            raise ResolutionAssertionError(
+                f"Layout gap {gap_mm:g}mm must be at least selected profile cutter diameter {self._profile_diameter_mm:g}mm"
+            )
 
     def _next_shape_id(self, prefix: str) -> str:
         shape_id = f"{prefix}_{self._shape_counter}"
@@ -2749,10 +2769,11 @@ class LayoutResolver:
         items: list[Item],
         params: dict[str, Any],
     ) -> None:
+        self._check_layout_gap(node.layout_gap_mm)
         assembly = self._build_assembly(node)
         panel_specs = assembly.resolve()
 
-        tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
+        tool_radius = self._profile_diameter_mm / 2.0
         edge_clearance = 2 * tool_radius
 
         items.extend(
@@ -3405,11 +3426,12 @@ class LayoutResolver:
                 f"from other stock cannot be machined in this program"
             )
 
-        tool_radius = (self.ast.kerf_width_mm or 6.35) / 2.0
+        tool_radius = self._profile_diameter_mm / 2.0
         edge_clearance = 2 * tool_radius
         sheet_size = region.width - 2 * edge_clearance
         panel_specs = beam_spec.expand(sheet_size)
         gap = 10.0
+        self._check_layout_gap(gap)
 
         segments = beam_spec.layer_segments(sheet_size)
 
@@ -3521,6 +3543,7 @@ class LayoutResolver:
             project=self.ast.project,
             kerf_width_mm=self.ast.kerf_width_mm,
             config=config,
+            machining_clearance=self._machining_clearance,
         )
 
     def _desugar_surface(self, surface: SurfaceDecl) -> list[Item]:
@@ -3653,8 +3676,10 @@ class LayoutResolver:
             handler_map[node_type](self, node, region, items, params)
 
 
-def resolve_layout(ast: CompositionalLayoutAST, validate: bool = True) -> LayoutAST:
-    results = resolve_layout_multi(ast, validate=validate)
+def resolve_layout(
+    ast: CompositionalLayoutAST, validate: bool = True, *, machining_clearance: MachiningClearance | None = None
+) -> LayoutAST:
+    results = resolve_layout_multi(ast, validate=validate, machining_clearance=machining_clearance)
     if len(results) > 1:
         raise ResolutionAssertionError(
             f"Assembly requires {len(results)} sheets but resolve_layout() "
@@ -3682,24 +3707,38 @@ def _has_beam_content(root: Any) -> bool:
     return any(isinstance(node, BeamDecl) for node in _expanded_nodes(root))
 
 
+def requires_machining_clearance(root: Any) -> bool:
+    if isinstance(root, (AssemblyDecl, BeamDecl)):
+        return True
+    if isinstance(root, ComponentInstance):
+        return requires_machining_clearance(root.body)
+    if any(requires_machining_clearance(child) for child in getattr(root, "children", ())):
+        return True
+    child = getattr(root, "child", None)
+    return child is not None and requires_machining_clearance(child)
+
+
 def resolve_layout_multi(
     ast: CompositionalLayoutAST,
     validate: bool = True,
+    *,
+    machining_clearance: MachiningClearance | None = None,
 ) -> list[LayoutAST]:
     from assembly.partitioner import partition_panels
 
     assembly_node = _find_assembly_node(ast.root)
     if assembly_node is None:
-        resolver = LayoutResolver(ast, validate=validate)
+        resolver = LayoutResolver(ast, validate=validate, machining_clearance=machining_clearance)
         return [resolver.resolve()]
 
-    resolver = LayoutResolver(ast, validate=validate)
+    resolver = LayoutResolver(ast, validate=validate, machining_clearance=machining_clearance)
     assembly_obj = resolver._build_assembly(assembly_node)
     panel_specs = assembly_obj.resolve()
 
     working_w = ast.sheet.working_width_mm
     working_h = ast.sheet.working_height_mm
-    tool_radius = (ast.kerf_width_mm or 6.35) / 2.0
+    resolver._check_layout_gap(assembly_node.layout_gap_mm)
+    tool_radius = resolver._profile_diameter_mm / 2.0
     edge_clearance = 2 * tool_radius
     gap = assembly_node.layout_gap_mm
 
@@ -3734,7 +3773,7 @@ def resolve_layout_multi(
 
     results: list[LayoutAST] = []
     for sheet_panels in partition.sheets:
-        sheet_resolver = LayoutResolver(ast, validate=validate)
+        sheet_resolver = LayoutResolver(ast, validate=validate, machining_clearance=machining_clearance)
 
         panel_items = sheet_resolver._panels_to_items(
             [(placement.panel, placement.x_min_mm, placement.y_min_mm) for placement in sheet_panels],
@@ -3751,6 +3790,7 @@ def resolve_layout_multi(
                 project=ast.project,
                 kerf_width_mm=ast.kerf_width_mm,
                 config={},
+                machining_clearance=machining_clearance,
             )
         )
 

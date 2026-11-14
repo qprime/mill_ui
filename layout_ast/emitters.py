@@ -38,6 +38,9 @@ def _ast_to_dict(ast: LayoutAST) -> dict[str, Any]:
 
     data["items"] = [_item_to_dict(item) for item in ast.items]
 
+    if ast.machining_clearance is not None:
+        data["machining_clearance"] = {"profile_diameter_mm": ast.machining_clearance.profile_diameter_mm}
+
     if ast.config:
         data["config"] = ast.config
 

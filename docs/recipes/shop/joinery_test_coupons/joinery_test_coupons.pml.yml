@@ -87,7 +87,7 @@ children:
 
   - AtPosition:
       x: 70mm
-      y: 63.33mm
+      y: 63.335mm
       width: 140mm
       height: 126.67mm
       child:
@@ -106,7 +106,7 @@ children:
 
   - AtPosition:
       x: 210mm
-      y: 63.33mm
+      y: 63.335mm
       width: 140mm
       height: 126.67mm
       child:

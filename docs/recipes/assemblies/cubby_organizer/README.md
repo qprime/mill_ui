@@ -28,28 +28,22 @@ Generated notch relief uses each notch cutout's center to orient the bores
 and clear its mating corners. A back groove may meet an existing notch relief
 when they belong to the same cutout.
 
-3 sheets.
+2 sheets. The layout reserves the actual 3.175mm profile cutter at the clamp margin;
+the authored 10mm part gaps and every nominal part/joinery dimension are unchanged.
 
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
 - `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 6 feature(s), to 9mm
 - `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 24 feature(s), to 9mm
-- `sheet_1.dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 42 feature(s), to 18mm
-- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 18.2mm
+- `sheet_1.dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 46 feature(s), to 18mm
+- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 4 feature(s), to 18.2mm
 
 Sheet 2: 1220 × 1220 × 18mm mdf.
 
-- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 3 feature(s), to 9mm
-- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 12 feature(s), to 9mm
-- `sheet_2.dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 46 feature(s), to 18mm
-- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 18.2mm
-
-Sheet 3: 1220 × 1220 × 18mm mdf.
-
-- `sheet_3.pocket-12.70mm.nc`: pocket, 12.7mm tool, 4 feature(s), to 9mm
-- `sheet_3.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 16 feature(s), to 9mm
-- `sheet_3.dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 88 feature(s), to 18mm
-- `sheet_3.profile-3.17mm.nc`: profile, 3.175mm tool, 2 feature(s), to 18.2mm
+- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 7 feature(s), to 9mm
+- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 28 feature(s), to 9mm
+- `sheet_2.dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 130 feature(s), to 18mm
+- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 4 feature(s), to 18.2mm
 
 ## Run
 
@@ -59,7 +53,6 @@ Sheet 3: 1220 × 1220 × 18mm mdf.
 
 - `cubby_organizer_sheet_1.svg`
 - `cubby_organizer_sheet_2.svg`
-- `cubby_organizer_sheet_3.svg`
 - `machining_summary.json`
 - `manifest.json`
 - `metrics.json`
@@ -71,7 +64,3 @@ Sheet 3: 1220 × 1220 × 18mm mdf.
 - `sheet_2.dogbone-3.17mm.nc`
 - `sheet_2.pocket-12.70mm.nc`
 - `sheet_2.profile-3.17mm.nc`
-- `sheet_3.dogbone-12.70mm.nc`
-- `sheet_3.dogbone-3.17mm.nc`
-- `sheet_3.pocket-12.70mm.nc`
-- `sheet_3.profile-3.17mm.nc`

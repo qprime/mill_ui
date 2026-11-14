@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
-from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
+from cam.pipeline import GcodeNameCollisionError, SheetRun, resolve_profile_clearance, run_sheets, write_run_outputs
 from cli.nest import nest_job
 from cli.project import (
     DEFAULT_KERF_MM,
@@ -33,7 +33,7 @@ from layout_ast.layout import LayoutAST
 from pml.revision_header import build_provenance, format_pml_header
 from pml.yaml_parser import PMLParseError as ParseError
 from pml.yaml_parser import parse_nest_yaml, parse_pml_yaml
-from resolution.layout_resolver import resolve_layout_multi
+from resolution.layout_resolver import requires_machining_clearance, resolve_layout_multi
 from validation.recipes import Recipe, recipe_at, recipe_job_stem
 
 RECIPE_KERF_MM = 3.175
@@ -327,7 +327,7 @@ def process_file(
     if input_name.endswith(".json"):
         asts = [LayoutAST.from_json(str(input_path))]
     elif input_name.endswith(".pml.yml") or input_name.endswith(".pml") or input_name.endswith(".txt"):
-        asts = load_pml_asts(input_path)
+        asts = load_pml_asts(input_path, kerf_mm=args.kerf, default_kerf_mm=kerf_mm, endmills=endmills, feeds=feeds)
     else:
         print(f"Error: Unsupported input format: {input_name}", file=sys.stderr)
         sys.exit(1)
@@ -349,13 +349,32 @@ def process_file(
     return runs
 
 
-def load_pml_asts(source: Path) -> list[LayoutAST]:
+def load_pml_asts(
+    source: Path,
+    *,
+    kerf_mm: float | None = None,
+    default_kerf_mm: float = DEFAULT_KERF_MM,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
+) -> list[LayoutAST]:
     comp_ast = parse_pml_yaml(source.read_text(encoding="utf-8"))
+    requested = kerf_mm if kerf_mm is not None else default_kerf_mm
     comp_ast = replace(comp_ast, source_dir=str(source.parent.resolve()))
-    return resolve_layout_multi(comp_ast)
+    clearance = (
+        resolve_profile_clearance(comp_ast.sheet.material, requested, endmills=endmills, feeds=feeds)
+        if requires_machining_clearance(comp_ast.root)
+        else None
+    )
+    return resolve_layout_multi(comp_ast, machining_clearance=clearance)
 
 
-def _load_recipe_source(source: Path, kerf_mm: float | None) -> tuple[list[LayoutAST], float]:
+def _load_recipe_source(
+    source: Path,
+    kerf_mm: float | None,
+    *,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
+) -> tuple[list[LayoutAST], float]:
     if source.name.endswith(".nest.yml"):
         job = parse_nest_yaml(source.read_text(encoding="utf-8"))
         if kerf_mm is not None:
@@ -368,7 +387,8 @@ def _load_recipe_source(source: Path, kerf_mm: float | None) -> tuple[list[Layou
         if not result["output"]:
             raise ValueError(f"{source.name}: nesting produced 0 sheets")
         return result["output"], job.kerf_mm
-    return load_pml_asts(source), RECIPE_KERF_MM if kerf_mm is None else kerf_mm
+    asts = load_pml_asts(source, kerf_mm=kerf_mm, default_kerf_mm=RECIPE_KERF_MM, endmills=endmills, feeds=feeds)
+    return asts, kerf_mm if kerf_mm is not None else RECIPE_KERF_MM
 
 
 def write_recipe_outputs(
@@ -380,12 +400,15 @@ def write_recipe_outputs(
     y_origin: str = "back",
     generate_svg: bool = True,
     machine_config: MachineConfig | None = None,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
 ) -> tuple[list[SheetRun], dict[str, Path]]:
     runs = []
     source_kerfs = {}
     for source in recipe.sources:
-        asts, source_kerf = _load_recipe_source(source, kerf_mm)
-        source_kerfs[source.name] = source_kerf
+        asts, source_kerf = _load_recipe_source(source, kerf_mm, endmills=endmills, feeds=feeds)
+        clearance = asts[0].machining_clearance
+        source_kerfs[source.name] = clearance.profile_diameter_mm if clearance is not None else source_kerf
         source_runs = _compile(
             asts,
             source,
@@ -395,6 +418,8 @@ def write_recipe_outputs(
             y_origin=y_origin,
             generate_svg=generate_svg,
             machine_config=machine_config,
+            endmills=endmills,
+            feeds=feeds,
         )
         runs.extend(source_runs)
     kerfs = set(source_kerfs.values())
@@ -417,6 +442,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
     print(f"Recipe: {recipe.name}", file=sys.stderr)
     for source in recipe.sources:
         print(f"Compiling: {source.name}", file=sys.stderr)
+    endmills, feeds = _load_tool_library(args)
     runs, outputs = write_recipe_outputs(
         recipe,
         recipe_dir / "output",
@@ -425,6 +451,8 @@ def process_recipe(recipe_dir: Path, args) -> None:
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
         machine_config=_load_machine(args.machine),
+        endmills=endmills,
+        feeds=feeds,
     )
     _report_runs(runs)
     _report_outputs(runs, outputs)
@@ -620,12 +648,23 @@ Exit codes:
                     feeds=feeds_list,
                 )
             )
-        _finish_run(
-            runs,
-            output_dir,
-            {"kerf_mm": kerf_mm, "theme": theme, "y_origin": args.y_origin},
-            build_provenance(),
-        )
+        source_kerfs = {
+            run.source: run.result.ast.machining_clearance.profile_diameter_mm
+            if run.result.ast.machining_clearance is not None
+            else kerf_mm
+            for run in runs
+        }
+        effective_kerfs = set(source_kerfs.values())
+        build_params: dict[str, object] = {
+            "kerf_mm": next(iter(effective_kerfs)) if len(effective_kerfs) == 1 else None,
+            "theme": theme,
+            "y_origin": args.y_origin,
+        }
+        if len(effective_kerfs) > 1:
+            build_params["source_kerfs_mm"] = source_kerfs
+        if args.kerf is not None and effective_kerfs != {args.kerf}:
+            build_params["requested_kerf_mm"] = args.kerf
+        _finish_run(runs, output_dir, build_params, build_provenance())
 
     except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)

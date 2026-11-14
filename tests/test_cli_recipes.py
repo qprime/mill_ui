@@ -526,3 +526,143 @@ def test_nest_recipe_rejects_unplaced_parts(tmp_path: Path):
 
     with pytest.raises(ValueError, match=r"job\.nest\.yml: parts do not fit.*2x door"):
         regenerate_recipe(recipe)
+
+
+PACKED_BOX_PML = """kerf: 12mm
+Sheet:
+  physical_width: 600mm
+  physical_height: 600mm
+  thickness: 19mm
+  margin: 10mm
+children:
+- Assembly:
+    type: box
+    width: 200mm
+    depth: 150mm
+    height: 100mm
+    thickness: 19mm
+    joinery: butt
+    bottom: none
+    top: none
+    layout_gap: 10mm
+"""
+
+PACKED_BEAM_PML = """kerf: 12mm
+Sheet:
+  physical_width: 600mm
+  physical_height: 600mm
+  thickness: 19mm
+  margin: 10mm
+children:
+- Beam:
+    name: rail
+    length: 300mm
+    width: 40mm
+    thickness: 19mm
+    layers: 2
+"""
+
+
+def _profile_bounds(asts):
+    from adapters.ast_to_removal import ast_to_removal_intents
+
+    return [intent.bounds for ast in asts for intent in ast_to_removal_intents(ast) if intent.hint_type == "profile"]
+
+
+@pytest.mark.parametrize("source", [PACKED_BOX_PML, PACKED_BEAM_PML])
+@pytest.mark.parametrize("kerf", [3.175, 6.35])
+def test_packed_sources_use_the_selected_cutter_and_preserve_authored_kerf(tmp_path, source, kerf):
+    from cli.mill import load_pml_asts
+    from pml import parse_pml_yaml
+    from resolution.layout_resolver import resolve_layout_multi
+
+    path = tmp_path / "parts.pml.yml"
+    path.write_text(source)
+    parsed = parse_pml_yaml(source)
+    original = resolve_layout_multi(parsed)
+    resolved = load_pml_asts(path, kerf_mm=kerf)
+    bounds = _profile_bounds(resolved)
+    assert min(b.x_min for b in bounds) == pytest.approx(kerf)
+    assert min(b.y_min for b in bounds) == pytest.approx(kerf)
+    assert sorted((round(b.width, 8), round(b.height, 8)) for b in bounds) == sorted(
+        (round(b.width, 8), round(b.height, 8)) for b in _profile_bounds(original)
+    )
+    assert all(ast.kerf_width_mm == 12 for ast in resolved)
+    assert all(
+        ast.machining_clearance is not None and ast.machining_clearance.profile_diameter_mm == kerf for ast in resolved
+    )
+    assert parsed == parse_pml_yaml(source)
+
+
+def test_embedded_assembly_receives_cutter_context(tmp_path):
+    from cli.mill import load_pml_asts
+
+    source = PACKED_BOX_PML.replace(
+        "- Assembly:",
+        "- AtPosition:\n    x: 290mm\n    y: 290mm\n    width: 580mm\n    height: 580mm\n    child:\n      Assembly:",
+    )
+    head, body = source.split("      Assembly:\n")
+    source = head + "      Assembly:\n" + "\n".join("    " + line for line in body.splitlines()) + "\n"
+    path = tmp_path / "embedded.pml.yml"
+    path.write_text(source)
+    bounds = _profile_bounds(load_pml_asts(path, kerf_mm=3.175))
+    assert min(b.x_min for b in bounds) == pytest.approx(3.175)
+    assert min(b.y_min for b in bounds) == pytest.approx(3.175)
+
+
+def test_actual_library_cutter_reaches_recipe_packing_and_planning(tmp_path):
+    from config.machine_loader import Endmill, FeedsEntry
+
+    endmills = [Endmill("custom_3mm", 3, 20, 3, 2, "straight")]
+    feeds = [FeedsEntry("custom_3mm", "mdf", 0.05, 18000, 2, 0.3)]
+    path = tmp_path / "box"
+    path.mkdir()
+    (path / "box.pml.yml").write_text(PACKED_BOX_PML)
+    recipe = recipe_at(path)
+    assert recipe is not None
+    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=5, endmills=endmills, feeds=feeds)
+    assert min(b.x_min for b in _profile_bounds([run.result.ast for run in runs])) == pytest.approx(3)
+    assert all(p.tool_selection.diameter == 3 for run in runs for p in run.result.passes if p.op == "profile")
+    assert all(not run.result.errors for run in runs)
+    metrics = json.loads((path / "output" / "metrics.json").read_text())
+    assert metrics["build"]["kerf_mm"] == 3
+
+
+def test_packed_context_rejects_a_changed_profile_library(tmp_path):
+    from cam.pipeline import run_pipeline
+    from cli.mill import load_pml_asts
+
+    path = tmp_path / "box.pml.yml"
+    path.write_text(PACKED_BOX_PML)
+    (ast,) = load_pml_asts(path, kerf_mm=3.175)
+    with pytest.raises(ValueError, match="Profile cutter changed after packing"):
+        run_pipeline(ast, kerf_mm=6.35)
+
+
+def test_packed_context_rejects_gap_smaller_than_selected_cutter(tmp_path):
+    from cli.mill import load_pml_asts
+    from resolution.layout_resolver import ResolutionAssertionError
+
+    path = tmp_path / "box.pml.yml"
+    path.write_text(PACKED_BOX_PML)
+    with pytest.raises(
+        ResolutionAssertionError, match=r"Layout gap 10mm must be at least selected profile cutter diameter 12\.7mm"
+    ):
+        load_pml_asts(path, kerf_mm=12.7)
+
+
+def test_recipe_and_project_paths_agree_with_an_explicit_kerf(tmp_path):
+    from cli.mill import load_pml_asts
+
+    path = tmp_path / "box"
+    path.mkdir()
+    source = path / "box.pml.yml"
+    source.write_text(PACKED_BOX_PML)
+    recipe = recipe_at(path)
+    assert recipe is not None
+    runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=5)
+    project = load_pml_asts(source, kerf_mm=5)
+    assert [run.result.ast for run in runs] == project
+    assert project[0].machining_clearance is not None
+    assert project[0].machining_clearance.profile_diameter_mm == 6.35
+    assert min(b.x_min for b in _profile_bounds(project)) == pytest.approx(6.35)

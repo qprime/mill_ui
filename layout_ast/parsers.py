@@ -13,6 +13,7 @@ from layout_ast.layout import (
     Geometry,
     Item,
     LayoutAST,
+    MachiningClearance,
     Placement,
     RestSpec,
     Sheet,
@@ -92,6 +93,9 @@ def parse_layout_json(path: str) -> LayoutAST:
         cam=cam,
         layout=layout,
         config=config,
+        machining_clearance=MachiningClearance(**data["machining_clearance"])
+        if "machining_clearance" in data
+        else None,
     )
 
 

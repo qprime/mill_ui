@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -147,13 +148,24 @@ def validate_recipe(
     source_file = recipe.pml_sources[0] if recipe is not None and recipe.pml_sources else None
 
     if ast is None and source_file is not None:
+        from cam.pipeline import resolve_profile_clearance
         from pml import parse_pml_yaml
-        from resolution.layout_resolver import resolve_layout_multi
+        from resolution.layout_resolver import requires_machining_clearance, resolve_layout_multi
 
         parsed = replace(
             parse_pml_yaml(source_file.read_text(encoding="utf-8")), source_dir=str(source_file.parent.resolve())
         )
-        asts = resolve_layout_multi(parsed)
+        clearance = None
+        if requires_machining_clearance(parsed.root):
+            build = {}
+            metrics_path = output_dir / "metrics.json"
+            if metrics_path.is_file():
+                build = json.loads(metrics_path.read_text(encoding="utf-8")).get("build", {})
+            requested = build.get("kerf_mm")
+            if requested is None:
+                requested = 3.175
+            clearance = resolve_profile_clearance(parsed.sheet.material, float(requested))
+        asts = resolve_layout_multi(parsed, machining_clearance=clearance)
         if len(asts) > 1:
             return _validate_recipe_sheets(
                 recipe_dir, source_file, asts, golden_metrics, golden_file, comparison_config, options

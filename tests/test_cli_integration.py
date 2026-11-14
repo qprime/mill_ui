@@ -375,3 +375,24 @@ def test_cli_input_run_records_provenance(tmp_path: Path):
 
     metrics = json.loads((out_dir / "metrics.json").read_text())
     assert set(metrics["provenance"]) == {"mill_ui"}
+
+
+def test_project_cutter_override_reaches_packing_and_physical_cut_bounds(tmp_path):
+    source = tmp_path / "beam.pml.yml"
+    source.write_text("""kerf: 12mm
+Sheet: {physical_width: 600mm, physical_height: 600mm, thickness: 19mm, margin: 10mm}
+children:
+- Beam: {name: rail, length: 300mm, width: 40mm, thickness: 19mm, layers: 2}
+""")
+    out_dir = tmp_path / "out"
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out_dir), "--kerf", "5"])
+    metrics = json.loads((out_dir / "metrics.json").read_text())
+    assert metrics["build"]["kerf_mm"] == 6.35
+    assert metrics["build"]["requested_kerf_mm"] == 5
+    import re
+
+    code = (out_dir / "profile-6.35mm.nc").read_text()
+    positions = [(float(x), float(y)) for x, y in re.findall(r"^G1 X(-?[0-9.]+) Y(-?[0-9.]+)", code, re.MULTILINE)]
+    assert positions
+    assert min(x for x, _ in positions) - 6.35 / 2 == pytest.approx(10, abs=0.001)
+    assert min(y for _, y in positions) - 6.35 / 2 == pytest.approx(10, abs=0.001)

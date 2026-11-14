@@ -17,7 +17,13 @@ from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord, plan_passes
 from cam.planner.passes.summary import summarise_gcode_file
-from cam.planner.passes.tools import ToolSelection, normalize_tool_entries, pass_key, pick_tool_for_engrave
+from cam.planner.passes.tools import (
+    ToolSelection,
+    normalize_tool_entries,
+    pass_key,
+    pick_tool_for_engrave,
+    pick_tool_for_profile,
+)
 from cam.post.gcode import write_gcode
 from config.machine_loader import (
     Endmill,
@@ -28,7 +34,7 @@ from config.machine_loader import (
 )
 from core.constants import BACK_SVG_SUFFIX, FeatureType
 from ir.removal_intent import RemovalIntent
-from layout_ast.layout import LayoutAST, mirror_item_about_x
+from layout_ast.layout import LayoutAST, MachiningClearance, mirror_item_about_x
 from validation.removal_checks import (
     check_back_face_support,
     check_cross_face_web,
@@ -286,6 +292,22 @@ def _plan_and_emit_face(
     )
 
 
+def resolve_profile_clearance(
+    material: str,
+    kerf_mm: float,
+    *,
+    endmills: list[Endmill] | None = None,
+    feeds: list[FeedsEntry] | None = None,
+) -> MachiningClearance:
+    tool_db = (
+        build_tool_db(endmills, feeds, material)
+        if endmills is not None and feeds is not None
+        else load_machine_tool_db(material)
+    )
+    tool = pick_tool_for_profile(normalize_tool_entries(tool_db), kerf_mm=kerf_mm)
+    return MachiningClearance(profile_diameter_mm=tool.diameter)
+
+
 def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     ast: LayoutAST,
     *,
@@ -307,6 +329,14 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     else:
         effective_tool_db = load_machine_tool_db(ast.sheet.material)
     tools = normalize_tool_entries(effective_tool_db)
+    if ast.machining_clearance is not None:
+        selected = pick_tool_for_profile(tools, kerf_mm=kerf_mm)
+        expected = ast.machining_clearance.profile_diameter_mm
+        if abs(selected.diameter - expected) > 1e-9:
+            raise ValueError(
+                f"Profile cutter changed after packing: resolved {expected:g}mm, selected {selected.diameter:g}mm; resolve the layout again"
+            )
+        kerf_mm = selected.diameter
 
     errors: list[str] = []
     warnings: list[str] = []

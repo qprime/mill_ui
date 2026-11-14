@@ -23,6 +23,16 @@
 
 ---
 
+## Assembly and Beam Perimeter Clearance
+
+Machining-aware assembly partitioning and row-wrapped assembly/beam placement
+reserve the selected profile cutter diameter inside the working-area boundary.
+The context arrives from orchestration before resolution, including when the
+requested kerf differs from an available cutter. Perimeter clearance therefore
+accounts for the complete outside cut rather than only its centerline. Numeric
+part gaps retain their authored total separation and must accommodate the cutter.
+This does not change the standalone nesting APIs or introduce automatic gaps.
+
 ## Part Dimensions
 
 - `width_mm > 0`

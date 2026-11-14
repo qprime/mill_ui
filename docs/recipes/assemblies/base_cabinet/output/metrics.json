@@ -97,11 +97,11 @@
         ]
       },
       "output_size": {
-        "total_bytes": 13950,
+        "total_bytes": 13955,
         "total_lines": 526,
         "files": {
           "pocket-12.70mm": {
-            "bytes": 1815,
+            "bytes": 1820,
             "lines": 72
           },
           "dogbone-12.70mm": {

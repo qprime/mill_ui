@@ -76,6 +76,24 @@ assert ast1 == ast2
 
 ---
 
+## Cutter Context Before Packing
+
+Canonical PML machining entry points select the actual flat profile tool before
+resolving assembly and beam layouts. A frozen, dependency-light
+`MachiningClearance` carries only its positive finite diameter into resolution.
+The resolved LayoutAST retains that contract, including through JSON export;
+Feature and RemovalIntent carry no tool objects or computed paths. The planner
+rejects a different selected diameter and uses the actual diameter for clearance
+checks. A changed library requires resolution again.
+
+Entry-point cutter defaults remain unchanged: recipes request 3.175mm and
+projects 6.35mm; an explicit CLI kerf overrides that request. An authored PML
+`kerf` retains its existing geometry-generation meaning and does not substitute
+for the actual profile-tool selection. Geometry-only resolution without a
+machining context retains its explicit kerf/default behavior. Numeric layout
+gaps are preserved and incompatible selected cutters error instead of shrinking
+parts or spacing. Automatic gaps and polygon common cuts remain separate work.
+
 ## Layer Separation
 
 Keep pipeline layers separate. Don't mix concerns.

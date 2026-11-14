@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from cli.mill import write_recipe_outputs
 from cli.validate_cam import EXIT_FAIL, EXIT_PASS, EXIT_WARN, main
 from validation.recipes import recipe_at
@@ -281,3 +283,89 @@ def test_cli_exit_codes():
     assert EXIT_PASS == 0
     assert EXIT_WARN == 1
     assert EXIT_FAIL == 2
+
+
+MULTI_SHEET_PML = """Sheet:
+  physical_width: 500mm
+  physical_height: 500mm
+  thickness: 6mm
+  margin: 10mm
+children:
+- Assembly:
+    type: box
+    width: 400mm
+    depth: 300mm
+    height: 200mm
+    thickness: 6mm
+    joinery: finger
+    finger_width: 12mm
+    clearance: 0.15mm
+    bottom: captured
+    top: none
+    show_labels: true
+"""
+
+
+def _make_multi_sheet_recipe(tmp_path):
+    recipe_dir = tmp_path / "box"
+    recipe_dir.mkdir()
+    (recipe_dir / "box.pml.yml").write_text(MULTI_SHEET_PML)
+    recipe = recipe_at(recipe_dir)
+    assert recipe is not None
+    runs, _ = write_recipe_outputs(recipe, recipe_dir / "output")
+    assert len(runs) > 1
+    return recipe_dir, runs
+
+
+def test_multi_sheet_recipe_checks_every_sheet_with_its_own_intent(tmp_path):
+    recipe_dir, runs = _make_multi_sheet_recipe(tmp_path)
+    code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--quiet")
+    assert code in (EXIT_PASS, EXIT_WARN), stderr
+    result = json.loads(stdout)["validation_result"]
+    assert len(result["sheets"]) == len(runs)
+    for index, sheet in enumerate(result["sheets"], start=1):
+        assert f"sheet_{index}" in sheet["input_file"]
+        assert sheet["assertions"]["total"] > 0
+        assert sheet["assertions"]["failed"] == 0
+        assert sheet["metrics"]["gcode"].get("file_count", 1) == len(runs[index - 1].result.gcode)
+    assert result["invariants"]["total"] == sum(s["invariants"]["total"] for s in result["sheets"])
+
+
+def test_multi_sheet_corruption_on_later_sheet_fails_the_whole_job(tmp_path):
+    recipe_dir, runs = _make_multi_sheet_recipe(tmp_path)
+    nc = next((recipe_dir / "output").glob(f"sheet_{len(runs)}.*.nc"))
+    nc.write_text(nc.read_text() + "\nG1 X99999 Y99999 Z-30 F1000\n")
+    code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--quiet")
+    assert code == EXIT_FAIL, stderr
+    result = json.loads(stdout)["validation_result"]
+    assert result["sheets"][-1]["verdict"] == "fail"
+    assert result["sheets"][0]["verdict"] != "fail"
+
+
+@pytest.mark.parametrize("artifact", ["svg", "nc"])
+def test_multi_sheet_missing_later_artifacts_fail_explicitly(tmp_path, artifact):
+    recipe_dir, runs = _make_multi_sheet_recipe(tmp_path)
+    pattern = f"box_sheet_{len(runs)}.svg" if artifact == "svg" else f"sheet_{len(runs)}.*.nc"
+    for path in (recipe_dir / "output").glob(pattern):
+        path.unlink()
+    code, _, stderr = run_cli("--recipe", str(recipe_dir))
+    assert code == EXIT_FAIL
+    assert f"sheet_{len(runs)}: missing" in stderr
+
+
+def test_multi_sheet_summary_and_metrics_only(tmp_path):
+    recipe_dir, runs = _make_multi_sheet_recipe(tmp_path)
+    code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--metrics-only", "--summary")
+    assert code == EXIT_PASS, stderr
+    for index in range(1, len(runs) + 1):
+        assert f"Sheet {index}: PASS" in stdout
+
+
+def test_multi_sheet_golden_uses_separate_sheet_metrics(tmp_path):
+    recipe_dir, _ = _make_multi_sheet_recipe(tmp_path)
+    _, stdout, _ = run_cli("--recipe", str(recipe_dir), "--quiet")
+    metrics = json.loads(stdout)["validation_result"]["metrics"]
+    golden = _write_baseline(tmp_path, metrics)
+    code, stdout, stderr = run_cli("--recipe", str(recipe_dir), "--golden", str(golden), "--quiet")
+    assert code in (EXIT_PASS, EXIT_WARN), stderr
+    assert json.loads(stdout)["validation_result"]["regressions"]["exceeded_tolerance"] == 0

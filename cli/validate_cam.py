@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 from validation.core import Verdict
-from validation.recipes import recipe_at
 from validation.regression import ComparisonConfig
 from validation.runner import (
     ValidationInput,
@@ -188,12 +187,6 @@ def run_validation(args: argparse.Namespace) -> int:
         if not recipe_dir.is_dir():
             raise ValueError(f"Not a directory: {args.recipe}")
 
-        recipe = recipe_at(recipe_dir)
-        if ast is None and recipe is not None and len(recipe.pml_sources) == 1:
-            from pml import parse_pml
-
-            ast = parse_pml(recipe.pml_sources[0].read_text(encoding="utf-8"))
-
         result = validate_recipe(
             recipe_dir,
             ast=ast,
@@ -271,6 +264,13 @@ def output_summary(result, args: argparse.Namespace) -> None:  # noqa: C901 — 
         if "gcode" in result.metrics:
             motion = result.metrics["gcode"].get("motion", {})
             lines.append(f"  G-code: {motion.get('g0_count', 0)} rapids, {motion.get('g1_count', 0)} feeds")
+        lines.append("")
+
+    for index, sheet in enumerate(result.sheets, start=1):
+        lines.append(
+            f"Sheet {index}: {sheet.verdict.value.upper()} — {sheet.assertions.total} assertions, {sheet.invariants.total} invariants"
+        )
+    if result.sheets:
         lines.append("")
 
     inv = result.invariants

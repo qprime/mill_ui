@@ -19,6 +19,14 @@
 
 ---
 
+## Multi-sheet CAM Artifacts
+
+Recipe CAM validation resolves every sheet before checking artifacts. Each
+sheet uses its own AST, blueprint, optional back blueprint and sheet_N NC files.
+Missing sheet artifacts error explicitly. Results retain each sheet and aggregate
+all invariant/assertion checks; any sheet failure fails the job. Multi-sheet
+goldens use a `sheets` mapping keyed by `sheet_1`, `sheet_2`, and so on.
+
 ## Depth Validation
 
 - Gradient depth must not exceed sheet thickness

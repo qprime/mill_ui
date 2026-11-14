@@ -228,6 +228,7 @@ class CAMValidationResult:
 
     execution_time_ms: float = 0.0
     verdict_reason: str = ""
+    sheets: tuple[CAMValidationResult, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.timestamp:
@@ -271,6 +272,7 @@ class CAMValidationResult:
                 "input_file": self.input_file,
                 "verdict": self.verdict.value,
                 "metrics": self.metrics,
+                **({"sheets": [sheet.to_dict()["validation_result"] for sheet in self.sheets]} if self.sheets else {}),
                 "invariants": self.invariants.to_dict(),
                 "assertions": self.assertions.to_dict(),
                 "regressions": self.regressions.to_dict(),
@@ -293,6 +295,7 @@ class CAMValidationResult:
             input_file=vr.get("input_file", ""),
             verdict=Verdict(vr.get("verdict", "pass")),
         )
+        result.sheets = tuple(cls.from_dict(sheet) for sheet in vr.get("sheets", []))
         result.metrics = vr.get("metrics", {})
         result.execution_time_ms = vr.get("summary", {}).get("execution_time_ms", 0.0)
         result.verdict_reason = vr.get("summary", {}).get("verdict_reason", "")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, cast
 
@@ -146,6 +146,20 @@ def validate_recipe(
         )
     source_file = recipe.pml_sources[0] if recipe is not None and recipe.pml_sources else None
 
+    if ast is None and source_file is not None:
+        from pml import parse_pml_yaml
+        from resolution.layout_resolver import resolve_layout_multi
+
+        parsed = replace(
+            parse_pml_yaml(source_file.read_text(encoding="utf-8")), source_dir=str(source_file.parent.resolve())
+        )
+        asts = resolve_layout_multi(parsed)
+        if len(asts) > 1:
+            return _validate_recipe_sheets(
+                recipe_dir, source_file, asts, golden_metrics, golden_file, comparison_config, options
+            )
+        ast = asts[0]
+
     svg_path = None
     svg_back_path = None
     gcode_paths: list[str | Path] = []
@@ -181,6 +195,71 @@ def validate_recipe(
     )
 
     return validate(inputs, options)
+
+
+def _validate_recipe_sheets(
+    recipe_dir: Path,
+    source_file: Path,
+    asts: list[LayoutAST],
+    golden_metrics: dict[str, Any] | None,
+    golden_file: str | None,
+    comparison_config: ComparisonConfig | None,
+    options: ValidationOptions | None,
+) -> CAMValidationResult:
+    start = time.perf_counter()
+    effective_options = options or ValidationOptions()
+    golden_sheets = None
+    if effective_options.check_regressions and golden_metrics is not None:
+        golden_sheets = golden_metrics.get("sheets")
+        expected = {f"sheet_{index}" for index in range(1, len(asts) + 1)}
+        if not isinstance(golden_sheets, dict) or set(golden_sheets) != expected:
+            raise ValueError(f"Multi-sheet recipe golden requires a 'sheets' mapping with keys {sorted(expected)}")
+    output_dir = recipe_dir / "output"
+    result = CAMValidationResult(input_file=str(source_file))
+    sheets = []
+    sheet_metrics = {}
+    for index, ast in enumerate(asts, start=1):
+        label = f"sheet_{index}"
+        svg_path = output_dir / f"{recipe_dir.name}_{label}.svg"
+        svg_back_path = output_dir / f"{recipe_dir.name}_{label}{BACK_SVG_SUFFIX}"
+        gcode_paths = sorted(output_dir.glob(f"{label}.*.nc"))
+        if not svg_path.is_file():
+            raise FileNotFoundError(f"Recipe {recipe_dir.name} {label}: missing blueprint {svg_path.name}")
+        if not gcode_paths:
+            raise FileNotFoundError(f"Recipe {recipe_dir.name} {label}: missing G-code {label}.*.nc")
+        if ast.face_items("back") and not svg_back_path.is_file():
+            raise FileNotFoundError(f"Recipe {recipe_dir.name} {label}: missing back blueprint {svg_back_path.name}")
+        inputs = ValidationInput(
+            source_file=source_file,
+            ast=ast,
+            golden_metrics=golden_sheets[label] if golden_sheets is not None else None,
+            golden_file=golden_file,
+            comparison_config=comparison_config,
+            svg_path=svg_path,
+            svg_back_path=svg_back_path if ast.face_items("back") else None,
+            gcode_paths=list(gcode_paths),
+            sheet_width_mm=ast.sheet.width_mm,
+            sheet_height_mm=ast.sheet.height_mm,
+        )
+        sheet = validate(inputs, options)
+        sheet.input_file = f"{source_file} {label}"
+        sheets.append(sheet)
+        sheet_metrics[label] = sheet.metrics
+        for invariant in sheet.invariants.results:
+            result.invariants.add(
+                replace(invariant, id=f"{label}:{invariant.id}", details={**invariant.details, "sheet": index})
+            )
+        for assertion in sheet.assertions.results:
+            result.assertions.add(replace(assertion, id=f"{label}:{assertion.id}"))
+        for regression in sheet.regressions.results:
+            result.regressions.add(replace(regression, metric_path=f"{label}.{regression.metric_path}"))
+    result.regressions.compared = golden_sheets is not None
+    result.regressions.golden_file = golden_file
+    result.sheets = tuple(sheets)
+    result.metrics["sheets"] = sheet_metrics
+    result.execution_time_ms = (time.perf_counter() - start) * 1000
+    result.compute_verdict()
+    return result
 
 
 def _extract_all_metrics(

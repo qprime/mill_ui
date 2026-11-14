@@ -9,7 +9,7 @@ from cam.config import Config
 from cam.model.machine import Machine
 from cam.model.setup import Setup
 from cam.model.stock import Stock
-from cam.moves import Move, SetRpmMove
+from cam.moves import CutMove, Move, SetRpmMove
 from cam.ops.profile import profile_outline
 from cam.planner.planner_input import FeatureInput, PlannerInput, TabsInput
 from cam.shape import Shape2D
@@ -134,6 +134,9 @@ class PassAccumulator:
     @property
     def warnings(self) -> list[str]:
         return list(self._warnings)
+
+    def cut_move_count(self) -> int:
+        return sum(isinstance(move, CutMove) for record in self._records.values() for move in record.moves)
 
     def passes(self) -> list[PassRecord]:
         return list(self._records.values())

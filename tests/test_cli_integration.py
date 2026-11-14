@@ -259,6 +259,26 @@ def test_missing_roundover_tool_exits_3_and_replaces_old_gcode_with_diagnostics(
     assert summary["files"] == []
 
 
+@pytest.mark.parametrize("width,height", [(2, 2), (2, 40)])
+def test_unmachinable_pocket_fails_and_removes_stale_programs(tmp_path: Path, width, height):
+    source = _write_simple_profile(tmp_path)
+    out_dir = tmp_path / "out"
+    args = ["-m", "cli.mill", "--input", str(source), "--out", str(out_dir)]
+    _run_cli(args)
+    assert list(out_dir.glob("*.nc"))
+    source.write_text(
+        SIMPLE_PROFILE_PML.replace("type: profile", "type: pocket")
+        .replace("depth: through", "depth: 3mm")
+        .replace("width: 200mm", f"width: {width}mm")
+        .replace("height: 150mm", f"height: {height}mm")
+    )
+    result = _run_cli(args, check=False)
+    assert result.returncode != 0
+    assert "Pocket 'part'" in result.stderr
+    assert "smallest flat tool 3.175 mm" in result.stderr
+    assert not list(out_dir.glob("*.nc"))
+
+
 def test_cli_multi_file_run_keeps_every_file_and_writes_one_metrics_file(tmp_path: Path):
     input_dir = tmp_path / "project"
     input_dir.mkdir()

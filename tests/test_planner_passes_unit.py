@@ -981,12 +981,11 @@ class TestPlanPocketPasses:
         plan_pocket_passes((), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         assert len(acc.passes()) == 0
 
-    def test_unknown_shape_produces_no_moves(self):
+    def test_unknown_shape_fails_explicitly(self):
         acc = _accumulator()
         pockets = (_feature("Hexagon", {}, (100.0, 75.0), 6.0),)
-        plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
-        total_moves = sum(len(r.moves) for r in acc.passes())
-        assert total_moves == 0
+        with pytest.raises(ValueError, match=r"Hexagon.*required cutting moves, got 0"):
+            plan_pocket_passes(pockets, accumulator=acc, tool_db=FLAT_ONLY, config=Config())
 
     def test_holed_polygon_pocket_stays_out_of_hole(self):
         acc = _accumulator()
@@ -1041,29 +1040,42 @@ class TestPlanPocketPasses:
             assert region.contains(point)
             assert region.boundary.distance(point) >= radius - 1e-6
 
-    def test_polygon_pocket_without_fitting_tool_warns_and_skips(self):
+    @pytest.mark.parametrize(
+        "pocket",
+        [
+            _ring_feature(3.0),
+            _feature("Rect", {"w_mm": 2.5, "h_mm": 50.0}, (150.0, 100.0), 3.0),
+            _feature("Circle", {"diameter_mm": 3.0}, (150.0, 100.0), 3.0),
+            _feature("Polygon", {"points": [[0, 0], [3, 0], [0, 3]]}, (150.0, 100.0), 3.0),
+        ],
+    )
+    def test_pocket_without_fitting_tool_is_an_error(self, pocket):
         acc = _accumulator()
-        plan_pocket_passes((_ring_feature(3.0),), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        with pytest.raises(ValueError, match=r"required cutting moves, got 0.*smallest flat tool 3 mm") as exc:
+            plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert pocket.id in str(exc.value)
+        assert pocket.shape in str(exc.value)
         assert acc.passes() == []
-        (warning,) = acc.warnings
-        assert "no flat tool in the tool library fits" in warning
-        assert "3.000 mm" in warning
 
-    def test_rect_pocket_without_fitting_tool_warns_and_skips(self):
+    def test_empty_allowance_plan_is_an_error_even_after_another_pocket_cuts(self):
         acc = _accumulator()
-        pocket = _feature("Rect", {"w_mm": 2.5, "h_mm": 50.0}, (150.0, 100.0), 3.0)
+        valid = _feature("Rect", {"w_mm": 30.0, "h_mm": 50.0}, (150.0, 100.0), 3.0)
+        empty = replace(
+            valid,
+            id="empty_allowance",
+            edge_treatment=EdgeTreatmentInput(type="allowance", rough_allowance_mm=20, finish_allowance_mm=20),
+        )
+        with pytest.raises(ValueError, match=r"empty_allowance.*selected tool 12 mm"):
+            plan_pocket_passes((valid, empty), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
+        assert acc.cut_move_count() > 0
+
+    @pytest.mark.parametrize("depth,start", [(0.0, 0.0), (3.0, 3.0), (2.0, 3.0)])
+    def test_no_depth_to_remove_does_not_require_a_fitting_tool(self, depth, start):
+        acc = _accumulator()
+        pocket = _feature("Circle", {"diameter_mm": 2.0}, (100.0, 75.0), depth, start_depth=start)
         plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
         assert acc.passes() == []
-        (warning,) = acc.warnings
-        assert "no flat tool in the tool library fits" in warning
-
-    def test_circle_pocket_without_fitting_tool_warns_and_skips(self):
-        acc = _accumulator()
-        pocket = _feature("Circle", {"diameter_mm": 3.0}, (150.0, 100.0), 3.0)
-        plan_pocket_passes((pocket,), accumulator=acc, tool_db=FLAT_ONLY, config=Config())
-        assert acc.passes() == []
-        (warning,) = acc.warnings
-        assert "no flat tool in the tool library fits" in warning
+        assert acc.warnings == []
 
     def test_rect_pocket_just_wider_than_tool_still_cuts(self):
         acc = _accumulator()

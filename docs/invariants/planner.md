@@ -137,6 +137,15 @@ or automatic decorative dogbone is implied.
 
 ---
 
+## Required Pocket Machining
+
+A pocket with material to remove must produce cutting moves. No fitting flat tool
+or a nonempty requested pocket that plans to zero cuts raises a feature-specific
+error with its shape, bounds and selected/smallest cutter dimensions (PC-1).
+The check includes allowance, rest and surface paths. Pockets with no remaining
+depth are exempt; islands that cover the entire pocket retain their explicit
+empty-region warning. A partial-coverage check is outside this contract.
+
 ## Spiral Pocket Coverage
 
 Spiral pockets complete each inset contour at every layer depth before moving

@@ -6,9 +6,11 @@ import argparse
 import json
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+from cam.compilation import CompilationContext, compilation_context
 from cli.project import (
     DEFAULT_KERF_MM,
     DEFAULT_MARGIN_MM,
@@ -18,6 +20,7 @@ from cli.project import (
     resolve_input_path,
     resolve_output_dir,
 )
+from config.machine_loader import Endmill, FeedsEntry
 from layout_ast.layout import LayoutAST, MachiningClearance
 from nesting import nest_and_generate, nest_parts
 from pml.lifter import lift_layout_ast
@@ -132,6 +135,17 @@ def nest_job(job: NestJob, *, machining_clearance: MachiningClearance | None = N
     return nest_and_generate(**api_params)
 
 
+def nest_machining_job(
+    job: NestJob, *, endmills: list[Endmill] | None = None, feeds: list[FeedsEntry] | None = None
+) -> tuple[dict[str, Any], CompilationContext]:
+    context = compilation_context("mdf", job.kerf_mm, endmills=endmills, feeds=feeds)
+    result = nest_job(job, machining_clearance=context.clearance())
+    result["output"] = [
+        replace(ast, config={**ast.config, "compilation": context.to_dict()}) for ast in result["output"]
+    ]
+    return result, context
+
+
 def main():  # noqa: C901 — CLI entry point
     parser = argparse.ArgumentParser(
         description="Run nesting from .nest.yml file and output PML layouts",
@@ -152,7 +166,8 @@ Examples:
 Output files:
   PML:  {prefix}_{N}.pml.yml (one per sheet)
   SVG:  {prefix}_{N}.blueprint.{theme}.svg (if --export-svg)
-  JSON: manifest.json (nesting summary)
+  JSON: {prefix}_{N}.json (machining layout with saved cutter context)
+        {prefix}_manifest.json (nesting summary)
         """,
     )
     add_project_arg(parser)
@@ -240,7 +255,9 @@ Output files:
 
     start_time = time.perf_counter()
 
-    result = nest_job(job)
+    if args.kerf is not None:
+        job = replace(job, kerf_mm=args.kerf)
+    result, context = nest_machining_job(job)
 
     nest_time = time.perf_counter() - start_time
 
@@ -251,6 +268,7 @@ Output files:
 
     validation_params = nest_job_to_api_params(job)
     validation_params["validate"] = True
+    validation_params["machining_clearance"] = context.clearance()
     validation_result = nest_parts(**validation_params)
 
     validation = validation_result["validation"]
@@ -291,6 +309,7 @@ Output files:
         header += "\n"
 
         pml_path.write_text(header + pml_content)
+        ast.to_json(str(output_dir / f"{sheet_name}.json"))
         output_files.append(sheet_name)
 
         if args.verbose:
@@ -310,6 +329,7 @@ Output files:
             "height_mm": job.sheet_height_mm,
             "thickness_mm": job.sheet_thickness_mm,
         },
+        "compilation": context.to_dict(),
         "kerf_mm": job.kerf_mm,
         "margin_mm": job.margin_mm,
         "nesting": {
@@ -320,6 +340,7 @@ Output files:
         },
         "output_files": {
             "pml": [f"{name}.pml.yml" for name in output_files],
+            "json": [f"{name}.json" for name in output_files],
         },
     }
 

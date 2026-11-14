@@ -171,7 +171,7 @@ def _plan_one_heightfield(
         barrier = _barrier_for_tool(barriers, assignment)
         record = accumulator.get_record("heightfield-rough", tool)
         moves = _emit_rough_moves(feature, tool, assignment, barrier, safe_z)
-        record.add_moves(moves, increment=1)
+        record.add_moves(moves, feature_ids=(feature.id,), increment=1)
 
     if not finish_pairs:
         return
@@ -191,7 +191,7 @@ def _plan_one_heightfield(
             safe_surface = np.maximum(safe_surface, prev_safe_surface)
         record = accumulator.get_record("heightfield-finish", tool)
         moves = _emit_finish_moves(feature, tool, assignment, safe_surface, safe_z)
-        record.add_moves(moves, increment=1)
+        record.add_moves(moves, feature_ids=(feature.id,), increment=1)
         prev_safe_surface = safe_surface
 
 

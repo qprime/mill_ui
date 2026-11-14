@@ -115,9 +115,9 @@ class TestToolpathKeepoutVerification:
         accumulator = PassAccumulator(machine=Machine(), stock=Stock(300, 200, 19), safe_z=6, prime_spindle=False)
         tool = normalize_tool_entries([{"diameter": 3.175, "kind": "flat"}])[0]
         first = accumulator.get_record("pocket", tool)
-        first.add_moves([RapidMove(x=0, y=50)])
+        first.add_moves([RapidMove(x=0, y=50)], feature_ids=("test",))
         second = accumulator.get_record("profile", tool)
-        second.add_moves([CutMove(x=200)])
+        second.add_moves([CutMove(x=200)], feature_ids=("test",))
         zones = [{"x_min": 90, "x_max": 110, "y_min": 40, "y_max": 60}]
 
         assert verify_passes_avoid_keepouts([first, second], zones).has_violations()
@@ -758,3 +758,113 @@ class TestConstraintCoverageEnforcement:
         }
         actual = set(constraint_keys_in_caps)
         assert actual == expected, f"Constraint field(s) missing from PLANNER_CAPABILITIES: {expected - actual}"
+
+
+MULTIPART_SWEEP_PML = """Sheet:
+  width: 600mm
+  height: 300mm
+  thickness: 6mm
+  margin: 10mm
+children:
+- Rect:
+    id: left
+    at: {x: 100mm, y: 140mm, width: 120mm, height: 120mm}
+    feature: {type: profile, side: outside, depth: through}
+- Rect:
+    id: right
+    at: {x: 330mm, y: 140mm, width: 120mm, height: 120mm}
+    feature: {type: profile, side: outside, depth: through}
+"""
+
+
+def test_sheet_surface_with_multiple_parts_preserves_fixture_checks():
+    source = "Surface: {depth-per-pass: 0.5mm}\n" + MULTIPART_SWEEP_PML
+    result = run_pipeline(resolve_layout(parse_pml_yaml(source)), generate_svg=False)
+    assert not result.errors
+    assert result.gcode
+    blocked = (
+        source
+        + """- Keepout:
+    id: clamp
+    children:
+    - Rect:
+        at: {x: 500mm, y: 50mm, width: 20mm, height: 20mm}
+"""
+    )
+    result = run_pipeline(resolve_layout(parse_pml_yaml(blocked)), generate_svg=False)
+    assert any("Keepout violation" in error for error in result.errors)
+    assert not result.gcode
+
+
+@pytest.mark.parametrize(
+    "shape",
+    [
+        "Rect:\n    at: {x: 100mm, y: 140mm, width: 40mm, height: 40mm}\n    feature: {type: pocket, depth: 2mm}",
+        "Circle:\n    diameter: 8mm\n    at: {x: 100mm, y: 140mm}\n    feature: {type: hole, depth: 2mm}",
+        "Polyline:\n    points: [[0.14, 0.5], [0.2, 0.5]]\n    feature: {type: engrave, depth: 0.5mm}",
+    ],
+)
+def test_unambiguous_sibling_feature_inherits_actual_containing_part(shape):
+    result = run_pipeline(resolve_layout(parse_pml_yaml(MULTIPART_SWEEP_PML + "- " + shape)), generate_svg=False)
+    assert not result.errors
+    assert result.gcode
+
+
+def test_cross_boundary_sibling_requires_ownership_without_spacing_retry():
+    source = (
+        MULTIPART_SWEEP_PML
+        + """- Rect:
+    id: crossing
+    at: {x: 160mm, y: 140mm, width: 40mm, height: 40mm}
+    feature: {type: pocket, depth: 2mm}
+"""
+    )
+    result = run_pipeline(resolve_layout(parse_pml_yaml(source)), generate_svg=False)
+    assert not result.gcode
+    assert any("ambiguous part ownership" in error and "part_id" in error for error in result.errors)
+
+
+def test_sibling_in_concave_profile_bounds_does_not_gain_that_owner():
+    from dataclasses import replace
+
+    from cam.planner.planner_input import FeatureInput, GeometryInput, PlannerInput
+    from ir.removal_intent import ShapeGeometry
+    from validation.toolpath_checks import _infer_feature_owners
+
+    left = FeatureInput(
+        "left",
+        "Polygon",
+        GeometryInput("Polygon", ShapeGeometry(points=((0, 0), (100, 0), (100, 30), (30, 30), (30, 100), (0, 100)))),
+        (0, 0),
+        6,
+        side="outside",
+    )
+    right = replace(left, id="right", center_xy_mm=(200, 0))
+    pocket = FeatureInput("notch", "Rect", GeometryInput("Rect", ShapeGeometry(w_mm=20, h_mm=20)), (60, 60), 2)
+    planner_input = PlannerInput(profiles=(left, right), pockets=(pocket,))
+    assert "notch" not in _infer_feature_owners(planner_input, {}, frozenset())
+
+
+@pytest.mark.parametrize("owner", ["left", "right"])
+def test_explicit_sibling_ownership_keeps_foreign_part_protection(owner):
+    source = (
+        MULTIPART_SWEEP_PML
+        + f"""- AtPosition:
+    x: 100mm
+    y: 140mm
+    width: 40mm
+    height: 40mm
+    part_id: {owner}
+    child:
+      Rect:
+        id: owned_pocket
+        feature: {{type: pocket, depth: 2mm}}
+"""
+    )
+    result = run_pipeline(resolve_layout(parse_pml_yaml(source)), generate_svg=False)
+    if owner == "left":
+        assert not result.errors
+        assert result.gcode
+    else:
+        assert not result.gcode
+        assert any("owned_pocket" in error and "retained part 'left'" in error for error in result.errors)

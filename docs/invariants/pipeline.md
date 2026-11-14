@@ -105,7 +105,11 @@ JSON/PML conversion. No cutter paths or computed regions enter semantic records.
 Planner move ranges retain contributing feature IDs, including shared groups and
 deferred finishing/release, so sweep checks distinguish a feature's own part from
 neighboring retained geometry. A legacy single-workpiece layout remains usable
-without ownership; multiple independent parts must identify local operations.
+without ownership. With multiple parts, a sibling feature wholly contained in exactly
+one actual retained region may inherit that owner; ambiguous or boundary-crossing
+features require explicit `part_id` or shape-child ownership. Bounding boxes alone
+do not establish containment. Explicit sheet Surface operations may cross retained
+parts, but remain subject to fixture keepout checks.
 
 Every setup checks actual planned cutter segments and radii before emission,
 including pockets, relief and edge tools. Neighbor material and holding stock,

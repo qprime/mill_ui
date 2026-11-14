@@ -23,7 +23,7 @@ from cam.ops.pocket import pocket_offset_loops
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
 from cam.planner.passes import PassAccumulator, PassRecord, plan_passes
 from cam.planner.passes.edge import build_edge_cut_plan, plan_edge_feature_passes, vbit_cut_depth, vbit_effective_radius
-from cam.planner.passes.merge_shared_edges import merge_rect_profiles
+from cam.planner.passes.merge_shared_edges import merge_profiles
 from cam.planner.passes.pocket import (
     plan_engrave_passes,
     plan_hole_passes,
@@ -704,7 +704,7 @@ class TestRectangleProfilePlanning:
         if polygon:
             geometry = GeometryInput("Polygon", ShapeGeometry(points=((-50, -30), (50, -30), (50, 30), (-50, 30))))
             profiles = tuple(replace(p, shape="Polygon", geometry=geometry) for p in profiles)
-        (group,) = merge_rect_profiles(profiles, tool_diameter_mm=3, config=Config())
+        (group,) = merge_profiles(profiles, tool_diameter_mm=3, config=Config())
 
         assert group.profile_indices == tuple(range(len(profiles)))
         assert len(group.seams) == (8 if ring else 4)
@@ -1753,9 +1753,12 @@ class TestMoveTiming:
     def test_gcode_file_summary_joins_ops_and_times_the_merged_moves(self):
         acc = _accumulator()
         pocket = acc.get_record("pocket", SUMMARY_TOOL)
-        pocket.add_moves([RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=600.0), CutMove(x=1200.0, feed=1200.0)])
+        pocket.add_moves(
+            [RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=600.0), CutMove(x=1200.0, feed=1200.0)],
+            feature_ids=("test",),
+        )
         dogbone = acc.get_record("dogbone", SUMMARY_TOOL)
-        dogbone.add_moves([RetractMove(z=5.0), RapidMove(x=0.0), CutMove(z=-1.0, feed=600.0)])
+        dogbone.add_moves([RetractMove(z=5.0), RapidMove(x=0.0), CutMove(z=-1.0, feed=600.0)], feature_ids=("test",))
 
         entry = summarise_gcode_file("6.35mm.nc", [pocket, dogbone])
 
@@ -1788,7 +1791,9 @@ def _profile_intent(constraints: Constraints) -> RemovalIntent:
 class TestGcodeFileStrategy:
     def _entry(self, op: str, intents: list[RemovalIntent]) -> dict:
         record = _accumulator().get_record(op, SUMMARY_TOOL)
-        record.add_moves([RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=300.0)], increment=2)
+        record.add_moves(
+            [RapidMove(x=0.0, y=0.0, z=5.0), CutMove(z=-1.0, feed=300.0)], feature_ids=("test",), increment=2
+        )
         return summarise_gcode_file(f"{op}.nc", [record], profile_intents=intents, cut_through_mm=0.2)
 
     def test_profile_with_onion_skin(self):
@@ -1849,15 +1854,15 @@ def test_cut_count_tracks_multiple_records_streams_and_initial_moves():
     tools = normalize_tool_entries([FLAT_3MM, FLAT_6MM])
     pocket = acc.get_record("pocket", tools[0])
     finish = acc.get_record("finish", tools[1])
-    pocket.add_moves(iter([CommentMove("start"), RapidMove(x=1), CutMove(x=2), CutMove(z=-1)]))
-    finish.add_moves(iter([SetFeedMove(100), CutMove(x=3), RetractMove(5)]))
+    pocket.add_moves(iter([CommentMove("start"), RapidMove(x=1), CutMove(x=2), CutMove(z=-1)]), feature_ids=("test",))
+    finish.add_moves(iter([SetFeedMove(100), CutMove(x=3), RetractMove(5)]), feature_ids=("test",))
     assert acc.cut_move_count() == 3
     assert acc.cut_move_count() == 3
-    pocket.add_moves(iter([CutMove(x=4), DwellMove(1)]))
+    pocket.add_moves(iter([CutMove(x=4), DwellMove(1)]), feature_ids=("test",))
     assert acc.cut_move_count() == 4
     restored = PassRecord("pocket", tools[0], pocket.setup, "restored.nc", list(pocket.moves))
     assert restored.cut_move_count == 3
-    restored.add_moves(iter([CutMove(z=-2)]))
+    restored.add_moves(iter([CutMove(z=-2)]), feature_ids=("test",))
     assert restored.cut_move_count == 4
 
 
@@ -1874,7 +1879,7 @@ def test_cut_count_queries_do_not_revisit_accumulated_move_history():
     record = acc.get_record("pocket", FLAT_ONLY[0])
     history = ObservedMoves()
     record.moves = history
-    record.add_moves(CutMove(x=i) for i in range(1000))
+    record.add_moves((CutMove(x=i) for i in range(1000)), feature_ids=("test",))
     for _ in range(100):
         assert acc.cut_move_count() == 1000
     assert history.traversed == 0
@@ -1995,3 +2000,15 @@ def test_atomic_seams_discard_subprecision_noding_fragments():
     lines = [LineString([(p.x, p.y) for p in seam.points]) for seam in atomic]
     assert all(line.length > 1e-9 for line in lines)
     assert sum(line.length for line in lines) == pytest.approx(150)
+
+
+def test_move_attribution_is_explicit_across_reused_pass_records():
+    acc = _accumulator()
+    record = acc.get_record("pocket", FLAT_ONLY[0])
+    record.add_moves([CutMove(z=-1)], feature_ids=("first",))
+    same_record = acc.get_record("pocket", FLAT_ONLY[0])
+    same_record.add_moves([CutMove(x=10)], feature_ids=("second",))
+    assert record.move_ranges == [(0, 1, ("first",)), (1, 2, ("second",))]
+    with pytest.raises(ValueError, match="explicit contributing feature IDs"):
+        record.add_moves([CutMove(x=20)], feature_ids=())
+    assert record.move_ranges == [(0, 1, ("first",)), (1, 2, ("second",))]

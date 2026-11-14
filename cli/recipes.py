@@ -10,7 +10,7 @@ from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 
 from cli.mill import write_recipe_outputs
-from cli.nest import nest_job
+from cli.nest import nest_machining_job
 from config.machine_loader import MachineConfig, load_machine_by_name
 from ir.removal_intent import Bounds2D
 from pml.yaml_parser import parse_nest_yaml
@@ -103,7 +103,7 @@ def check_nest_recipe(recipe: Recipe, machine: MachineConfig) -> list[str]:
             y_max=job.sheet_height_mm - job.margin_mm,
         )
         problems += _fit_problems(check_job_fits_machine(bounds, machine), source.name)
-        result = nest_job(job)
+        result, _ = nest_machining_job(job)
         if result["total_sheets"] == 0:
             problems.append(f"{source.name}: nesting produced 0 sheets")
         elif result["utilization"] < MIN_NEST_UTILIZATION:

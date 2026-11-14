@@ -157,7 +157,10 @@ def _profile_pass() -> PassRecord:
         machine=Machine(), stock=Stock(width=300, height=200, thickness=19), safe_z=3.0, prime_spindle=False
     )
     record = acc.get_record("profile", tool)
-    record.add_moves([RapidMove(x=0.0, y=0.0, z=3.0), CutMove(z=0.0, feed=300.0), CutMove(x=1200.0, feed=1200.0)])
+    record.add_moves(
+        [RapidMove(x=0.0, y=0.0, z=3.0), CutMove(z=0.0, feed=300.0), CutMove(x=1200.0, feed=1200.0)],
+        feature_ids=("test",),
+    )
     return record
 
 

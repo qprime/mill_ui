@@ -174,10 +174,10 @@ def plan_edge_feature_passes(
             if not any(isinstance(move, CutMove) for move in pocket_moves):
                 accumulator.add_error(f"RaisedPanel '{entry.id}': required pocket produced no cutting moves")
                 continue
-            pocket_record.add_moves(pocket_moves, increment=1)
+            pocket_record.add_moves(pocket_moves, feature_ids=(entry.id,), increment=1)
         record = accumulator.get_record("edge", plan.tool)
         moves = profile_outline(plan.shape, record.setup, plan.depth_mm, step_down=stepdown_for_tool(plan.tool))
-        record.add_moves(moves, increment=1)
+        record.add_moves(moves, feature_ids=(entry.id,), increment=1)
 
 
 def _build_offset_shape(entry: EdgeFeatureInput, offset: float) -> Shape2D | None:

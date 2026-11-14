@@ -785,3 +785,110 @@ def test_auto_preflight_stops_after_four_failed_attempts(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="four bounded preflight attempts"):
         load_pml_asts(path, kerf_mm=3.175)
     assert len(calls) == 4
+
+
+@pytest.mark.parametrize("safe_z", [None, 9])
+def test_auto_preflight_and_emission_share_surface_and_face_preparation(tmp_path, monkeypatch, safe_z):
+    import cam.compilation as compilation
+    from cam.pipeline import run_pipeline
+
+    path = tmp_path / "surface.pml.yml"
+    source = PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto")
+    if safe_z is not None:
+        source = source.replace("  thickness: 19mm", f"  thickness: 19mm\n  safe_z: {safe_z}mm", 1)
+    source = "Surface: {depth-per-pass: 0.5mm, cool_every: 2, cool_dwell: 1s}\n" + source
+    source += """- Circle:
+    diameter: 8mm
+    at: {x: 50mm, y: 120mm}
+    feature: {type: hole, depth: 2mm, face: back}
+"""
+    path.write_text(source)
+    calls = []
+    from cam.planner.passes import plan_passes as original
+
+    def capture(planner_input, **kwargs):
+        result = original(planner_input, **kwargs)
+        calls.append((planner_input, kwargs, result[0]))
+        return result
+
+    monkeypatch.setattr(compilation, "plan_passes", capture)
+    (ast,) = compilation.load_pml_asts(path, kerf_mm=3.175)
+    preflight = calls.copy()
+    calls.clear()
+    result = run_pipeline(ast, generate_svg=False)
+    assert not result.errors
+    assert result.gcode
+    assert len(preflight) == len(calls) == 2
+    for planned in preflight:
+        emitted = next(call for call in calls if bool(call[0].profiles) == bool(planned[0].profiles))
+        assert planned[0] == emitted[0]
+        assert planned[1] == emitted[1]
+        assert planned[2] == emitted[2]
+        assert planned[1]["safe_z"] == (safe_z if safe_z is not None else 6)
+        assert planned[1]["stock"].width == 600
+        assert planned[1]["profile_opts"] == {"cut_through_mm": 0.2}
+    assert any(pocket.surface_cooling for call in preflight for pocket in call[0].pockets)
+
+
+def test_ownership_error_is_not_retried_by_automatic_preflight(tmp_path, monkeypatch):
+    from cam.compilation import load_pml_asts
+    from validation.toolpath_checks import PartCollision
+
+    calls = []
+
+    def ownership_error(*args, **kwargs):
+        calls.append(1)
+        return (PartCollision((), "ownership", 0, "ambiguous part ownership", retriable=False),)
+
+    monkeypatch.setattr("validation.toolpath_checks.verify_layout_cutting_clearance", ownership_error)
+    path = tmp_path / "ownership.pml.yml"
+    path.write_text(PACKED_BOX_PML.replace("layout_gap: 10mm", "layout_gap: auto"))
+    with pytest.raises(ValueError, match="ambiguous part ownership"):
+        load_pml_asts(path, kerf_mm=3.175)
+    assert len(calls) == 1
+
+
+def test_manufacturing_nesting_entrypoints_use_same_cutter_and_preserve_contract(tmp_path, monkeypatch):
+    import cli.nest as nest_cli
+    import cli.recipes as recipes_cli
+    from cam.compilation import saved_compilation_context
+    from cli.mill import _load_recipe_source
+    from layout_ast.layout import LayoutAST
+    from pml.yaml_parser import parse_nest_yaml
+
+    source = """Nest:
+  algorithm: maxrects
+  Sheet: {width: 300mm, height: 200mm, thickness: 6mm}
+  kerf: 7mm
+  margin: 10mm
+  parts:
+    - {name: panel, width: 100mm, height: 100mm, quantity: 2}
+"""
+    folder = _make_recipe(_make_root(tmp_path), "panels", "nested", {"job.nest.yml": source})
+    path = folder / "job.nest.yml"
+    recipe = recipe_at(folder)
+    assert recipe is not None
+    (expected,), requested = _load_recipe_source(path, None)
+    context = saved_compilation_context(expected)
+    assert context is not None
+    assert requested == 7
+    assert context.profile_diameter_mm != requested
+    geometry_only = nest_cli.nest_job(parse_nest_yaml(source))["output"][0]
+    assert geometry_only.items != expected.items
+    monkeypatch.setattr(sys, "argv", ["nest", str(path), "-o", str(folder / "nested")])
+    nest_cli.main()
+    restored = LayoutAST.from_json(str(folder / "nested" / "job_sheet_1.json"))
+    assert json.loads(restored.to_json()) == json.loads(expected.to_json())
+    manifest = json.loads((folder / "nested" / "job_manifest.json").read_text())
+    assert manifest["compilation"] == context.to_dict()
+    checked = []
+    original = nest_cli.nest_machining_job
+
+    def capture(job):
+        result, tools = original(job)
+        checked.extend(result["output"])
+        return result, tools
+
+    monkeypatch.setattr(recipes_cli, "nest_machining_job", capture)
+    assert not check_nest_recipe(recipe, load_machine_by_name("altmill_4x4"))
+    assert checked == [expected]

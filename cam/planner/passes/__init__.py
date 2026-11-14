@@ -55,7 +55,6 @@ class PassRecord:
     moves: list[Move] = field(default_factory=list)
     count: int = 0
     _cut_moves: int = field(init=False, repr=False)
-    feature_ids: tuple[str, ...] = ()
     move_ranges: list[tuple[int, int, tuple[str, ...]]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -68,13 +67,15 @@ class PassRecord:
     def setup_for(self, tool: ToolSelection) -> Setup:
         return replace(self.setup, tool=tool.as_model())
 
-    def add_moves(self, moves: Iterable[Move], *, increment: int = 0) -> None:
+    def add_moves(self, moves: Iterable[Move], *, feature_ids: tuple[str, ...], increment: int = 0) -> None:
+        if not feature_ids or not all(feature_ids):
+            raise ValueError("Planned moves require explicit contributing feature IDs")
         start = len(self.moves)
         for move in moves:
             self.moves.append(move)
             self._cut_moves += isinstance(move, CutMove)
         if len(self.moves) > start:
-            self.move_ranges.append((start, len(self.moves), self.feature_ids))
+            self.move_ranges.append((start, len(self.moves), feature_ids))
         if increment:
             self.count += int(increment)
 
@@ -96,7 +97,6 @@ class PassAccumulator:
         self._ramp_angle_deg = float(ramp_angle_deg)
         self._records: dict[tuple[str, float, str, str | None, float | None, float | None], PassRecord] = {}
         self._feature_tools: dict[str, ToolSelection] = {}
-        self.feature_ids: tuple[str, ...] = ()
         self._warnings: list[str] = []
         self._errors: list[str] = []
 
@@ -124,7 +124,6 @@ class PassAccumulator:
         key = pass_key(operation, tool)
         if key not in self._records:
             self._records[key] = self._make_record(operation, tool)
-        self._records[key].feature_ids = self.feature_ids
         return self._records[key]
 
     def set_feature_tool(self, feature_id: str, tool: ToolSelection) -> None:
@@ -191,25 +190,18 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     )
 
     for pocket in planner_input.pockets:
-        accumulator.feature_ids = (pocket.id,)
         plan_pocket_passes((pocket,), accumulator=accumulator, tool_db=tool_db, config=config)
     for hole in planner_input.holes:
-        accumulator.feature_ids = (hole.id,)
         plan_hole_passes((hole,), accumulator=accumulator, tool_db=tool_db)
     for engrave in planner_input.engraves:
-        accumulator.feature_ids = (engrave.id,)
         plan_engrave_passes((engrave,), accumulator=accumulator, tool_db=tool_db)
     for cleanup in planner_input.corner_cleanups:
-        accumulator.feature_ids = (cleanup.pocket_id,)
         plan_corner_cleanup_passes((cleanup,), accumulator=accumulator, tool_db=tool_db)
     for dogbone in planner_input.dogbones:
-        accumulator.feature_ids = (dogbone.pocket_id,)
         plan_dogbone_passes((dogbone,), accumulator=accumulator, tool_db=tool_db)
     for heightfield in planner_input.heightfields:
-        accumulator.feature_ids = (heightfield.id,)
         plan_heightfield_passes((heightfield,), accumulator=accumulator, tool_db=tool_db, config=config)
     for edge in planner_input.edge_features:
-        accumulator.feature_ids = (edge.id,)
         plan_edge_feature_passes((edge,), accumulator=accumulator, tool_db=tool_db)
 
     kerf_mm = planner_input.kerf_width_mm
@@ -260,7 +252,6 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
     deferred_releases: list[tuple[FeatureInput, Shape2D, Setup, ToolSelection, float]] = []
 
     def _add_profile_moves(rec: FeatureInput, shape: Shape2D, tool: ToolSelection, *, finishing: bool = False) -> None:
-        accumulator.feature_ids = (rec.id,)
         skin = _onion_skin_for_feature(rec)
         tabs = _tabs_for_feature(rec)
         nominal_depth = max(0.0, rec.depth_mm)
@@ -274,7 +265,9 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             rough_depth = max(0.0, nominal_depth - web)
             if rough_depth > 0.0:
                 record.add_moves(
-                    profile_outline(shape, setup, rough_depth, step_down=stepdown_for_tool(tool)), increment=1
+                    profile_outline(shape, setup, rough_depth, step_down=stepdown_for_tool(tool)),
+                    feature_ids=(rec.id,),
+                    increment=1,
                 )
         elif skin > 0.0:
             rough_moves, finish_depth = onion_skin_rough_moves(
@@ -285,7 +278,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                 onion_skin_mm=skin,
                 cut_through_mm=cut_through_mm,
             )
-            record.add_moves(rough_moves, increment=1)
+            record.add_moves(rough_moves, feature_ids=(rec.id,), increment=1)
             deferred_releases.append((rec, shape, setup, tool, finish_depth))
         else:
             adjusted_tabs = {**tabs, "height_mm": tabs["height_mm"] + cut_through_mm} if tabs else None
@@ -298,6 +291,7 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
                     onion_skin_mm=0.0,
                     tabs_opts=adjusted_tabs,
                 ),
+                feature_ids=(rec.id,),
                 increment=1,
             )
 
@@ -320,10 +314,13 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
             else ()
         )
         for group in groups:
-            accumulator.feature_ids = tuple(mergeable_profiles[index].id for index in group.profile_indices)
             record = accumulator.get_record("profile", profile_tool)
             merged_seams += plan_shared_profiles(
-                (group,), record=record, tool=profile_tool, cut_through_mm=cut_through_mm
+                (group,),
+                record=record,
+                tool=profile_tool,
+                cut_through_mm=cut_through_mm,
+                feature_ids=tuple(mergeable_profiles[index].id for index in group.profile_indices),
             )
         merged_indices = {index for group in groups for index in group.profile_indices}
     merged_ids = {id(mergeable_profiles[index]) for index in merged_indices}
@@ -472,10 +469,11 @@ def plan_passes(  # noqa: C901 — feature-type dispatcher (defer refactor)
         _add_profile_moves(feature, finish_shape, finish_tool, finishing=True)
 
     for feature, shape_def, deferred_setup, release_tool, finish_depth in deferred_releases:
-        accumulator.feature_ids = (feature.id,)
         release_record = accumulator.get_record("release", release_tool)
         release_record.add_moves(
-            onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth), increment=1
+            onion_skin_finish_moves(shape_def, setup=deferred_setup, finish_depth=finish_depth),
+            feature_ids=(feature.id,),
+            increment=1,
         )
 
     pass_records = accumulator.passes()

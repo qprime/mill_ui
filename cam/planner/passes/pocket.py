@@ -46,6 +46,7 @@ def _pocket_with_allowance(
     center: tuple[float, float],
     *,
     record: PassRecord,
+    feature_ids: tuple[str, ...],
     depth: float,
     start_depth: float,
     step_over: float,
@@ -72,20 +73,20 @@ def _pocket_with_allowance(
             stepdown=step_down,
             strategy=pocket_strategy,
         )
-        record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
+        record.add_moves(offset_moves_z(rough_moves, start_depth), feature_ids=feature_ids, increment=0)
 
     rough_profile_shape = offset_rect_shape(width, height, center, -(tool_r + rough_allowance_mm))
     if rough_profile_shape is not None:
         rough_profile_moves = profile_outline(
             rough_profile_shape, record.setup, depth_mm=cut_depth, step_down=step_down
         )
-        record.add_moves(offset_moves_z(rough_profile_moves, start_depth), increment=1)
+        record.add_moves(offset_moves_z(rough_profile_moves, start_depth), feature_ids=feature_ids, increment=1)
 
     finish_record = accumulator.get_record("finish", tool)
     finish_shape = offset_rect_shape(width, height, center, -(tool_r + finish_allowance_mm))
     if finish_shape is not None:
         finish_moves = profile_outline(finish_shape, finish_record.setup, depth_mm=cut_depth, step_down=step_down)
-        finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
+        finish_record.add_moves(offset_moves_z(finish_moves, start_depth), feature_ids=feature_ids, increment=1)
 
 
 def _offset_pocket_moves(
@@ -186,7 +187,7 @@ def _plan_rest_region(
         depth_mm=cut_depth,
         wall_allowance_mm=rest.finish_allowance_mm if single_pass else rest.rough_allowance_mm,
     )
-    rough_record.add_moves(offset_moves_z(rough_moves, start_depth), increment=1)
+    rough_record.add_moves(offset_moves_z(rough_moves, start_depth), feature_ids=(entry.id,), increment=1)
     if single_pass:
         return
 
@@ -205,7 +206,7 @@ def _plan_rest_region(
         move_comment(f"BEGIN rest loops count={len(loops)}"),
         *pocket_rest_loops(loops, rest_record.setup, depth_mm=cut_depth, stepdown=stepdown_for_tool(finish_tool)),
     ]
-    rest_record.add_moves(offset_moves_z(rest_moves, start_depth), increment=1)
+    rest_record.add_moves(offset_moves_z(rest_moves, start_depth), feature_ids=(entry.id,), increment=1)
 
 
 def _plan_rest_pocket(
@@ -273,14 +274,14 @@ def _plan_rest_pocket(
             stepdown=rough_step_down,
             strategy=config.pocket_strategy,
         )
-        rough_record.add_moves(offset_moves_z(rough_moves, start_depth), increment=0)
+        rough_record.add_moves(offset_moves_z(rough_moves, start_depth), feature_ids=(entry.id,), increment=0)
 
     rough_profile_shape = offset_rect_shape(width, height, center, -(rough_tool_r + rest.rough_allowance_mm))
     if rough_profile_shape is not None:
         rough_profile_moves = profile_outline(
             rough_profile_shape, rough_record.setup, depth_mm=cut_depth, step_down=rough_step_down
         )
-        rough_record.add_moves(offset_moves_z(rough_profile_moves, start_depth), increment=1)
+        rough_record.add_moves(offset_moves_z(rough_profile_moves, start_depth), feature_ids=(entry.id,), increment=1)
 
     rest_record = accumulator.get_record("pocket_rest", finish_tool)
 
@@ -309,14 +310,14 @@ def _plan_rest_pocket(
                 stepdown=finish_step_down,
                 strategy=config.pocket_strategy,
             )
-            rest_record.add_moves(offset_moves_z(corner_moves, start_depth), increment=0)
+            rest_record.add_moves(offset_moves_z(corner_moves, start_depth), feature_ids=(entry.id,), increment=0)
 
     finish_profile_shape = offset_rect_shape(width, height, center, -(finish_tool_r + rest.finish_allowance_mm))
     if finish_profile_shape is not None:
         finish_profile_moves = profile_outline(
             finish_profile_shape, rest_record.setup, depth_mm=cut_depth, step_down=finish_step_down
         )
-        rest_record.add_moves(offset_moves_z(finish_profile_moves, start_depth), increment=1)
+        rest_record.add_moves(offset_moves_z(finish_profile_moves, start_depth), feature_ids=(entry.id,), increment=1)
 
 
 def _plan_surface_pass(
@@ -353,7 +354,7 @@ def _plan_surface_pass(
         cool_every=sc.cool_every,
         cool_dwell_s=sc.cool_dwell_s,
     )
-    record.add_moves(offset_moves_z(moves, start_depth), increment=1)
+    record.add_moves(offset_moves_z(moves, start_depth), feature_ids=(entry.id,), increment=1)
 
 
 def _pocket_region(entry: FeatureInput) -> BaseGeometry | None:
@@ -496,7 +497,7 @@ def _plan_pocket_entry(
 
     if region is not None:
         moves = _offset_pocket_moves(region, tool, setup, depth_mm=cut_depth, wall_allowance_mm=rough_allowance)
-        record.add_moves(offset_moves_z(moves, start_depth), increment=1)
+        record.add_moves(offset_moves_z(moves, start_depth), feature_ids=(entry.id,), increment=1)
         if allowance_et is not None:
             finish_record = accumulator.get_record("finish", tool)
             finish_moves = [
@@ -509,7 +510,7 @@ def _plan_pocket_entry(
                     wall_allowance_mm=allowance_et.finish_allowance_mm or 0.0,
                 ),
             ]
-            finish_record.add_moves(offset_moves_z(finish_moves, start_depth), increment=1)
+            finish_record.add_moves(offset_moves_z(finish_moves, start_depth), feature_ids=(entry.id,), increment=1)
     elif shape_name == "rect":
         width = float(sg.w_mm or 0.0)
         height = float(sg.h_mm or 0.0)
@@ -522,6 +523,7 @@ def _plan_pocket_entry(
                 height,
                 center,
                 record=record,
+                feature_ids=(entry.id,),
                 depth=depth,
                 start_depth=start_depth,
                 step_over=step_over,
@@ -546,6 +548,7 @@ def _plan_pocket_entry(
                     finish_perimeter=config.pocket_finish_perimeter,
                     pocket_strategy=config.pocket_strategy,
                 ),
+                feature_ids=(entry.id,),
                 increment=1,
             )
     elif shape_name == "circle":
@@ -559,7 +562,7 @@ def _plan_pocket_entry(
             stepdown_mm=step_down,
             finish=True,
         )
-        record.add_moves(offset_moves_z(moves, start_depth), increment=1)
+        record.add_moves(offset_moves_z(moves, start_depth), feature_ids=(entry.id,), increment=1)
     else:
         return
 
@@ -587,6 +590,7 @@ def plan_hole_passes(
             peck = min(stepdown_for_tool(tool), 2.5)
             record.add_moves(
                 drill_peck([center], record.setup, depth_mm=depth, peck=peck),
+                feature_ids=(entry.id,),
                 increment=1,
             )
         elif diameter <= 3.0 * tool_diameter + eps:
@@ -594,6 +598,7 @@ def plan_hole_passes(
             step_down = stepdown_for_tool(tool)
             record.add_moves(
                 bore_helical(center, diameter, record.setup, depth_mm=depth, stepdown_mm=step_down),
+                feature_ids=(entry.id,),
                 increment=1,
             )
         else:
@@ -610,6 +615,7 @@ def plan_hole_passes(
                     stepdown_mm=step_down,
                     finish=True,
                 ),
+                feature_ids=(entry.id,),
                 increment=1,
             )
 
@@ -634,7 +640,7 @@ def plan_engrave_passes(
             moves = engrave_lines_ramped(lines, setup, z=-abs(depth), ramp_mm=entry.ramp_mm)
         else:
             moves = engrave_lines(lines, setup, z=-abs(depth))
-        record.add_moves(offset_moves_z(moves, entry.start_depth_mm), increment=len(lines))
+        record.add_moves(offset_moves_z(moves, entry.start_depth_mm), feature_ids=(entry.id,), increment=len(lines))
 
 
 def plan_corner_cleanup_passes(
@@ -680,7 +686,7 @@ def plan_corner_cleanup_passes(
             )
 
             moves = offset_moves_z(moves, start_depth)
-            record.add_moves(moves, increment=1)
+            record.add_moves(moves, feature_ids=(entry.pocket_id,), increment=1)
 
 
 _SQRT2_INV = 1.0 / math.sqrt(2.0)
@@ -768,7 +774,7 @@ def plan_dogbone_passes(
             peck = min(step_down, 2.5)
             moves = drill_peck(fillet_centers, setup, depth_mm=effective_depth, peck=peck)
             moves = offset_moves_z(moves, start_depth)
-            record.add_moves(moves, increment=len(fillet_centers))
+            record.add_moves(moves, feature_ids=(entry.pocket_id,), increment=len(fillet_centers))
         else:
             for center in fillet_centers:
                 moves = pocket_circle_concentric(
@@ -781,7 +787,7 @@ def plan_dogbone_passes(
                     finish=True,
                 )
                 moves = offset_moves_z(moves, start_depth)
-                record.add_moves(moves, increment=1)
+                record.add_moves(moves, feature_ids=(entry.pocket_id,), increment=1)
 
 
 def _pocket_center_from_corners(

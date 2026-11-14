@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from shapely.geometry import LineString, Point, box
+from shapely.geometry.base import BaseGeometry
 
 from cam.moves import CutMove, Move, XYMove
 from ir.removal_intent import Bounds2D
@@ -166,6 +167,7 @@ class PartCollision:
     part_id: str
     extra_gap_mm: float
     message: str
+    retriable: bool = True
 
 
 def _cutting_segments(
@@ -203,6 +205,8 @@ def verify_passes_preserve_parts(
     passes: Sequence[PassRecord],
     planner_input: PlannerInput,
     owners: Mapping[str, str],
+    *,
+    surface_ids: frozenset[str] = frozenset(),
 ) -> tuple[PartCollision, ...]:
     from shapely.strtree import STRtree
 
@@ -228,6 +232,8 @@ def verify_passes_preserve_parts(
     by_owner = {owners.get(p.id, p.id): region for p, region in retained}
     collisions: dict[tuple[tuple[str, ...], str], PartCollision] = {}
     for record, ids, segment in _cutting_segments(passes):
+        if ids and all(feature_id in surface_ids for feature_id in ids):
+            continue
         radius = record.setup.tool.diameter / 2
         bounds = segment.bounds
         query = box(bounds[0] - radius, bounds[1] - radius, bounds[2] + radius, bounds[3] + radius)
@@ -298,14 +304,74 @@ def verify_layout_cutting_clearance(
         for intent in intents
         if intent.part_id is not None
     }
-    collisions = verify_passes_preserve_parts(passes, planner_input, owners)
+    surface_ids = frozenset(
+        item.shape_id
+        for item in ast.items
+        if item.shape_id is not None and item.feature is not None and item.feature.type == "surface"
+    )
+    try:
+        owners = _infer_feature_owners(planner_input, owners, surface_ids)
+    except ValueError as exc:
+        return (PartCollision((), "ownership", 0, str(exc), retriable=False),)
+    collisions = verify_passes_preserve_parts(passes, planner_input, owners, surface_ids=surface_ids)
     return collisions + verify_passes_within_working_area(
         passes,
         ast.sheet.working_width_mm,
         ast.sheet.working_height_mm,
-        surface_ids=frozenset(
-            item.shape_id
-            for item in ast.items
-            if item.shape_id is not None and item.feature is not None and item.feature.type == "surface"
-        ),
+        surface_ids=surface_ids,
     )
+
+
+def _infer_feature_owners(
+    planner_input: PlannerInput, owners: Mapping[str, str], surface_ids: frozenset[str]
+) -> dict[str, str]:
+    from shapely.ops import unary_union
+
+    from cam.planner.passes.merge_shared_edges import profile_material_region
+    from cam.planner.planner_input import EdgeFeatureInput, FeatureInput
+    from core.geometry import engraving_paths
+
+    retained = [
+        (p, profile_material_region(p)) for p in planner_input.profiles if p.side == "outside" and p.depth_mm > 0
+    ]
+    resolved = dict(owners)
+    if len(retained) < 2:
+        return resolved
+    features: tuple[FeatureInput | EdgeFeatureInput, ...] = (
+        *planner_input.profiles,
+        *planner_input.pockets,
+        *planner_input.holes,
+        *planner_input.engraves,
+        *planner_input.edge_features,
+    )
+    profile_ids = {p.id for p, _ in retained}
+    for feature in features:
+        region: BaseGeometry
+        if feature.id in resolved or feature.id in profile_ids or feature.id in surface_ids:
+            continue
+        if feature.shape.lower() in {"rect", "polygon", "circle", "roundedrect"}:
+            region = profile_material_region(
+                FeatureInput(
+                    id=feature.id,
+                    shape=feature.shape,
+                    geometry=feature.geometry,
+                    center_xy_mm=feature.center_xy_mm,
+                    depth_mm=feature.depth_mm,
+                )
+            )
+        else:
+            paths = engraving_paths(feature.shape, feature.geometry.geometry, feature.center_xy_mm)
+            region = unary_union([LineString(path) for path in paths if len(path) >= 2])
+        candidates = [
+            p
+            for p, material in retained
+            if not region.is_empty and material.contains(region) and material.boundary.distance(region) > 1e-6
+        ]
+        if len(candidates) == 1:
+            resolved[feature.id] = owners.get(candidates[0].id, candidates[0].id)
+        elif any(material.intersects(region) for _, material in retained):
+            raise ValueError(
+                f"Feature '{feature.id}' has ambiguous part ownership; nest it under its part's shape "
+                "or set an explicit part_id. Ownership cannot be resolved by increasing part spacing."
+            )
+    return resolved

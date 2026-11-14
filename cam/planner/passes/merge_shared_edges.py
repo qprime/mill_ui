@@ -315,38 +315,35 @@ def merge_profiles(
 
 
 def plan_shared_profiles(
-    groups: Sequence[SharedProfileGroup], *, record: PassRecord, tool: ToolSelection, cut_through_mm: float
+    groups: Sequence[SharedProfileGroup],
+    *,
+    record: PassRecord,
+    tool: ToolSelection,
+    cut_through_mm: float,
+    feature_ids: tuple[str, ...],
 ) -> int:
     for group in groups:
-        group_ids = record.feature_ids
+        group_ids = feature_ids
         seam_ids = group.seam_feature_ids or tuple(group_ids for _ in group.seams)
         shapes = [
             *zip(group.seams, seam_ids, strict=True),
             *((shape, group_ids) for shape in (*group.unshared_contours, *group.outlines)),
         ]
         for shape, contributors in shapes:
-            record.feature_ids = contributors
             record.add_moves(
                 profile_outline(
                     shape, record.setup, group.depth_mm + cut_through_mm, step_down=stepdown_for_tool(tool)
                 ),
+                feature_ids=contributors,
                 increment=1,
             )
-        record.feature_ids = group_ids
     return sum(len(group.seams) for group in groups)
 
-
-merge_rect_profiles = merge_profiles
-plan_shared_rect_profiles = plan_shared_profiles
-validate_rect_profile_clearance = validate_profile_clearance
 
 __all__ = [
     "SharedProfileGroup",
     "merge_profiles",
-    "merge_rect_profiles",
     "plan_shared_profiles",
-    "plan_shared_rect_profiles",
     "profile_material_region",
     "validate_profile_clearance",
-    "validate_rect_profile_clearance",
 ]

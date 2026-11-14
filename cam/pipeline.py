@@ -9,14 +9,25 @@ from pathlib import Path
 from typing import Any
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from adapters.removal_to_planner import removal_intents_to_planner_input
-from cam.compilation import CompilationContext, compilation_context, saved_compilation_context
-from cam.config import Config
+from cam.compilation import (
+    DEFAULT_SAFE_Z_MM as DEFAULT_SAFE_Z_MM,
+)
+from cam.compilation import (
+    PROFILE_CUT_THROUGH_MM as PROFILE_CUT_THROUGH_MM,
+)
+from cam.compilation import (
+    CompilationContext,
+    back_face_ast,
+    compilation_context,
+    plan_face_passes,
+    prepare_face_input,
+    saved_compilation_context,
+)
 from cam.model.machine import Machine
 from cam.model.stock import Stock
 from cam.moves import CutMove, RapidMove
 from cam.planner.capabilities import audit_constraints
-from cam.planner.passes import PassRecord, plan_passes
+from cam.planner.passes import PassRecord
 from cam.planner.passes.summary import summarise_gcode_file
 from cam.planner.passes.tools import (
     ToolSelection,
@@ -31,7 +42,7 @@ from config.machine_loader import (
 )
 from core.constants import BACK_SVG_SUFFIX, PROJECT_KERF_MM, FeatureType
 from ir.removal_intent import RemovalIntent
-from layout_ast.layout import LayoutAST, mirror_item_about_x
+from layout_ast.layout import LayoutAST
 from validation.removal_checks import (
     check_back_face_support,
     check_cross_face_web,
@@ -48,8 +59,6 @@ from validation.toolpath_checks import (
 )
 
 NON_DETERMINISTIC_METRICS = frozenset({"timing"})
-DEFAULT_SAFE_Z_MM = 6.0
-PROFILE_CUT_THROUGH_MM = 0.2
 
 
 class GcodeNameCollisionError(ValueError):
@@ -106,37 +115,6 @@ class FaceOutput:
     hints_ms: float
     plan_ms: float
     gcode_ms: float
-
-
-def _attach_surface_cooling(planner_input, ast: LayoutAST):
-    from dataclasses import replace as _replace
-
-    from cam.planner.planner_input import SurfaceCooling
-
-    surface_map: dict[str, dict] = {}
-    for item in ast.items:
-        if item.params and "surface_cooling" in item.params:
-            surface_map[item.shape_id or ""] = item.params["surface_cooling"]
-
-    if not surface_map:
-        return planner_input
-
-    new_pockets = []
-    for pocket in planner_input.pockets:
-        sc_data = surface_map.get(pocket.id)
-        if sc_data is not None:
-            cooling = SurfaceCooling(
-                stepover_pct=sc_data["stepover_pct"],
-                direction=sc_data["direction"],
-                cool_every=sc_data["cool_every"],
-                cool_dwell_s=sc_data["cool_dwell_s"],
-                start_depth_mm=sc_data.get("start_depth_mm", 0.0),
-            )
-            new_pockets.append(_replace(pocket, surface_cooling=cooling))
-        else:
-            new_pockets.append(pocket)
-
-    return _replace(planner_input, pockets=tuple(new_pockets))
 
 
 TOOL_KIND_LABELS = {"v": "vbit"}
@@ -203,23 +181,12 @@ def _plan_and_emit_face(
     face: str,
 ) -> FaceOutput:
     hints_start = time.perf_counter()
-    planner_input = removal_intents_to_planner_input(
-        intents,
-        kerf_width_mm=kerf_mm,
-        warnings=warnings,
-    )
-    planner_input = _attach_surface_cooling(planner_input, ast)
+    planner_input = prepare_face_input(ast, intents, kerf_mm=kerf_mm, warnings=warnings)
     hints_ms = (time.perf_counter() - hints_start) * 1000
 
     plan_start = time.perf_counter()
-    passes, _, planner_warnings, planner_errors = plan_passes(
-        planner_input,
-        config=Config(),
-        tool_db=tools,
-        machine=machine,
-        stock=stock,
-        safe_z=safe_z,
-        profile_opts={"cut_through_mm": PROFILE_CUT_THROUGH_MM},
+    passes, _, planner_warnings, planner_errors = plan_face_passes(
+        planner_input, tools=tools, machine=machine, stock=stock, safe_z=safe_z
     )
     plan_ms = (time.perf_counter() - plan_start) * 1000
     warnings.extend(planner_warnings)
@@ -476,10 +443,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     back_intents: list[RemovalIntent] = []
     if back_items:
         try:
-            back_ast = replace(
-                ast,
-                items=tuple(mirror_item_about_x(item, ast.sheet.working_height_mm) for item in back_items),
-            )
+            back_ast = back_face_ast(ast)
         except ValueError as exc:
             errors.append(f"Back-face mirror: {exc}")
             return PipelineResult(

@@ -267,7 +267,28 @@ def test_two_source_recipe_writes_outputs_per_source(tmp_path: Path):
     names = sorted(path.name for path in (recipe.path / "output").iterdir())
 
     assert {"a.pml.svg", "b.pml.svg", "manifest.json"} <= set(names)
-    assert [name for name in names if name.endswith(".nc")] == ["a.pml.profile-3.17mm.nc", "b.pml.profile-3.17mm.nc"]
+    assert [name for name in names if name.endswith(".nc")] == ["a.pml.profile-9.53mm.nc", "b.pml.profile-9.53mm.nc"]
+
+
+def test_waste_cuts_preserve_holding_stock_for_the_larger_recipe_cutter(tmp_path: Path):
+    source = "kerf: 9.525mm\n" + PART_PML.replace("width: 300mm", "width: 600mm").replace(
+        "height: 200mm", "height: 500mm"
+    ).replace("x: 150mm", "x: 300mm").replace("y: 100mm", "y: 250mm")
+    source += """- WasteCuts:
+    min_width: 40mm
+    min_height: 40mm
+    margin: 5mm
+    tab_count: 2
+    tab_height: 3mm
+    strategy: largest
+"""
+    recipe = recipe_at(_make_recipe(_make_root(tmp_path), "panels", "offcuts", {"offcuts.pml.yml": source}))
+    assert recipe is not None
+
+    runs, _ = write_recipe_outputs(recipe, recipe.path / "output")
+
+    assert all(not run.result.errors for run in runs)
+    assert any((item.shape_id or "").startswith("waste_") for run in runs for item in run.result.ast.items)
 
 
 def test_gate_passes_with_no_recipes(tmp_path: Path):
@@ -505,7 +526,7 @@ def test_recipe_compiles_both_pml_and_nest_sources(tmp_path: Path):
     assert (recipe.path / "output" / "doors.nest_sheet_1.svg").exists()
     metrics = json.loads(outputs["metrics"].read_text())
     assert metrics["build"]["kerf_mm"] is None
-    assert metrics["build"]["source_kerfs_mm"] == {"part.pml.yml": 3.175, "doors.nest.yml": 6.35}
+    assert metrics["build"]["source_kerfs_mm"] == {"part.pml.yml": 9.525, "doors.nest.yml": 6.35}
 
 
 def test_nest_recipe_kerf_override_applies_to_packing_and_machining(tmp_path: Path):

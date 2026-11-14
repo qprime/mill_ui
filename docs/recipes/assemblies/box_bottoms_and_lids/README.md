@@ -18,9 +18,9 @@ to preserve the specified 80mm overall height.
 
 Sheet 1200 × 800 × 6mm mdf.
 
-- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 24 feature(s), to 3mm
-- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 496 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 77 contour(s), to 6.2mm
+- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 24 operation(s), to 3mm
+- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 496 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 80 operation(s), to 6.2mm
 
 ## Run
 
@@ -33,4 +33,4 @@ Sheet 1200 × 800 × 6mm mdf.
 - `machining_summary.json`
 - `metrics.json`
 - `pocket-3.17mm.nc`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

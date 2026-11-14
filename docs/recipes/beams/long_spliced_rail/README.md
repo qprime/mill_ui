@@ -10,9 +10,7 @@ A 2000mm laminated rail, longer than the sheet, spliced with staggered joints an
 
 Sheet 1220 × 1220 × 19mm mdf.
 
-Eight segments across three layers, with a 38mm center-layer tenon at each end. The outer layers each total 2000mm; the center layer totals 2076mm. Each segment fits the sheet's working area with profile clearance.
-
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 10 contour(s), to 19.2mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 10 operation(s), to 19.2mm
 
 ## Run
 
@@ -23,4 +21,4 @@ Eight segments across three layers, with a 38mm center-layer tenon at each end. 
 - `long_spliced_rail.svg`
 - `machining_summary.json`
 - `metrics.json`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

@@ -1,5 +1,5 @@
 project: production_sheet
-kerf: 6.35mm
+kerf: 9.525mm
 
 Sheet:
   working_width: 1200mm
@@ -12,15 +12,15 @@ Sheet:
 
 children:
   - AtPosition:
-      x: 320mm
-      y: 905mm
-      width: 600mm
-      height: 550mm
+      x: 321mm
+      y: 906mm
+      width: 602mm
+      height: 552mm
       child:
         Grid:
           rows: 2
           cols: 2
-          gap: 20mm
+          gap: 22mm
           children:
             - Cell:
                 children:
@@ -35,8 +35,8 @@ children:
                             tab_height: 3mm
                             tab_width: 10mm
                             feeds:
-                              rpm: 16000
-                              feed_xy: 1500
+                              rpm: 18000
+                              feed_xy: 4500
                         - Edge:
                             treatment: allowance
                             rough_allowance: 0.5mm
@@ -66,8 +66,8 @@ children:
                         - Pocket:
                             depth: 6mm
                             feeds:
-                              feed_xy: 800
-                              depth_per_pass: 3
+                              feed_xy: 2520
+                              depth_per_pass: 6
             - Rect:
                 id: drawer_front
                 label: "Drawer Front"

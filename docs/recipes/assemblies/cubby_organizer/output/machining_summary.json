@@ -13,63 +13,63 @@
       },
       "files": [
         {
-          "filename": "sheet_1.pocket-12.70mm.nc",
+          "filename": "sheet_1.pocket-9.53mm.nc",
           "operation": "pocket",
-          "tool_diameter_mm": 12.7,
-          "rpm": 14000.0,
-          "feed_xy_mm_min": 1400.0,
-          "feed_z_mm_min": 350.0,
-          "stepdown_mm": 3.5,
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2520.0,
+          "feed_z_mm_min": 630.0,
+          "stepdown_mm": 6.0,
           "max_depth_mm": 9.0,
-          "feature_count": 9,
+          "feature_count": 6,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 35.8
+          "estimated_runtime_min": 17.3
         },
         {
-          "filename": "sheet_1.dogbone-12.70mm.nc",
+          "filename": "sheet_1.dogbone-9.53mm.nc",
           "operation": "dogbone",
-          "tool_diameter_mm": 12.7,
-          "rpm": 14000.0,
-          "feed_xy_mm_min": 1400.0,
-          "feed_z_mm_min": 350.0,
-          "stepdown_mm": 3.5,
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2520.0,
+          "feed_z_mm_min": 630.0,
+          "stepdown_mm": 6.0,
           "max_depth_mm": 9.0,
-          "feature_count": 36,
+          "feature_count": 24,
           "strategy": "dogbone",
-          "estimated_runtime_min": 8.7
+          "estimated_runtime_min": 4.1
         },
         {
           "filename": "sheet_1.dogbone-3.17mm.nc",
           "operation": "dogbone",
           "tool_diameter_mm": 3.175,
-          "rpm": 20000.0,
-          "feed_xy_mm_min": 1200.0,
-          "feed_z_mm_min": 396.0,
-          "stepdown_mm": 1.5,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2160.0,
+          "feed_z_mm_min": 712.8,
+          "stepdown_mm": 2.0,
           "max_depth_mm": 18.0,
-          "feature_count": 84,
+          "feature_count": 46,
           "strategy": "dogbone",
-          "estimated_runtime_min": 59.5
+          "estimated_runtime_min": 14.7
         },
         {
-          "filename": "sheet_1.profile-3.17mm.nc",
+          "filename": "sheet_1.profile-9.53mm.nc",
           "operation": "profile",
-          "tool_diameter_mm": 3.175,
-          "rpm": 20000.0,
-          "feed_xy_mm_min": 1200.0,
-          "feed_z_mm_min": 396.0,
-          "stepdown_mm": 1.5,
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 4500.0,
+          "feed_z_mm_min": 1125.0,
+          "stepdown_mm": 6.0,
           "max_depth_mm": 18.2,
-          "feature_count": 47,
+          "feature_count": 10,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 126.4
+          "estimated_runtime_min": 9.5
         }
       ],
-      "total_runtime_min": 230.4,
+      "total_runtime_min": 45.6,
       "feature_counts": {
-        "pocket": 51,
-        "profile": 5
+        "pocket": 29,
+        "profile": 4
       },
       "safe_z_mm": 6.0
     },
@@ -85,67 +85,67 @@
       },
       "files": [
         {
-          "filename": "sheet_2.pocket-12.70mm.nc",
+          "filename": "sheet_2.pocket-9.53mm.nc",
           "operation": "pocket",
-          "tool_diameter_mm": 12.7,
-          "rpm": 14000.0,
-          "feed_xy_mm_min": 1400.0,
-          "feed_z_mm_min": 350.0,
-          "stepdown_mm": 3.5,
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2520.0,
+          "feed_z_mm_min": 630.0,
+          "stepdown_mm": 6.0,
           "max_depth_mm": 9.0,
-          "feature_count": 4,
+          "feature_count": 7,
           "strategy": "raster_pocket",
-          "estimated_runtime_min": 12.6
+          "estimated_runtime_min": 16.2
+        },
+        {
+          "filename": "sheet_2.dogbone-9.53mm.nc",
+          "operation": "dogbone",
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2520.0,
+          "feed_z_mm_min": 630.0,
+          "stepdown_mm": 6.0,
+          "max_depth_mm": 9.0,
+          "feature_count": 28,
+          "strategy": "dogbone",
+          "estimated_runtime_min": 4.4
         },
         {
           "filename": "sheet_2.dogbone-3.17mm.nc",
           "operation": "dogbone",
           "tool_diameter_mm": 3.175,
-          "rpm": 20000.0,
-          "feed_xy_mm_min": 1200.0,
-          "feed_z_mm_min": 396.0,
-          "stepdown_mm": 1.5,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 2160.0,
+          "feed_z_mm_min": 712.8,
+          "stepdown_mm": 2.0,
           "max_depth_mm": 18.0,
-          "feature_count": 92,
+          "feature_count": 130,
           "strategy": "dogbone",
-          "estimated_runtime_min": 64.9
+          "estimated_runtime_min": 40.8
         },
         {
-          "filename": "sheet_2.dogbone-12.70mm.nc",
-          "operation": "dogbone",
-          "tool_diameter_mm": 12.7,
-          "rpm": 14000.0,
-          "feed_xy_mm_min": 1400.0,
-          "feed_z_mm_min": 350.0,
-          "stepdown_mm": 3.5,
-          "max_depth_mm": 9.0,
-          "feature_count": 16,
-          "strategy": "dogbone",
-          "estimated_runtime_min": 3.5
-        },
-        {
-          "filename": "sheet_2.profile-3.17mm.nc",
+          "filename": "sheet_2.profile-9.53mm.nc",
           "operation": "profile",
-          "tool_diameter_mm": 3.175,
-          "rpm": 20000.0,
-          "feed_xy_mm_min": 1200.0,
-          "feed_z_mm_min": 396.0,
-          "stepdown_mm": 1.5,
+          "tool_diameter_mm": 9.525,
+          "rpm": 18000.0,
+          "feed_xy_mm_min": 4500.0,
+          "feed_z_mm_min": 1125.0,
+          "stepdown_mm": 6.0,
           "max_depth_mm": 18.2,
-          "feature_count": 41,
+          "feature_count": 44,
           "strategy": "contour",
           "cut_through_mm": 0.2,
-          "estimated_runtime_min": 89.2
+          "estimated_runtime_min": 11.4
         }
       ],
-      "total_runtime_min": 170.2,
+      "total_runtime_min": 72.8,
       "feature_counts": {
-        "pocket": 50,
-        "profile": 3
+        "pocket": 72,
+        "profile": 4
       },
       "safe_z_mm": 6.0
     }
   ],
-  "total_runtime_min": 400.6,
-  "kerf_mm": 3.175
+  "total_runtime_min": 118.4,
+  "kerf_mm": 9.525
 }

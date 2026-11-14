@@ -11,8 +11,8 @@ every 20mm (0, 20, 40, …, 600), cut out with a through profile.
 
 Sheet 700 × 250 × 18mm mdf.
 
-- `engrave-1.00mm.nc`: engrave, 1mm tool, 1996 feature(s), to 0.4mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 18.2mm
+- `engrave-1.00mm.nc`: engrave, 1mm tool, 1996 operation(s), to 0.4mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 1 operation(s), to 18.2mm
 
 ## Run
 
@@ -23,5 +23,5 @@ Sheet 700 × 250 × 18mm mdf.
 - `engrave-1.00mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`
 - `shop_ruler.svg`

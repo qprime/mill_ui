@@ -80,6 +80,7 @@ endmills:
     shank_diameter_mm: 6.35    # Shank diameter
     flutes: 2                  # Number of flutes
     type: upcut_spiral         # Tool type (see below)
+    purpose: general          # general | profile | pocket | surface; defaults to general
     v_angle_deg: 60            # Optional: V-bit angle (for v_bit type)
 ```
 
@@ -97,6 +98,57 @@ endmills:
 | ID | Rule |
 |----|------|
 | `MCH_ENDMILL_POSITIVE` | `diameter_mm > 0`, `flute_length_mm > 0` |
+
+### AltMill recipe tooling
+
+Recipes default to a 9.525mm (3/8-inch) profile cutter. These are modeled planning
+tools, authorized for recipe comparisons, rather than a claim about a verified
+make/model in the shop. The assumed spindle is a 1.5kW-class AltMill spindle;
+its actual power and the user's exact cutters have not been supplied.
+
+| Operation | Modeled cutter | Edges | RPM | Feed mm/min | Plunge mm/min | Stepdown mm | Stepover |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Profile | 3/8 carbide mortise compression | 2 | 18,000 | 4,500 | 1,125 | 6 | 40% |
+| Pocket / relief roughing | 3/8 PCD straight-plunge | 1 | 18,000 | 2,520 | 630 | 6 | 40% |
+
+The compression model assumes an upcut section shorter than the initial cut
+depth. The PCD model assumes a plunge-capable straight cutter, using Amana's
+DRB-422 family as a reference; an actual non-plunging PCD cutter requires a
+different entry strategy. Cutting diameter is modeled as exactly 9.525mm, with
+25.4mm flute length and shank diameter 9.525mm. Confirm those dimensions and
+entry capabilities against the actual cutter before using these modeled programs
+on the machine. No coating-based speed multiplier is applied.
+
+Dedicated tools participate only in automatic selection for their declared
+purpose. Pocket selection tries a dedicated pocket cutter first, retaining
+smaller general-purpose cutters where the geometry requires them. A diameter tie
+in profile selection favors a dedicated profile cutter. Surface cutters cannot
+be selected automatically for holes. Explicit named tools retain their existing
+behavior. The library's later equal-diameter hole entry remains the tie-break,
+preserving its longer-reach plunge tools.
+
+Legacy detail tools also have updated MDF planning feeds: 1/8-inch upcut at
+2,160mm/min and 2mm stepdown, 1/4-inch upcut at 3,600mm/min, 1mm engraving at
+1,200mm/min, V-bits at 1,800mm/min, and the small ball-nose finish cutter at
+1,800mm/min. Fine relief stepover and engraving depth are preserved. Existing
+surfacing parameters remain unchanged. Dedicated main-tool entries cover MDF and
+plywood; these are not automatic recommendations for other materials.
+
+The profile values are a deliberately reduced engineering estimate relative to
+[Centurion's two-flute compression chart](https://www.centuriontools.com/pages/cutting-chart),
+with shallower passes than its one-diameter reference. The PCD feed is close to
+the 100 IPM MDF reference at 18,000 RPM in
+[Amana's PCD plunge chart](https://www.amanatool.com/pub/media/productattachments/PCD-Down-Shear-Straight-Plunge-Speed-Chart-v4.pdf).
+Feed is computed as RPM × cutting edges × chipload; plunge rates are separate
+planning choices. The selected rates are below the motion limits in
+[Sienci's AltMill specifications](https://resources.sienci.com/view/am-about-your-altmill/).
+Those limits do not establish a safe material-removal rate or spindle capability.
+
+Recipe comparisons retain the existing rapid-rate estimator, safe-Z policy and
+spindle dwell. Estimated times exclude acceleration, manual tool changes,
+stock handling and physical cutting trials. See
+[recipe timing evidence](../docs/evidence/altmill_recipe_tooling/timings.csv)
+for every recipe's captured baseline and revised estimate.
 
 ## Spindle Schema
 

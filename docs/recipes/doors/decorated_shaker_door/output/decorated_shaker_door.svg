@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 673.175 875.175" width="673.175mm" height="875.175mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24.762 -64.763 679.525 881.525" width="679.5250000000001mm" height="881.5250000000001mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="673.175" height="875.175" fill="#1a1a1a" />
+  <rect x="-24.7625" y="-64.7625" width="679.5250000000001" height="881.5250000000001" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="500.000" height="700.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="500.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_bottom" />
@@ -50,76 +50,76 @@
     <rect x="490.000" y="10.000" width="10.000" height="680.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_right" />
   </g>
   <g id="PROFILE_CUTS" class="profile-cuts">
-    <path d="M 13.210 686.790 L 413.210 686.790 L 413.210 86.790 L 13.210 86.790 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
+    <path d="M 23.210 676.790 L 423.210 676.790 L 423.210 76.790 L 23.210 76.790 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_profile_0" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 11.623 688.377 L 414.798 688.377 L 414.798 85.202 L 11.623 85.202 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
+    <path d="M 18.448 681.553 L 427.973 681.553 L 427.973 72.027 L 18.448 72.027 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_profile_0_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
-    <path d="M 28.210 101.790 L 398.210 101.790 L 398.210 671.790 L 28.210 671.790 Z M 394.210 667.790 L 394.210 105.790 L 32.210 105.790 L 32.210 667.790 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_1_000" />
-    <rect x="63.210" y="136.790" width="300.000" height="500.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_pocket_2" />
+    <path d="M 38.210 91.790 L 408.210 91.790 L 408.210 661.790 L 38.210 661.790 Z M 404.210 657.790 L 404.210 95.790 L 42.210 95.790 L 42.210 657.790 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" fill-rule="evenodd" id="generated_border_1_000" />
+    <rect x="73.210" y="126.790" width="300.000" height="500.000" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_pocket_2" />
   </g>
   <g id="DIMENSIONS" class="dimensions">
-    <line x1="28.210000000000036" y1="101.78999999999996" x2="28.210000000000036" y2="81.78999999999996" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="398.21000000000004" y1="101.78999999999996" x2="398.21000000000004" y2="81.78999999999996" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="28.210000000000036" y1="81.78999999999996" x2="398.21000000000004" y2="81.78999999999996" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="28.210000000000036,81.78999999999996 31.210000000000036,78.78999999999996 31.210000000000036,84.78999999999996" fill="#5ab9ea" />
-    <polygon points="398.21000000000004,81.78999999999996 395.21000000000004,78.78999999999996 395.21000000000004,84.78999999999996" fill="#5ab9ea" />
-    <text x="213.21000000000004" y="76.78999999999996" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">370.0mm</text>
-    <line x1="398.21000000000004" y1="101.78999999999996" x2="418.21000000000004" y2="101.78999999999996" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="398.21000000000004" y1="671.79" x2="418.21000000000004" y2="671.79" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="418.21000000000004" y1="101.78999999999996" x2="418.21000000000004" y2="671.79" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="418.21000000000004,101.78999999999996 415.21000000000004,104.78999999999996 421.21000000000004,104.78999999999996" fill="#5ab9ea" />
-    <polygon points="418.21000000000004,671.79 415.21000000000004,668.79 421.21000000000004,668.79" fill="#5ab9ea" />
-    <text x="423.21000000000004" y="386.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 423.21000000000004 386.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">570.0mm</text>
-    <line x1="63.210000000000036" y1="136.78999999999994" x2="63.210000000000036" y2="96.78999999999994" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="363.21000000000004" y1="136.78999999999994" x2="363.21000000000004" y2="96.78999999999994" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="63.210000000000036" y1="96.78999999999994" x2="363.21000000000004" y2="96.78999999999994" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="63.210000000000036,96.78999999999994 66.21000000000004,93.78999999999994 66.21000000000004,99.78999999999994" fill="#5ab9ea" />
-    <polygon points="363.21000000000004,96.78999999999994 360.21000000000004,93.78999999999994 360.21000000000004,99.78999999999994" fill="#5ab9ea" />
-    <text x="213.21000000000004" y="91.78999999999994" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
-    <line x1="363.21000000000004" y1="136.78999999999994" x2="403.21000000000004" y2="136.78999999999994" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="363.21000000000004" y1="636.79" x2="403.21000000000004" y2="636.79" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="403.21000000000004" y1="136.78999999999994" x2="403.21000000000004" y2="636.79" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="403.21000000000004,136.78999999999994 400.21000000000004,139.78999999999994 406.21000000000004,139.78999999999994" fill="#5ab9ea" />
-    <polygon points="403.21000000000004,636.79 400.21000000000004,633.79 406.21000000000004,633.79" fill="#5ab9ea" />
-    <text x="408.21000000000004" y="386.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 408.21000000000004 386.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">500.0mm</text>
-    <line x1="13.210000000000036" y1="86.78999999999996" x2="13.210000000000036" y2="26.789999999999964" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="413.21000000000004" y1="86.78999999999996" x2="413.21000000000004" y2="26.789999999999964" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="13.210000000000036" y1="26.789999999999964" x2="413.21000000000004" y2="26.789999999999964" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="13.210000000000036,26.789999999999964 16.210000000000036,23.789999999999964 16.210000000000036,29.789999999999964" fill="#5ab9ea" />
-    <polygon points="413.21000000000004,26.789999999999964 410.21000000000004,23.789999999999964 410.21000000000004,29.789999999999964" fill="#5ab9ea" />
-    <text x="213.21000000000004" y="21.789999999999964" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">400.0mm</text>
-    <line x1="413.21000000000004" y1="86.78999999999996" x2="473.21000000000004" y2="86.78999999999996" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="413.21000000000004" y1="686.79" x2="473.21000000000004" y2="686.79" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="473.21000000000004" y1="86.78999999999996" x2="473.21000000000004" y2="686.79" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="473.21000000000004,86.78999999999996 470.21000000000004,89.78999999999996 476.21000000000004,89.78999999999996" fill="#5ab9ea" />
-    <polygon points="473.21000000000004,686.79 470.21000000000004,683.79 476.21000000000004,683.79" fill="#5ab9ea" />
-    <text x="478.21000000000004" y="386.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 478.21000000000004 386.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">600.0mm</text>
+    <line x1="38.210000000000036" y1="91.78999999999996" x2="38.210000000000036" y2="71.78999999999996" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="408.21000000000004" y1="91.78999999999996" x2="408.21000000000004" y2="71.78999999999996" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="38.210000000000036" y1="71.78999999999996" x2="408.21000000000004" y2="71.78999999999996" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="38.210000000000036,71.78999999999996 41.210000000000036,68.78999999999996 41.210000000000036,74.78999999999996" fill="#5ab9ea" />
+    <polygon points="408.21000000000004,71.78999999999996 405.21000000000004,68.78999999999996 405.21000000000004,74.78999999999996" fill="#5ab9ea" />
+    <text x="223.21000000000004" y="66.78999999999996" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">370.0mm</text>
+    <line x1="408.21000000000004" y1="91.78999999999996" x2="428.21000000000004" y2="91.78999999999996" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="408.21000000000004" y1="661.79" x2="428.21000000000004" y2="661.79" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="428.21000000000004" y1="91.78999999999996" x2="428.21000000000004" y2="661.79" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="428.21000000000004,91.78999999999996 425.21000000000004,94.78999999999996 431.21000000000004,94.78999999999996" fill="#5ab9ea" />
+    <polygon points="428.21000000000004,661.79 425.21000000000004,658.79 431.21000000000004,658.79" fill="#5ab9ea" />
+    <text x="433.21000000000004" y="376.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 433.21000000000004 376.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">570.0mm</text>
+    <line x1="73.21000000000004" y1="126.78999999999994" x2="73.21000000000004" y2="86.78999999999994" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="373.21000000000004" y1="126.78999999999994" x2="373.21000000000004" y2="86.78999999999994" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="73.21000000000004" y1="86.78999999999994" x2="373.21000000000004" y2="86.78999999999994" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="73.21000000000004,86.78999999999994 76.21000000000004,83.78999999999994 76.21000000000004,89.78999999999994" fill="#5ab9ea" />
+    <polygon points="373.21000000000004,86.78999999999994 370.21000000000004,83.78999999999994 370.21000000000004,89.78999999999994" fill="#5ab9ea" />
+    <text x="223.21000000000004" y="81.78999999999994" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">300.0mm</text>
+    <line x1="373.21000000000004" y1="126.78999999999994" x2="413.21000000000004" y2="126.78999999999994" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="373.21000000000004" y1="626.79" x2="413.21000000000004" y2="626.79" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="413.21000000000004" y1="126.78999999999994" x2="413.21000000000004" y2="626.79" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="413.21000000000004,126.78999999999994 410.21000000000004,129.78999999999994 416.21000000000004,129.78999999999994" fill="#5ab9ea" />
+    <polygon points="413.21000000000004,626.79 410.21000000000004,623.79 416.21000000000004,623.79" fill="#5ab9ea" />
+    <text x="418.21000000000004" y="376.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 418.21000000000004 376.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">500.0mm</text>
+    <line x1="23.210000000000036" y1="76.78999999999996" x2="23.210000000000036" y2="16.789999999999964" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="423.21000000000004" y1="76.78999999999996" x2="423.21000000000004" y2="16.789999999999964" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="23.210000000000036" y1="16.789999999999964" x2="423.21000000000004" y2="16.789999999999964" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="23.210000000000036,16.789999999999964 26.210000000000036,13.789999999999964 26.210000000000036,19.789999999999964" fill="#5ab9ea" />
+    <polygon points="423.21000000000004,16.789999999999964 420.21000000000004,13.789999999999964 420.21000000000004,19.789999999999964" fill="#5ab9ea" />
+    <text x="223.21000000000004" y="11.789999999999964" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">400.0mm</text>
+    <line x1="423.21000000000004" y1="76.78999999999996" x2="483.21000000000004" y2="76.78999999999996" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="423.21000000000004" y1="676.79" x2="483.21000000000004" y2="676.79" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="483.21000000000004" y1="76.78999999999996" x2="483.21000000000004" y2="676.79" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="483.21000000000004,76.78999999999996 480.21000000000004,79.78999999999996 486.21000000000004,79.78999999999996" fill="#5ab9ea" />
+    <polygon points="483.21000000000004,676.79 480.21000000000004,673.79 486.21000000000004,673.79" fill="#5ab9ea" />
+    <text x="488.21000000000004" y="376.78999999999996" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 488.21000000000004 376.78999999999996)" fill="#5ab9ea" font-family="monospace" font-size="10px">600.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
-    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
-    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+    <text x="-14.7625" y="-50.7625" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-14.7625" y="-36.7625" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="519.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
-    <line x1="519.5875" y1="-29.5875" x2="534.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="539.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
-    <line x1="519.5875" y1="-13.587499999999999" x2="534.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
-    <text x="539.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="519.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="539.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="519.5875" y1="18.4125" x2="534.5875" y2="18.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="539.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="519.5875" y1="34.4125" x2="534.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" />
-    <text x="539.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <text x="522.7625" y="-50.7625" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="522.7625" y1="-32.7625" x2="537.7625" y2="-32.7625" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="542.7625" y="-29.762500000000003" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="522.7625" y1="-16.762500000000003" x2="537.7625" y2="-16.762500000000003" stroke="#e8e8e8" stroke-width="2" />
+    <text x="542.7625" y="-13.762500000000003" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="522.7625" y="-3.762500000000003" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="542.7625" y="2.237499999999997" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="522.7625" y1="15.237499999999997" x2="537.7625" y2="15.237499999999997" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="542.7625" y="18.237499999999997" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="522.7625" y1="31.237499999999997" x2="537.7625" y2="31.237499999999997" stroke="#5ab9ea" stroke-width="1" />
+    <text x="542.7625" y="34.2375" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20.0" y="731.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20.0" y="743.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 500.0 × 700.0 × 19.0mm</text>
-    <text x="20.0" y="755.5875" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
-    <text x="20.0" y="767.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 2 pockets, 1 profile</text>
-    <text x="20.0" y="779.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="791.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm, 6.0mm</text>
+    <text x="20.0" y="734.7625" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="746.7625" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 500.0 × 700.0 × 19.0mm</text>
+    <text x="20.0" y="758.7625" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="770.7625" fill="#cccccc" font-family="monospace" font-size="10px">Features: 2 pockets, 1 profile</text>
+    <text x="20.0" y="782.7625" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="794.7625" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 3.0mm, 6.0mm</text>
   </g>
 </svg>

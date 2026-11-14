@@ -14,9 +14,9 @@ every edge while preserving the specified 160 × 110 × 70mm box dimensions.
 
 Sheet 600 × 400 × 6mm mdf.
 
-- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 4 feature(s), to 3mm
-- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 72 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 17 contour(s), to 6.2mm
+- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 4 operation(s), to 3mm
+- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 72 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 17 operation(s), to 6.2mm
 
 ## Run
 
@@ -29,4 +29,4 @@ Sheet 600 × 400 × 6mm mdf.
 - `machining_summary.json`
 - `metrics.json`
 - `pocket-3.17mm.nc`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

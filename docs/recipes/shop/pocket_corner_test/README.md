@@ -10,12 +10,12 @@ Identical 120 × 80 × 10mm pockets in a row, each finished a different way: pla
 
 Sheet 1000 × 300 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 6 feature(s), to 10mm
-- `pocket_rest-3.17mm.nc`: pocket_rest, 3.175mm tool, 1 feature(s), to 10mm
-- `finish-12.70mm.nc`: finish, 12.7mm tool, 1 feature(s), to 10mm
-- `corner_cleanup-3.17mm.nc`: corner_cleanup, 3.175mm tool, 4 feature(s), to 10mm
-- `dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 4 feature(s), to 10mm
-- `dogbone-6.35mm.nc`: dogbone, 6.35mm tool, 4 feature(s), to 10mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 6 operation(s), to 10mm
+- `pocket_rest-3.17mm.nc`: pocket_rest, 3.175mm tool, 1 operation(s), to 10mm
+- `finish-9.53mm.nc`: finish, 9.525mm tool, 1 operation(s), to 10mm
+- `corner_cleanup-3.17mm.nc`: corner_cleanup, 3.175mm tool, 4 operation(s), to 10mm
+- `dogbone-9.53mm.nc`: dogbone, 9.525mm tool, 4 operation(s), to 10mm
+- `dogbone-6.35mm.nc`: dogbone, 6.35mm tool, 4 operation(s), to 10mm
 
 ## Run
 
@@ -24,11 +24,11 @@ Sheet 1000 × 300 × 19mm mdf.
 ## Outputs
 
 - `corner_cleanup-3.17mm.nc`
-- `dogbone-12.70mm.nc`
 - `dogbone-6.35mm.nc`
-- `finish-12.70mm.nc`
+- `dogbone-9.53mm.nc`
+- `finish-9.53mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
+- `pocket-9.53mm.nc`
 - `pocket_corner_test.svg`
 - `pocket_rest-3.17mm.nc`

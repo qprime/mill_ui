@@ -10,7 +10,7 @@ A shop sign with engraved text and engraved line and spline borders.
 
 Sheet 600 × 400 × 19mm mdf.
 
-- `engrave-1.00mm.nc`: engrave, 1mm tool, 282 feature(s), to 1mm
+- `engrave-1.00mm.nc`: engrave, 1mm tool, 282 operation(s), to 1mm
 
 ## Run
 

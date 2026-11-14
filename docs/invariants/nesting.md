@@ -25,6 +25,11 @@
 
 ## Assembly and Beam Perimeter Clearance
 
+Waste-cut decomposition uses the resolved profile diameter. With tabs or onion
+skin anywhere in the job, it reserves two diameters between parts and offcuts
+and between offcuts. The declared waste margin adds clearance around existing
+parts. Waste profiles still pass the ordinary planner holding and sweep checks.
+
 Machining-aware assembly partitioning and row-wrapped assembly/beam placement
 reserve the selected profile cutter diameter inside the working-area boundary.
 The context arrives from orchestration before resolution, including when the

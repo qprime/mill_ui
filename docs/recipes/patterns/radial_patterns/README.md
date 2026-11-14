@@ -18,9 +18,9 @@ ends at 405°; a full circle starting at 90° ends at 450°.
 
 Sheet 1000 × 400 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 16 feature(s), to 4mm
-- `engrave-1.00mm.nc`: engrave, 1mm tool, 270 feature(s), to 0.5mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 3 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 16 operation(s), to 4mm
+- `engrave-1.00mm.nc`: engrave, 1mm tool, 270 operation(s), to 0.5mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 3 operation(s), to 19.2mm
 
 ## Run
 
@@ -31,6 +31,6 @@ Sheet 1000 × 400 × 19mm mdf.
 - `engrave-1.00mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`
 - `radial_patterns.svg`

@@ -58,7 +58,10 @@ class CompilationContext:
         return MachiningClearance(diameter)
 
     def tool_db(self) -> list[dict[str, Any]]:
-        return [asdict(tool) for tool in self.tools]
+        return [
+            {key: value for key, value in asdict(tool).items() if key != "purpose" or value != "general"}
+            for tool in self.tools
+        ]
 
     def to_dict(self) -> dict[str, Any]:
         payload = {

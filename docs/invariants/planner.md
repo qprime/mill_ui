@@ -159,6 +159,16 @@ Bridges between contours must not replace a required boundary segment.
 
 ## Outside Profiles and Shared Cuts
 
+Tool-library purpose restricts automatic flat-tool selection. Dedicated profile,
+pocket and surface cutters are eligible only for that operation; general tools
+remain eligible for all operations and holes. A dedicated pocket cutter is tried
+before general cutters, with geometry checks retaining smaller detail tools when
+it does not fit. Profile selection matches the requested kerf and prefers a
+dedicated profile tool on a diameter tie. Hole selection uses the largest fitting
+general cutter, independently of library ordering. Explicit named-tool requests
+retain their existing behavior. Compilation snapshots preserve dedicated purposes;
+legacy general-tool snapshots keep their existing representation.
+
 Rectangle profiles use the canonical closed-profile operation with the requested
 `inside`, `outside`, or `on` cutter offset. Isolated or incompatible profiles keep
 their feed overrides, allowances, and existing holding operations.

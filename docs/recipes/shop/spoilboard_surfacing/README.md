@@ -15,7 +15,7 @@ recipes instead show a shaded 10mm no-cut border.
 
 Sheet 1220 × 1220 × 19mm mdf.
 
-- `surface-25.40mm.nc`: surface, 25.4mm tool, 1 feature(s), to 0.5mm
+- `surface-25.40mm.nc`: surface, 25.4mm tool, 1 operation(s), to 0.5mm
 
 ## Run
 

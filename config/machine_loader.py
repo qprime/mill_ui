@@ -7,6 +7,8 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+from core.constants import TOOL_PURPOSES
+
 
 @dataclass(frozen=True)
 class SoftLimits:
@@ -185,8 +187,13 @@ class Endmill:
     type: str
     v_angle_deg: float | None = None
     roundover_radius_mm: float | None = None
+    purpose: str = "general"
 
     def __post_init__(self):
+        if self.purpose not in TOOL_PURPOSES:
+            raise ValueError(
+                f"Endmill '{self.name}': purpose must be one of {sorted(TOOL_PURPOSES)}, got {self.purpose!r}"
+            )
         if self.diameter_mm <= 0:
             raise ValueError(f"Endmill diameter must be positive, got {self.diameter_mm}")
         if self.flute_length_mm <= 0:
@@ -282,6 +289,8 @@ def resolve_tool_selection(endmill: Endmill, feeds: FeedsEntry) -> dict[str, Any
         "depth_per_pass": feeds.depth_per_pass,
         "rotation": rotation,
     }
+    if endmill.purpose != "general":
+        result["purpose"] = endmill.purpose
     if feeds.stepover_percent is not None:
         result["stepover_percent"] = feeds.stepover_percent
     if endmill.v_angle_deg is not None:
@@ -412,6 +421,7 @@ def load_endmills(path: Path | str) -> list[Endmill]:
             type=item.get("type", "unknown"),
             v_angle_deg=float(item["v_angle_deg"]) if "v_angle_deg" in item else None,
             roundover_radius_mm=float(item["roundover_radius_mm"]) if "roundover_radius_mm" in item else None,
+            purpose=item.get("purpose", "general"),
         )
         endmills.append(endmill)
 

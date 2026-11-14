@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-21.587 -61.587 773.175 587.175" width="773.175mm" height="587.175mm">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24.762 -64.763 779.525 593.525" width="779.5250000000001mm" height="593.525mm">
   <style>.default { stroke: #e8e8e8; fill: none; stroke-width: 1; }
 .sheet-outline { stroke: #6b8e7f; fill: none; stroke-width: 1; stroke-dasharray: 2,2; }
 .profile { stroke: #e8e8e8; fill: none; stroke-width: 2; }
@@ -41,7 +41,7 @@
 .beam-dim-text { fill: #5ab9ea; font-family: monospace; font-size: 8px; }
 .beam-segment-text { fill: #5ab9ea; font-family: monospace; font-size: 7px; }
 .heightfield-border { stroke: #ffcc00; fill: none; stroke-width: 1; stroke-dasharray: 4,2; }</style>
-  <rect x="-21.5875" y="-61.5875" width="773.175" height="587.175" fill="#1a1a1a" />
+  <rect x="-24.7625" y="-64.7625" width="779.5250000000001" height="593.525" fill="#1a1a1a" />
   <g id="SHEET_OUTLINE" class="sheet-outline">
     <rect x="0.000" y="0.000" width="600.000" height="400.000" stroke="#6b8e7f" fill="none" stroke-width="1" stroke-dasharray="2,2" id="sheet_boundary" />
     <rect x="0.000" y="0.000" width="600.000" height="10.000" fill="#ff6b6b" fill-opacity="0.15" id="margin_bottom" />
@@ -55,9 +55,9 @@
     <path d="M 470.754 296.514 L 471.100 298.473 L 472.094 300.195 L 473.618 301.474 L 475.487 302.154 L 477.477 302.154 L 479.346 301.474 L 480.870 300.195 L 481.865 298.473 L 482.210 296.514 L 481.865 294.554 L 480.870 292.832 L 479.346 291.553 L 477.477 290.873 L 475.487 290.873 L 473.618 291.553 L 472.094 292.832 L 471.100 294.554 L 470.754 296.514 Z" stroke="#e8e8e8" fill="none" stroke-width="2" id="generated_svg_002" />
   </g>
   <g id="PROFILE_TOOLPATHS" class="profile-toolpaths">
-    <path d="M 428.749 371.053 L 434.930 366.409 L 439.849 362.510 L 444.430 358.651 L 448.662 354.830 L 452.529 351.046 L 456.019 347.295 L 459.117 343.575 L 461.810 339.882 L 464.080 336.213 L 465.912 332.563 L 467.284 328.929 L 468.175 325.309 L 468.560 321.708 L 468.416 318.136 L 467.727 314.609 L 466.483 311.148 L 464.801 307.936 L 462.819 305.141 L 460.573 302.761 L 458.104 300.805 L 455.457 299.278 L 452.676 298.185 L 449.804 297.527 L 446.888 297.308 L 443.971 297.527 L 441.100 298.185 L 438.318 299.278 L 435.671 300.805 L 433.203 302.761 L 430.957 305.141 L 428.975 307.936 L 428.749 308.367 L 428.524 307.936 L 426.542 305.141 L 424.296 302.761 L 421.828 300.805 L 419.180 299.278 L 416.399 298.185 L 413.527 297.527 L 410.611 297.308 L 407.694 297.527 L 404.823 298.185 L 402.041 299.278 L 399.394 300.805 L 396.926 302.761 L 394.680 305.141 L 392.698 307.936 L 391.015 311.148 L 389.772 314.609 L 389.082 318.136 L 388.939 321.708 L 389.324 325.309 L 390.215 328.929 L 391.587 332.563 L 393.418 336.213 L 395.689 339.882 L 398.381 343.575 L 401.480 347.295 L 404.970 351.046 L 408.837 354.830 L 413.068 358.651 L 417.650 362.510 L 422.568 366.409 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_000_toolpath" />
-    <path d="M 523.637 291.429 L 514.104 318.872 L 485.059 319.461 L 484.702 320.559 L 507.846 338.104 L 499.438 365.913 L 500.372 366.591 L 524.215 349.999 L 548.058 366.591 L 548.991 365.913 L 540.584 338.104 L 563.728 320.559 L 563.371 319.461 L 534.326 318.872 L 524.793 291.429 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_001_toolpath" />
-    <path d="M 469.142 296.514 L 469.585 299.024 L 470.859 301.232 L 472.812 302.870 L 475.208 303.742 L 477.757 303.742 L 480.152 302.870 L 482.105 301.232 L 483.379 299.024 L 483.822 296.514 L 483.379 294.003 L 482.105 291.796 L 480.152 290.157 L 477.757 289.285 L 475.208 289.285 L 472.812 290.157 L 470.859 291.796 L 469.585 294.003 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_002_toolpath" />
+    <path d="M 428.749 375.025 L 436.870 368.922 L 441.858 364.969 L 446.518 361.045 L 450.837 357.144 L 454.803 353.263 L 458.403 349.394 L 461.623 345.528 L 464.446 341.656 L 466.855 337.764 L 468.824 333.839 L 470.321 329.872 L 471.309 325.860 L 471.741 321.814 L 471.579 317.766 L 470.797 313.763 L 469.397 309.869 L 467.514 306.274 L 465.280 303.123 L 462.724 300.415 L 459.893 298.172 L 456.839 296.410 L 453.616 295.143 L 450.280 294.379 L 446.888 294.124 L 443.495 294.379 L 440.160 295.143 L 436.936 296.410 L 433.882 298.172 L 431.051 300.415 L 428.749 302.854 L 426.447 300.415 L 423.616 298.172 L 420.562 296.410 L 417.339 295.143 L 414.003 294.379 L 410.611 294.124 L 407.219 294.379 L 403.883 295.143 L 400.660 296.410 L 397.605 298.172 L 394.774 300.415 L 392.219 303.123 L 389.984 306.274 L 388.101 309.869 L 386.702 313.763 L 385.920 317.766 L 385.757 321.814 L 386.190 325.860 L 387.177 329.872 L 388.675 333.839 L 390.644 337.764 L 393.052 341.656 L 395.876 345.528 L 399.096 349.394 L 402.696 353.263 L 406.662 357.144 L 410.981 361.045 L 415.641 364.969 L 420.628 368.922 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_000_toolpath" />
+    <path d="M 522.482 285.079 L 511.830 315.743 L 479.376 316.400 L 478.306 319.694 L 504.167 339.300 L 494.773 370.373 L 497.573 372.406 L 524.215 353.867 L 550.857 372.406 L 553.657 370.373 L 544.262 339.300 L 570.124 319.694 L 569.053 316.400 L 536.600 315.743 L 525.948 285.079 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_001_toolpath" />
+    <path d="M 465.918 296.514 L 466.555 300.127 L 468.390 303.304 L 471.200 305.662 L 474.648 306.917 L 478.317 306.917 L 481.764 305.662 L 484.575 303.304 L 486.409 300.127 L 487.046 296.514 L 486.409 292.900 L 484.575 289.723 L 481.764 287.365 L 478.317 286.110 L 474.648 286.110 L 471.200 287.365 L 468.390 289.723 L 466.555 292.900 Z" stroke="#5ab9ea" fill="none" stroke-width="1" stroke-dasharray="4,2" id="generated_svg_002_toolpath" />
   </g>
   <g id="POCKET_REGIONS" class="pocket-regions">
     <path d="M 238.749 369.067 L 233.538 365.152 L 228.655 361.281 L 224.112 357.455 L 219.925 353.674 L 216.107 349.937 L 212.672 346.245 L 209.634 342.598 L 207.007 338.996 L 204.805 335.438 L 203.043 331.925 L 201.734 328.457 L 200.891 325.034 L 200.530 321.655 L 200.664 318.321 L 201.307 315.032 L 202.472 311.788 L 204.054 308.767 L 205.911 306.150 L 208.002 303.934 L 210.289 302.122 L 212.732 300.713 L 215.293 299.706 L 217.932 299.102 L 220.611 298.900 L 223.289 299.102 L 225.929 299.706 L 228.490 300.713 L 230.933 302.122 L 233.220 303.934 L 235.311 306.150 L 237.167 308.767 L 238.749 311.788 L 240.331 308.767 L 242.188 306.150 L 244.279 303.934 L 246.566 302.122 L 249.009 300.713 L 251.570 299.706 L 254.209 299.102 L 256.888 298.900 L 259.566 299.102 L 262.206 299.706 L 264.766 300.713 L 267.210 302.122 L 269.497 303.934 L 271.588 306.150 L 273.444 308.767 L 275.026 311.788 L 276.192 315.032 L 276.835 318.321 L 276.969 321.655 L 276.607 325.034 L 275.765 328.457 L 274.456 331.925 L 272.693 335.438 L 270.492 338.996 L 267.865 342.598 L 264.827 346.245 L 261.392 349.937 L 257.574 353.674 L 253.387 357.455 L 248.844 361.281 L 243.960 365.152 L 238.749 369.067 Z" stroke="#6496c8" fill="#6496c8" fill-opacity="0.2" stroke-width="1.5" id="generated_svg_000" />
@@ -130,12 +130,12 @@
     <polygon points="487.89979297768673,274.604228339154 490.89979297768673,271.604228339154 490.89979297768673,277.604228339154" fill="#5ab9ea" />
     <polygon points="560.53,274.604228339154 557.53,271.604228339154 557.53,277.604228339154" fill="#5ab9ea" />
     <text x="524.2148964888434" y="269.604228339154" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">72.6mm</text>
-    <line x1="560.53" y1="294.604228339154" x2="621.5875" y2="294.604228339154" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="560.53" y1="363.6831160906601" x2="621.5875" y2="363.6831160906601" stroke="#5ab9ea" stroke-width="1" />
-    <line x1="621.5875" y1="294.604228339154" x2="621.5875" y2="363.6831160906601" stroke="#5ab9ea" stroke-width="1" />
-    <polygon points="621.5875,294.604228339154 618.5875,297.604228339154 624.5875,297.604228339154" fill="#5ab9ea" />
-    <polygon points="621.5875,363.6831160906601 618.5875,360.6831160906601 624.5875,360.6831160906601" fill="#5ab9ea" />
-    <text x="626.5875" y="329.14367221490704" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 626.5875 329.14367221490704)" fill="#5ab9ea" font-family="monospace" font-size="10px">69.1mm</text>
+    <line x1="560.53" y1="294.604228339154" x2="624.7625" y2="294.604228339154" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="560.53" y1="363.6831160906601" x2="624.7625" y2="363.6831160906601" stroke="#5ab9ea" stroke-width="1" />
+    <line x1="624.7625" y1="294.604228339154" x2="624.7625" y2="363.6831160906601" stroke="#5ab9ea" stroke-width="1" />
+    <polygon points="624.7625,294.604228339154 621.7625,297.604228339154 627.7625,297.604228339154" fill="#5ab9ea" />
+    <polygon points="624.7625,363.6831160906601 621.7625,360.6831160906601 627.7625,360.6831160906601" fill="#5ab9ea" />
+    <text x="629.7625" y="329.14367221490704" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 629.7625 329.14367221490704)" fill="#5ab9ea" font-family="monospace" font-size="10px">69.1mm</text>
     <line x1="470.7541762831449" y1="290.87262566005165" x2="470.7541762831449" y2="250.87262566005165" stroke="#5ab9ea" stroke-width="1" />
     <line x1="482.21004489865174" y1="290.87262566005165" x2="482.21004489865174" y2="250.87262566005165" stroke="#5ab9ea" stroke-width="1" />
     <line x1="470.7541762831449" y1="250.87262566005165" x2="482.21004489865174" y2="250.87262566005165" stroke="#5ab9ea" stroke-width="1" />
@@ -156,31 +156,31 @@
     <text x="476.4821105908983" y="237.154453890092" text-anchor="middle" dominant-baseline="middle" fill="#5ab9ea" font-family="monospace" font-size="10px">2.0mm</text>
   </g>
   <g id="TITLE_BLOCK" class="title-block">
-    <text x="-11.587499999999999" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
-    <text x="-11.587499999999999" y="-33.5875" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
+    <text x="-14.7625" y="-50.7625" fill="#cccccc" font-family="monospace" font-size="14px" font-weight="bold">BLUEPRINT PROOF DRAWING</text>
+    <text x="-14.7625" y="-36.7625" fill="#cccccc" font-family="monospace" font-size="9px">Units: millimeters (mm)</text>
   </g>
   <g id="LEGEND" class="legend">
-    <text x="619.5875" y="-47.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
-    <line x1="619.5875" y1="-29.5875" x2="634.5875" y2="-29.5875" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
-    <text x="639.5875" y="-26.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
-    <line x1="619.5875" y1="-13.587499999999999" x2="634.5875" y2="-13.587499999999999" stroke="#e8e8e8" stroke-width="2" />
-    <text x="639.5875" y="-10.587499999999999" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
-    <rect x="619.5875" y="-0.5874999999999986" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
-    <text x="639.5875" y="5.412500000000001" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
-    <line x1="619.5875" y1="18.4125" x2="634.5875" y2="18.4125" stroke="#888888" stroke-width="0.25" />
-    <text x="639.5875" y="21.4125" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
-    <line x1="619.5875" y1="34.4125" x2="634.5875" y2="34.4125" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
-    <text x="639.5875" y="37.4125" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
-    <line x1="619.5875" y1="50.4125" x2="634.5875" y2="50.4125" stroke="#5ab9ea" stroke-width="1" />
-    <text x="639.5875" y="53.4125" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
+    <text x="622.7625" y="-50.7625" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">LEGEND</text>
+    <line x1="622.7625" y1="-32.7625" x2="637.7625" y2="-32.7625" stroke="#6b8e7f" stroke-width="1" stroke-dasharray="2,2" />
+    <text x="642.7625" y="-29.762500000000003" fill="#cccccc" font-family="monospace" font-size="10px">Sheet Outline</text>
+    <line x1="622.7625" y1="-16.762500000000003" x2="637.7625" y2="-16.762500000000003" stroke="#e8e8e8" stroke-width="2" />
+    <text x="642.7625" y="-13.762500000000003" fill="#cccccc" font-family="monospace" font-size="10px">Profile Cuts</text>
+    <rect x="622.7625" y="-3.762500000000003" width="15.0" height="8" stroke="#6496c8" stroke-width="1.5" fill="#6496c8" fill-opacity="0.2" />
+    <text x="642.7625" y="2.237499999999997" fill="#cccccc" font-family="monospace" font-size="10px">Pocket Regions</text>
+    <line x1="622.7625" y1="15.237499999999997" x2="637.7625" y2="15.237499999999997" stroke="#888888" stroke-width="0.25" />
+    <text x="642.7625" y="18.237499999999997" fill="#cccccc" font-family="monospace" font-size="10px">Engrave Paths</text>
+    <line x1="622.7625" y1="31.237499999999997" x2="637.7625" y2="31.237499999999997" stroke="#5ab9ea" stroke-width="1" stroke-dasharray="4,2" />
+    <text x="642.7625" y="34.2375" fill="#cccccc" font-family="monospace" font-size="10px">Toolpath Centerline</text>
+    <line x1="622.7625" y1="47.2375" x2="637.7625" y2="47.2375" stroke="#5ab9ea" stroke-width="1" />
+    <text x="642.7625" y="50.2375" fill="#cccccc" font-family="monospace" font-size="10px">Dimensions</text>
   </g>
   <g id="NOTES" class="notes">
-    <text x="20.0" y="431.5875" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
-    <text x="20.0" y="443.5875" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 600.0 × 400.0 × 19.0mm</text>
-    <text x="20.0" y="455.5875" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
-    <text x="20.0" y="467.5875" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 engraves, 3 pockets, 3 profiles</text>
-    <text x="20.0" y="479.5875" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
-    <text x="30.0" y="491.5875" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.5mm</text>
-    <text x="30.0" y="503.5875" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm</text>
+    <text x="20.0" y="434.7625" fill="#cccccc" font-family="monospace" font-size="10px" font-weight="bold">NOTES</text>
+    <text x="20.0" y="446.7625" fill="#cccccc" font-family="monospace" font-size="10px">Sheet: 600.0 × 400.0 × 19.0mm</text>
+    <text x="20.0" y="458.7625" fill="#cccccc" font-family="monospace" font-size="10px">Clamp margin: 10mm (shaded; no cutting)</text>
+    <text x="20.0" y="470.7625" fill="#cccccc" font-family="monospace" font-size="10px">Features: 3 engraves, 3 pockets, 3 profiles</text>
+    <text x="20.0" y="482.7625" fill="#cccccc" font-family="monospace" font-size="10px">Depths:</text>
+    <text x="30.0" y="494.7625" fill="#cccccc" font-family="monospace" font-size="10px">• engrave: 0.5mm</text>
+    <text x="30.0" y="506.7625" fill="#cccccc" font-family="monospace" font-size="10px">• pocket: 4.0mm</text>
   </g>
 </svg>

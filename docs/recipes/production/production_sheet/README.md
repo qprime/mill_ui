@@ -10,27 +10,27 @@ A full sheet of mixed parts held with tabs and onion skin, offcuts cut into usab
 
 Sheet 1220 × 1220 × 19mm mdf.
 
-- `12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 6mm
-- `25.40mm.nc`: bore, 25.4mm tool, 1 feature(s), to 12mm
-- `3.17mm-downcut.nc`: bore, 3.175mm tool, 16 feature(s), to 12mm
-- `3.17mm-upcut.nc`: profiles and allowance finishing, 3.175mm tool, to 19.2mm
-- `release-3.17mm.nc`: removes the three onion skins last, to 19.2mm
+- `9.53mm.nc`: pocket, 9.525mm tool, 1 operation(s), to 6mm
+- `9.53mm-compression.nc`: profile, profile_finish, 9.525mm tool, 14 operation(s), to 19.2mm
+- `12.70mm.nc`: bore, 12.7mm tool, 1 operation(s), to 12mm
+- `6.35mm.nc`: bore, 6.35mm tool, 16 operation(s), to 12mm
+- `release-9.53mm.nc`: release, 9.525mm tool, 3 operation(s), to 19.2mm
 
 ## Run
 
 `python -m cli.mill --recipe docs/recipes/production/production_sheet`
 
-Run the machining programs in the order listed above, with `release-3.17mm.nc`
+Run the machining programs in the order listed above, with `release-9.53mm.nc`
 last. The other parts retain their requested tabs. Release remains a separate
 program even in per-tool mode.
 
 ## Outputs
 
 - `12.70mm.nc`
-- `25.40mm.nc`
-- `3.17mm-downcut.nc`
-- `3.17mm-upcut.nc`
+- `6.35mm.nc`
+- `9.53mm-compression.nc`
+- `9.53mm.nc`
 - `machining_summary.json`
 - `metrics.json`
 - `production_sheet.svg`
-- `release-3.17mm.nc`
+- `release-9.53mm.nc`

@@ -12,8 +12,8 @@ children:
       id: door
       label: Shaker Door
       at:
-        x: 203.2mm
-        y: 303.2mm
+        x: 213.2mm
+        y: 313.2mm
         width: 400mm
         height: 600mm
       children:

@@ -16,10 +16,12 @@ material away from the coupon.
 
 Sheet 300 × 250 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 3 feature(s), to 5mm
-- `bore-3.17mm.nc`: bore, 3.175mm tool, 1 feature(s), to 19mm
-- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 3 feature(s), to 19mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 4 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 3 operation(s), to 5mm
+- `drill-6.35mm.nc`: drill, 6.35mm tool, 1 operation(s), to 19mm
+- `bore-9.53mm.nc`: bore, 9.525mm tool, 1 operation(s), to 19mm
+- `drill-12.70mm.nc`: drill, 12.7mm tool, 1 operation(s), to 19mm
+- `bore-12.70mm.nc`: bore, 12.7mm tool, 1 operation(s), to 19mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 4 operation(s), to 19.2mm
 
 ## Run
 
@@ -27,10 +29,12 @@ Sheet 300 × 250 × 19mm mdf.
 
 ## Outputs
 
-- `bore-3.17mm.nc`
+- `bore-12.70mm.nc`
+- `bore-9.53mm.nc`
 - `calibration_coupon.svg`
+- `drill-12.70mm.nc`
+- `drill-6.35mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
-- `pocket-3.17mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

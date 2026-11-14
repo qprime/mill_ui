@@ -20,4 +20,8 @@ The pocket's island is preserved in both machining and the blueprint pocket fill
 
 ## Outputs
 
-The blueprint, G-code, machining summary, and validation metrics are written to `output/`.
+- `clamp_keepouts.svg`
+- `machining_summary.json`
+- `metrics.json`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

@@ -3,28 +3,28 @@ feeds:
 
   - endmill: "1/4 upcut spiral"
     material: mdf
-    chipload: 0.05
+    chipload: 0.1
     rpm: 18000
     depth_per_pass: 3.0
     plunge_factor: 0.33
 
   - endmill: "1/8 upcut spiral"
     material: mdf
-    chipload: 0.03
-    rpm: 20000
-    depth_per_pass: 1.5
+    chipload: 0.06
+    rpm: 18000
+    depth_per_pass: 2.0
     plunge_factor: 0.33
 
   - endmill: "1/8 downcut spiral"
     material: mdf
-    chipload: 0.03
-    rpm: 20000
+    chipload: 0.06
+    rpm: 18000
     depth_per_pass: 1.5
     plunge_factor: 0.33
 
   - endmill: "1/4 compression"
     material: mdf
-    chipload: 0.05
+    chipload: 0.1
     rpm: 18000
     depth_per_pass: 3.0
     plunge_factor: 0.33
@@ -38,22 +38,22 @@ feeds:
 
   - endmill: "60 degree v-bit"
     material: mdf
-    chipload: 0.03
+    chipload: 0.1
     rpm: 18000
     depth_per_pass: 1.0
     plunge_factor: 0.25
 
   - endmill: "90 degree v-bit"
     material: mdf
-    chipload: 0.03
+    chipload: 0.1
     rpm: 18000
     depth_per_pass: 1.0
     plunge_factor: 0.25
 
   - endmill: "1mm engraving bit"
     material: mdf
-    chipload: 0.02
-    rpm: 20000
+    chipload: 0.06666666666666667
+    rpm: 18000
     depth_per_pass: 0.5
     plunge_factor: 0.25
 
@@ -61,7 +61,7 @@ feeds:
 
   - endmill: "1/8 ball nose 2F"
     material: mdf
-    chipload: 0.03
+    chipload: 0.05
     rpm: 18000
     depth_per_pass: 1.0
     plunge_factor: 0.33
@@ -75,16 +75,16 @@ feeds:
 
   - endmill: "tapered ball nose R1/32 ZrN"
     material: mdf
-    chipload: 0.01
+    chipload: 0.02
     rpm: 20000
     depth_per_pass: 0.5
     plunge_factor: 0.25
 
   - endmill: "1/4 downcut SpeTool"
     material: mdf
-    chipload: 0.04
-    rpm: 16000
-    depth_per_pass: 2.0
+    chipload: 0.08
+    rpm: 18000
+    depth_per_pass: 3.0
     plunge_factor: 0.25
 
   # mfr spec: 200 IPM / 18000 RPM / 0.375" DOC / 50% plunge
@@ -97,30 +97,30 @@ feeds:
 
   - endmill: "1/2 upcut 2F SE"
     material: mdf
-    chipload: 0.05
-    rpm: 14000
-    depth_per_pass: 3.5
+    chipload: 0.1
+    rpm: 18000
+    depth_per_pass: 4.5
     plunge_factor: 0.25
 
   - endmill: "1/4 ball nose 2F WEXWE"
     material: mdf
-    chipload: 0.04
-    rpm: 16000
+    chipload: 0.08
+    rpm: 18000
     depth_per_pass: 2.0
     plunge_factor: 0.25
 
   - endmill: "1/8 ball nose long reach WEXWE"
     material: mdf
-    chipload: 0.02
+    chipload: 0.03333333333333333
     rpm: 18000
     depth_per_pass: 1.0
     plunge_factor: 0.25
 
   - endmill: "1/8 downcut plunge"
     material: mdf
-    chipload: 0.03
+    chipload: 0.05
     rpm: 18000
-    depth_per_pass: 1.5
+    depth_per_pass: 2.0
     plunge_factor: 0.33
 
   - endmill: "1 inch surfacing bit"
@@ -180,3 +180,31 @@ feeds:
     rpm: 12000
     depth_per_pass: 0.8
     plunge_factor: 0.20
+  - endmill: Example 3/8 carbide mortise compression
+    material: mdf
+    chipload: 0.125
+    rpm: 18000
+    depth_per_pass: 6.0
+    plunge_factor: 0.25
+    stepover_percent: 40.0
+  - endmill: Example 3/8 PCD straight plunge
+    material: mdf
+    chipload: 0.14
+    rpm: 18000
+    depth_per_pass: 6.0
+    plunge_factor: 0.25
+    stepover_percent: 40.0
+  - endmill: Example 3/8 carbide mortise compression
+    material: plywood
+    chipload: 0.125
+    rpm: 18000
+    depth_per_pass: 6.0
+    plunge_factor: 0.25
+    stepover_percent: 40.0
+  - endmill: Example 3/8 PCD straight plunge
+    material: plywood
+    chipload: 0.14
+    rpm: 18000
+    depth_per_pass: 6.0
+    plunge_factor: 0.25
+    stepover_percent: 40.0

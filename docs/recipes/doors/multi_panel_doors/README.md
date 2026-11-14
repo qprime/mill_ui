@@ -8,7 +8,10 @@
 
 Four cabinet doors built from one reusable door outline: a 400 × 1000mm six-panel door, a 360 × 800mm two-panel door, and two 160 × 800mm narrow doors.
 
-Sheet 1220 × 1220 × 19mm MDF, with a 10mm margin. Twelve panel recesses cut to 6mm with a 12.7mm tool. Four outside profiles cut through with a 3.175mm tool. The reusable outline defaults to four 3mm-high tabs; the second door overrides `tab_height` to 4mm. The other three uses retain the default.
+Sheet 1220 × 1220 × 19mm mdf.
+
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 12 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 4 operation(s), to 19.2mm
 
 ## Run
 
@@ -19,5 +22,5 @@ Sheet 1220 × 1220 × 19mm MDF, with a 10mm margin. Twelve panel recesses cut to
 - `machining_summary.json`
 - `metrics.json`
 - `multi_panel_doors.svg`
-- `pocket-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

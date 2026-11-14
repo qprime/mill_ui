@@ -44,6 +44,7 @@
 | Parameter | Default | Location |
 |-----------|---------|----------|
 | kerf_mm | 6.35 mm | nesting/types.py (DEFAULT_KERF_MM) |
+| recipe profile cutter | 9.525 mm | core/constants.py (RECIPE_KERF_MM); explicit PML/nest or CLI kerf overrides still apply |
 
 ---
 

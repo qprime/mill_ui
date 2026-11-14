@@ -7,88 +7,88 @@
   },
   "files": [
     {
-      "filename": "pocket-12.70mm.nc",
+      "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
-      "tool_diameter_mm": 12.7,
-      "rpm": 14000.0,
-      "feed_xy_mm_min": 1400.0,
-      "feed_z_mm_min": 350.0,
-      "stepdown_mm": 3.5,
+      "tool_diameter_mm": 9.525,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2520.0,
+      "feed_z_mm_min": 630.0,
+      "stepdown_mm": 6.0,
       "max_depth_mm": 10.0,
       "feature_count": 6,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 25.8
+      "estimated_runtime_min": 13.6
     },
     {
       "filename": "pocket_rest-3.17mm.nc",
       "operation": "pocket_rest",
       "tool_diameter_mm": 3.175,
-      "rpm": 20000.0,
-      "feed_xy_mm_min": 1200.0,
-      "feed_z_mm_min": 396.0,
-      "stepdown_mm": 1.5,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2160.0,
+      "feed_z_mm_min": 712.8,
+      "stepdown_mm": 2.0,
       "max_depth_mm": 10.0,
       "feature_count": 1,
       "strategy": "pocket_rest",
-      "estimated_runtime_min": 4.1
+      "estimated_runtime_min": 1.1
     },
     {
-      "filename": "finish-12.70mm.nc",
+      "filename": "finish-9.53mm.nc",
       "operation": "finish",
-      "tool_diameter_mm": 12.7,
-      "rpm": 14000.0,
-      "feed_xy_mm_min": 1400.0,
-      "feed_z_mm_min": 350.0,
-      "stepdown_mm": 3.5,
+      "tool_diameter_mm": 9.525,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2520.0,
+      "feed_z_mm_min": 630.0,
+      "stepdown_mm": 6.0,
       "max_depth_mm": 10.0,
       "feature_count": 1,
       "strategy": "finish",
-      "estimated_runtime_min": 1.0
+      "estimated_runtime_min": 0.5
     },
     {
       "filename": "corner_cleanup-3.17mm.nc",
       "operation": "corner_cleanup",
       "tool_diameter_mm": 3.175,
-      "rpm": 20000.0,
-      "feed_xy_mm_min": 1200.0,
-      "feed_z_mm_min": 396.0,
-      "stepdown_mm": 1.5,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2160.0,
+      "feed_z_mm_min": 712.8,
+      "stepdown_mm": 2.0,
       "max_depth_mm": 10.0,
       "feature_count": 4,
       "strategy": "corner_cleanup",
-      "estimated_runtime_min": 3.0
+      "estimated_runtime_min": 1.5
     },
     {
-      "filename": "dogbone-12.70mm.nc",
+      "filename": "dogbone-9.53mm.nc",
       "operation": "dogbone",
-      "tool_diameter_mm": 12.7,
-      "rpm": 14000.0,
-      "feed_xy_mm_min": 1400.0,
-      "feed_z_mm_min": 350.0,
-      "stepdown_mm": 3.5,
+      "tool_diameter_mm": 9.525,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2520.0,
+      "feed_z_mm_min": 630.0,
+      "stepdown_mm": 6.0,
       "max_depth_mm": 10.0,
       "feature_count": 4,
       "strategy": "dogbone",
-      "estimated_runtime_min": 0.8
+      "estimated_runtime_min": 0.5
     },
     {
       "filename": "dogbone-6.35mm.nc",
       "operation": "dogbone",
       "tool_diameter_mm": 6.35,
       "rpm": 18000.0,
-      "feed_xy_mm_min": 1800.0,
-      "feed_z_mm_min": 594.0,
+      "feed_xy_mm_min": 3600.0,
+      "feed_z_mm_min": 1188.0,
       "stepdown_mm": 3.0,
       "max_depth_mm": 10.0,
       "feature_count": 4,
       "strategy": "dogbone",
-      "estimated_runtime_min": 0.5
+      "estimated_runtime_min": 0.3
     }
   ],
-  "total_runtime_min": 35.2,
+  "total_runtime_min": 17.5,
   "feature_counts": {
     "pocket": 6
   },
   "safe_z_mm": 6.0,
-  "kerf_mm": 3.175
+  "kerf_mm": 9.525
 }

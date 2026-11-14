@@ -12,8 +12,8 @@ remains 13mm thick.
 
 Sheet 400 × 400 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 1 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 1 operation(s), to 19.2mm
 
 ## Run
 
@@ -23,6 +23,6 @@ Sheet 400 × 400 × 19mm mdf.
 
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
+- `pocket-9.53mm.nc`
 - `pocket_with_island.svg`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

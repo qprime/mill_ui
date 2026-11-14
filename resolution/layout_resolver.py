@@ -1609,7 +1609,12 @@ class LayoutResolver:
         working_width = self.ast.sheet.working_width_mm
         working_height = self.ast.sheet.working_height_mm
 
-        tool_diameter = self.ast.kerf_width_mm or 6.35
+        tool_diameter = self._profile_diameter_mm
+        held = node.tab_count > 0 or any(
+            item.feature is not None and ((item.feature.tab_count or 0) > 0 or (item.feature.onion_skin_mm or 0) > 0)
+            for item in items
+        )
+        clearance = tool_diameter * (2 if held else 1) + (node.margin_mm or 0.0)
 
         part_bounds = []
         for item in items:
@@ -1621,10 +1626,10 @@ class LayoutResolver:
                 )
                 part_bounds.append(
                     PartBounds(
-                        x=bounds["x_min"] - tool_diameter,
-                        y=bounds["y_min"] - tool_diameter,
-                        width=bounds["x_max"] - bounds["x_min"] + 2 * tool_diameter,
-                        height=bounds["y_max"] - bounds["y_min"] + 2 * tool_diameter,
+                        x=bounds["x_min"] - clearance,
+                        y=bounds["y_min"] - clearance,
+                        width=bounds["x_max"] - bounds["x_min"] + 2 * clearance,
+                        height=bounds["y_max"] - bounds["y_min"] + 2 * clearance,
                     )
                 )
 
@@ -1638,7 +1643,7 @@ class LayoutResolver:
             min_width=node.min_width_mm,
             min_height=node.min_height_mm,
             strategy=strategy,
-            tool_clearance=tool_diameter,
+            tool_clearance=clearance,
         )
 
         for i, wrect in enumerate(waste_rects):

@@ -10,10 +10,10 @@ Four laminated legs with mortises and four aprons with tenons for a small side t
 
 Sheet 1220 × 1220 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 feature(s), to 19mm
-- `pocket-6.35mm.nc`: pocket, 6.35mm tool, 16 feature(s), to 19mm
-- `bore-3.17mm.nc`: bore, 3.175mm tool, 8 feature(s), to 10mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 64 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 8 operation(s), to 19mm
+- `pocket-6.35mm.nc`: pocket, 6.35mm tool, 16 operation(s), to 19mm
+- `bore-6.35mm.nc`: bore, 6.35mm tool, 8 operation(s), to 10mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 16 operation(s), to 19.2mm
 
 ## Run
 
@@ -21,10 +21,10 @@ Sheet 1220 × 1220 × 19mm mdf.
 
 ## Outputs
 
-- `bore-3.17mm.nc`
+- `bore-6.35mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
 - `pocket-6.35mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`
 - `side_table_frame.svg`

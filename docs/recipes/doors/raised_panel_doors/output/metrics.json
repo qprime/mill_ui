@@ -12,18 +12,18 @@
     }
   },
   "complexity": {
-    "total_moves": 12396,
-    "rapid_moves": 120,
-    "cut_moves": 11764,
-    "rapid_ratio": 0.01
+    "total_moves": 13873,
+    "rapid_moves": 103,
+    "cut_moves": 13245,
+    "rapid_ratio": 0.007
   },
   "fidelity": {
     "tool_changes": 4,
     "passes": [
       {
         "name": "pocket_offset",
-        "tool_diameter_mm": 12.7,
-        "move_count": 11046
+        "tool_diameter_mm": 9.525,
+        "move_count": 13086
       },
       {
         "name": "edge",
@@ -37,37 +37,37 @@
       },
       {
         "name": "profile",
-        "tool_diameter_mm": 3.175,
-        "move_count": 869
+        "tool_diameter_mm": 9.525,
+        "move_count": 306
       }
     ]
   },
   "output_size": {
-    "total_bytes": 349366,
-    "total_lines": 12199,
+    "total_bytes": 397850,
+    "total_lines": 13627,
     "files": {
-      "pocket_offset-12.70mm": {
-        "bytes": 312620,
-        "lines": 10845
+      "pocket_offset-9.53mm": {
+        "bytes": 376158,
+        "lines": 12836
       },
       "edge-12.70mm-90deg": {
-        "bytes": 10386,
+        "bytes": 10816,
         "lines": 379
       },
       "edge-12.70mm-60deg": {
-        "bytes": 2407,
+        "bytes": 2505,
         "lines": 94
       },
-      "profile-3.17mm": {
-        "bytes": 23953,
-        "lines": 881
+      "profile-9.53mm": {
+        "bytes": 8371,
+        "lines": 318
       }
     }
   },
   "errors": [],
   "warnings": [],
   "build": {
-    "kerf_mm": 3.175,
+    "kerf_mm": 9.525,
     "theme": "dark",
     "y_origin": "back",
     "source": "raised_panel_doors.pml.yml",
@@ -75,16 +75,44 @@
       "raised_panel_doors.pml.yml": {
         "version": 1,
         "material": "mdf",
-        "requested_kerf_mm": 3.175,
-        "selected_profile_diameter_mm": 3.175,
+        "requested_kerf_mm": 9.525,
+        "selected_profile_diameter_mm": 9.525,
         "tools": [
+          {
+            "name": "Example 3/8 carbide mortise compression",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rpm": 18000.0,
+            "feed_xy": 4500.0,
+            "feed_z": 1125.0,
+            "rotation": "compression",
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "v_angle_deg": null,
+            "roundover_radius_mm": null,
+            "purpose": "profile"
+          },
+          {
+            "name": "Example 3/8 PCD straight plunge",
+            "diameter": 9.525,
+            "kind": "flat",
+            "rpm": 18000.0,
+            "feed_xy": 2520.0000000000005,
+            "feed_z": 630.0000000000001,
+            "rotation": null,
+            "depth_per_pass": 6.0,
+            "stepover_percent": 40.0,
+            "v_angle_deg": null,
+            "roundover_radius_mm": null,
+            "purpose": "pocket"
+          },
           {
             "name": "1/4 upcut spiral",
             "diameter": 6.35,
             "kind": "flat",
             "rpm": 18000.0,
-            "feed_xy": 1800.0,
-            "feed_z": 594.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0,
             "rotation": "upcut",
             "depth_per_pass": 3.0,
             "stepover_percent": null,
@@ -95,11 +123,11 @@
             "name": "1/8 upcut spiral",
             "diameter": 3.175,
             "kind": "flat",
-            "rpm": 20000.0,
-            "feed_xy": 1200.0,
-            "feed_z": 396.0,
+            "rpm": 18000.0,
+            "feed_xy": 2160.0,
+            "feed_z": 712.8000000000001,
             "rotation": "upcut",
-            "depth_per_pass": 1.5,
+            "depth_per_pass": 2.0,
             "stepover_percent": null,
             "v_angle_deg": null,
             "roundover_radius_mm": null
@@ -108,9 +136,9 @@
             "name": "1/8 downcut spiral",
             "diameter": 3.175,
             "kind": "flat",
-            "rpm": 20000.0,
-            "feed_xy": 600.0,
-            "feed_z": 198.0,
+            "rpm": 18000.0,
+            "feed_xy": 1080.0,
+            "feed_z": 356.40000000000003,
             "rotation": "downcut",
             "depth_per_pass": 1.5,
             "stepover_percent": null,
@@ -122,8 +150,8 @@
             "diameter": 6.35,
             "kind": "flat",
             "rpm": 18000.0,
-            "feed_xy": 1800.0,
-            "feed_z": 594.0,
+            "feed_xy": 3600.0,
+            "feed_z": 1188.0,
             "rotation": "compression",
             "depth_per_pass": 3.0,
             "stepover_percent": null,
@@ -148,8 +176,8 @@
             "diameter": 12.7,
             "kind": "v",
             "rpm": 18000.0,
-            "feed_xy": 540.0,
-            "feed_z": 135.0,
+            "feed_xy": 1800.0,
+            "feed_z": 450.0,
             "rotation": null,
             "depth_per_pass": 1.0,
             "stepover_percent": null,
@@ -161,8 +189,8 @@
             "diameter": 12.7,
             "kind": "v",
             "rpm": 18000.0,
-            "feed_xy": 540.0,
-            "feed_z": 135.0,
+            "feed_xy": 1800.0,
+            "feed_z": 450.0,
             "rotation": null,
             "depth_per_pass": 1.0,
             "stepover_percent": null,
@@ -173,9 +201,9 @@
             "name": "1mm engraving bit",
             "diameter": 1.0,
             "kind": "ball",
-            "rpm": 20000.0,
-            "feed_xy": 400.0,
-            "feed_z": 100.0,
+            "rpm": 18000.0,
+            "feed_xy": 1200.0,
+            "feed_z": 300.0,
             "rotation": null,
             "depth_per_pass": 0.5,
             "stepover_percent": null,
@@ -187,8 +215,8 @@
             "diameter": 3.19,
             "kind": "ball",
             "rpm": 18000.0,
-            "feed_xy": 1080.0,
-            "feed_z": 356.40000000000003,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0,
             "rotation": null,
             "depth_per_pass": 1.0,
             "stepover_percent": null,
@@ -213,8 +241,8 @@
             "diameter": 1.6,
             "kind": "ball",
             "rpm": 20000.0,
-            "feed_xy": 400.0,
-            "feed_z": 100.0,
+            "feed_xy": 800.0,
+            "feed_z": 200.0,
             "rotation": null,
             "depth_per_pass": 0.5,
             "stepover_percent": null,
@@ -225,11 +253,11 @@
             "name": "1/4 downcut SpeTool",
             "diameter": 6.35,
             "kind": "flat",
-            "rpm": 16000.0,
-            "feed_xy": 1280.0,
-            "feed_z": 320.0,
+            "rpm": 18000.0,
+            "feed_xy": 2880.0,
+            "feed_z": 720.0,
             "rotation": "downcut",
-            "depth_per_pass": 2.0,
+            "depth_per_pass": 3.0,
             "stepover_percent": null,
             "v_angle_deg": null,
             "roundover_radius_mm": null
@@ -251,11 +279,11 @@
             "name": "1/2 upcut 2F SE",
             "diameter": 12.7,
             "kind": "flat",
-            "rpm": 14000.0,
-            "feed_xy": 1400.0,
-            "feed_z": 350.0,
+            "rpm": 18000.0,
+            "feed_xy": 3600.0,
+            "feed_z": 900.0,
             "rotation": "upcut",
-            "depth_per_pass": 3.5,
+            "depth_per_pass": 4.5,
             "stepover_percent": null,
             "v_angle_deg": null,
             "roundover_radius_mm": null
@@ -264,9 +292,9 @@
             "name": "1/4 ball nose 2F WEXWE",
             "diameter": 6.35,
             "kind": "ball",
-            "rpm": 16000.0,
-            "feed_xy": 1280.0,
-            "feed_z": 320.0,
+            "rpm": 18000.0,
+            "feed_xy": 2880.0,
+            "feed_z": 720.0,
             "rotation": null,
             "depth_per_pass": 2.0,
             "stepover_percent": null,
@@ -278,8 +306,8 @@
             "diameter": 3.175,
             "kind": "ball",
             "rpm": 18000.0,
-            "feed_xy": 720.0,
-            "feed_z": 180.0,
+            "feed_xy": 1200.0,
+            "feed_z": 300.0,
             "rotation": null,
             "depth_per_pass": 1.0,
             "stepover_percent": null,
@@ -291,10 +319,10 @@
             "diameter": 3.175,
             "kind": "flat",
             "rpm": 18000.0,
-            "feed_xy": 1080.0,
-            "feed_z": 356.40000000000003,
+            "feed_xy": 1800.0,
+            "feed_z": 594.0,
             "rotation": "downcut",
-            "depth_per_pass": 1.5,
+            "depth_per_pass": 2.0,
             "stepover_percent": null,
             "v_angle_deg": null,
             "roundover_radius_mm": null
@@ -310,7 +338,8 @@
             "depth_per_pass": 1.0,
             "stepover_percent": null,
             "v_angle_deg": null,
-            "roundover_radius_mm": null
+            "roundover_radius_mm": null,
+            "purpose": "surface"
           },
           {
             "name": "Example 6mm point roundover",
@@ -326,10 +355,10 @@
             "roundover_radius_mm": 6.0
           }
         ],
-        "fingerprint": "aa4e75a84ce2f5123c3594ffc22432707d2ad633db26be6ffd2b89b893f84794"
+        "fingerprint": "0614a63ca4e45dab7ce9a2a5a232f24674bb73b23c7c597d04b75331aaad2c75"
       }
     },
-    "requested_kerf_mm": 3.175,
-    "selected_profile_diameter_mm": 3.175
+    "requested_kerf_mm": 9.525,
+    "selected_profile_diameter_mm": 9.525
   }
 }

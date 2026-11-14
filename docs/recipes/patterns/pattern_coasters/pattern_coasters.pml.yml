@@ -11,7 +11,7 @@ children:
       id: phyllotaxis_coaster
       label: "Phyllotaxis"
       diameter: 100mm
-      at: {x: 53.21mm, y: 53.21mm}
+      at: {x: 63.21mm, y: 63.21mm}
       children:
         - Profile:
             side: outside
@@ -31,7 +31,7 @@ children:
       id: voronoi_coaster
       label: "Voronoi"
       diameter: 100mm
-      at: {x: 159.56mm, y: 53.21mm}
+      at: {x: 183.21mm, y: 63.21mm}
       children:
         - Profile:
             side: outside
@@ -52,7 +52,7 @@ children:
       id: string_art_coaster
       label: "String Art"
       diameter: 100mm
-      at: {x: 265.91mm, y: 53.21mm}
+      at: {x: 303.21mm, y: 63.21mm}
       children:
         - Profile:
             side: outside
@@ -71,7 +71,7 @@ children:
       id: ripple_coaster
       label: "Ripples"
       diameter: 100mm
-      at: {x: 372.26mm, y: 53.21mm}
+      at: {x: 423.21mm, y: 63.21mm}
       children:
         - Profile:
             side: outside

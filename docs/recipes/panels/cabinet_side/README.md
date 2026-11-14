@@ -10,10 +10,9 @@ An 18mm cabinet side with two shelf dados, two rows of 5mm shelf-pin holes, and 
 
 Sheet 400 × 800 × 18mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 feature(s), to 6mm
-- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 1 feature(s), to 9mm
-- `bore-3.17mm.nc`: bore, 3.175mm tool, 26 feature(s), to 10mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 18.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 3 operation(s), to 9mm
+- `bore-3.17mm.nc`: bore, 3.175mm tool, 26 operation(s), to 10mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 1 operation(s), to 18.2mm
 
 ## Run
 
@@ -25,6 +24,5 @@ Sheet 400 × 800 × 18mm mdf.
 - `cabinet_side.svg`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
 - `pocket-9.53mm.nc`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

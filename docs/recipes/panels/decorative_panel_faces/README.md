@@ -16,11 +16,10 @@ those crossings are valid.
 
 Sheet 1100 × 900 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 4 feature(s), to 6mm
-- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 8 feature(s), to 6mm
-- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 26 feature(s), to 3mm
-- `engrave-1.00mm.nc`: engrave, 1mm tool, 101 feature(s), to 4mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 8 contour(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 12 operation(s), to 6mm
+- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 26 operation(s), to 3mm
+- `engrave-1.00mm.nc`: engrave, 1mm tool, 101 operation(s), to 4mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 6 operation(s), to 19.2mm
 
 ## Run
 
@@ -32,7 +31,6 @@ Sheet 1100 × 900 × 19mm mdf.
 - `engrave-1.00mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
 - `pocket-3.17mm.nc`
 - `pocket-9.53mm.nc`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

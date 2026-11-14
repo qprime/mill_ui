@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import textwrap
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -84,6 +85,18 @@ class TestFeedsEntry:
 
 
 class TestResolveToolSelection:
+    def test_dedicated_purpose_survives_library_resolution(self):
+        tool = resolve_tool_selection(replace(_endmill(), purpose="pocket"), _feeds_entry())
+
+        assert normalize_tool_entries([tool])[0].purpose == "pocket"
+
+    @pytest.mark.parametrize("purpose", ["profiling", "unknown"])
+    def test_invalid_tool_purpose_is_rejected(self, purpose):
+        with pytest.raises(ValueError, match="purpose must be one of"):
+            replace(_endmill(), purpose=purpose)
+        with pytest.raises(ValueError, match="purpose must be one of"):
+            normalize_tool_entries([{"name": "invalid", "purpose": purpose}])
+
     def test_feed_xy_computation(self):
         em = _endmill(flutes=2)
         feeds = _feeds_entry(chipload=0.05, rpm=18000)
@@ -184,10 +197,26 @@ class TestBuildToolDb:
         endmills = load_endmills("machines/endmills.yml")
         feeds = load_feeds("machines/feeds.yml")
         result = build_tool_db(endmills, feeds, "plywood")
-        assert len(result) == 6
+        assert len(result) == 8
 
 
 class TestLoadEndmills:
+    def test_loads_dedicated_tool_purpose(self, tmp_path):
+        path = tmp_path / "endmills.yml"
+        path.write_text("""endmills:
+  - name: PCD pocket
+    diameter_mm: 9.525
+    flute_length_mm: 25.4
+    shank_diameter_mm: 9.525
+    flutes: 1
+    type: straight
+    purpose: pocket
+""")
+
+        (tool,) = load_endmills(path)
+
+        assert tool.purpose == "pocket"
+
     def test_roundover_library_preserves_kind_and_radius_for_tool_selection(self, tmp_path):
         yml = tmp_path / "endmills.yml"
         yml.write_text(
@@ -772,7 +801,7 @@ class TestPipelineWithFeeds:
         assert not result.errors
         assert len(result.passes) > 0
         tool = result.passes[0].setup.tool
-        assert tool.feed_xy == 1800.0
+        assert tool.feed_xy == 3600.0
 
     def test_pipeline_unknown_material_raises(self):
         with pytest.raises(ValueError, match="Unknown material 'oak'"):

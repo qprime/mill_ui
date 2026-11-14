@@ -1,0 +1,4529 @@
+{
+  "date": "2026-11-14",
+  "baseline_commit": "c4e92a376c8e510848e340bf95f828782ccab80d",
+  "estimate": "Canonical total_runtime_min; not measured machine time",
+  "recipes": {
+    "base_cabinet": {
+      "baseline": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "base_cabinet.pml.yml",
+            "sheet_index": 1,
+            "job_name": "base_cabinet_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 8,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 30.9
+              },
+              {
+                "filename": "sheet_1.dogbone-12.70mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 32,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 7.8
+              },
+              {
+                "filename": "sheet_1.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 48.8
+              }
+            ],
+            "total_runtime_min": 87.5,
+            "feature_counts": {
+              "pocket": 8,
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "base_cabinet.pml.yml",
+            "sheet_index": 2,
+            "job_name": "base_cabinet_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 2,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 8.3
+              },
+              {
+                "filename": "sheet_2.dogbone-12.70mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 8,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 2.1
+              },
+              {
+                "filename": "sheet_2.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 7,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 76.2
+              }
+            ],
+            "total_runtime_min": 86.6,
+            "feature_counts": {
+              "pocket": 2,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 174.1,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "base_cabinet.pml.yml",
+            "sheet_index": 1,
+            "job_name": "base_cabinet_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 8,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 21.1
+              },
+              {
+                "filename": "sheet_1.dogbone-9.53mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 32,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 5.5
+              },
+              {
+                "filename": "sheet_1.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 4.3
+              }
+            ],
+            "total_runtime_min": 30.9,
+            "feature_counts": {
+              "pocket": 8,
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "base_cabinet.pml.yml",
+            "sheet_index": 2,
+            "job_name": "base_cabinet_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 2,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 5.4
+              },
+              {
+                "filename": "sheet_2.dogbone-9.53mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 8,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 1.5
+              },
+              {
+                "filename": "sheet_2.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 7,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 7.2
+              }
+            ],
+            "total_runtime_min": 14.1,
+            "feature_counts": {
+              "pocket": 2,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 45.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "bookcase": {
+      "baseline": {
+        "total_sheets": 3,
+        "sheets": [
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 1,
+            "job_name": "bookcase_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 10,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 21.9
+              },
+              {
+                "filename": "sheet_1.dogbone-12.70mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 40,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 9.1
+              },
+              {
+                "filename": "sheet_1.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 49.9
+              }
+            ],
+            "total_runtime_min": 80.9,
+            "feature_counts": {
+              "pocket": 10,
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 2,
+            "job_name": "bookcase_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 3,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 59.2
+              }
+            ],
+            "total_runtime_min": 59.2,
+            "feature_counts": {
+              "profile": 3
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 3,
+            "job_name": "bookcase_sheet_3",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_3.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 42.8
+              }
+            ],
+            "total_runtime_min": 42.8,
+            "feature_counts": {
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 182.9,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "total_sheets": 3,
+        "sheets": [
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 1,
+            "job_name": "bookcase_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 10,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 15.2
+              },
+              {
+                "filename": "sheet_1.dogbone-9.53mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 40,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 6.2
+              },
+              {
+                "filename": "sheet_1.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 4.3
+              }
+            ],
+            "total_runtime_min": 25.7,
+            "feature_counts": {
+              "pocket": 10,
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 2,
+            "job_name": "bookcase_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 3,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 5.3
+              }
+            ],
+            "total_runtime_min": 5.3,
+            "feature_counts": {
+              "profile": 3
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "bookcase.pml.yml",
+            "sheet_index": 3,
+            "job_name": "bookcase_sheet_3",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_3.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 3.8
+              }
+            ],
+            "total_runtime_min": 3.8,
+            "feature_counts": {
+              "profile": 2
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 34.8,
+        "kerf_mm": 9.525
+      }
+    },
+    "box_bottoms_and_lids": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1200.0,
+          "height_mm": 800.0,
+          "thickness_mm": 6.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 3.0,
+            "feature_count": 24,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 30.7
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 496,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 55.9
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 6.2,
+            "feature_count": 77,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 55.4
+          }
+        ],
+        "total_runtime_min": 142.0,
+        "feature_counts": {
+          "pocket": 224,
+          "profile": 24
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1200.0,
+          "height_mm": 800.0,
+          "thickness_mm": 6.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 3.0,
+            "feature_count": 24,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 17.5
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 496,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 29.8
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.2,
+            "feature_count": 80,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 8.7
+          }
+        ],
+        "total_runtime_min": 56.0,
+        "feature_counts": {
+          "pocket": 224,
+          "profile": 24
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "cubby_organizer": {
+      "baseline": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "cubby_organizer.pml.yml",
+            "sheet_index": 1,
+            "job_name": "cubby_organizer_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 9,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 35.8
+              },
+              {
+                "filename": "sheet_1.dogbone-12.70mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 36,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 8.7
+              },
+              {
+                "filename": "sheet_1.dogbone-3.17mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.0,
+                "feature_count": 84,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 59.5
+              },
+              {
+                "filename": "sheet_1.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 47,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 126.4
+              }
+            ],
+            "total_runtime_min": 230.4,
+            "feature_counts": {
+              "pocket": 51,
+              "profile": 5
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "cubby_organizer.pml.yml",
+            "sheet_index": 2,
+            "job_name": "cubby_organizer_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 4,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 12.6
+              },
+              {
+                "filename": "sheet_2.dogbone-3.17mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.0,
+                "feature_count": 92,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 64.9
+              },
+              {
+                "filename": "sheet_2.dogbone-12.70mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 9.0,
+                "feature_count": 16,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 3.5
+              },
+              {
+                "filename": "sheet_2.profile-3.17mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 3.175,
+                "rpm": 20000.0,
+                "feed_xy_mm_min": 1200.0,
+                "feed_z_mm_min": 396.0,
+                "stepdown_mm": 1.5,
+                "max_depth_mm": 18.2,
+                "feature_count": 41,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 89.2
+              }
+            ],
+            "total_runtime_min": 170.2,
+            "feature_counts": {
+              "pocket": 50,
+              "profile": 3
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 400.6,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "cubby_organizer.pml.yml",
+            "sheet_index": 1,
+            "job_name": "cubby_organizer_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 6,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 17.3
+              },
+              {
+                "filename": "sheet_1.dogbone-9.53mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 24,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 4.1
+              },
+              {
+                "filename": "sheet_1.dogbone-3.17mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 3.175,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2160.0,
+                "feed_z_mm_min": 712.8,
+                "stepdown_mm": 2.0,
+                "max_depth_mm": 18.0,
+                "feature_count": 46,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 14.7
+              },
+              {
+                "filename": "sheet_1.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 10,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 9.5
+              }
+            ],
+            "total_runtime_min": 45.6,
+            "feature_counts": {
+              "pocket": 29,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "cubby_organizer.pml.yml",
+            "sheet_index": 2,
+            "job_name": "cubby_organizer_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 7,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 16.2
+              },
+              {
+                "filename": "sheet_2.dogbone-9.53mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 9.0,
+                "feature_count": 28,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 4.4
+              },
+              {
+                "filename": "sheet_2.dogbone-3.17mm.nc",
+                "operation": "dogbone",
+                "tool_diameter_mm": 3.175,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2160.0,
+                "feed_z_mm_min": 712.8,
+                "stepdown_mm": 2.0,
+                "max_depth_mm": 18.0,
+                "feature_count": 130,
+                "strategy": "dogbone",
+                "estimated_runtime_min": 40.8
+              },
+              {
+                "filename": "sheet_2.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 44,
+                "strategy": "contour",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 11.4
+              }
+            ],
+            "total_runtime_min": 72.8,
+            "feature_counts": {
+              "pocket": 72,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 118.4,
+        "kerf_mm": 9.525
+      }
+    },
+    "finger_jointed_box": {
+      "baseline": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 6.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 3.0,
+            "feature_count": 4,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 5.5
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 72,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 8.0
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 6.2,
+            "feature_count": 17,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 11.0
+          }
+        ],
+        "total_runtime_min": 24.5,
+        "feature_counts": {
+          "pocket": 32,
+          "profile": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 6.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 3.0,
+            "feature_count": 4,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 3.2
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 72,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 4.3
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.2,
+            "feature_count": 17,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.7
+          }
+        ],
+        "total_runtime_min": 9.2,
+        "feature_counts": {
+          "pocket": 32,
+          "profile": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "long_spliced_rail": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 10,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 107.0
+          }
+        ],
+        "total_runtime_min": 107.0,
+        "feature_counts": {
+          "profile": 8
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 10,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 9.9
+          }
+        ],
+        "total_runtime_min": 9.9,
+        "feature_counts": {
+          "profile": 8
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "side_table_frame": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 8,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 8.2
+          },
+          {
+            "filename": "pocket-6.35mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 16,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 15.6
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 8,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 2.1
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 16,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 154.5
+          }
+        ],
+        "total_runtime_min": 180.4,
+        "feature_counts": {
+          "hole": 8,
+          "pocket": 24,
+          "profile": 16
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 8,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 6.1
+          },
+          {
+            "filename": "pocket-6.35mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 1188.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 16,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 9.3
+          },
+          {
+            "filename": "bore-6.35mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2880.0,
+            "feed_z_mm_min": 720.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 8,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.6
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 16,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 14.8
+          }
+        ],
+        "total_runtime_min": 30.8,
+        "feature_counts": {
+          "hole": 8,
+          "pocket": 24,
+          "profile": 16
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "decorated_shaker_door": {
+      "baseline": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 3.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 6.6
+          },
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 42.5
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 23.2
+          }
+        ],
+        "total_runtime_min": 72.3,
+        "feature_counts": {
+          "pocket": 2,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 3.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 3.7
+          },
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 15.7
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 2.1
+          }
+        ],
+        "total_runtime_min": 21.5,
+        "feature_counts": {
+          "pocket": 2,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "hinge_cup_door": {
+      "baseline": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "back-bore-25.40mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 25.4,
+            "rpm": 12000.0,
+            "feed_xy_mm_min": 4800.0,
+            "feed_z_mm_min": 1200.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 13.0,
+            "feature_count": 2,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.5
+          },
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 42.5
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 23.2
+          }
+        ],
+        "total_runtime_min": 66.2,
+        "feature_counts": {
+          "hole": 2,
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "back-bore-12.70mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 900.0,
+            "stepdown_mm": 4.5,
+            "max_depth_mm": 13.0,
+            "feature_count": 2,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.4
+          },
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 15.7
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 2.1
+          }
+        ],
+        "total_runtime_min": 18.2,
+        "feature_counts": {
+          "hole": 2,
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "multi_panel_doors": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 12,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 126.4
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 4,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm, tabs 4x4mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 103.6
+          }
+        ],
+        "total_runtime_min": 230.0,
+        "feature_counts": {
+          "pocket": 12,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 12,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 47.9
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 4,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm, tabs 4x4mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 9.6
+          }
+        ],
+        "total_runtime_min": 57.5,
+        "feature_counts": {
+          "pocket": 12,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "raised_panel_doors": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1100.0,
+          "height_mm": 800.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket_offset-12.70mm.nc",
+            "operation": "pocket_offset",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 7,
+            "strategy": "offset_pocket",
+            "estimated_runtime_min": 42.0
+          },
+          {
+            "filename": "edge-12.70mm-90deg.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 540.0,
+            "feed_z_mm_min": 135.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 3,
+            "strategy": "edge",
+            "estimated_runtime_min": 34.5
+          },
+          {
+            "filename": "edge-12.70mm-60deg.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 540.0,
+            "feed_z_mm_min": 135.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 2,
+            "strategy": "edge",
+            "estimated_runtime_min": 16.6
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 2,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 51.4
+          }
+        ],
+        "total_runtime_min": 144.5,
+        "feature_counts": {
+          "profile": 2,
+          "raised_panel": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1100.0,
+          "height_mm": 800.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket_offset-9.53mm.nc",
+            "operation": "pocket_offset",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 7,
+            "strategy": "offset_pocket",
+            "estimated_runtime_min": 29.9
+          },
+          {
+            "filename": "edge-12.70mm-90deg.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 450.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 3,
+            "strategy": "edge",
+            "estimated_runtime_min": 10.5
+          },
+          {
+            "filename": "edge-12.70mm-60deg.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 450.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 2,
+            "strategy": "edge",
+            "estimated_runtime_min": 5.0
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 2,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 4.8
+          }
+        ],
+        "total_runtime_min": 50.2,
+        "feature_counts": {
+          "profile": 2,
+          "raised_panel": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "shaker_door": {
+      "baseline": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 42.5
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 23.2
+          }
+        ],
+        "total_runtime_min": 65.7,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 500.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 15.7
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 2.1
+          }
+        ],
+        "total_runtime_min": 17.8,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "layout_board": {
+      "baseline": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.4,
+            "feature_count": 3143,
+            "strategy": "engrave",
+            "estimated_runtime_min": 309.4
+          }
+        ],
+        "total_runtime_min": 309.4,
+        "feature_counts": {
+          "engrave": 3143
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.4,
+            "feature_count": 3143,
+            "strategy": "engrave",
+            "estimated_runtime_min": 156.7
+          }
+        ],
+        "total_runtime_min": 156.7,
+        "feature_counts": {
+          "engrave": 3143
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "shop_ruler": {
+      "baseline": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 250.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.4,
+            "feature_count": 1996,
+            "strategy": "engrave",
+            "estimated_runtime_min": 151.1
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 18.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 16.1
+          }
+        ],
+        "total_runtime_min": 167.2,
+        "feature_counts": {
+          "engrave": 1996,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 250.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.4,
+            "feature_count": 1996,
+            "strategy": "engrave",
+            "estimated_runtime_min": 59.5
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 18.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.5
+          }
+        ],
+        "total_runtime_min": 61.0,
+        "feature_counts": {
+          "engrave": 1996,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "sign": {
+      "baseline": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 1.0,
+            "feature_count": 282,
+            "strategy": "engrave",
+            "estimated_runtime_min": 39.9
+          }
+        ],
+        "total_runtime_min": 39.9,
+        "feature_counts": {
+          "engrave": 282
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 1.0,
+            "feature_count": 282,
+            "strategy": "engrave",
+            "estimated_runtime_min": 15.2
+          }
+        ],
+        "total_runtime_min": 15.2,
+        "feature_counts": {
+          "engrave": 282
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "svg_artwork": {
+      "baseline": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 4.0,
+            "feature_count": 2,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 1.6
+          },
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4320.0,
+            "feed_z_mm_min": 2160.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 4.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.0
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 3,
+            "strategy": "engrave",
+            "estimated_runtime_min": 1.6
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 7.9
+          }
+        ],
+        "total_runtime_min": 11.1,
+        "feature_counts": {
+          "engrave": 3,
+          "pocket": 3,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 4.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 1.1
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 3,
+            "strategy": "engrave",
+            "estimated_runtime_min": 0.6
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.0
+          }
+        ],
+        "total_runtime_min": 2.7,
+        "feature_counts": {
+          "engrave": 3,
+          "pocket": 3,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "cabinet_side": {
+      "baseline": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 800.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 2,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 3.3
+          },
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4320.0,
+            "feed_z_mm_min": 2160.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 9.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 1.2
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 26,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 3.1
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 18.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 23.9
+          }
+        ],
+        "total_runtime_min": 31.5,
+        "feature_counts": {
+          "hole": 26,
+          "pocket": 3,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 800.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 9.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 3.7
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 26,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 1.8
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 18.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 2.1
+          }
+        ],
+        "total_runtime_min": 7.6,
+        "feature_counts": {
+          "hole": 26,
+          "pocket": 3,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "decorative_panel_faces": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1100.0,
+          "height_mm": 900.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 4,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 14.1
+          },
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4320.0,
+            "feed_z_mm_min": 2160.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 8,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 1.6
+          },
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 3.0,
+            "feature_count": 26,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 61.7
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 4.0,
+            "feature_count": 101,
+            "strategy": "engrave",
+            "estimated_runtime_min": 73.2
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 8,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 66.4
+          }
+        ],
+        "total_runtime_min": 217.0,
+        "feature_counts": {
+          "engrave": 101,
+          "pocket": 38,
+          "profile": 6
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1100.0,
+          "height_mm": 900.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 12,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 9.6
+          },
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 3.0,
+            "feature_count": 26,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 35.2
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 4.0,
+            "feature_count": 101,
+            "strategy": "engrave",
+            "estimated_runtime_min": 27.6
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 6,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 9.2
+          }
+        ],
+        "total_runtime_min": 81.6,
+        "feature_counts": {
+          "engrave": 101,
+          "pocket": 38,
+          "profile": 6
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "edge_treatments": {
+      "baseline": {
+        "stock": {
+          "width_mm": 900.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "edge-12.70mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 540.0,
+            "feed_z_mm_min": 135.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 12.4
+          },
+          {
+            "filename": "edge-12.00mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 720.0,
+            "feed_z_mm_min": 180.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 9.3
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 37.6
+          },
+          {
+            "filename": "finish-3.17mm.nc",
+            "operation": "finish",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "finish",
+            "estimated_runtime_min": 12.5
+          }
+        ],
+        "total_runtime_min": 71.8,
+        "feature_counts": {
+          "chamfer": 1,
+          "profile": 3,
+          "roundover": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 900.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "edge-12.70mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 450.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 3.7
+          },
+          {
+            "filename": "edge-12.00mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 720.0,
+            "feed_z_mm_min": 180.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 9.3
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 3.7
+          },
+          {
+            "filename": "finish-9.53mm.nc",
+            "operation": "finish",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "finish",
+            "estimated_runtime_min": 1.2
+          }
+        ],
+        "total_runtime_min": 17.9,
+        "feature_counts": {
+          "chamfer": 1,
+          "profile": 3,
+          "roundover": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "frames_and_trays": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 12.0,
+            "feature_count": 2,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 45.1
+          },
+          {
+            "filename": "edge-12.70mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 540.0,
+            "feed_z_mm_min": 135.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 5.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 7.0
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 7,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 65.0
+          }
+        ],
+        "total_runtime_min": 117.1,
+        "feature_counts": {
+          "chamfer": 1,
+          "pocket": 2,
+          "profile": 7
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 700.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 12.0,
+            "feature_count": 2,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 21.0
+          },
+          {
+            "filename": "edge-12.70mm.nc",
+            "operation": "edge",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 450.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 5.0,
+            "feature_count": 1,
+            "strategy": "edge",
+            "estimated_runtime_min": 2.1
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 7,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 6.9
+          }
+        ],
+        "total_runtime_min": 30.0,
+        "feature_counts": {
+          "chamfer": 1,
+          "pocket": 2,
+          "profile": 7
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "pocket_with_island": {
+      "baseline": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 17.2
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 14.6
+          }
+        ],
+        "total_runtime_min": 31.8,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 400.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 8.6
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.4
+          }
+        ],
+        "total_runtime_min": 10.0,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "recessed_mounting_plate": {
+      "baseline": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 250.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 3.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 2.8
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 4,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 1.1
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 9.2
+          }
+        ],
+        "total_runtime_min": 13.1,
+        "feature_counts": {
+          "hole": 4,
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 250.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 3.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 2.1
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 4,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.6
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 1,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 0.9
+          }
+        ],
+        "total_runtime_min": 3.6,
+        "feature_counts": {
+          "hole": 4,
+          "pocket": 1,
+          "profile": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "curve_coasters": {
+      "baseline": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 260.0,
+          "thickness_mm": 12.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 7,
+            "strategy": "engrave",
+            "estimated_runtime_min": 29.0
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 12.2,
+            "feature_count": 5,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 14.3
+          }
+        ],
+        "total_runtime_min": 43.3,
+        "feature_counts": {
+          "engrave": 7,
+          "profile": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 260.0,
+          "thickness_mm": 12.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 7,
+            "strategy": "engrave",
+            "estimated_runtime_min": 9.8
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 12.2,
+            "feature_count": 5,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.9
+          }
+        ],
+        "total_runtime_min": 11.7,
+        "feature_counts": {
+          "engrave": 7,
+          "profile": 5
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "pattern_coasters": {
+      "baseline": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 260.0,
+          "thickness_mm": 12.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4320.0,
+            "feed_z_mm_min": 2160.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 2.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.1
+          },
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 2.0,
+            "feature_count": 11,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.5
+          },
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 2.0,
+            "feature_count": 6,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 5.6
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 4.0,
+            "feature_count": 40,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 2.1
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.3,
+            "feature_count": 70,
+            "strategy": "engrave",
+            "estimated_runtime_min": 15.7
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 12.2,
+            "feature_count": 4,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 11.4
+          }
+        ],
+        "total_runtime_min": 35.4,
+        "feature_counts": {
+          "engrave": 70,
+          "hole": 40,
+          "pocket": 20,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 700.0,
+          "height_mm": 260.0,
+          "thickness_mm": 12.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 2.0,
+            "feature_count": 14,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.6
+          },
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 2.0,
+            "feature_count": 6,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 1.9
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 4.0,
+            "feature_count": 40,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 1.5
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.3,
+            "feature_count": 70,
+            "strategy": "engrave",
+            "estimated_runtime_min": 6.1
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 12.2,
+            "feature_count": 4,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.5
+          }
+        ],
+        "total_runtime_min": 11.6,
+        "feature_counts": {
+          "engrave": 70,
+          "hole": 40,
+          "pocket": 20,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "radial_patterns": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 4.0,
+            "feature_count": 16,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 10.8
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 400.0,
+            "feed_z_mm_min": 100.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 270,
+            "strategy": "engrave",
+            "estimated_runtime_min": 28.2
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 30.9
+          }
+        ],
+        "total_runtime_min": 69.9,
+        "feature_counts": {
+          "engrave": 270,
+          "pocket": 16,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 4.0,
+            "feature_count": 16,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 5.8
+          },
+          {
+            "filename": "engrave-1.00mm.nc",
+            "operation": "engrave",
+            "tool_diameter_mm": 1.0,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 300.0,
+            "stepdown_mm": 0.5,
+            "max_depth_mm": 0.5,
+            "feature_count": 270,
+            "strategy": "engrave",
+            "estimated_runtime_min": 11.0
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 3.1
+          }
+        ],
+        "total_runtime_min": 19.9,
+        "feature_counts": {
+          "engrave": 270,
+          "pocket": 16,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "relief_carving": {
+      "baseline": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "heightfield-rough-6.35mm.nc",
+            "operation": "heightfield-rough",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 5.7,
+            "feature_count": 1,
+            "strategy": "heightfield-rough",
+            "estimated_runtime_min": 18.2
+          },
+          {
+            "filename": "heightfield-rough-3.17mm.nc",
+            "operation": "heightfield-rough",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 5.7,
+            "feature_count": 1,
+            "strategy": "heightfield-rough",
+            "estimated_runtime_min": 127.5
+          },
+          {
+            "filename": "heightfield-finish-3.19mm.nc",
+            "operation": "heightfield-finish",
+            "tool_diameter_mm": 3.19,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 4.405,
+            "feature_count": 1,
+            "strategy": "heightfield-finish",
+            "estimated_runtime_min": 94.6
+          }
+        ],
+        "total_runtime_min": 240.3,
+        "feature_counts": {
+          "heightfield": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "heightfield-rough-9.53mm.nc",
+            "operation": "heightfield-rough",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 5.7,
+            "feature_count": 1,
+            "strategy": "heightfield-rough",
+            "estimated_runtime_min": 4.1
+          },
+          {
+            "filename": "heightfield-rough-3.17mm.nc",
+            "operation": "heightfield-rough",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 5.7,
+            "feature_count": 1,
+            "strategy": "heightfield-rough",
+            "estimated_runtime_min": 74.2
+          },
+          {
+            "filename": "heightfield-finish-3.19mm.nc",
+            "operation": "heightfield-finish",
+            "tool_diameter_mm": 3.19,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 4.405,
+            "feature_count": 1,
+            "strategy": "heightfield-finish",
+            "estimated_runtime_min": 58.9
+          }
+        ],
+        "total_runtime_min": 137.2,
+        "feature_counts": {
+          "heightfield": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "nested_cabinet_job": {
+      "baseline": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "nested_cabinet_job.nest.yml",
+            "sheet_index": 1,
+            "job_name": "nested_cabinet_job_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 6.0,
+                "feature_count": 3,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 82.8
+              },
+              {
+                "filename": "sheet_1.profile-6.35mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 6.35,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 1800.0,
+                "feed_z_mm_min": 594.0,
+                "stepdown_mm": 3.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 6,
+                "strategy": "onion_skin_then_finish",
+                "holding": "tabs 4x3mm, onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 42.9
+              },
+              {
+                "filename": "sheet_1.release-6.35mm.nc",
+                "operation": "release",
+                "tool_diameter_mm": 6.35,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 1800.0,
+                "feed_z_mm_min": 594.0,
+                "stepdown_mm": 3.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "onion_skin_release",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 2.8
+              }
+            ],
+            "total_runtime_min": 128.5,
+            "feature_counts": {
+              "pocket": 3,
+              "profile": 6
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "nested_cabinet_job.nest.yml",
+            "sheet_index": 2,
+            "job_name": "nested_cabinet_job_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-12.70mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 12.7,
+                "rpm": 14000.0,
+                "feed_xy_mm_min": 1400.0,
+                "feed_z_mm_min": 350.0,
+                "stepdown_mm": 3.5,
+                "max_depth_mm": 6.0,
+                "feature_count": 1,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 5.5
+              },
+              {
+                "filename": "sheet_2.profile-6.35mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 6.35,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 1800.0,
+                "feed_z_mm_min": 594.0,
+                "stepdown_mm": 3.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 4,
+                "strategy": "onion_skin_then_finish",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 15.7
+              },
+              {
+                "filename": "sheet_2.release-6.35mm.nc",
+                "operation": "release",
+                "tool_diameter_mm": 6.35,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 1800.0,
+                "feed_z_mm_min": 594.0,
+                "stepdown_mm": 3.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 3,
+                "strategy": "onion_skin_release",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 2.9
+              }
+            ],
+            "total_runtime_min": 24.1,
+            "feature_counts": {
+              "pocket": 1,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 152.6,
+        "kerf_mm": 6.35
+      },
+      "revised": {
+        "total_sheets": 2,
+        "sheets": [
+          {
+            "source": "nested_cabinet_job.nest.yml",
+            "sheet_index": 1,
+            "job_name": "nested_cabinet_job_sheet_1",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_1.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 6.0,
+                "feature_count": 3,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 30.4
+              },
+              {
+                "filename": "sheet_1.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 6,
+                "strategy": "onion_skin_then_finish",
+                "holding": "tabs 4x3mm, onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 10.6
+              },
+              {
+                "filename": "sheet_1.release-9.53mm.nc",
+                "operation": "release",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 2,
+                "strategy": "onion_skin_release",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 1.2
+              }
+            ],
+            "total_runtime_min": 42.2,
+            "feature_counts": {
+              "pocket": 3,
+              "profile": 6
+            },
+            "safe_z_mm": 6.0
+          },
+          {
+            "source": "nested_cabinet_job.nest.yml",
+            "sheet_index": 2,
+            "job_name": "nested_cabinet_job_sheet_2",
+            "stock": {
+              "width_mm": 1220.0,
+              "height_mm": 1220.0,
+              "thickness_mm": 18.0,
+              "material": "mdf"
+            },
+            "files": [
+              {
+                "filename": "sheet_2.pocket-9.53mm.nc",
+                "operation": "pocket",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 2520.0,
+                "feed_z_mm_min": 630.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 6.0,
+                "feature_count": 1,
+                "strategy": "raster_pocket",
+                "estimated_runtime_min": 2.0
+              },
+              {
+                "filename": "sheet_2.profile-9.53mm.nc",
+                "operation": "profile",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 4,
+                "strategy": "onion_skin_then_finish",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 3.9
+              },
+              {
+                "filename": "sheet_2.release-9.53mm.nc",
+                "operation": "release",
+                "tool_diameter_mm": 9.525,
+                "rpm": 18000.0,
+                "feed_xy_mm_min": 4500.0,
+                "feed_z_mm_min": 1125.0,
+                "stepdown_mm": 6.0,
+                "max_depth_mm": 18.2,
+                "feature_count": 3,
+                "strategy": "onion_skin_release",
+                "holding": "onion_skin 0.3mm",
+                "cut_through_mm": 0.2,
+                "estimated_runtime_min": 1.3
+              }
+            ],
+            "total_runtime_min": 7.2,
+            "feature_counts": {
+              "pocket": 1,
+              "profile": 4
+            },
+            "safe_z_mm": 6.0
+          }
+        ],
+        "total_runtime_min": 49.4,
+        "kerf_mm": 9.525
+      }
+    },
+    "production_sheet": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 800.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 28.8
+          },
+          {
+            "filename": "25.40mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 25.4,
+            "rpm": 12000.0,
+            "feed_xy_mm_min": 4800.0,
+            "feed_z_mm_min": 1200.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 12.0,
+            "feature_count": 1,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.2
+          },
+          {
+            "filename": "3.17mm-downcut.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 12.0,
+            "feature_count": 16,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 5.6
+          },
+          {
+            "filename": "3.17mm-upcut.nc",
+            "operation": "profile, profile_finish",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 14,
+            "strategy": "onion_skin_then_finish, allowance_finish",
+            "holding": "tabs 4x3mm, onion_skin 0.3mm, tabs 3x3mm, tabs 2x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 187.1
+          },
+          {
+            "filename": "release-3.17mm.nc",
+            "operation": "release",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "onion_skin_release",
+            "holding": "onion_skin 0.3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 6.0
+          }
+        ],
+        "total_runtime_min": 227.7,
+        "feature_counts": {
+          "hole": 17,
+          "pocket": 1,
+          "profile": 8,
+          "waste_cut": 1
+        },
+        "safe_z_mm": 25.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 6.0
+          },
+          {
+            "filename": "9.53mm-compression.nc",
+            "operation": "profile, profile_finish",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 14,
+            "strategy": "onion_skin_then_finish, allowance_finish",
+            "holding": "tabs 4x3mm, onion_skin 0.3mm, tabs 3x3mm, tabs 2x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 20.9
+          },
+          {
+            "filename": "12.70mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 900.0,
+            "stepdown_mm": 4.5,
+            "max_depth_mm": 12.0,
+            "feature_count": 1,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.2
+          },
+          {
+            "filename": "6.35mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2880.0,
+            "feed_z_mm_min": 720.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 12.0,
+            "feature_count": 16,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 1.7
+          },
+          {
+            "filename": "release-9.53mm.nc",
+            "operation": "release",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "onion_skin_release",
+            "holding": "onion_skin 0.3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.9
+          }
+        ],
+        "total_runtime_min": 30.7,
+        "feature_counts": {
+          "hole": 17,
+          "pocket": 1,
+          "profile": 8,
+          "waste_cut": 1
+        },
+        "safe_z_mm": 25.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "calibration_coupon": {
+      "baseline": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 250.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 5.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.8
+          },
+          {
+            "filename": "bore-3.17mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 1,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.3
+          },
+          {
+            "filename": "pocket-3.17mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1080.0,
+            "feed_z_mm_min": 356.4,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 17.8
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 4,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 14.5
+          }
+        ],
+        "total_runtime_min": 33.4,
+        "feature_counts": {
+          "hole": 4,
+          "pocket": 3,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 300.0,
+          "height_mm": 250.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 5.0,
+            "feature_count": 3,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 0.4
+          },
+          {
+            "filename": "drill-6.35mm.nc",
+            "operation": "drill",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2880.0,
+            "feed_z_mm_min": 720.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 1,
+            "strategy": "drill",
+            "estimated_runtime_min": 0.3
+          },
+          {
+            "filename": "bore-9.53mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4320.0,
+            "feed_z_mm_min": 2160.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.0,
+            "feature_count": 1,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.0
+          },
+          {
+            "filename": "drill-12.70mm.nc",
+            "operation": "drill",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 900.0,
+            "stepdown_mm": 4.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 1,
+            "strategy": "drill",
+            "estimated_runtime_min": 0.2
+          },
+          {
+            "filename": "bore-12.70mm.nc",
+            "operation": "bore",
+            "tool_diameter_mm": 12.7,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 900.0,
+            "stepdown_mm": 4.5,
+            "max_depth_mm": 19.0,
+            "feature_count": 1,
+            "strategy": "helical_bore",
+            "estimated_runtime_min": 0.1
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 4,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 1.8
+          }
+        ],
+        "total_runtime_min": 2.8,
+        "feature_counts": {
+          "hole": 4,
+          "pocket": 3,
+          "profile": 4
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "clamp_keepouts": {
+      "baseline": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 6.4
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 24.7
+          }
+        ],
+        "total_runtime_min": 31.1,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 6.0,
+            "feature_count": 1,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 3.5
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 19.2,
+            "feature_count": 3,
+            "strategy": "tabbed_profile",
+            "holding": "tabs 4x3mm",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 2.9
+          }
+        ],
+        "total_runtime_min": 6.4,
+        "feature_counts": {
+          "pocket": 1,
+          "profile": 3
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "joinery_test_coupons": {
+      "baseline": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 9.0,
+            "feature_count": 12,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 4.1
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 18.0,
+            "feature_count": 28,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 19.7
+          },
+          {
+            "filename": "dogbone-12.70mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 9.0,
+            "feature_count": 48,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 8.9
+          },
+          {
+            "filename": "profile-3.17mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 18.2,
+            "feature_count": 38,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 68.8
+          }
+        ],
+        "total_runtime_min": 101.5,
+        "feature_counts": {
+          "pocket": 26,
+          "profile": 32
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 600.0,
+          "height_mm": 400.0,
+          "thickness_mm": 18.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 9.0,
+            "feature_count": 12,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 2.7
+          },
+          {
+            "filename": "dogbone-3.17mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 18.0,
+            "feature_count": 28,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 8.7
+          },
+          {
+            "filename": "dogbone-9.53mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 9.0,
+            "feature_count": 48,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 5.5
+          },
+          {
+            "filename": "profile-9.53mm.nc",
+            "operation": "profile",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 4500.0,
+            "feed_z_mm_min": 1125.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 18.2,
+            "feature_count": 53,
+            "strategy": "contour",
+            "cut_through_mm": 0.2,
+            "estimated_runtime_min": 9.9
+          }
+        ],
+        "total_runtime_min": 26.8,
+        "feature_counts": {
+          "pocket": 26,
+          "profile": 32
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "pocket_corner_test": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-12.70mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 6,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 25.8
+          },
+          {
+            "filename": "pocket_rest-3.17mm.nc",
+            "operation": "pocket_rest",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 1,
+            "strategy": "pocket_rest",
+            "estimated_runtime_min": 4.1
+          },
+          {
+            "filename": "finish-12.70mm.nc",
+            "operation": "finish",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 1,
+            "strategy": "finish",
+            "estimated_runtime_min": 1.0
+          },
+          {
+            "filename": "corner_cleanup-3.17mm.nc",
+            "operation": "corner_cleanup",
+            "tool_diameter_mm": 3.175,
+            "rpm": 20000.0,
+            "feed_xy_mm_min": 1200.0,
+            "feed_z_mm_min": 396.0,
+            "stepdown_mm": 1.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "corner_cleanup",
+            "estimated_runtime_min": 3.0
+          },
+          {
+            "filename": "dogbone-12.70mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 12.7,
+            "rpm": 14000.0,
+            "feed_xy_mm_min": 1400.0,
+            "feed_z_mm_min": 350.0,
+            "stepdown_mm": 3.5,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 0.8
+          },
+          {
+            "filename": "dogbone-6.35mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 1800.0,
+            "feed_z_mm_min": 594.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 0.5
+          }
+        ],
+        "total_runtime_min": 35.2,
+        "feature_counts": {
+          "pocket": 6
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1000.0,
+          "height_mm": 300.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "pocket-9.53mm.nc",
+            "operation": "pocket",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 6,
+            "strategy": "raster_pocket",
+            "estimated_runtime_min": 13.6
+          },
+          {
+            "filename": "pocket_rest-3.17mm.nc",
+            "operation": "pocket_rest",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 1,
+            "strategy": "pocket_rest",
+            "estimated_runtime_min": 1.1
+          },
+          {
+            "filename": "finish-9.53mm.nc",
+            "operation": "finish",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 1,
+            "strategy": "finish",
+            "estimated_runtime_min": 0.5
+          },
+          {
+            "filename": "corner_cleanup-3.17mm.nc",
+            "operation": "corner_cleanup",
+            "tool_diameter_mm": 3.175,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2160.0,
+            "feed_z_mm_min": 712.8,
+            "stepdown_mm": 2.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "corner_cleanup",
+            "estimated_runtime_min": 1.5
+          },
+          {
+            "filename": "dogbone-9.53mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 9.525,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 2520.0,
+            "feed_z_mm_min": 630.0,
+            "stepdown_mm": 6.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 0.5
+          },
+          {
+            "filename": "dogbone-6.35mm.nc",
+            "operation": "dogbone",
+            "tool_diameter_mm": 6.35,
+            "rpm": 18000.0,
+            "feed_xy_mm_min": 3600.0,
+            "feed_z_mm_min": 1188.0,
+            "stepdown_mm": 3.0,
+            "max_depth_mm": 10.0,
+            "feature_count": 4,
+            "strategy": "dogbone",
+            "estimated_runtime_min": 0.3
+          }
+        ],
+        "total_runtime_min": 17.5,
+        "feature_counts": {
+          "pocket": 6
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    },
+    "spoilboard_surfacing": {
+      "baseline": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "surface-25.40mm.nc",
+            "operation": "surface",
+            "tool_diameter_mm": 25.4,
+            "rpm": 12000.0,
+            "feed_xy_mm_min": 4800.0,
+            "feed_z_mm_min": 1200.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 0.5,
+            "feature_count": 1,
+            "strategy": "surface",
+            "estimated_runtime_min": 19.5
+          }
+        ],
+        "total_runtime_min": 19.5,
+        "feature_counts": {
+          "pocket": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 3.175
+      },
+      "revised": {
+        "stock": {
+          "width_mm": 1220.0,
+          "height_mm": 1220.0,
+          "thickness_mm": 19.0,
+          "material": "mdf"
+        },
+        "files": [
+          {
+            "filename": "surface-25.40mm.nc",
+            "operation": "surface",
+            "tool_diameter_mm": 25.4,
+            "rpm": 12000.0,
+            "feed_xy_mm_min": 4800.0,
+            "feed_z_mm_min": 1200.0,
+            "stepdown_mm": 1.0,
+            "max_depth_mm": 0.5,
+            "feature_count": 1,
+            "strategy": "surface",
+            "estimated_runtime_min": 19.5
+          }
+        ],
+        "total_runtime_min": 19.5,
+        "feature_counts": {
+          "pocket": 1
+        },
+        "safe_z_mm": 6.0,
+        "kerf_mm": 9.525
+      }
+    }
+  }
+}

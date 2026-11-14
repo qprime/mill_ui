@@ -20,10 +20,10 @@ relief bores use each cutout’s center to clear its mating corners.
 
 Sheet 600 × 400 × 18mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 12 feature(s), to 9mm
-- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 28 feature(s), to 18mm
-- `dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 48 feature(s), to 9mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 38 contour(s), to 18.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 12 operation(s), to 9mm
+- `dogbone-3.17mm.nc`: dogbone, 3.175mm tool, 28 operation(s), to 18mm
+- `dogbone-9.53mm.nc`: dogbone, 9.525mm tool, 48 operation(s), to 9mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 53 operation(s), to 18.2mm
 
 ## Run
 
@@ -31,10 +31,10 @@ Sheet 600 × 400 × 18mm mdf.
 
 ## Outputs
 
-- `dogbone-12.70mm.nc`
 - `dogbone-3.17mm.nc`
+- `dogbone-9.53mm.nc`
 - `joinery_test_coupons.svg`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

@@ -16,9 +16,9 @@ The center pocket retains the normal internal corner radius of the cutter.
 
 Sheet 500 × 700 × 19mm mdf.
 
-- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 1 feature(s), to 3mm
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 19.2mm
+- `pocket-3.17mm.nc`: pocket, 3.175mm tool, 1 operation(s), to 3mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 1 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 1 operation(s), to 19.2mm
 
 ## Run
 
@@ -29,6 +29,6 @@ Sheet 500 × 700 × 19mm mdf.
 - `decorated_shaker_door.svg`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
 - `pocket-3.17mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

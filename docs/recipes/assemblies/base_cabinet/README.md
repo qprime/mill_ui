@@ -36,15 +36,15 @@ Corrected parts pack onto two sheets; the earlier oversized back required three.
 
 Sheet 1: 1220 × 1220 × 18mm mdf.
 
-- `sheet_1.pocket-12.70mm.nc`: pocket, 12.7mm tool, 8 operation(s), to 9mm
-- `sheet_1.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 32 operation(s), to 9mm
-- `sheet_1.profile-3.17mm.nc`: profile, 3.175mm tool, 2 contour(s), to 18.2mm
+- `sheet_1.pocket-9.53mm.nc`: pocket, 9.525mm tool, 8 operation(s), to 9mm
+- `sheet_1.dogbone-9.53mm.nc`: dogbone, 9.525mm tool, 32 operation(s), to 9mm
+- `sheet_1.profile-9.53mm.nc`: profile, 9.525mm tool, 2 operation(s), to 18.2mm
 
 Sheet 2: 1220 × 1220 × 18mm mdf.
 
-- `sheet_2.pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 operation(s), to 9mm
-- `sheet_2.dogbone-12.70mm.nc`: dogbone, 12.7mm tool, 8 operation(s), to 9mm
-- `sheet_2.profile-3.17mm.nc`: profile, 3.175mm tool, 7 contour(s), to 18.2mm
+- `sheet_2.pocket-9.53mm.nc`: pocket, 9.525mm tool, 2 operation(s), to 9mm
+- `sheet_2.dogbone-9.53mm.nc`: dogbone, 9.525mm tool, 8 operation(s), to 9mm
+- `sheet_2.profile-9.53mm.nc`: profile, 9.525mm tool, 7 operation(s), to 18.2mm
 
 ## Run
 
@@ -57,9 +57,9 @@ Sheet 2: 1220 × 1220 × 18mm mdf.
 - `machining_summary.json`
 - `manifest.json`
 - `metrics.json`
-- `sheet_1.dogbone-12.70mm.nc`
-- `sheet_1.pocket-12.70mm.nc`
-- `sheet_1.profile-3.17mm.nc`
-- `sheet_2.dogbone-12.70mm.nc`
-- `sheet_2.pocket-12.70mm.nc`
-- `sheet_2.profile-3.17mm.nc`
+- `sheet_1.dogbone-9.53mm.nc`
+- `sheet_1.pocket-9.53mm.nc`
+- `sheet_1.profile-9.53mm.nc`
+- `sheet_2.dogbone-9.53mm.nc`
+- `sheet_2.pocket-9.53mm.nc`
+- `sheet_2.profile-9.53mm.nc`

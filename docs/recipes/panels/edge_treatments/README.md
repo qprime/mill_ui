@@ -31,14 +31,10 @@ with the available 90° V-bit.
 
 Sheet 900 × 400 × 19mm mdf.
 
-## Programs
-
-- `edge-12.70mm.nc`: 90° V-bit chamfer, to 6mm
-- `edge-12.00mm.nc`: example R6 point roundover, to 6mm
-- `profile-3.17mm.nc`: three outside profiles, including the allowance rough pass, to 19.2mm
-- `finish-3.17mm.nc`: allowance finish pass, to 19.2mm
-
-Estimated total runtime: 71.8 minutes. Metrics contain no errors or warnings.
+- `edge-12.70mm.nc`: edge, 12.7mm tool, 1 operation(s), to 6mm
+- `edge-12.00mm.nc`: edge, 12mm tool, 1 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 3 operation(s), to 19.2mm
+- `finish-9.53mm.nc`: finish, 9.525mm tool, 1 operation(s), to 19.2mm
 
 ## Run
 
@@ -49,7 +45,7 @@ Estimated total runtime: 71.8 minutes. Metrics contain no errors or warnings.
 - `edge-12.00mm.nc`
 - `edge-12.70mm.nc`
 - `edge_treatments.svg`
-- `finish-3.17mm.nc`
+- `finish-9.53mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `profile-3.17mm.nc`
+- `profile-9.53mm.nc`

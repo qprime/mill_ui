@@ -39,22 +39,10 @@ explicitly by these tool-matched profiles; that arbitrary slope is not supported
 
 Sheet 1100 × 800 × 19mm mdf.
 
-- `pocket_offset-12.70mm.nc`: seven flat clearing regions, 12.7mm endmill, to 6mm (gutters) or 2mm (fields)
-- `edge-12.70mm-90deg.nc`: three contours, 12.7mm 90° V-bit, to 6mm
-- `edge-12.70mm-60deg.nc`: two contours, 12.7mm 60° V-bit, to 6mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 2 feature(s), to 19.2mm
-
-Door outlines and their four 3mm-high tabs are unchanged. Estimated runtime is
-144.6 minutes, including the newly required gutter clearing.
-
-## Machining limits
-
-The 12.7mm flat cutter leaves rounded internal corners and small areas of
-retained stock there, including spots that retain the full original height.
-Blueprint pocket fills describe the intended regions, not square-corner
-clearance. No dogbones are added to decorative corners.
-Arbitrary shallow slopes and shaped molding profiles need separate capabilities.
-An unavailable angle or undersized bit is an error; tooling inventory is unchanged.
+- `pocket_offset-9.53mm.nc`: pocket_offset, 9.525mm tool, 7 operation(s), to 6mm
+- `edge-12.70mm-90deg.nc`: edge, 12.7mm tool, 3 operation(s), to 6mm
+- `edge-12.70mm-60deg.nc`: edge, 12.7mm tool, 2 operation(s), to 6mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 2 operation(s), to 19.2mm
 
 ## Run
 
@@ -66,6 +54,6 @@ An unavailable angle or undersized bit is an error; tooling inventory is unchang
 - `edge-12.70mm-90deg.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket_offset-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket_offset-9.53mm.nc`
+- `profile-9.53mm.nc`
 - `raised_panel_doors.svg`

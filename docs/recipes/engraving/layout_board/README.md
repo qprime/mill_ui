@@ -10,7 +10,7 @@ A layout board engraved with a measurement grid and labelled grid lines.
 
 Sheet 400 × 300 × 19mm mdf.
 
-- `engrave-1.00mm.nc`: engrave, 1mm tool, 3143 feature(s), to 0.4mm
+- `engrave-1.00mm.nc`: engrave, 1mm tool, 3143 operation(s), to 0.4mm
 
 ## Run
 

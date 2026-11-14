@@ -7,53 +7,53 @@
   },
   "files": [
     {
-      "filename": "back-bore-25.40mm.nc",
+      "filename": "back-bore-12.70mm.nc",
       "operation": "bore",
-      "tool_diameter_mm": 25.4,
-      "rpm": 12000.0,
-      "feed_xy_mm_min": 4800.0,
-      "feed_z_mm_min": 1200.0,
-      "stepdown_mm": 1.0,
+      "tool_diameter_mm": 12.7,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 3600.0,
+      "feed_z_mm_min": 900.0,
+      "stepdown_mm": 4.5,
       "max_depth_mm": 13.0,
       "feature_count": 2,
       "strategy": "helical_bore",
-      "estimated_runtime_min": 0.5
+      "estimated_runtime_min": 0.4
     },
     {
-      "filename": "pocket-12.70mm.nc",
+      "filename": "pocket-9.53mm.nc",
       "operation": "pocket",
-      "tool_diameter_mm": 12.7,
-      "rpm": 14000.0,
-      "feed_xy_mm_min": 1400.0,
-      "feed_z_mm_min": 350.0,
-      "stepdown_mm": 3.5,
+      "tool_diameter_mm": 9.525,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 2520.0,
+      "feed_z_mm_min": 630.0,
+      "stepdown_mm": 6.0,
       "max_depth_mm": 6.0,
       "feature_count": 1,
       "strategy": "raster_pocket",
-      "estimated_runtime_min": 42.5
+      "estimated_runtime_min": 15.7
     },
     {
-      "filename": "profile-3.17mm.nc",
+      "filename": "profile-9.53mm.nc",
       "operation": "profile",
-      "tool_diameter_mm": 3.175,
-      "rpm": 20000.0,
-      "feed_xy_mm_min": 1200.0,
-      "feed_z_mm_min": 396.0,
-      "stepdown_mm": 1.5,
+      "tool_diameter_mm": 9.525,
+      "rpm": 18000.0,
+      "feed_xy_mm_min": 4500.0,
+      "feed_z_mm_min": 1125.0,
+      "stepdown_mm": 6.0,
       "max_depth_mm": 19.2,
       "feature_count": 1,
       "strategy": "tabbed_profile",
       "holding": "tabs 4x3mm",
       "cut_through_mm": 0.2,
-      "estimated_runtime_min": 23.2
+      "estimated_runtime_min": 2.1
     }
   ],
-  "total_runtime_min": 66.2,
+  "total_runtime_min": 18.2,
   "feature_counts": {
     "hole": 2,
     "pocket": 1,
     "profile": 1
   },
   "safe_z_mm": 6.0,
-  "kerf_mm": 3.175
+  "kerf_mm": 9.525
 }

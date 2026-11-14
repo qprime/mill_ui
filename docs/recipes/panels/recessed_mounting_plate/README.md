@@ -10,9 +10,9 @@ A plate with a 3mm recess and four 6mm through-holes, cut out with an outside pr
 
 Sheet 300 × 250 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 1 feature(s), to 3mm
-- `bore-3.17mm.nc`: bore, 3.175mm tool, 4 feature(s), to 19mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 1 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 1 operation(s), to 3mm
+- `bore-3.17mm.nc`: bore, 3.175mm tool, 4 operation(s), to 19mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 1 operation(s), to 19.2mm
 
 ## Run
 
@@ -23,6 +23,6 @@ Sheet 300 × 250 × 19mm mdf.
 - `bore-3.17mm.nc`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`
 - `recessed_mounting_plate.svg`

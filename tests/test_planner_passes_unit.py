@@ -43,6 +43,7 @@ from cam.planner.passes.tools import (
     pick_tool_for_profile,
     pick_tool_for_region,
     pick_tool_for_roundover,
+    pick_tool_for_surface,
     stepdown_for_tool,
     stepover_for_tool,
 )
@@ -144,6 +145,52 @@ def _accumulator(ramp_angle=3.0):
         prime_spindle=False,
         ramp_angle_deg=ramp_angle,
     )
+
+
+class TestDedicatedToolSelection:
+    @staticmethod
+    def _tools():
+        return normalize_tool_entries(
+            [
+                FLAT_3MM,
+                FLAT_6MM,
+                FLAT_12MM,
+                {**FLAT_12MM, "name": "surfacer", "diameter": 25.4, "purpose": "surface"},
+                {**FLAT_6MM, "name": "carbide profile", "diameter": 9.525, "purpose": "profile"},
+                {**FLAT_6MM, "name": "PCD pocket", "diameter": 9.525, "purpose": "pocket"},
+            ]
+        )
+
+    def test_dedicated_tools_are_selected_for_their_operations(self):
+        tools = self._tools()
+
+        assert pick_tool_for_profile(tools, kerf_mm=9.525).name == "carbide profile"
+        assert pick_tool_for_pocket(tools, required_width_mm=None, cleanup_offset_mm=0).name == "PCD pocket"
+        region_tool = pick_tool_for_region(tools, box(0, 0, 30, 30), cleanup_offset_mm=0)
+        assert region_tool is not None and region_tool.name == "PCD pocket"
+        assert pick_tool_for_surface(tools).name == "surfacer"
+        assert pick_tool_for_hole(tools, hole_diameter_mm=10).name == "6mm_flat"
+
+    def test_narrow_pockets_retain_a_fitting_detail_tool(self):
+        tools = self._tools()
+
+        assert pick_tool_for_pocket(tools, required_width_mm=5, cleanup_offset_mm=0.25).name == "3mm_flat"
+        region_tool = pick_tool_for_region(tools, box(0, 0, 30, 5), cleanup_offset_mm=0.25)
+        assert region_tool is not None and region_tool.name == "3mm_flat"
+
+    def test_holes_choose_largest_fit_and_preserve_later_equal_diameter_entries(self):
+        tools = normalize_tool_entries([FLAT_12MM, FLAT_6MM, FLAT_3MM, {**FLAT_6MM, "name": "plunge tool"}])
+
+        assert pick_tool_for_hole(tools, hole_diameter_mm=10).name == "plunge tool"
+
+    def test_compilation_snapshot_preserves_purposes_and_legacy_general_tools(self):
+        from cam.compilation import CompilationContext
+
+        context = CompilationContext("mdf", 9.525, tuple(self._tools()))
+        snapshot = context.to_dict()
+
+        assert "purpose" not in snapshot["tools"][0]
+        assert CompilationContext.from_dict(snapshot) == context
 
 
 class TestPickToolForPocket:

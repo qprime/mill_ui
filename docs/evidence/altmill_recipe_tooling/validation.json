@@ -1,0 +1,348 @@
+{
+  "baseline_commit": "b4943220",
+  "baseline": {
+    "base_cabinet": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "bookcase": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "box_bottoms_and_lids": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "cubby_organizer": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "finger_jointed_box": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "long_spliced_rail": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "side_table_frame": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "decorated_shaker_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "hinge_cup_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "multi_panel_doors": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "raised_panel_doors": {
+      "verdict": "Verdict.FAIL",
+      "failures": [
+        {
+          "id": "ITEM_COUNT",
+          "details": "Item count mismatch: expected 2, got 9"
+        }
+      ]
+    },
+    "shaker_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "layout_board": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "shop_ruler": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "sign": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "svg_artwork": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "cabinet_side": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "decorative_panel_faces": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "edge_treatments": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "frames_and_trays": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "pocket_with_island": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "recessed_mounting_plate": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "curve_coasters": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "pattern_coasters": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "radial_patterns": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "relief_carving": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "nested_cabinet_job": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "production_sheet": {
+      "verdict": "Verdict.FAIL",
+      "failures": [
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 14: Stepdown 28.000mm exceeds max 26.0mm",
+            "Line 87: Stepdown 28.000mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 22: Stepdown 26.500mm exceeds max 26.0mm",
+            "Line 31: Stepdown 28.000mm exceeds max 26.0mm",
+            "Line 40: Stepdown 29.500mm exceeds max 26.0mm",
+            "Line 49: Stepdown 31.000mm exceeds max 26.0mm",
+            "Line 58: Stepdown 32.500mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 14: Stepdown 39.054mm exceeds max 26.0mm",
+            "Line 27: Stepdown 39.054mm exceeds max 26.0mm",
+            "Line 39: Stepdown 40.889mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "ITEM_COUNT",
+          "details": "Item count mismatch: expected 27, got 26"
+        },
+        {
+          "id": "PROFILE_EXISTS",
+          "details": "No profile geometry matches expected dimensions for 'waste_0_11'"
+        }
+      ]
+    },
+    "calibration_coupon": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "clamp_keepouts": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "joinery_test_coupons": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "pocket_corner_test": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "spoilboard_surfacing": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    }
+  },
+  "revised": {
+    "base_cabinet": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "bookcase": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "box_bottoms_and_lids": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "cubby_organizer": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "finger_jointed_box": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "long_spliced_rail": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "side_table_frame": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "decorated_shaker_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "hinge_cup_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "multi_panel_doors": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "raised_panel_doors": {
+      "verdict": "Verdict.FAIL",
+      "failures": [
+        {
+          "id": "ITEM_COUNT",
+          "details": "Item count mismatch: expected 2, got 9"
+        }
+      ]
+    },
+    "shaker_door": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "layout_board": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "shop_ruler": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "sign": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "svg_artwork": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "cabinet_side": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "decorative_panel_faces": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "edge_treatments": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "frames_and_trays": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "pocket_with_island": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "recessed_mounting_plate": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "curve_coasters": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "pattern_coasters": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "radial_patterns": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "relief_carving": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "nested_cabinet_job": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "production_sheet": {
+      "verdict": "Verdict.FAIL",
+      "failures": [
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 22: Stepdown 31.000mm exceeds max 26.0mm",
+            "Line 31: Stepdown 37.000mm exceeds max 26.0mm",
+            "Line 48: Stepdown 43.000mm exceeds max 26.0mm",
+            "Line 67: Stepdown 31.000mm exceeds max 26.0mm",
+            "Line 88: Stepdown 31.000mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 14: Stepdown 31.000mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "GCODE_MAX_STEPDOWN",
+          "details": [
+            "Line 14: Stepdown 39.387mm exceeds max 26.0mm",
+            "Line 27: Stepdown 39.387mm exceeds max 26.0mm",
+            "Line 39: Stepdown 41.222mm exceeds max 26.0mm"
+          ]
+        },
+        {
+          "id": "ITEM_COUNT",
+          "details": "Item count mismatch: expected 27, got 26"
+        },
+        {
+          "id": "PROFILE_EXISTS",
+          "details": "No profile geometry matches expected dimensions for 'waste_0_11'"
+        }
+      ]
+    },
+    "calibration_coupon": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    },
+    "clamp_keepouts": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "joinery_test_coupons": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "pocket_corner_test": {
+      "verdict": "Verdict.PASS",
+      "failures": []
+    },
+    "spoilboard_surfacing": {
+      "verdict": "Verdict.WARN",
+      "failures": []
+    }
+  }
+}

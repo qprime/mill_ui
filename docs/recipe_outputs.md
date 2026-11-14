@@ -127,3 +127,47 @@ A run with more than one sheet (a multi-sheet layout, or several input files) wr
 
 `cam.pipeline.write_run_outputs` is the single writer for `.nc`, `.svg`, `metrics.json`, `machining_summary.json` and `manifest.json` (runs with more than one sheet); `cli.mill --recipe` and `cli.recipes --regen` both reach it through `cli.mill.write_recipe_outputs`, so either one refreshes a recipe's outputs. A run with several input files prefixes each `.nc` with its input stem (`door.pml.profile-6.35mm.nc`). The writer raises `GcodeNameCollisionError` if two G-code files would share a name.
 
+
+## AltMill tooling comparison, 2026-11-14
+
+[All 33 recipe timings](evidence/altmill_recipe_tooling/timings.csv) record the
+canonical estimates captured before retuning and after rebuilding. The baseline
+is the post-#248 working tree at commit `b4943220`; its recipe gate passed before
+any tooling change. [Full before/after summaries](evidence/altmill_recipe_tooling/comparison.json)
+retain the per-sheet and per-program estimates.
+
+The combined estimate changes from 3,790.0 to 1,189.1 minutes, a 68.6% reduction.
+Thirty-two recipes improve; spoilboard surfacing is unchanged. Sheet counts are
+unchanged for every recipe. These are generated-program estimates; acceleration,
+manual tool changes, sheet handling and physical cutting measurements are not
+included.
+
+Main profiling uses a modeled 9.525mm two-edge carbide mortise-compression cutter
+at 18,000 RPM, 4,500mm/min and 6mm stepdown. Main pocketing uses a modeled 9.525mm
+single-edge PCD straight-plunge cutter at 18,000 RPM, 2,520mm/min, 6mm stepdown
+and 40% stepover. [Tool assumptions and primary references](../machines/README.md#altmill-recipe-tooling)
+explain the spindle, flute-length and entry assumptions. Detail, engraving and
+ball-nose tools remain where required, with revised MDF feeds; surfacing settings
+and the rapid-rate estimator are unchanged.
+
+Fixed layouts were translated and spaced for the larger cutter while retaining
+nominal part sizes. Automatic layouts use the selected actual diameter. Held
+nesting uses two diameters of separation; waste-cut generation now also preserves
+that holding stock and honors its extra margin. The production-sheet shelves keep
+their sizes while their containing grid grows to retain allowance clearance.
+
+A larger cutter changes internal corner radii: the main tool's radius is
+4.7625mm rather than 1.5875mm. Narrow pockets and small holes still select fitting
+detail cutters. Tool purpose separates profile, pocket and surface selection so
+that a surfacing cutter is not chosen automatically to bore a hole. Updated
+blueprints and recipe READMEs show the revised placements and program lists.
+
+Verification: 4,067 Python tests pass, as do Ruff, mypy, the recipe gate and all
+compilation clearance checks. Extended artifact checks were run on all recipes
+and compared with a separate checkout of the original baseline. The same two
+recipes retain pre-existing validator findings: raised-panel diagram item counts,
+and production-sheet waste diagram counting/profile matching plus safe-Z-inclusive
+stepdown diagnostics. The numeric stepdown diagnostics change with the new passes;
+these checks do not distinguish cleared kerf from uncut material. No additional
+recipes fail those checks. [Detailed baseline/revised results](evidence/altmill_recipe_tooling/validation.json)
+retain the findings rather than hiding or relaxing them.

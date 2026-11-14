@@ -14,9 +14,9 @@ of flat frame outside it. The V-bit tip follows the nominal opening edge.
 
 Sheet 1000 × 700 × 19mm mdf.
 
-- `pocket-12.70mm.nc`: pocket, 12.7mm tool, 2 feature(s), to 12mm
-- `edge-12.70mm.nc`: edge, 12.7mm tool, 1 feature(s), to 5mm
-- `profile-3.17mm.nc`: profile, 3.175mm tool, 7 feature(s), to 19.2mm
+- `pocket-9.53mm.nc`: pocket, 9.525mm tool, 2 operation(s), to 12mm
+- `edge-12.70mm.nc`: edge, 12.7mm tool, 1 operation(s), to 5mm
+- `profile-9.53mm.nc`: profile, 9.525mm tool, 7 operation(s), to 19.2mm
 
 ## Run
 
@@ -28,5 +28,5 @@ Sheet 1000 × 700 × 19mm mdf.
 - `frames_and_trays.svg`
 - `machining_summary.json`
 - `metrics.json`
-- `pocket-12.70mm.nc`
-- `profile-3.17mm.nc`
+- `pocket-9.53mm.nc`
+- `profile-9.53mm.nc`

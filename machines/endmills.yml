@@ -1,4 +1,20 @@
 endmills:
+  - name: "Example 3/8 carbide mortise compression"
+    diameter_mm: 9.525
+    flute_length_mm: 25.4
+    shank_diameter_mm: 9.525
+    flutes: 2
+    type: compression
+    purpose: profile
+
+  - name: "Example 3/8 PCD straight plunge"
+    diameter_mm: 9.525
+    flute_length_mm: 25.4
+    shank_diameter_mm: 9.525
+    flutes: 1
+    type: straight
+    purpose: pocket
+
   # --- existing tools (pre-inventory) ---
 
   - name: "1/4 upcut spiral"
@@ -125,6 +141,7 @@ endmills:
     type: downcut_spiral
 
   - name: "1 inch surfacing bit"
+    purpose: surface
     diameter_mm: 25.4
     flute_length_mm: 10.2
     shank_diameter_mm: 6.35

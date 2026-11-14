@@ -10,6 +10,7 @@ from shapely.geometry.base import BaseGeometry
 
 from cam.model.tool import Tool, ToolKind
 from cam.planner.params import MIN_STEPDOWN_MM, stepdown_for, stepover_for
+from core.constants import TOOL_PURPOSES
 from layout_ast.layout import FeedsOverride
 
 
@@ -26,6 +27,13 @@ class ToolSelection:
     stepover_percent: float | None = None
     v_angle_deg: float | None = None
     roundover_radius_mm: float | None = None
+    purpose: str = "general"
+
+    def __post_init__(self) -> None:
+        if self.purpose not in TOOL_PURPOSES:
+            raise ValueError(
+                f"Tool '{self.name}': purpose must be one of {sorted(TOOL_PURPOSES)}, got {self.purpose!r}"
+            )
 
     def as_model(self) -> Tool:
         return Tool(
@@ -75,6 +83,7 @@ def _selection_from_dict(data: Mapping[str, Any]) -> ToolSelection:
         ),
         v_angle_deg=float(data["v_angle_deg"]) if data.get("v_angle_deg") is not None else None,
         roundover_radius_mm=float(data["roundover_radius_mm"]) if data.get("roundover_radius_mm") is not None else None,
+        purpose=str(data.get("purpose", "general")),
     )
 
 
@@ -82,8 +91,8 @@ def normalize_tool_entries(tool_db: Sequence[Mapping[str, Any]]) -> list[ToolSel
     return [_selection_from_dict(entry) for entry in tool_db]
 
 
-def _flat_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
-    return [tool for tool in tool_db if tool.kind == "flat"]
+def _flat_tools(tool_db: Sequence[ToolSelection], *, purpose: str = "general") -> list[ToolSelection]:
+    return [tool for tool in tool_db if tool.kind == "flat" and tool.purpose in {"general", purpose}]
 
 
 def _ball_or_v_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
@@ -91,11 +100,12 @@ def _ball_or_v_tools(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
 
 
 def _pocket_candidates(tool_db: Sequence[ToolSelection]) -> list[ToolSelection]:
-    candidates = _flat_tools(tool_db)
+    candidates = _flat_tools(tool_db, purpose="pocket")
     if not candidates:
         raise ValueError("No flat tools available for pocketing")
     candidates.sort(
         key=lambda t: (
+            0 if t.purpose == "pocket" else 1,
             0 if (t.rotation or "").lower() in {"upcut", "compression"} else 1,
             -t.diameter,
         )
@@ -151,11 +161,11 @@ def pick_tool_for_profile(
     kerf_mm: float | None,
 ) -> ToolSelection:
 
-    candidates = _flat_tools(tool_db)
+    candidates = _flat_tools(tool_db, purpose="profile")
     if not candidates:
         raise ValueError("Tool database does not contain a flat tool for profiling")
     if kerf_mm and kerf_mm > 0.0:
-        candidates.sort(key=lambda t: abs(t.diameter - kerf_mm))
+        candidates.sort(key=lambda t: (abs(t.diameter - kerf_mm), t.purpose != "profile"))
         return candidates[0]
     candidates.sort(key=lambda t: t.diameter)
     return candidates[0]
@@ -170,7 +180,7 @@ def pick_tool_for_hole(
     if not candidates:
         raise ValueError("Tool database does not contain a flat tool for drilling")
     feasible = [t for t in candidates if t.diameter <= hole_diameter_mm]
-    return feasible[-1] if feasible else candidates[0]
+    return max(reversed(feasible), key=lambda t: t.diameter) if feasible else min(candidates, key=lambda t: t.diameter)
 
 
 def pick_tool_for_edge(
@@ -203,7 +213,7 @@ def pick_tool_for_roundover(
 
 
 def pick_tool_for_surface(tool_db: Sequence[ToolSelection]) -> ToolSelection:
-    candidates = _flat_tools(tool_db)
+    candidates = _flat_tools(tool_db, purpose="surface")
     if not candidates:
         raise ValueError("No flat tools available for surfacing")
     candidates.sort(key=lambda t: -t.diameter)

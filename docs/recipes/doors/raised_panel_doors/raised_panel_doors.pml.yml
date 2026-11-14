@@ -12,8 +12,8 @@ children:
       id: four_panel_door
       label: Four-Panel Raised Door
       at:
-        x: 228.2mm
-        y: 353.21mm
+        x: 238.2mm
+        y: 363.21mm
         width: 450mm
         height: 700mm
       children:
@@ -61,8 +61,8 @@ children:
                               field_depth: 2mm
 
   - AtPosition:
-      x: 684.55mm
-      y: 353.21mm
+      x: 708.2mm
+      y: 363.21mm
       width: 450mm
       height: 700mm
       child:

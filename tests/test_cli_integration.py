@@ -447,7 +447,8 @@ children:
     assert "compilation_contexts" not in (output / "metrics.json").read_text()
 
 
-def test_nest_build_machines_source_without_intermediate_exports(tmp_path):
+@pytest.mark.parametrize("same_directory", [False, True])
+def test_nest_build_machines_source_without_intermediate_exports(tmp_path, same_directory):
     source = tmp_path / "job.nest.yml"
     source.write_text("""Nest:
   algorithm: maxrects
@@ -457,8 +458,13 @@ def test_nest_build_machines_source_without_intermediate_exports(tmp_path):
   parts:
   - {name: panel, width: 100mm, height: 100mm, quantity: 2}
 """)
-    output = tmp_path / "out"
+    unrelated = tmp_path / "unrelated.txt"
+    unrelated.write_text("keep")
+    original = source.read_text()
+    output = tmp_path if same_directory else tmp_path / "out"
     _run_cli(["-m", "cli.nest", str(source), "-o", str(output)])
+    assert source.read_text() == original
+    assert unrelated.read_text() == "keep"
     assert list(output.glob("*.nc")) and list(output.glob("*.svg"))
     assert not list(output.glob("*.pml.yml"))
     assert {path.name for path in output.glob("*.json")} == {"metrics.json", "machining_summary.json"}
@@ -482,3 +488,34 @@ def test_cli_uses_only_the_supplied_configuration_root(tmp_path, monkeypatch):
     assert result.returncode != 0
     assert "missing_configuration/defaults.yml" in result.stderr
     assert not list((tmp_path / "out").glob("*.nc"))
+
+
+@pytest.mark.parametrize("module", ["cli.mill", "cli.nest"])
+def test_explicit_preset_is_used_and_identified_in_outputs(tmp_path, machining_config, module):
+    from ruamel.yaml import YAML
+
+    yaml = YAML(typ="safe")
+    data = yaml.load((machining_config / "cutting_presets/test_cutting.yml").read_text())
+    data["materials"]["mdf"]["parameters"]["profile"]["test_profile"]["feed_xy"] = 777
+    preset = tmp_path / "custom_preset.yml"
+    with preset.open("w") as handle:
+        yaml.dump(data, handle)
+    output = tmp_path / "out"
+    if module == "cli.mill":
+        source = _write_simple_profile(tmp_path)
+        arguments = ["--input", str(source), "--out", str(output)]
+    else:
+        source = tmp_path / "job.nest.yml"
+        source.write_text("""Nest:
+  algorithm: maxrects
+  Sheet: {width: 400mm, height: 400mm, thickness: 12mm, material: mdf}
+  parts:
+  - {name: panel, width: 100mm, height: 100mm, quantity: 1}
+""")
+        arguments = [str(source), "-o", str(output)]
+    _run_cli(["-m", module, *arguments, "--preset", str(preset), "--no-svg"])
+    summary = json.loads((output / "machining_summary.json").read_text())
+    metrics = json.loads((output / "metrics.json").read_text())
+    assert summary["machining"]["preset"] == str(preset)
+    assert metrics["build"]["machining"][source.name]["preset"] == str(preset)
+    assert "F777.0" in next(output.glob("*.nc")).read_text()

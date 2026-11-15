@@ -1371,7 +1371,12 @@ class LayoutResolver:
                 allow_empty=True,
                 shape_id_prefix=shape_id_prefix,
             )
-            items.extend(generated_items)
+            items.extend(
+                replace(item, feature=replace(item.feature, tool_name=node.tool_name))
+                if item.feature is not None
+                else item
+                for item in generated_items
+            )
         except GeneratorSkipError:
             pass
 
@@ -1514,7 +1519,12 @@ class LayoutResolver:
                 allow_empty=True,
                 shape_id_prefix=shape_id_prefix,
             )
-            items.extend(generated_items)
+            items.extend(
+                replace(item, feature=replace(item.feature, tool_name=node.tool_name))
+                if item.feature is not None
+                else item
+                for item in generated_items
+            )
         except GeneratorSkipError:
             pass
 
@@ -1545,7 +1555,12 @@ class LayoutResolver:
                 allow_empty=True,
                 shape_id_prefix=shape_id_prefix,
             )
-            items.extend(generated_items)
+            items.extend(
+                replace(item, feature=replace(item.feature, tool_name=node.tool_name))
+                if item.feature is not None
+                else item
+                for item in generated_items
+            )
         except GeneratorSkipError:
             pass
 

@@ -686,6 +686,8 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
             element["center_shape"] = node.center_shape
         if node.center_size_mm is not None:
             element["center_size"] = dim(node.center_size_mm)
+        if node.tool_name is not None:
+            element["tool"] = node.tool_name
         return {"Radial": {**radial, "element": element}}
 
     elif isinstance(node, RadialTickGen):
@@ -733,10 +735,14 @@ def format_node(node: Any) -> dict[str, Any]:  # noqa: C901 — AST node-type di
 
     elif isinstance(node, PhyllotaxisHoleGen):
         element = {"type": "hole", "diameter": dim(node.diameter_mm)}
+        if node.tool_name is not None:
+            element["tool"] = node.tool_name
         return {"Phyllotaxis": {**_format_phyllotaxis_shared(node), "element": element}}
 
     elif isinstance(node, PhyllotaxisPocketGen):
         element = {"type": "pocket", "diameter": dim(node.diameter_mm)}
+        if node.tool_name is not None:
+            element["tool"] = node.tool_name
         return {"Phyllotaxis": {**_format_phyllotaxis_shared(node), "element": element}}
 
     elif isinstance(node, PhyllotaxisSvgGen):

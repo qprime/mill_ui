@@ -5,7 +5,6 @@ from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cam.compilation import CompilationContext
     from layout_ast.raised_panel import RaisedPanelSpec
 
 VALID_GCODE_OUTPUT_MODES = ("per-operation", "per-tool")
@@ -194,7 +193,6 @@ class LayoutAST:
     config: dict[str, Any] = field(default_factory=dict)
     machining_clearance: MachiningClearance | None = None
     machining: MachiningSpec = field(default_factory=MachiningSpec)
-    machining_context: CompilationContext | None = field(default=None, repr=False, compare=False)
 
     def face_items(self, face: str) -> tuple[Item, ...]:
         return tuple(i for i in self.items if item_face(i) == face)

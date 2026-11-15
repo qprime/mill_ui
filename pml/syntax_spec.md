@@ -2049,16 +2049,21 @@ Only these feature types and keys are accepted:
 
 | Type | Allowed keys |
 |------|--------------|
-| `profile` | `type`, `depth`, `face`, `side`, `tab_count`, `tab_height`, `tab_width`, `onion_skin_mm`, `feeds` |
-| `pocket` | `type`, `depth`, `face`, `corner_cleanup`, `dogbone`, `rest`, `rest_tool`, `feeds` |
-| `hole` | `type`, `depth`, `face`, `feeds` |
-| `engrave` | `type`, `depth`, `face`, `feeds` |
+| `profile` | `type`, `depth`, `face`, `side`, `tab_count`, `tab_height`, `tab_width`, `onion_skin_mm`, `tool`, `feeds` |
+| `pocket` | `type`, `depth`, `face`, `corner_cleanup`, `dogbone`, `rest`, `rest_tool`, `tool`, `feeds` |
+| `hole` | `type`, `depth`, `face`, `tool`, `feeds` |
+| `engrave` | `type`, `depth`, `face`, `tool`, `feeds` |
 
 `face: back` still requires a finite depth and a pocket, hole or engrave feature
 (PM-13). `dogbone` mappings accept `style`, `diameter`, `overcut`; `rest`
 accepts `tool`, `rough_allowance`, `finish_allowance`; `feeds` accepts `rpm`,
 `feed_xy`, `feed_z`, `depth_per_pass`, `stepover_percent`. Empty `feeds: {}`
 means no override.
+
+Radial pocket elements and Phyllotaxis hole/pocket elements accept an optional
+`tool` containing the exact library cutter name. That binding override applies to
+every generated cut and survives source formatting; unknown or infeasible cutters
+fail instead of reverting to a preset cutter.
 
 ### Feature Types
 

@@ -132,9 +132,8 @@ Every field must survive `parse → format → parse` with an equal AST. `test_r
 - Formatter emits only non-default fields (e.g., dogbone omitted when all defaults)
 - Parser accepts both detailed and simplified forms; formatter emits simplest valid form
 - Idempotency: `format(parse(x))` is stable — formatting twice produces identical output
-- JSON emitter/parser (`layout_ast/emitters.py`, `layout_ast/parsers.py`) follows the same convention
 
-When adding a new Feature field: add it to parser, formatter, JSON emitter, JSON parser, and round-trip tests. Incomplete coverage will silently drop the field.
+When adding a new Feature field: add it to the source parser, formatter, and round-trip tests. Incomplete coverage will silently drop the field.
 
 ## Planner Pass Accumulation
 

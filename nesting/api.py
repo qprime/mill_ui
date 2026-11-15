@@ -163,6 +163,10 @@ def nest_and_generate(
         edge_clearance_mm=edge_clearance,
     )
 
+    validation = validate_nesting_result(result)
+    if not validation.is_valid:
+        raise ValueError(validation.summary())
+
     asts = nesting_result_to_asts(result)
     if machining_clearance is not None:
         asts = [replace(ast, machining_clearance=machining_clearance) for ast in asts]

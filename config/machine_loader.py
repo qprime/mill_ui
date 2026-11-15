@@ -481,17 +481,6 @@ def load_feeds(path: Path | str) -> list[FeedsEntry]:
     return entries
 
 
-def available_materials(feeds: list[FeedsEntry] | None = None) -> frozenset[str]:
-    if feeds is not None:
-        return frozenset(f.material.lower() for f in feeds)
-    yaml = YAML(typ="safe")
-    return frozenset(
-        material
-        for path in (get_machines_dir() / "cutting_presets").glob("*.yml")
-        for material in yaml.load(path.read_text()).get("materials", {})
-    )
-
-
 def get_machines_dir() -> Path:
     configured = os.environ.get("MILL_UI_MACHINES_DIR")
     return Path(configured).expanduser().resolve() if configured else Path(__file__).parent.parent / "machines"
@@ -522,7 +511,6 @@ __all__ = [
     "Spindle",
     "Spoilboard2D",
     "Table2D",
-    "available_materials",
     "build_tool_db",
     "get_machines_dir",
     "list_available_machines",

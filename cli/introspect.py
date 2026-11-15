@@ -8,7 +8,7 @@ from cam.compilation import load_pml_asts
 
 
 def dump_removal_intent(source_path: str) -> str:
-    asts = load_pml_asts(Path(source_path))
+    asts, _ = load_pml_asts(Path(source_path))
     return json.dumps(
         [
             [{**intent.to_dict(), "depth_mm": intent.depth_mm()} for intent in ast_to_removal_intents(ast)]

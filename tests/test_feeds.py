@@ -349,32 +349,6 @@ class TestLoaderCaching:
         assert second[0] is not first[0]
 
 
-class TestAvailableMaterials:
-    def test_returns_materials_from_feeds(self):
-        from config.machine_loader import available_materials
-
-        feeds = [
-            _feeds_entry(endmill="bit_a", material="mdf"),
-            _feeds_entry(endmill="bit_b", material="plywood"),
-        ]
-        result = available_materials(feeds)
-        assert result == frozenset({"mdf", "plywood"})
-
-    def test_case_normalized(self):
-        from config.machine_loader import available_materials
-
-        feeds = [_feeds_entry(endmill="bit_a", material="MDF")]
-        result = available_materials(feeds)
-        assert "mdf" in result
-
-    def test_loads_real_feeds_yml(self):
-        from config.machine_loader import available_materials
-
-        result = available_materials()
-        assert "mdf" in result
-        assert "plywood" in result
-
-
 class TestSheetMaterialValidation:
     def test_valid_material_accepted(self):
         Sheet(width_mm=100, height_mm=100, thickness_mm=19, material="mdf")
@@ -927,18 +901,18 @@ def test_editing_preset_is_observed_by_next_source_build(preset_inputs, tmp_path
     source = tmp_path / "part.pml.yml"
     source.write_text("Sheet: {width: 200mm, height: 200mm, thickness: 12mm}\nchildren: []\n")
     _test_preset_context(preset_inputs)
-    first = load_pml_asts(source, machine_config=machine, endmills=cutters, preset_path=path)[0]
+    _, first = load_pml_asts(source, machine_config=machine, endmills=cutters, preset_path=path)
     data["materials"]["mdf"]["parameters"]["pocket"]["pcd"]["feed_xy"] = 1111
     _test_preset_context(preset_inputs)
     output = tmp_path / "output"
     output.mkdir()
     (output / "metrics.json").write_text('{"build":{"compilation_contexts":{"part.pml.yml":{"tools":"stale"}}}}')
-    second = resolve_validation_source(source, output, machine_config=machine, endmills=cutters, preset_path=path)[0]
+    asts, second = load_pml_asts(source, machine_config=machine, endmills=cutters, preset_path=path)
+    assert resolve_validation_source(source, machine_config=machine, endmills=cutters, preset_path=path) == asts
     from cam.planner.passes.tools import tools_for_role
 
-    assert first.machining_context is not None and second.machining_context is not None
-    assert tools_for_role(first.machining_context.tools, "pocket")[0].feed_xy == 2520
-    assert tools_for_role(second.machining_context.tools, "pocket")[0].feed_xy == 1111
+    assert tools_for_role(first.tools, "pocket")[0].feed_xy == 2520
+    assert tools_for_role(second.tools, "pocket")[0].feed_xy == 1111
 
 
 @pytest.mark.parametrize(
@@ -1006,8 +980,7 @@ Surface:
   feeds: {depth_per_pass: 1, feed_xy: 500}
 children: []
 """)
-    (ast,) = load_pml_asts(source, machine_config=machine, endmills=cutters, preset_path=path)
-    context = ast.machining_context
+    (ast,), context = load_pml_asts(source, machine_config=machine, endmills=cutters, preset_path=path)
     assert context is not None
     planner = prepare_face_input(ast, ast_to_removal_intents(ast), kerf_mm=6)
     passes, _, _, errors = plan_face_passes(
@@ -1068,11 +1041,10 @@ children:
     top: none
     layout_gap: 30mm
 """)
-    (ast,) = load_pml_asts(source)
+    (ast,), context = load_pml_asts(source)
     assert ast.machining_clearance is not None
     assert ast.machining_clearance.profile_diameter_mm == 12.7
-    assert ast.machining_context is not None
-    assert ast.machining_context.profile_tool().name == "test_long_flat"
+    assert context.profile_tool().name == "test_long_flat"
     source.write_text("machining: {tools: {profile: 'test_profile'}}\n" + source.read_text())
     with pytest.raises(ValueError, match=r"required reach 30\.2mm exceeds flute length 25\.4mm"):
         load_pml_asts(source)
@@ -1088,6 +1060,46 @@ def test_unused_profile_role_is_not_required_for_pocket_only_jobs(preset_inputs)
     assert tools_for_role(context.tools, "pocket")[0].name == "pcd"
     with pytest.raises(ValueError, match="role profile: packing requires"):
         context.clearance()
+
+
+def test_profile_and_vcarve_roles_work_without_matching_specialty_tools(preset_inputs):
+    _, data, _, _ = preset_inputs
+    material = data["materials"]["mdf"]
+    material["parameters"]["specialty"] = {"v90": material["parameters"]["vcarve"]["v90"]}
+    material["roles"]["specialty"] = ["v90"]
+    context = _test_preset_context(preset_inputs)
+    assert context.clearance().profile_diameter_mm == 6
+    ast = resolve_layout(
+        parse_pml_yaml("""Sheet: {width: 200mm, height: 200mm, thickness: 12mm}
+children:
+- Rect:
+    at: {x: 100mm, y: 100mm, width: 100mm, height: 100mm}
+    children:
+    - Chamfer: {width: 1mm, depth: 1.7320508075688772mm}
+""")
+    )
+    result = run_pipeline(ast, context=context)
+    assert not result.errors
+    assert result.svg and result.gcode
+    assert {record.tool_selection.name for record in result.passes} == {"v60"}
+
+
+@pytest.mark.parametrize("role", ["profile", "pocket", "hole"])
+def test_legacy_feeds_with_multiple_cutters_require_a_named_role_independent_of_order(role):
+    from cam.compilation import compilation_context
+    from cam.planner.passes.tools import tools_for_role
+    from layout_ast.layout import MachiningSpec
+
+    cutters = [_endmill("large", diameter=6), _endmill("small", diameter=3)]
+    feeds = [_feeds_entry(endmill=tool.name) for tool in cutters]
+    for ordered in (cutters, list(reversed(cutters))):
+        context = compilation_context("mdf", endmills=ordered, feeds=feeds)
+        with pytest.raises(ValueError, match=f"role {role}: no configured cutter assignment"):
+            tools_for_role(context.tools, role)
+        explicit = compilation_context(
+            "mdf", endmills=ordered, feeds=feeds, machining=MachiningSpec(tools={role: "small"})
+        )
+        assert [tool.name for tool in tools_for_role(explicit.tools, role)] == ["small"]
 
 
 def test_explicit_configuration_root_never_falls_back_to_production(tmp_path, monkeypatch):

@@ -99,7 +99,9 @@ without changing nominal part dimensions or part-to-part gap.
 `cli.nest`, recipe compilation and recipe validation share that tool selection.
 `cli.nest` packs and machines the original `.nest.yml` in one invocation, with
 in-memory AST handoffs. It writes final manufacturing/review outputs through the
-canonical pipeline writer. Resolved layouts, flattened PML and tool snapshots
+canonical pipeline writer without deleting the output directory. Packing overlap
+and bounds checks complete before machining. Existing files are preserved and
+only the current output list identifies current artifacts. Resolved layouts, flattened PML and tool snapshots
 are neither exported nor accepted as machining inputs.
 
 Packing results describe physical sheet placements. At the LayoutAST boundary,

@@ -10,9 +10,6 @@ from typing import Any
 
 from adapters.ast_to_removal import ast_to_removal_intents
 from cam.compilation import (
-    DEFAULT_SAFE_Z_MM as DEFAULT_SAFE_Z_MM,
-)
-from cam.compilation import (
     PROFILE_CUT_THROUGH_MM as PROFILE_CUT_THROUGH_MM,
 )
 from cam.compilation import (
@@ -31,6 +28,7 @@ from cam.planner.capabilities import audit_constraints
 from cam.planner.passes import PassRecord
 from cam.planner.passes.summary import summarise_gcode_file
 from cam.planner.passes.tools import (
+    ToolCatalog,
     ToolSelection,
     pick_tool_for_engrave,
     tools_for_role,
@@ -295,10 +293,10 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     machine_config: MachineConfig | None = None,
     endmill: Endmill | None = None,
     validate_machine_bounds: bool = True,
+    context: CompilationContext | None = None,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
 ) -> PipelineResult:
-    context = ast.machining_context
     if (
         context is None
         or (kerf_mm is not None and kerf_mm != context.requested_kerf_mm)
@@ -365,8 +363,9 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     for issue in web_result.warnings:
         warnings.append(issue.message)
 
+    v_tools = tools.parameters.get("vcarve", {}).values() if isinstance(tools, ToolCatalog) else tools
     v_angles: list[float] | None = [
-        float(t.v_angle_deg) for t in tools if t.kind == "v" and t.v_angle_deg is not None
+        float(t.v_angle_deg) for t in v_tools if t.kind == "v" and t.v_angle_deg is not None
     ] or None
 
     for intent in intents:
@@ -418,13 +417,8 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             for failure in machine_result.failures:
                 warnings.append(f"Machine bounds: {failure}")
 
-    if ast.sheet.safe_z_mm is not None:
-        safe_z = ast.sheet.safe_z_mm
-    elif machine_config is not None:
-        safe_z = machine_config.defaults.safe_z_mm
-    else:
-        safe_z = DEFAULT_SAFE_Z_MM
-    park_z_mm = machine_config.defaults.park_z_mm if machine_config is not None else None
+    safe_z = ast.sheet.safe_z_mm if ast.sheet.safe_z_mm is not None else machine_config.defaults.safe_z_mm
+    park_z_mm = machine_config.defaults.park_z_mm
 
     constraint_summary = {
         entry.constraint: {

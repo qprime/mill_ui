@@ -239,25 +239,14 @@ ast = LayoutAST(
 
 **Use case:** Optimize part placement on sheet material.
 
-```python
-from nesting import nest_and_generate
-from pml.lifter import lift_layout_ast
-from pml.nest_parser import nest_job_to_api_params
-from pml.yaml_formatter import format_pml_yaml
-from pml.yaml_parser import parse_nest_yaml
-
-job = parse_nest_yaml(open("job.nest.yml").read())
-result = nest_and_generate(**nest_job_to_api_params(job), output_format="ast")
-
-for i, ast in enumerate(result["output"]):
-    pml_text = format_pml_yaml(lift_layout_ast(ast))
-    open(f"sheet_{i+1}.pml.yml", "w").write(pml_text)
-```
-
-**CLI alternative:**
 ```bash
-python -m cli.nest job.nest.yml -o output/ --export-svg
+python -m cli.nest job.nest.yml -o output/
 ```
+
+The command validates packing and machines the original source in one invocation,
+writing final G-code, SVG blueprints and reports. Existing files are preserved;
+use a dedicated output directory and the current run's output list to identify
+current artifacts. Use `--no-svg` when blueprints are not needed.
 
 **Key point:** See [pml/nest_syntax_spec.md](../pml/nest_syntax_spec.md) for the full syntax.
 

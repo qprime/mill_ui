@@ -465,6 +465,36 @@ children:
         assert math.dist(hole.placement.center_xy_mm, disc.placement.center_xy_mm) + 2.5 <= 100.0
 
 
+@pytest.mark.usefixtures("machining_config")
+@pytest.mark.parametrize(
+    "generator",
+    [
+        "Radial: {rays: 4, depth: 3mm, element: {type: pocket, tool: MISSING}}",
+        "Phyllotaxis: {count: 3, spacing: 20mm, depth: 3mm, element: {type: hole, diameter: 10mm, tool: MISSING}}",
+        "Phyllotaxis: {count: 3, spacing: 20mm, depth: 3mm, element: {type: pocket, diameter: 10mm, tool: MISSING}}",
+    ],
+)
+def test_generated_element_tool_override_survives_formatting_resolution_and_ir(generator):
+    from cam.pipeline import run_pipeline
+    from pml.yaml_formatter import format_pml_yaml
+
+    source = f"""Sheet: {{width: 200mm, height: 200mm, thickness: 12mm}}
+children:
+- Circle:
+    diameter: 150mm
+    at: {{x: 100mm, y: 100mm}}
+    children:
+    - {generator}
+"""
+    parsed = parse_pml_yaml(source)
+    assert parse_pml_yaml(format_pml_yaml(parsed)) == parsed
+    ast = resolve_layout(parsed)
+    intents = ast_to_removal_intents(ast)
+    assert intents and all(intent.tool_name == "MISSING" for intent in intents)
+    with pytest.raises(ValueError, match=r"MISSING.*unknown/unavailable tool"):
+        run_pipeline(ast, generate_svg=False)
+
+
 _PHYLLOTAXIS_SVG_FILE_PML = """
 Sheet:
   width: 300mm

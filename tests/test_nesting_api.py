@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from adapters.ast_to_removal import ast_to_removal_intents
@@ -21,6 +23,32 @@ def test_basic_nesting_api():
     assert result["total_parts"] == 4
     assert result["total_sheets"] >= 1
     assert "utilization" in result
+
+
+@pytest.mark.parametrize("defect", ["overlap", "bounds"])
+def test_nest_and_generate_rejects_invalid_packing_before_generating_layout(monkeypatch, defect):
+    from dataclasses import replace
+
+    import nesting.api as api
+
+    arguments: dict[str, Any] = {
+        "parts": [{"name": "panel", "width_mm": 100, "height_mm": 60, "quantity": 2}],
+        "sheet_width_mm": 400,
+        "sheet_height_mm": 400,
+        "sheet_thickness_mm": 12,
+    }
+    packed = nest_and_generate(**arguments)["nesting_result"]
+    sheet = packed.sheets[0]
+    first, second = sheet.placements
+    placements = (
+        (first, replace(second, x_mm=first.x_mm, y_mm=first.y_mm))
+        if defect == "overlap"
+        else (replace(first, x_mm=-100), second)
+    )
+    invalid = replace(packed, sheets=(replace(sheet, placements=placements),))
+    monkeypatch.setattr(api, "pack_sheets", lambda *args, **kwargs: invalid)
+    with pytest.raises(ValueError, match=r"overlap|bounds"):
+        nest_and_generate(**arguments)
 
 
 def test_api_with_template():

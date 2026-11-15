@@ -162,8 +162,7 @@ def nest_machining_job(
         names = [part.name for part in result["nesting_result"].unplaced_parts]
         raise ValueError(f"Nesting: parts do not fit the selected sheet: {names}")
     result["output"] = [
-        replace(ast, sheet=replace(ast.sheet, material=job.material), machining=machining, machining_context=context)
-        for ast in result["output"]
+        replace(ast, sheet=replace(ast.sheet, material=job.material), machining=machining) for ast in result["output"]
     ]
     return result, context
 
@@ -184,8 +183,6 @@ def main() -> None:
     parser.add_argument("--kerf", type=float, default=None)
     parser.add_argument("--theme", default="dark")
     parser.add_argument("--no-svg", action="store_true")
-    parser.add_argument("--export-svg", action="store_true")
-    parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--init_project", action="store_true")
     parser.add_argument("--sheet", default=None)
     parser.add_argument("--thickness", type=float, default=None)
@@ -203,7 +200,7 @@ def main() -> None:
             job = replace(job, kerf_mm=args.kerf, kerf_explicit=True)
         machine = _load_machine(args.machine or default_machine_name())
         endmills, feeds = _load_tool_library(args)
-        result, _ = nest_machining_job(
+        result, context = nest_machining_job(
             job,
             machine_config=machine,
             endmills=endmills,
@@ -219,8 +216,9 @@ def main() -> None:
             y_origin="back",
             generate_svg=not args.no_svg,
             machine_config=machine,
+            context=context,
         )
-        outputs = write_run_outputs(runs, resolve_output_dir(args.project, args.output))
+        outputs = write_run_outputs(runs, resolve_output_dir(args.project, args.output), clean_output_dir=False)
         _report_runs(runs)
         _report_outputs(runs, outputs)
     except (ValueError, NestParseError) as exc:

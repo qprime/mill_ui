@@ -316,6 +316,8 @@ Job and operation precedence is documented in [PML](../pml/syntax_spec.md#job-ma
 `--preset` selects an explicit alternate preset file for the invocation;
 `--endmills` supplies an explicit library. Optional `--feeds` with `--endmills`
 is an explicit legacy cutter/material cutting input, never an automatic fallback.
+With multiple eligible cutters, declare the role in `machining.tools` or supply
+an operation-level named tool. Library order cannot supply that choice.
 Use the same explicit inputs for validation. Outputs contain selected effective
 passes, not snapshots or build configuration to replay.
 

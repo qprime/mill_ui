@@ -46,7 +46,7 @@ invented. Genmitsu has an independent, unsupported-until-configured preset.
 
 Verification completed:
 
-- 4,037 general Python tests and 3 explicit shipped-configuration checks pass
+- 4,048 general Python tests and 3 explicit shipped-configuration checks pass
   separately through `tools/run_tests.py` (see the isolation addendum below).
 - Ruff lint/format and mypy pass through the repository wrappers.
 - All 33 recipes regenerate and pass the recipe gate; all generated output files
@@ -114,3 +114,33 @@ Final verification:
 
 The issue's earlier extended-validator limitations remain recorded above; test
 isolation does not change those artifact checks.
+
+## Review follow-up
+
+The review of `5adc9422` identified 13 findings, addressed in the follow-up:
+
+- Nesting preserves its output directory, source and unrelated files. Existing
+  packing overlap/bounds validation runs before layout generation and machining.
+- Radial pocket and Phyllotaxis hole/pocket element tool overrides survive the
+  parser, source formatter, resolution and RemovalIntent conversion. Unknown
+  explicit cutters fail rather than silently selecting a preset default.
+- Reports identify an explicitly supplied preset file. Recipe validation uses
+  the recipe-machine default, while honoring an explicit machine selection.
+- Legacy endmill/feed inputs with multiple cutters require a named role or
+  operation tool; file order cannot choose one. Profile, V-angle and pocket-error
+  checks use the relevant role configuration instead of the specialty table.
+- Compilation context is passed alongside resolved layouts through existing
+  build functions. LayoutAST has no CAM context or dependency on CAM types.
+- Unused nesting CLI switches, obsolete validation parameters, the unreachable
+  safe-Z fallback and unused material-listing helper were removed. Tool lookup
+  diagnostics retain the available candidates, and source/configuration docs
+  describe the supported workflow.
+
+The canonical 33-recipe gate passes without changing production artifacts or
+timing estimates. Targeted regressions use the existing synthetic configuration
+fixtures and ordinary CLI subprocesses.
+
+Follow-up verification: 4,048 general tests and 3 separate shipped-configuration
+checks pass; Ruff lint/format and mypy pass. The duplication audit retains only
+the existing matches, with no new duplicate-code pairs. The extended-validator
+limitations recorded above remain unchanged.

@@ -234,7 +234,7 @@ def _edge_tools_for_layout(ast: LayoutAST, tools: Sequence[ToolSelection] | None
         return ()
     from cam.compilation import compilation_context
 
-    return (ast.machining_context or compilation_context(ast.sheet.material, machining=ast.machining)).tools
+    return compilation_context(ast.sheet.material, machining=ast.machining).tools
 
 
 def _record_edge_depth(depths: dict[str, set[str]], feature_type: str, context: _DrawingContext) -> None:

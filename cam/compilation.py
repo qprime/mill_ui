@@ -44,7 +44,6 @@ from layout_ast.layout import (
 from pml import parse_pml_yaml
 from resolution.layout_resolver import requires_machining_clearance, resolve_layout_multi
 
-DEFAULT_SAFE_Z_MM = 6.0
 PROFILE_CUT_THROUGH_MM = 0.2
 
 
@@ -64,8 +63,6 @@ class CompilationContext:
 
     @property
     def profile_diameter_mm(self) -> float | None:
-        if not any(tool.kind == "flat" for tool in self.tools):
-            return None
         if (
             isinstance(self.tools, ToolCatalog)
             and not self.tools.assignments.get("profile")
@@ -184,13 +181,11 @@ def _preset_catalog(
                 shank_diameter_mm=em.shank_diameter_mm,
                 context_label=f"{label}, role {role}",
             )
-    entries = tuple(parameters.get("specialty", {}).values())
-    if not entries:
-        entries = tuple({t.name: t for combinations in parameters.values() for t in combinations.values()}.values())
+    entries = tuple({t.name: t for combinations in parameters.values() for t in combinations.values()}.values())
     catalog = ToolCatalog(entries, parameters, assignments, machining, label, tuple(by_name))
     for role, name in machining.tools.items():
         catalog.for_role(role, name)
-    return catalog, str(preset or path)
+    return catalog, str(path if preset_path is not None else preset)
 
 
 def compilation_context(
@@ -210,6 +205,7 @@ def compilation_context(
     if kerf_mm is not None and (not math.isfinite(kerf_mm) or kerf_mm <= 0):
         raise ValueError(f"Profile kerf constraint must be finite and positive, got {kerf_mm}")
     if tool_db is not None or feeds is not None:
+        legacy_feeds = tool_db is None
         if tool_db is None:
             if endmills is None:
                 raise ValueError("Explicit feeds require an explicit endmill library")
@@ -238,6 +234,10 @@ def compilation_context(
                 "specialty": {"flat", "ball", "v", "roundover"},
             }.items()
         }
+        if legacy_feeds:
+            assignments = {
+                role: names if len(names) == 1 or role == "specialty" else () for role, names in assignments.items()
+            }
         tools: Sequence[ToolSelection] = ToolCatalog(
             entries,
             parameters,
@@ -296,7 +296,7 @@ def load_pml_asts(
     feeds: list[FeedsEntry] | None = None,
     machine_config: MachineConfig | None = None,
     preset_path: Path | None = None,
-) -> list[LayoutAST]:
+) -> tuple[list[LayoutAST], CompilationContext]:
     parsed = replace(parse_pml_yaml(source.read_text(encoding="utf-8")), source_dir=str(source.parent.resolve()))
     spec = profile_machining_spec(parsed.machining, parsed.root)
     context = compilation_context(
@@ -312,7 +312,7 @@ def load_pml_asts(
         ),
     )
     clearance = context.clearance() if requires_machining_clearance(parsed.root) else None
-    return resolve_machining_layout(parsed, context, clearance)
+    return resolve_machining_layout(parsed, context, clearance), context
 
 
 def resolve_machining_layout(
@@ -330,7 +330,7 @@ def resolve_machining_layout(
         resolved = resolve_layout_multi(parsed, machining_clearance=clearance)
         auto = any(ast.config.get("layout_gaps") for ast in resolved)
         if not auto:
-            return [replace(ast, machining_context=context) for ast in resolved]
+            return resolved
         extra_gap = 0.0
         reasons: list[str] = []
         for ast in resolved:
@@ -373,10 +373,7 @@ def resolve_machining_layout(
             }
         )
         if extra_gap <= 0:
-            return [
-                replace(ast, machining_context=context, config={**ast.config, "packing_preflight": attempts})
-                for ast in resolved
-            ]
+            return [replace(ast, config={**ast.config, "packing_preflight": attempts}) for ast in resolved]
         if clearance is None:
             raise ValueError("Automatic packing requires a machining clearance context")
         clearance = replace(clearance, gap_margin_mm=clearance.gap_margin_mm + extra_gap + 0.002)

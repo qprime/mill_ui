@@ -1019,6 +1019,7 @@ def _parse_radial_node(node_data: dict, path: str) -> Any:
 
     if element_type == "pocket":
         return RadialPocketGen(
+            tool_name=_parse_tool_name(element.get("tool"), f"{ctx}.element"),
             rays=rays,
             depth_mm=depth_mm,
             bar_width_mm=parse_dimension(element.get("bar_width", "0mm")),
@@ -1117,6 +1118,7 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
             if key in node_data:
                 raise PMLParseError(f"Phyllotaxis '{key}' is not supported for hole elements", ctx)
         return PhyllotaxisHoleGen(
+            tool_name=_parse_tool_name(element.get("tool"), f"{ctx}.element"),
             count=count,
             spacing_mm=spacing_mm,
             diameter_mm=parse_dimension(_require(element, "diameter", element_ctx)),
@@ -1132,6 +1134,7 @@ def _parse_phyllotaxis_node(node_data: dict, path: str) -> Any:
 
     if element_type == "pocket":
         return PhyllotaxisPocketGen(
+            tool_name=_parse_tool_name(element.get("tool"), f"{ctx}.element"),
             count=count,
             spacing_mm=spacing_mm,
             diameter_mm=parse_dimension(_require(element, "diameter", element_ctx)),

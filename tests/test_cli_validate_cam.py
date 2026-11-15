@@ -135,6 +135,23 @@ def test_cli_recipe_with_summary(tmp_path: Path):
     assert "Metrics extracted:" in stdout or "Invariants:" in stdout
 
 
+@pytest.mark.parametrize("explicit_machine", [False, True])
+def test_recipe_validation_uses_recipe_machine_unless_explicit(tmp_path, machining_config, explicit_machine):
+    from ruamel.yaml import YAML
+
+    recipe = _make_recipe(tmp_path)
+    defaults = {"machine": "unconfigured_production", "recipe_machine": "test_router"}
+    if explicit_machine:
+        defaults["recipe_machine"] = "unconfigured_recipe"
+    with (machining_config / "defaults.yml").open("w") as handle:
+        YAML(typ="safe").dump(defaults, handle)
+    arguments = ["--recipe", str(recipe)]
+    if explicit_machine:
+        arguments.extend(["--machine", "test_router"])
+    exit_code, _, stderr = run_cli(*arguments)
+    assert exit_code in (EXIT_PASS, EXIT_WARN), stderr
+
+
 def test_cli_recipe_with_output_file(tmp_path: Path):
     """CLI --output writes to file."""
     output_path = tmp_path / "result.json"

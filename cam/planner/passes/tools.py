@@ -356,8 +356,10 @@ def pick_tool_by_diameter(
     kind: str | None = None,
     role: str = "specialty",
 ) -> ToolSelection:
+    available = tool_db
     if isinstance(tool_db, ToolCatalog):
         names = tool_db.assignments.get(role, ())
+        available = tuple(tool_db.parameters.get(role, {}).values())
         catalog = tool_db
         tool_db = [
             t
@@ -373,7 +375,7 @@ def pick_tool_by_diameter(
     kind_msg = f" of kind '{kind}'" if kind else ""
     raise ValueError(
         f"Tool with diameter {diameter_mm}mm{kind_msg} not found in tool_db. "
-        f"Available tools: {[t.diameter for t in tool_db]}"
+        f"Available tools: {[(t.name, t.diameter) for t in available]}"
     )
 
 

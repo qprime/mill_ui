@@ -201,7 +201,8 @@ it does not treat the rounding radius as the nose radius.
 `config/machine_loader.py` preserves `type: roundover` and
 `roundover_radius_mm` from `machines/endmills.yml` into the planner tool model.
 The radius is required for roundover tools and forbidden for other types. A
-matching material entry in `machines/feeds.yml` supplies ordinary feeds/stepdown.
+matching material/role/tool entry in the selected machine's cutting preset supplies
+ordinary feeds/stepdown.
 `Example 6mm point roundover` is an owner-authorized demonstration tool, not
 verified shop inventory or manufacturer-recommended feeds. It models `R=6mm`,
 `D=12mm`, no nose extension/bearing, and a zero axis offset.
@@ -226,4 +227,4 @@ To add a new edge feature type:
 12. Add tool selection in `cam/planner/passes/tools.py`
 13. Add planner handler in `cam/planner/passes/edge.py`
 14. Add validation branch in `validation/removal_checks.py`
-15. Add tool to `machines/endmills.yml` and feeds entry to `machines/feeds.yml`
+15. Add tool to `machines/endmills.yml` and its role/parameters to the selected machine's cutting preset

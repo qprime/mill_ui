@@ -298,6 +298,7 @@ class RadialPocketGen:
     start_angle_deg: float = 0.0
     end_angle_deg: float = 360.0
     radius_mm: float | None = None
+    tool_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -349,6 +350,7 @@ class PhyllotaxisHoleGen:
     diameter_mm: float
     depth_mm: str | float
     angle_deg: float = GOLDEN_ANGLE_DEG
+    tool_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -360,6 +362,7 @@ class PhyllotaxisPocketGen:
     angle_deg: float = GOLDEN_ANGLE_DEG
     scale_with_radius: bool = False
     min_size_mm: float | None = None
+    tool_name: str | None = None
 
 
 @dataclass(frozen=True)

@@ -28,7 +28,9 @@ all invariant/assertion checks; any sheet failure fails the job. Multi-sheet
 goldens use a `sheets` mapping keyed by `sheet_1`, `sheet_2`, and so on.
 
 Recipe and explicit-source validation resolve authored PML/nest with the current
-machine, preset and tool configuration. Custom build inputs must be supplied
+machine, preset and tool configuration. Recipe validation uses `recipe_machine`
+from `machines/defaults.yml` unless a machine is explicitly supplied, matching
+recipe generation. Custom build inputs must be supplied
 explicitly (`--machine`, `--preset`, `--endmills`, optional explicit `--feeds`), or
 validation receives the invocation's in-memory AST. Metrics/manifests never select
 tools or feeds. Stale, altered or absent reports cannot change expected geometry.

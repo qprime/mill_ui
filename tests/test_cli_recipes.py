@@ -607,7 +607,7 @@ def test_packed_sources_use_the_selected_cutter_and_preserve_authored_kerf(tmp_p
     path.write_text(source)
     parsed = parse_pml_yaml(source)
     original = resolve_layout_multi(parsed)
-    resolved = load_pml_asts(path, kerf_mm=kerf)
+    resolved, _ = load_pml_asts(path, kerf_mm=kerf)
     bounds = _profile_bounds(resolved)
     assert min(b.x_min for b in bounds) == pytest.approx(kerf)
     assert min(b.y_min for b in bounds) == pytest.approx(kerf)
@@ -632,7 +632,7 @@ def test_embedded_assembly_receives_cutter_context(tmp_path):
     source = head + "      Assembly:\n" + "\n".join("    " + line for line in body.splitlines()) + "\n"
     path = tmp_path / "embedded.pml.yml"
     path.write_text(source)
-    bounds = _profile_bounds(load_pml_asts(path, kerf_mm=3.175))
+    bounds = _profile_bounds(load_pml_asts(path, kerf_mm=3.175)[0])
     assert min(b.x_min for b in bounds) == pytest.approx(3.175)
     assert min(b.y_min for b in bounds) == pytest.approx(3.175)
 
@@ -663,9 +663,9 @@ def test_packed_context_rejects_a_changed_profile_library(tmp_path):
 
     path = tmp_path / "box.pml.yml"
     path.write_text(PACKED_BOX_PML)
-    (ast,) = load_pml_asts(path, kerf_mm=3.175)
+    (ast,), context = load_pml_asts(path, kerf_mm=3.175)
     with pytest.raises(ValueError, match="Profile cutter changed after packing"):
-        run_pipeline(ast, kerf_mm=6.35)
+        run_pipeline(ast, kerf_mm=6.35, context=context)
 
 
 def test_packed_context_rejects_gap_smaller_than_selected_cutter(tmp_path):
@@ -690,7 +690,7 @@ def test_recipe_and_project_paths_agree_with_an_explicit_kerf(tmp_path):
     recipe = recipe_at(path)
     assert recipe is not None
     runs, _ = write_recipe_outputs(recipe, path / "output", kerf_mm=6.35)
-    project = load_pml_asts(source, kerf_mm=6.35)
+    project, _ = load_pml_asts(source, kerf_mm=6.35)
     assert [run.result.ast for run in runs] == project
     assert project[0].machining_clearance is not None
     assert project[0].machining_clearance.profile_diameter_mm == 6.35
@@ -706,14 +706,17 @@ def test_auto_gap_uses_actual_cutter_and_retries_real_relief_sweeps(tmp_path):
     )
     path = tmp_path / "relief.pml.yml"
     path.write_text(source)
-    asts = load_pml_asts(path, kerf_mm=3.175)
+    asts, context = load_pml_asts(path, kerf_mm=3.175)
     attempts = asts[0].config["packing_preflight"]
     assert len(attempts) > 1
     assert attempts[0]["reasons"]
     assert not attempts[-1]["reasons"]
     assert asts[0].config["layout_gaps"][0]["gap_mm"] > 3.175
-    assert asts == load_pml_asts(path, kerf_mm=3.175)
-    assert all(not run.result.errors for run in run_sheets(asts, source=path.name, job_stem="relief", kerf_mm=3.175))
+    assert asts == load_pml_asts(path, kerf_mm=3.175)[0]
+    assert all(
+        not run.result.errors
+        for run in run_sheets(asts, source=path.name, job_stem="relief", kerf_mm=3.175, context=context)
+    )
 
 
 def test_numeric_gap_rejects_relief_collision_without_repacking(tmp_path):
@@ -726,9 +729,9 @@ def test_numeric_gap_rejects_relief_collision_without_repacking(tmp_path):
             "bottom: none", "bottom:\n      joinery: captured\n      dado_depth: 6mm\n      dogbone: {overcut: 30mm}"
         )
     )
-    (ast,) = load_pml_asts(path, kerf_mm=3.175)
+    (ast,), context = load_pml_asts(path, kerf_mm=3.175)
     assert "packing_preflight" not in ast.config
-    result = run_pipeline(ast, kerf_mm=3.175, generate_svg=False)
+    result = run_pipeline(ast, kerf_mm=3.175, generate_svg=False, context=context)
     assert any("Cutter sweep" in error for error in result.errors)
     assert not result.gcode
 
@@ -776,10 +779,10 @@ def test_auto_preflight_and_emission_share_surface_and_face_preparation(tmp_path
         return result
 
     monkeypatch.setattr(compilation, "plan_passes", capture)
-    (ast,) = compilation.load_pml_asts(path, kerf_mm=3.175)
+    (ast,), context = compilation.load_pml_asts(path, kerf_mm=3.175)
     preflight = calls.copy()
     calls.clear()
-    result = run_pipeline(ast, generate_svg=False)
+    result = run_pipeline(ast, generate_svg=False, context=context)
     assert not result.errors
     assert result.gcode
     assert len(preflight) == len(calls) == 2

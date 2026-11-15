@@ -419,11 +419,13 @@ def _empty_pocket_error(
     entry: FeatureInput, tool_db: Sequence[ToolSelection], tool: ToolSelection | None = None
 ) -> ValueError:
     bounds = compute_shape_bounds(entry.shape, entry.geometry.to_dict(), entry.center_xy_mm)
-    smallest = min((t.diameter for t in tool_db if t.kind == "flat"), default=None)
+    role = "surface" if entry.surface_cooling is not None else "pocket"
+    approved = tools_for_role(tool_db, role, entry.tool_name, entry.depth_mm)
+    smallest = min((t.diameter for t in approved if t.kind == "flat"), default=None)
     selected = f"{tool.name!r} ({tool.diameter:g} mm)" if tool is not None else "none fits"
     return ValueError(
         f"Pocket '{entry.id}' ({entry.shape}, {bounds.width:g} x {bounds.height:g} mm): "
-        f"required cutting moves, got 0; selected tool {selected}; approved tools {[t.name for t in tool_db]}; smallest flat tool "
+        f"required cutting moves, got 0; selected tool {selected}; approved tools {[t.name for t in approved]}; smallest flat tool "
         + (f"{smallest:g} mm" if smallest is not None else "unavailable")
     )
 

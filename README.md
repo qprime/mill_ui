@@ -194,7 +194,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.mill --project my_project` | Generate G-code and SVG blueprint |
 | `python -m cli.mill --recipe docs/recipes/doors/shaker_door` | Run a recipe example |
 | `python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19` | Generate starter PML |
-| `python -m cli.nest job.nest.yml -o output/ --export-svg` | Run nesting |
+| `python -m cli.nest job.nest.yml -o output/` | Run nesting |
 | `python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary` | Validate CAM outputs |
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert geometry between formats |
 | `python -m cli.convert_layout input.pml.yml --output formatted.pml.yml` | Validate and format authored PML |

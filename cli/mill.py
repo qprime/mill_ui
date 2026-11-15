@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
-from cam.compilation import default_machine_name
+from cam.compilation import CompilationContext, default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
 from cli.nest import nest_machining_job
@@ -222,6 +222,7 @@ def _compile(
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
     tool_db: list[dict] | None = None,
+    context: CompilationContext | None = None,
 ) -> list[SheetRun]:
     pipeline_kwargs: dict = {
         "kerf_mm": kerf_mm,
@@ -229,6 +230,7 @@ def _compile(
         "svg_theme": theme,
         "y_origin": y_origin,
         "machine_config": machine_config,
+        "context": context,
     }
     if tool_db is not None:
         pipeline_kwargs["tool_db"] = tool_db
@@ -324,7 +326,7 @@ def process_file(
         job = parse_nest_yaml(input_path.read_text(encoding="utf-8"))
         if args.kerf is not None:
             job = replace(job, kerf_mm=args.kerf, kerf_explicit=True)
-        result, _ = nest_machining_job(
+        result, context = nest_machining_job(
             job,
             endmills=endmills,
             feeds=feeds,
@@ -333,7 +335,7 @@ def process_file(
         )
         asts = result["output"]
     elif input_name.endswith((".pml.yml", ".pml", ".txt")):
-        asts = load_pml_asts(
+        asts, context = load_pml_asts(
             input_path,
             kerf_mm=args.kerf,
             endmills=endmills,
@@ -354,6 +356,7 @@ def process_file(
         y_origin=args.y_origin,
         generate_svg=not args.no_svg,
         machine_config=machine_config,
+        context=context,
     )
     _report_runs(runs)
     return runs
@@ -367,12 +370,12 @@ def _load_recipe_source(
     feeds: list[FeedsEntry] | None = None,
     machine_config: MachineConfig | None = None,
     preset_path: Path | None = None,
-) -> tuple[list[LayoutAST], float | None]:
+) -> tuple[list[LayoutAST], float | None, CompilationContext]:
     if source.name.endswith(".nest.yml"):
         job = parse_nest_yaml(source.read_text(encoding="utf-8"))
         if kerf_mm is not None:
             job = replace(job, kerf_mm=kerf_mm, kerf_explicit=True)
-        result, _ = nest_machining_job(
+        result, context = nest_machining_job(
             job, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
         )
         unplaced = result["nesting_result"].unplaced_parts
@@ -381,11 +384,11 @@ def _load_recipe_source(
             raise ValueError(f"{source.name}: parts do not fit the nesting sheets: {names}")
         if not result["output"]:
             raise ValueError(f"{source.name}: nesting produced 0 sheets")
-        return result["output"], kerf_mm if kerf_mm is not None else job.kerf_mm if job.kerf_explicit else None
-    asts = load_pml_asts(
+        return result["output"], kerf_mm if kerf_mm is not None else job.kerf_mm if job.kerf_explicit else None, context
+    asts, context = load_pml_asts(
         source, kerf_mm=kerf_mm, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
     )
-    return asts, kerf_mm
+    return asts, kerf_mm, context
 
 
 def write_recipe_outputs(
@@ -405,7 +408,7 @@ def write_recipe_outputs(
     runs = []
     source_kerfs = {}
     for source in recipe.sources:
-        asts, source_kerf = _load_recipe_source(
+        asts, source_kerf, context = _load_recipe_source(
             source, kerf_mm, endmills=endmills, feeds=feeds, machine_config=machine_config, preset_path=preset_path
         )
         source_kerfs[source.name] = source_kerf
@@ -418,6 +421,7 @@ def write_recipe_outputs(
             y_origin=y_origin,
             generate_svg=generate_svg,
             machine_config=machine_config,
+            context=context,
         )
         runs.extend(source_runs)
     kerfs = set(source_kerfs.values())

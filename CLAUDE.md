@@ -53,7 +53,7 @@ python -m cli.mill --recipe docs/recipes/doors/shaker_door
 python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19
 python -m cli.mill --init_project assembly --sheet 800x600 --thickness 6
 python -m cli.nest --init_project --sheet 1220x2440 --thickness 19
-python -m cli.nest --project my_table job.nest.yml -v
+python -m cli.nest --project my_table job.nest.yml
 python -m cli.validate_cam --recipe docs/recipes/doors/shaker_door --summary
 python -m cli.recipes                           # recipe gate: every output file matches current code (also a pre-commit hook)
 python -m cli.recipes --regen                   # regenerate every recipe's output/

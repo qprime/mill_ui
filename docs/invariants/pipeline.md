@@ -116,7 +116,8 @@ Automatic resolution runs these checks before returning any packed sheets.
 
 `cam.compilation` resolves current authored PML/nest, referenced templates/assets,
 machine, cutting preset and tool library on each invocation. `CompilationContext`
-is an immutable in-memory handoff. No context, layout, flattened PML, library
+is an immutable in-memory handoff passed alongside the AST to compilation and
+planning. LayoutAST contains no CAM context. No context, layout, flattened PML, library
 snapshot, fingerprint or resumable checkpoint is persisted or replayed.
 
 `cli.mill` and `cli.nest` pack and machine in one invocation through the existing

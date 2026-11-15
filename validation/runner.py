@@ -130,9 +130,7 @@ def validate(
 
 def resolve_validation_source(
     source_file: Path,
-    output_dir: Path | None = None,
     *,
-    context_source: str | None = None,
     machine_config: MachineConfig | None = None,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
@@ -148,9 +146,10 @@ def resolve_validation_source(
             job, machine_config=machine_config, endmills=endmills, feeds=feeds, preset_path=preset_path
         )
         return list(result["output"])
-    return load_pml_asts(
+    asts, _ = load_pml_asts(
         source_file, machine_config=machine_config, endmills=endmills, feeds=feeds, preset_path=preset_path
     )
+    return asts
 
 
 def validate_recipe(
@@ -166,6 +165,10 @@ def validate_recipe(
     feeds: list[FeedsEntry] | None = None,
     preset_path: Path | None = None,
 ) -> CAMValidationResult:
+    from cam.compilation import default_machine_name
+    from config.machine_loader import load_machine_by_name
+
+    machine_config = machine_config or load_machine_by_name(default_machine_name(recipe=True))
     recipe_dir = Path(recipe_dir)
     output_dir = recipe_dir / "output"
 

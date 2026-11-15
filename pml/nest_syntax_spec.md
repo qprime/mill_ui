@@ -420,11 +420,8 @@ validation commands include nesting recipes and their generated artifacts.
 # Run nesting job
 python -m cli.nest --project my_project job.nest.yml
 
-# With verbose output
-python -m cli.nest job.nest.yml -v
-
-# With SVG export
-python -m cli.nest job.nest.yml -o output/ --export-svg --theme dark
+# With SVG blueprints (the default)
+python -m cli.nest job.nest.yml -o output/ --theme dark
 ```
 
 ## JSON Schema

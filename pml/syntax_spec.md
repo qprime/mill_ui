@@ -5,10 +5,9 @@ PML is a YAML-based declarative language for defining CNC machining layouts. It 
 ## Design Principles
 
 - **Declarative**: No control flow, no execution, pure data
-- **Standard format**: Valid YAML with JSON Schema validation
+- **Standard format**: Valid YAML with [parser validation](#closed-key-sets)
 - **Dimension-explicit**: All dimensions use `mm` suffix for clarity (e.g., `100mm`)
 - **Type-safe**: Shape types, feature types, and parameters are explicit
-- **IDE-friendly**: JSON Schema enables autocomplete and validation
 
 ## Coordinate System
 
@@ -66,6 +65,12 @@ children:
 ```
 
 ## Closed Key Sets
+
+`parse_pml_yaml` in `pml/yaml_parser.py` validates PML documents, including
+required fields, supported value shapes and node structure. The parser is the
+validation authority; see [PM-18](../docs/invariants/pml.md#closed-key-sets-pm-18)
+for the shared PML, nest and template contract. Tool and preset resolution happens
+during compilation.
 
 Every parsed mapping has a closed set of allowed keys (PM-18). Allowed values
 reach the AST, `NestJob` or `TemplateDef`, following the syntax's default and
@@ -2368,16 +2373,7 @@ The [multi-panel door recipe](../docs/recipes/doors/multi_panel_doors/README.md)
 demonstrates a default 3mm tab height and a 4mm override on its second door,
 including a comparison measured from the emitted G-code.
 
-## JSON Schema
-
-JSON Schema files for IDE validation:
-
-- `pml/schema/pml.schema.json` - PML document schema
-- `pml/schema/nest.schema.json` - Nesting job schema
-
-Configure your IDE to use these schemas for `.pml.yml` files.
-
-### Cutter-aware packing and common cuts
+## Cutter-aware packing and common cuts
 
 `Assembly.layout_gap` and `Beam.layout_gap` accept `auto` or a finite,
 nonnegative dimension. Omitting the property retains the 10mm default. A numeric

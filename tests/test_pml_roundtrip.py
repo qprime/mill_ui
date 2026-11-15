@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-
 import pytest
 
 from pml import PMLParseError, parse_pml
@@ -759,18 +757,32 @@ children:
     assert reparsed.sheet.safe_z_mm == 15.0
 
 
-def test_gap_schema_matches_auto_and_numeric_parser_contract():
-    from importlib import import_module
-    from pathlib import Path
-
-    schema = json.loads((Path(__file__).resolve().parents[1] / "pml/schema/pml.schema.json").read_text())
-    validator = import_module("jsonschema").Draft202012Validator(
-        {"$ref": "#/$defs/layoutGap", "$defs": schema["$defs"]}
+def _layout_gap_pml(node_type, gap):
+    dimensions = {
+        "Assembly": "width: 100mm, depth: 100mm, height: 100mm, thickness: 19mm",
+        "Beam": "length: 100mm, width: 50mm, thickness: 19mm",
+    }
+    return (
+        "Sheet: {width: 400mm, height: 300mm, thickness: 19mm}\n"
+        f"children:\n- {node_type}: {{{dimensions[node_type]}, layout_gap: {gap}}}\n"
     )
-    for value in ("auto", "0mm", "3.175mm", 0, 10):
-        assert validator.is_valid(value)
-    for invalid_value in ("automatic", "-1mm", -1, None):
-        assert not validator.is_valid(invalid_value)
+
+
+@pytest.mark.parametrize("node_type", ["Assembly", "Beam"])
+@pytest.mark.parametrize(
+    "gap, expected", [("auto", "auto"), ("0mm", 0.0), ("3.175mm", 3.175), (0, 0.0), (10, 10.0), (3.175, 3.175)]
+)
+def test_layout_gap_parser_contract(node_type, gap, expected):
+    parsed = parse_pml_yaml(_layout_gap_pml(node_type, gap))
+    assert parsed.root.children[0].layout_gap_mm == expected
+    assert parse_pml_yaml(format_pml_yaml(parsed)) == parsed
+
+
+@pytest.mark.parametrize("node_type", ["Assembly", "Beam"])
+@pytest.mark.parametrize("gap", ["automatic", "-1mm", -1, "null", ".nan", ".inf", "-.inf"])
+def test_invalid_layout_gap_parser_contract(node_type, gap):
+    with pytest.raises((ValueError, PMLParseError), match=r"dimension|layout_gap"):
+        parse_pml_yaml(_layout_gap_pml(node_type, gap))
 
 
 def test_profile_direction_and_finishing_requests_are_not_silently_ignored():

@@ -5,7 +5,7 @@ Nest job files (`.nest.yml`) define bin-packing jobs for optimizing part placeme
 ## Design Principles
 
 - **Declarative**: Define parts and quantities, let the algorithm optimize placement
-- **Standard format**: Valid YAML with JSON Schema validation
+- **Standard format**: Valid YAML with [parser validation](#closed-key-sets)
 - **Dimension-explicit**: All dimensions use `mm` suffix for clarity
 - **Template-aware**: Parts can reference parametric templates (e.g., Shaker doors)
 
@@ -47,6 +47,12 @@ Nest:
 ```
 
 ## Closed Key Sets
+
+`parse_nest_yaml` in `pml/yaml_parser.py` validates nest documents, including
+required fields and supported value shapes. The parser is the validation
+authority; see [PM-18](../docs/invariants/pml.md#closed-key-sets-pm-18) for the
+shared PML, nest and template contract. Tool and preset resolution happens during
+compilation.
 
 Every parsed nest mapping accepts only its documented keys (PM-18). Unknown
 keys raise `NestParseError`, with the context, unknown keys, allowed keys and
@@ -423,10 +429,6 @@ python -m cli.nest --project my_project job.nest.yml
 # With SVG blueprints (the default)
 python -m cli.nest job.nest.yml -o output/ --theme dark
 ```
-
-## JSON Schema
-
-The nest job schema is available at `pml/schema/nest.schema.json` for IDE validation.
 
 ## Migration from Legacy Format
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from adapters.ast_to_removal import ast_to_removal_intents
-from pml.yaml_parser import PMLParseError, parse_pml_yaml
+from pml.yaml_parser import parse_pml_yaml
 from resolution.layout_resolver import ResolutionAssertionError, resolve_layout, resolve_layout_multi
 from validation.removal_checks import check_working_area_bounds
 
@@ -294,10 +294,3 @@ def test_layout_gap_round_trip_and_geometry_context(gap):
             assert all(intent.part_id is not None for a in asts for intent in ast_to_removal_intents(a))
     else:
         assert resolve_layout_multi(parsed)
-
-
-@pytest.mark.parametrize("gap", ["-1mm", ".nan", "banana"])
-def test_invalid_layout_gap_errors(gap):
-    source = SMALL_BOX_PML.replace("    type: box", f"    layout_gap: {gap}\n    type: box")
-    with pytest.raises((ValueError, PMLParseError), match=r"dimension|layout_gap|parse"):
-        parse_pml_yaml(source)

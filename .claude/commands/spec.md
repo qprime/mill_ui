@@ -126,6 +126,6 @@ Before presenting the draft, verify — run these silently, fix failures, don't 
 - [ ] Every "What NOT to do" bullet meets the bar (prior failure, non-obvious, or scope boundary); no bullet restates a positive rule from Design/Implementation
 - [ ] Test cases have names, not just descriptions
 - [ ] Implementation table and "what doesn't change" section are mutually exclusive — no file appears in both
-- [ ] Every layer the data flows through has a row (or an explicit "no change needed because X") — check parser, formatter, resolver, adapter, planner, diagram, renderer, schema
+- [ ] Every layer the data flows through has a row (or an explicit "no change needed because X") — check parser, formatter, resolver, adapter, planner, diagram, renderer, and any affected data contracts
 - [ ] Import layering: for each proposed function placement, verify the caller can import from that module (check project_conventions.md import layering)
 - [ ] If the design follows an existing feature as analog, walk every file that analog touches and account for each

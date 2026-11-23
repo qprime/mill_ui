@@ -192,6 +192,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | Command | Description |
 |---------|-------------|
 | `python -m cli.mill --project my_project` | Generate G-code and SVG blueprint |
+| `python -m cli.mill --input part.pml.yml --out plot-output --plot` | Generate a fixed-Z XY plot and preview |
 | `python -m cli.mill --recipe docs/recipes/doors/shaker_door` | Run a recipe example |
 | `python -m cli.mill --init_project layout --sheet 1220x1220 --thickness 19` | Generate starter PML |
 | `python -m cli.nest job.nest.yml -o output/` | Run nesting |
@@ -199,6 +200,8 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.convert_layout --from pml --to json input.pml.yml output.json` | Convert geometry between formats |
 | `python -m cli.convert_layout input.pml.yml --output formatted.pml.yml` | Validate and format authored PML |
 | `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
+
+Plot output accepts one front-face rectangle, circle, or simple polygon from an existing PML file. Use a new output directory. The program traces the design centerline at 300 mm/min, so position the fixed-height tip at the contour start before running. `--plot-stroke-width` sets the centered SVG stroke in millimeters. The default is 1.0 mm, and the XY program is identical for different stroke widths.
 
 ## Project Structure
 

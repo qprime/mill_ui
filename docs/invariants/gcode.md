@@ -73,6 +73,10 @@ one circuit with the requested entry and exit tapers at its declared start.
 - All feed rates (F parameter) must be positive
 - Zero or negative feed = machine error
 
+## Fixed-Z plot output
+
+Plotting uses one continuous design centerline. The operator sets the tip height and places it at the contour start. The generated program contains XY motion with a positive feed and zero Z moves, spindle starts, homing, or parking moves. The SVG preview depicts the same path at physical scale. Stroke width changes the preview only. Plot paths must fit the working area and the configured machine envelope. Milling retains the safe-Z and spindle requirements above.
+
 ---
 
 ## Modal Commands

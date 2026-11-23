@@ -158,6 +158,68 @@ def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
     assert (out_dir / "part.pml.svg").exists()
 
 
+def test_plot_rectangle_closes_on_design_centerline(tmp_path: Path):
+    source = _write_simple_profile(tmp_path)
+    out = tmp_path / "plot"
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--plot"])
+    assert result.stdout == ""
+    program = (out / "part.pml.plot.nc").read_text()
+    assert "Z" not in program
+    assert "M3" not in program and "M4" not in program
+    moves = [line for line in program.splitlines() if line.startswith("G1 ")]
+    assert len(moves) == 5
+    assert moves[0] == moves[-1]
+    corners = [tuple(float(word[1:]) for word in line.split()[1:]) for line in moves]
+    assert max(p[0] for p in corners) - min(p[0] for p in corners) == 200
+    assert max(p[1] for p in corners) - min(p[1] for p in corners) == 150
+    assert "<polygon" in (out / "part.pml.plot.svg").read_text()
+
+
+def test_plot_circle_stroke_width_only_changes_svg(tmp_path: Path):
+    source = tmp_path / "circle.pml.yml"
+    source.write_text(
+        "Sheet: {width: 200mm, height: 200mm, thickness: 19mm}\n"
+        "children:\n- Circle: {id: plotted-circle, diameter: 50mm}\n"
+    )
+    default, thin = tmp_path / "default", tmp_path / "thin"
+    args = ["-m", "cli.mill", "--input", str(source), "--plot"]
+    _run_cli([*args, "--out", str(default)])
+    _run_cli([*args, "--out", str(thin), "--plot-stroke-width", "0.5"])
+    program = (default / "circle.pml.plot.nc").read_text()
+    assert program == (thin / "circle.pml.plot.nc").read_text()
+    assert "I25.000 J0" in program and "I-25.000 J0" in program
+    assert 'r="25.000"' in (default / "circle.pml.plot.svg").read_text()
+    assert 'stroke-width="1"' in (default / "circle.pml.plot.svg").read_text()
+    assert 'stroke-width="0.5"' in (thin / "circle.pml.plot.svg").read_text()
+
+
+def test_plot_rejection_never_emits_a_program(tmp_path: Path):
+    source = tmp_path / "part.pml.yml"
+    source.write_text(OUT_OF_BOUNDS_PML.replace("x: 52mm", "x: 40mm"))
+    out = tmp_path / "plot"
+    result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--plot"], check=False)
+    assert result.returncode == 3
+    assert "sheet working area" in result.stderr
+    assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    ("geometry", "vertices"),
+    [
+        ("Triangle: {base: 40mm, height: 30mm, feature: {type: profile, depth: through}}", 3),
+        ("Polygon: {points: [[20,20],[60,20],[70,40],[40,65],[15,45]], feature: {type: profile, depth: through}}", 5),
+    ],
+)
+def test_plot_authored_polygon_preserves_contour(tmp_path: Path, geometry: str, vertices: int):
+    source = tmp_path / "polygon.pml.yml"
+    source.write_text("Sheet: {width: 150mm, height: 150mm, thickness: 19mm}\nchildren:\n- " + geometry)
+    out = tmp_path / "plot"
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--plot"])
+    moves = [line for line in (out / "polygon.pml.plot.nc").read_text().splitlines() if line.startswith("G1 ")]
+    assert len(moves) == vertices + 1
+    assert moves[0] == moves[-1]
+
+
 @pytest.mark.parametrize("clearance, error", [(0, "2 disconnected pieces"), (100, "remove the entire")])
 def test_notch_topology_errors_reach_the_cli_and_remove_stale_programs(tmp_path: Path, clearance, error):
     fixture = Path(__file__).parent / "fixtures/assemblies/notch_topology.pml.yml"

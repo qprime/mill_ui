@@ -10,6 +10,7 @@ from pathlib import Path
 from cam.compilation import CompilationContext, default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
+from cam.plot import DEFAULT_STROKE_WIDTH_MM, PlotError, PlotOptions, compile_plot
 from cli.nest import nest_machining_job
 from cli.project import (
     DEFAULT_KERF_MM,
@@ -307,6 +308,44 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
     return endmills, feeds
 
 
+def _write_plot(input_files: list[Path], output_dir: Path, args: argparse.Namespace) -> None:
+    if len(input_files) != 1:
+        raise PlotError("Plot output requires exactly one input file")
+    input_path = input_files[0]
+    if not input_path.name.lower().endswith((".pml.yml", ".pml", ".txt")):
+        raise PlotError("Plot output requires one authored PML file")
+    machine = _load_machine(args.machine or default_machine_name())
+    if machine is None:
+        raise PlotError("Plot output requires a machine configuration")
+    asts, _ = load_pml_asts(input_path, machine_config=machine)
+    if len(asts) != 1:
+        raise PlotError("Plot output requires one resolved sheet")
+    stroke = args.plot_stroke_width
+    options = PlotOptions(DEFAULT_STROKE_WIDTH_MM if stroke is None else stroke, args.y_origin)
+    result = compile_plot(asts[0], machine, options)
+    try:
+        output_dir.mkdir(parents=True)
+    except FileExistsError as error:
+        raise PlotError("Plot output requires a new output directory") from error
+    svg = output_dir / f"{input_path.stem}.plot.svg"
+    program = output_dir / f"{input_path.stem}.plot.nc"
+    svg.write_text(result.svg, encoding="utf-8")
+    staged = program.with_suffix(".tmp")
+    try:
+        staged.write_text(result.gcode, encoding="utf-8")
+        staged.replace(program)
+    finally:
+        staged.unlink(missing_ok=True)
+    print(f"  Outputs: {program.name}, {svg.name}", file=sys.stderr)
+
+
+def _validate_plot_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    if args.plot_stroke_width is not None and not args.plot:
+        parser.error("--plot-stroke-width requires --plot")
+    if args.plot and (not args.out or args.recipe or args.init_project or args.no_svg or args.no_clean):
+        parser.error("--plot requires a new --out directory and writes an SVG preview")
+
+
 def process_file(
     input_path: Path,
     args,
@@ -544,6 +583,8 @@ Exit codes:
         action="store_true",
         help="Skip SVG blueprint generation",
     )
+    parser.add_argument("--plot", action="store_true", help="Compile a fixed-Z centerline plot")
+    parser.add_argument("--plot-stroke-width", type=float, help="Plot preview stroke width in millimeters (default: 1)")
     parser.add_argument(
         "--no-clean",
         action="store_true",
@@ -600,6 +641,7 @@ Exit codes:
     )
 
     args = parser.parse_args()
+    _validate_plot_args(parser, args)
 
     try:
         if args.init_project:
@@ -620,6 +662,9 @@ Exit codes:
             sys.exit(1)
 
         output_dir = resolve_output_dir(args.project, args.out)
+        if args.plot:
+            _write_plot(input_files, output_dir, args)
+            return
 
         if not args.no_clean and output_dir.exists():
             resolved = output_dir.resolve()
@@ -663,6 +708,9 @@ Exit codes:
     except GcodeNameCollisionError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+    except PlotError as e:
+        print(f"Plot error: {e}", file=sys.stderr)
+        sys.exit(DESIGN_ERROR_EXIT_CODE)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         import traceback

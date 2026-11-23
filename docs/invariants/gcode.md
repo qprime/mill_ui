@@ -75,7 +75,11 @@ one circuit with the requested entry and exit tapers at its declared start.
 
 ## Fixed-Z plot output
 
-Plotting uses one continuous design centerline. The operator sets the tip height and places it at the contour start. The generated program contains XY motion with a positive feed and zero Z moves, spindle starts, homing, or parking moves. The SVG preview depicts the same path at physical scale. Stroke width changes the preview only. Plot paths must fit the working area and the configured machine envelope. Milling retains the safe-Z and spindle requirements above.
+Plotting uses one continuous design centerline. The operator sets the tip height and positions it at the G54 start shown in the preview and CLI diagnostics. The generated program contains XY motion with a positive feed and zero Z moves, spindle starts, homing, or parking moves.
+
+The emitted contour must fit inside both the sheet working area and the selected machine's XY envelope at 0.001 mm output precision. Plot mode uses the machine profile's travel limits independently of stock material and milling presets. The operator establishes the G54 origin and verifies clearance on the installed machine. Milling retains the safe-Z and spindle requirements above.
+
+The SVG depicts the emitted contour at physical scale and pads the viewBox to fit the centered stroke. Stroke width leaves the program bytes unchanged. Plot input and output-directory errors exit with code `1`. Plot design rejections exit with code `3` and publish no program.
 
 ---
 

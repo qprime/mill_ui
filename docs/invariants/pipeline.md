@@ -24,6 +24,8 @@
 
 ## Always Go Through RemovalIntent IR
 
+The [fixed-Z plot output](gcode.md#fixed-z-plot-output) uses the layout resolver and adapts its nominal outline through `RemovalIntent`. Its postprocessor validates and emits a rounded XY contour shared by the program and preview. The machining planner and cutter selection apply to the milling pipeline described here.
+
 **Wrong:**
 ```python
 hints = convert_ast_to_hints_directly(ast)

@@ -201,7 +201,7 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 | `python -m cli.convert_layout input.pml.yml --output formatted.pml.yml` | Validate and format authored PML |
 | `python -m cli.recipes` | Check every recipe's committed outputs against current code (`--regen` rewrites them) |
 
-Plot output accepts one front-face rectangle, circle, or simple polygon from an existing PML file. Use a new output directory. The program traces the design centerline at 300 mm/min, so position the fixed-height tip at the contour start before running. `--plot-stroke-width` sets the centered SVG stroke in millimeters. The default is 1.0 mm, and the XY program is identical for different stroke widths.
+Plot output accepts one front-face rectangle, circle, or simple polygon from an existing PML file. Use a new output directory and select the target with `--machine`, for example `--machine genmitsu_4040_pro`. Plotting uses that profile's XY envelope. The program traces the design centerline at 300 mm/min. Position the fixed-height tip at the G54 start shown in the preview before running. `--plot-stroke-width` sets the centered SVG stroke in millimeters. The default is 1.0 mm, and the XY program is identical for different stroke widths.
 
 To plot a generated blueprint, use `--input blueprint.svg --out plot-output --plot --plot-svg-stroke <path-id>`. Select a unique, closed SVG path by its `id`. The preview shows the selected outline at physical scale with its lower-left bounds as the plot origin. This mode accepts generated blueprints with uniform millimeter scale and an untransformed path.
 

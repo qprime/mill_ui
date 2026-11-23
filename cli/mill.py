@@ -5,13 +5,14 @@ import shutil
 import sys
 from collections.abc import Mapping
 from dataclasses import replace
+from math import isfinite
 from pathlib import Path
 
 from cam.blueprint_plot import load_blueprint_outline
 from cam.compilation import CompilationContext, default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
-from cam.plot import DEFAULT_STROKE_WIDTH_MM, PlotError, PlotOptions, compile_plot
+from cam.plot import DEFAULT_STROKE_WIDTH_MM, PlotError, PlotOptions, compile_plot, load_plot_pml
 from cli.nest import nest_machining_job
 from cli.project import (
     DEFAULT_KERF_MM,
@@ -309,36 +310,41 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
     return endmills, feeds
 
 
-def _plot_layout(input_path: Path, machine: MachineConfig, svg_stroke: str | None) -> LayoutAST:
+class PlotInputError(ValueError):
+    pass
+
+
+def _plot_layout(input_path: Path, svg_stroke: str | None) -> LayoutAST:
     if input_path.suffix.lower() == ".svg":
         if not svg_stroke:
-            raise PlotError("Blueprint plotting requires --plot-svg-stroke with a path ID")
+            raise PlotInputError("Blueprint plotting requires --plot-svg-stroke with a path ID")
         return load_blueprint_outline(input_path, svg_stroke)
     if svg_stroke is not None:
-        raise PlotError("--plot-svg-stroke requires a blueprint SVG input")
+        raise PlotInputError("--plot-svg-stroke requires a blueprint SVG input")
     if not input_path.name.lower().endswith((".pml.yml", ".pml", ".txt")):
-        raise PlotError("Plot output requires one authored PML file")
-    asts, _ = load_pml_asts(input_path, machine_config=machine)
-    if len(asts) != 1:
-        raise PlotError("Plot output requires one resolved sheet")
-    return asts[0]
+        raise PlotInputError("Plot output requires one authored PML file or selected blueprint outline")
+    return load_plot_pml(input_path)
 
 
 def _write_plot(input_files: list[Path], output_dir: Path, args: argparse.Namespace) -> None:
     if len(input_files) != 1:
-        raise PlotError("Plot output requires exactly one input file")
+        raise PlotInputError("Plot output requires exactly one input file")
     input_path = input_files[0]
     machine = _load_machine(args.machine or default_machine_name())
     if machine is None:
-        raise PlotError("Plot output requires a machine configuration")
-    ast = _plot_layout(input_path, machine, args.plot_svg_stroke)
+        raise PlotInputError("Plot output requires a machine configuration")
+    ast = _plot_layout(input_path, args.plot_svg_stroke)
     stroke = args.plot_stroke_width
-    options = PlotOptions(DEFAULT_STROKE_WIDTH_MM if stroke is None else stroke, args.y_origin)
+    options = PlotOptions(
+        DEFAULT_STROKE_WIDTH_MM if stroke is None else stroke,
+        args.y_origin,
+        show_start_label=input_path.suffix.lower() != ".svg",
+    )
     result = compile_plot(ast, machine, options)
     try:
         output_dir.mkdir(parents=True)
-    except FileExistsError as error:
-        raise PlotError("Plot output requires a new output directory") from error
+    except OSError as error:
+        raise PlotInputError(f"Plot output requires a new output directory: {error}") from error
     svg = output_dir / f"{input_path.stem}.plot.svg"
     program = output_dir / f"{input_path.stem}.plot.nc"
     svg.write_text(result.svg, encoding="utf-8")
@@ -348,7 +354,7 @@ def _write_plot(input_files: list[Path], output_dir: Path, args: argparse.Namesp
         staged.replace(program)
     finally:
         staged.unlink(missing_ok=True)
-    print(f"  Outputs: {program.name}, {svg.name}", file=sys.stderr)
+    print(f"  {result.start}\n  Outputs: {program.name}, {svg.name}", file=sys.stderr)
 
 
 def _validate_plot_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
@@ -356,6 +362,9 @@ def _validate_plot_args(parser: argparse.ArgumentParser, args: argparse.Namespac
         parser.error("Plot stroke options require --plot")
     if args.plot and (not args.out or args.recipe or args.init_project or args.no_svg or args.no_clean):
         parser.error("--plot requires a new --out directory and writes an SVG preview")
+    width = args.plot_stroke_width
+    if width is not None and (not isfinite(width) or width <= 0):
+        parser.error("--plot-stroke-width must be finite and positive")
 
 
 def process_file(
@@ -553,7 +562,8 @@ Exit codes:
   2  command-line usage error
   3  design errors (listed in metrics.json); outputs are still written, except
      G-code for setups with planner errors or keepout violations, and G-code
-     and SVG when the sheet exceeds the machine envelope
+     and SVG when the sheet exceeds the machine envelope. Plot design errors
+     publish no program.
         """,
     )
 
@@ -718,7 +728,7 @@ Exit codes:
     except ParseError as e:
         print(f"PML Parse Error: {e}", file=sys.stderr)
         sys.exit(1)
-    except GcodeNameCollisionError as e:
+    except (GcodeNameCollisionError, PlotInputError) as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except PlotError as e:

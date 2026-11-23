@@ -4,7 +4,7 @@ from math import isclose, isfinite
 from pathlib import Path
 from xml.etree.ElementTree import Element, ParseError, parse
 
-from cam.plot import PlotError
+from cam.plot import POSITION_PRECISION, PlotError
 from core.constants import ShapeType
 from generators.svg.parser import SVGParseError, parse_svg_path
 from layout_ast.layout import Geometry, Item, LayoutAST, Placement, Sheet
@@ -85,4 +85,5 @@ def load_blueprint_outline(source: Path, stroke_id: str) -> LayoutAST:
     center = width / 2, height / 2
     local = tuple(((x - x_min) * scale - center[0], (y_max - y) * scale - center[1]) for x, y in points)
     shape = Item("shape", ShapeType.POLYGON, Geometry({"points": local}), Placement(center), shape_id=stroke_id)
-    return LayoutAST(Sheet(width, height, 1.0), (shape,))
+    sheet = Sheet(max(width, round(width, POSITION_PRECISION)), max(height, round(height, POSITION_PRECISION)), 1.0)
+    return LayoutAST(sheet, (shape,))

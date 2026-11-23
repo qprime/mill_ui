@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -158,8 +159,16 @@ def test_cli_design_error_exits_3_and_lists_errors(tmp_path: Path):
     assert (out_dir / "part.pml.svg").exists()
 
 
-def test_plot_rectangle_closes_on_design_centerline(tmp_path: Path):
+@pytest.mark.parametrize("profile_child", [False, True])
+def test_plot_rectangle_closes_on_design_centerline(tmp_path: Path, profile_child: bool):
     source = _write_simple_profile(tmp_path)
+    if profile_child:
+        source.write_text(
+            SIMPLE_PROFILE_PML.replace(
+                "    feature:\n      type: profile\n      depth: through\n      side: outside",
+                "    children:\n    - Profile: {side: outside, depth: through}",
+            )
+        )
     out = tmp_path / "plot"
     result = _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(out), "--plot"])
     assert result.stdout == ""
@@ -172,25 +181,39 @@ def test_plot_rectangle_closes_on_design_centerline(tmp_path: Path):
     corners = [tuple(float(word[1:]) for word in line.split()[1:]) for line in moves]
     assert max(p[0] for p in corners) - min(p[0] for p in corners) == 200
     assert max(p[1] for p in corners) - min(p[1] for p in corners) == 150
-    assert "<polygon" in (out / "part.pml.plot.svg").read_text()
+    preview = ET.parse(out / "part.pml.plot.svg")
+    assert preview.find("{*}g/{*}polygon") is not None
+    start = "Start G54 X125.000 Y250.000 mm"
+    assert preview.findtext("{*}text") == start
+    assert start in result.stderr
 
 
-def test_plot_circle_stroke_width_only_changes_svg(tmp_path: Path):
+@pytest.mark.parametrize("size", ["diameter: 50mm", "radius: 25mm"])
+def test_plot_circle_stroke_width_only_changes_svg(tmp_path: Path, size: str):
     source = tmp_path / "circle.pml.yml"
     source.write_text(
         "Sheet: {width: 200mm, height: 200mm, thickness: 19mm}\n"
-        "children:\n- Circle: {id: plotted-circle, diameter: 50mm}\n"
+        f"children:\n- Circle: {{id: plotted-circle, {size}}}\n"
     )
-    default, thin = tmp_path / "default", tmp_path / "thin"
+    default, thin, wide = (tmp_path / name for name in ("default", "thin", "wide"))
     args = ["-m", "cli.mill", "--input", str(source), "--plot"]
     _run_cli([*args, "--out", str(default)])
     _run_cli([*args, "--out", str(thin), "--plot-stroke-width", "0.5"])
+    _run_cli([*args, "--out", str(wide), "--plot-stroke-width", "160"])
     program = (default / "circle.pml.plot.nc").read_text()
     assert program == (thin / "circle.pml.plot.nc").read_text()
     assert "I25.000 J0" in program and "I-25.000 J0" in program
     assert 'r="25.000"' in (default / "circle.pml.plot.svg").read_text()
     assert 'stroke-width="1"' in (default / "circle.pml.plot.svg").read_text()
     assert 'stroke-width="0.5"' in (thin / "circle.pml.plot.svg").read_text()
+    assert program == (wide / "circle.pml.plot.nc").read_text()
+    wide_view = ET.parse(wide / "circle.pml.plot.svg").getroot()
+    assert wide_view.findtext("{*}text") == "Start G54 X75.000 Y100.000 mm"
+    x, y, width, height = map(float, wide_view.attrib["viewBox"].split())
+    assert x < -5 and x + width > 205
+    assert y < -5 and y + height > 205
+    assert float(wide_view.attrib["width"].removesuffix("mm")) == width
+    assert float(wide_view.attrib["height"].removesuffix("mm")) == height
 
 
 def test_plot_rejection_never_emits_a_program(tmp_path: Path):
@@ -201,6 +224,77 @@ def test_plot_rejection_never_emits_a_program(tmp_path: Path):
     assert result.returncode == 3
     assert "sheet working area" in result.stderr
     assert not out.exists()
+
+
+@pytest.mark.parametrize(
+    "children",
+    [
+        "- Rect: {}\n- Circle: {diameter: 20mm}",
+        "- RoundedRect: {radius: 10mm}",
+        "- Rect:\n    children:\n    - Rect: {at: {x: 35mm, y: 35mm, width: 10mm, height: 10mm}}",
+    ],
+)
+def test_plot_rejects_unsupported_geometry(tmp_path: Path, children: str):
+    source = tmp_path / "part.pml.yml"
+    source.write_text(f"Sheet: {{width: 140mm, height: 120mm, thickness: 6mm}}\nchildren:\n{children}\n")
+    out = tmp_path / "plot"
+    result = _run_cli(["-m", "cli.mill", "--plot", "--input", str(source), "--out", str(out)], check=False)
+    assert result.returncode == 3, result.stderr
+    assert "single front-face" in result.stderr or "exactly one shape" in result.stderr
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("machine_limit", [False, True])
+def test_plot_rejects_out_of_bounds_after_rounding(tmp_path: Path, machining_config: Path, machine_limit: bool):
+    source = tmp_path / "part.pml.yml"
+    machine = machining_config / "cnc/plot_router.yml"
+    machine.write_text("name: Plot router\nenvelope: {x_min: 0, y_min: 0, x_max: 44.9996, y_max: 100}\n")
+    margin, center = ("0", "34.99959") if machine_limit else ("10.0004", "10.00001")
+    source.write_text(
+        f"Sheet: {{width: 140mm, height: 120mm, thickness: 6mm, margin: {margin}mm}}\n"
+        f"children:\n- Rect: {{at: {{x: {center}mm, y: 35mm, width: 20mm, height: 20mm}}}}\n"
+    )
+    out = tmp_path / "plot"
+    result = _run_cli(
+        ["-m", "cli.mill", "--plot", "--input", str(source), "--out", str(out), "--machine", "plot_router"],
+        check=False,
+    )
+    assert result.returncode == 3
+    assert ("effective envelope x_max" if machine_limit else "sheet working area") in result.stderr
+    assert not out.exists()
+
+
+def test_plot_uses_machine_envelope_without_a_cutting_preset(tmp_path: Path, machining_config: Path):
+    (machining_config / "cnc/plot_router.yml").write_text(
+        "name: Plot router\nenvelope: {x_min: 0, y_min: 0, x_max: 400, y_max: 400}\n"
+    )
+    source = tmp_path / "part.pml.yml"
+    source.write_text(
+        "Sheet: {width: 500mm, height: 120mm, thickness: 6mm, material: paper}\n"
+        "children:\n- Rect: {at: {x: 60mm, y: 60mm, width: 20mm, height: 20mm}}\n"
+    )
+    out = tmp_path / "plot"
+    _run_cli(["-m", "cli.mill", "--plot", "--input", str(source), "--out", str(out), "--machine", "plot_router"])
+    assert (out / "part.pml.plot.nc").is_file()
+
+
+@pytest.mark.parametrize("scenario", ["unsupported_input", "multiple_inputs", "existing_output"])
+def test_plot_input_and_output_errors_exit_one(tmp_path: Path, scenario: str):
+    source = _write_simple_profile(tmp_path)
+    out = tmp_path / "plot"
+    if scenario == "unsupported_input":
+        source = source.rename(tmp_path / "part.nest.yml")
+    elif scenario == "multiple_inputs":
+        (tmp_path / "second.pml.yml").write_text(SIMPLE_PROFILE_PML)
+        source = tmp_path
+    else:
+        out.mkdir()
+        (out / "existing").write_text("keep")
+    result = _run_cli(["-m", "cli.mill", "--plot", "--input", str(source), "--out", str(out)], check=False)
+    assert result.returncode == 1
+    assert not list(out.glob("*.nc"))
+    if scenario == "existing_output":
+        assert (out / "existing").read_text() == "keep"
 
 
 @pytest.mark.parametrize(
@@ -241,9 +335,12 @@ def test_plot_blueprint_preserves_selected_box_outline(tmp_path: Path):
     assert "Z" not in program and "M3" not in program and "M4" not in program
     assert len(moves) == 29
     assert moves[0] == moves[-1] == "G1 X110.000 Y10.030"
-    preview = (out / "finger_jointed_box.plot.svg").read_text()
-    assert 'width="110mm"' in preview and 'height="70mm"' in preview
-    assert "<text" not in preview
+    preview = ET.parse(out / "finger_jointed_box.plot.svg").getroot()
+    outline = preview.find("{*}g/{*}polygon")
+    assert outline is not None
+    xs, ys = zip(*(map(float, point.split(",")) for point in outline.attrib["points"].split()), strict=True)
+    assert (max(xs) - min(xs), max(ys) - min(ys)) == (110, 70)
+    assert preview.find("{*}text") is None
 
 
 @pytest.mark.parametrize("duplicates", [False, True])

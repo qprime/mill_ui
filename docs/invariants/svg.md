@@ -10,6 +10,8 @@ The SVG generation system converts LayoutAST to visual blueprints via DiagramIR.
 
 Pipeline: `LayoutAST -> DiagramIR -> SVG`
 
+SVG-5 applies to layout blueprints. The [fixed-Z plot preview](gcode.md#fixed-z-plot-output) depicts the validated, rounded contour shared with the plot program. Its viewport contains the full centered stroke and retains one millimeter per SVG user unit.
+
 ---
 
 ## Invariants

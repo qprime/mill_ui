@@ -203,6 +203,8 @@ Domains define *where* to machine (bounded 2D regions with inset/offset/subtract
 
 Plot output accepts one front-face rectangle, circle, or simple polygon from an existing PML file. Use a new output directory. The program traces the design centerline at 300 mm/min, so position the fixed-height tip at the contour start before running. `--plot-stroke-width` sets the centered SVG stroke in millimeters. The default is 1.0 mm, and the XY program is identical for different stroke widths.
 
+To plot a generated blueprint, use `--input blueprint.svg --out plot-output --plot --plot-svg-stroke <path-id>`. Select a unique, closed SVG path by its `id`. The preview shows the selected outline at physical scale with its lower-left bounds as the plot origin. This mode accepts generated blueprints with uniform millimeter scale and an untransformed path.
+
 ## Project Structure
 
 ```

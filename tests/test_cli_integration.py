@@ -220,6 +220,60 @@ def test_plot_authored_polygon_preserves_contour(tmp_path: Path, geometry: str, 
     assert moves[0] == moves[-1]
 
 
+def test_plot_blueprint_preserves_selected_box_outline(tmp_path: Path):
+    source = Path("docs/recipes/assemblies/finger_jointed_box/output/finger_jointed_box.svg")
+    out = tmp_path / "plot"
+    _run_cli(
+        [
+            "-m",
+            "cli.mill",
+            "--input",
+            str(source),
+            "--out",
+            str(out),
+            "--plot",
+            "--plot-svg-stroke",
+            "generated_assembly_left_side_21_left_side_outer",
+        ]
+    )
+    program = (out / "finger_jointed_box.plot.nc").read_text()
+    moves = [line for line in program.splitlines() if line.startswith("G1 ")]
+    assert "Z" not in program and "M3" not in program and "M4" not in program
+    assert len(moves) == 29
+    assert moves[0] == moves[-1] == "G1 X110.000 Y10.030"
+    preview = (out / "finger_jointed_box.plot.svg").read_text()
+    assert 'width="110mm"' in preview and 'height="70mm"' in preview
+    assert "<text" not in preview
+
+
+@pytest.mark.parametrize("duplicates", [False, True])
+def test_plot_blueprint_rejects_indeterminate_selection(tmp_path: Path, duplicates: bool):
+    source = tmp_path / "blueprint.svg"
+    stroke = '<path id="outline" d="M0 0 L20 0 L20 20 L0 20 Z"/>'
+    marks = stroke * 2 if duplicates else stroke.replace("outline", "other")
+    source.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="20mm" height="20mm" viewBox="0 0 20 20">' + marks + "</svg>"
+    )
+    out = tmp_path / "plot"
+    result = _run_cli(
+        [
+            "-m",
+            "cli.mill",
+            "--input",
+            str(source),
+            "--out",
+            str(out),
+            "--plot",
+            "--plot-svg-stroke",
+            "outline",
+        ],
+        check=False,
+    )
+    assert result.returncode == 3
+    assert "Select exactly one blueprint stroke ID" in result.stderr
+    assert not out.exists()
+
+
 @pytest.mark.parametrize("clearance, error", [(0, "2 disconnected pieces"), (100, "remove the entire")])
 def test_notch_topology_errors_reach_the_cli_and_remove_stale_programs(tmp_path: Path, clearance, error):
     fixture = Path(__file__).parent / "fixtures/assemblies/notch_topology.pml.yml"

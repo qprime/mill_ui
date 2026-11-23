@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
+from cam.blueprint_plot import load_blueprint_outline
 from cam.compilation import CompilationContext, default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
@@ -308,21 +309,32 @@ def _load_tool_library(args) -> tuple[list[Endmill] | None, list[FeedsEntry] | N
     return endmills, feeds
 
 
+def _plot_layout(input_path: Path, machine: MachineConfig, svg_stroke: str | None) -> LayoutAST:
+    if input_path.suffix.lower() == ".svg":
+        if not svg_stroke:
+            raise PlotError("Blueprint plotting requires --plot-svg-stroke with a path ID")
+        return load_blueprint_outline(input_path, svg_stroke)
+    if svg_stroke is not None:
+        raise PlotError("--plot-svg-stroke requires a blueprint SVG input")
+    if not input_path.name.lower().endswith((".pml.yml", ".pml", ".txt")):
+        raise PlotError("Plot output requires one authored PML file")
+    asts, _ = load_pml_asts(input_path, machine_config=machine)
+    if len(asts) != 1:
+        raise PlotError("Plot output requires one resolved sheet")
+    return asts[0]
+
+
 def _write_plot(input_files: list[Path], output_dir: Path, args: argparse.Namespace) -> None:
     if len(input_files) != 1:
         raise PlotError("Plot output requires exactly one input file")
     input_path = input_files[0]
-    if not input_path.name.lower().endswith((".pml.yml", ".pml", ".txt")):
-        raise PlotError("Plot output requires one authored PML file")
     machine = _load_machine(args.machine or default_machine_name())
     if machine is None:
         raise PlotError("Plot output requires a machine configuration")
-    asts, _ = load_pml_asts(input_path, machine_config=machine)
-    if len(asts) != 1:
-        raise PlotError("Plot output requires one resolved sheet")
+    ast = _plot_layout(input_path, machine, args.plot_svg_stroke)
     stroke = args.plot_stroke_width
     options = PlotOptions(DEFAULT_STROKE_WIDTH_MM if stroke is None else stroke, args.y_origin)
-    result = compile_plot(asts[0], machine, options)
+    result = compile_plot(ast, machine, options)
     try:
         output_dir.mkdir(parents=True)
     except FileExistsError as error:
@@ -340,8 +352,8 @@ def _write_plot(input_files: list[Path], output_dir: Path, args: argparse.Namesp
 
 
 def _validate_plot_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
-    if args.plot_stroke_width is not None and not args.plot:
-        parser.error("--plot-stroke-width requires --plot")
+    if (args.plot_stroke_width is not None or args.plot_svg_stroke is not None) and not args.plot:
+        parser.error("Plot stroke options require --plot")
     if args.plot and (not args.out or args.recipe or args.init_project or args.no_svg or args.no_clean):
         parser.error("--plot requires a new --out directory and writes an SVG preview")
 
@@ -585,6 +597,7 @@ Exit codes:
     )
     parser.add_argument("--plot", action="store_true", help="Compile a fixed-Z centerline plot")
     parser.add_argument("--plot-stroke-width", type=float, help="Plot preview stroke width in millimeters (default: 1)")
+    parser.add_argument("--plot-svg-stroke", help="Select a closed path by its ID from a mill_ui blueprint SVG")
     parser.add_argument(
         "--no-clean",
         action="store_true",

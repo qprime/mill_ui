@@ -17,12 +17,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 6699,
-    "total_lines": 372,
+    "total_bytes": 6670,
+    "total_lines": 370,
     "files": {
       "surface-25.40mm": {
-        "bytes": 6699,
-        "lines": 372
+        "bytes": 6670,
+        "lines": 370
       }
     }
   },

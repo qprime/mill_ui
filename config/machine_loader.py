@@ -47,8 +47,22 @@ class CNCMachine2D:
     envelope_y_min: float
     envelope_y_max: float
     soft_limits: SoftLimits | None = None
+    envelope_z_min: float | None = None
+    envelope_z_max: float | None = None
 
     def __post_init__(self):
+        for bound in (self.envelope_z_min, self.envelope_z_max):
+            if bound is not None and not math.isfinite(bound):
+                raise ValueError(f"CNCMachine2D: envelope Z bounds must be finite, got {bound}")
+        if (
+            self.envelope_z_min is not None
+            and self.envelope_z_max is not None
+            and self.envelope_z_min >= self.envelope_z_max
+        ):
+            raise ValueError(
+                f"CNCMachine2D: envelope.z_min must be less than z_max ({self.envelope_z_max}), got {self.envelope_z_min}"
+            )
+
         if self.envelope_x_max <= self.envelope_x_min:
             raise ValueError(
                 f"envelope_x_max ({self.envelope_x_max}) must be greater than envelope_x_min ({self.envelope_x_min})"
@@ -124,12 +138,14 @@ class TTrack:
 @dataclass(frozen=True)
 class MachineDefaults:
     safe_z_mm: float = 5.0
-    park_z_mm: float = 100.0
+    park_z_mm: float | None = None
     ramp_angle_deg: float = 3.0
 
     def __post_init__(self):
-        if self.park_z_mm < self.safe_z_mm:
-            raise ValueError(f"park_z_mm ({self.park_z_mm}) must be >= safe_z_mm ({self.safe_z_mm})")
+        if self.park_z_mm is not None and (not math.isfinite(self.park_z_mm) or self.park_z_mm < self.safe_z_mm):
+            raise ValueError(
+                f"MachineDefaults: park_z_mm must be finite and >= safe_z_mm ({self.safe_z_mm}), got {self.park_z_mm}"
+            )
         if self.ramp_angle_deg < 0.0:
             raise ValueError(f"ramp_angle_deg must be >= 0, got {self.ramp_angle_deg}")
 
@@ -349,6 +365,8 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
         envelope_y_min=float(envelope.get("y_min", 0)),
         envelope_y_max=float(envelope.get("y_max", 0)),
         soft_limits=soft_limits,
+        envelope_z_min=float(envelope["z_min"]) if envelope.get("z_min") is not None else None,
+        envelope_z_max=float(envelope["z_max"]) if envelope.get("z_max") is not None else None,
     )
 
     table_data = data.get("table")
@@ -381,7 +399,7 @@ def load_cnc_machine(path: Path | str) -> MachineConfig:
 
     defaults = MachineDefaults(
         safe_z_mm=float(defaults_data.get("safe_z_mm", 5.0)),
-        park_z_mm=float(defaults_data.get("park_z_mm", 100.0)),
+        park_z_mm=float(defaults_data["park_z_mm"]) if defaults_data.get("park_z_mm") is not None else None,
         ramp_angle_deg=float(defaults_data.get("ramp_angle_deg", 3.0)),
     )
 

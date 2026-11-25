@@ -53,24 +53,24 @@
     ]
   },
   "output_size": {
-    "total_bytes": 370236,
-    "total_lines": 11776,
+    "total_bytes": 370120,
+    "total_lines": 11768,
     "files": {
       "9.53mm": {
-        "bytes": 2922,
-        "lines": 110
+        "bytes": 2893,
+        "lines": 108
       },
       "9.53mm-compression": {
-        "bytes": 27377,
-        "lines": 975
+        "bytes": 27348,
+        "lines": 973
       },
       "6.35mm": {
-        "bytes": 338776,
-        "lines": 10639
+        "bytes": 338747,
+        "lines": 10637
       },
       "release-9.53mm": {
-        "bytes": 1161,
-        "lines": 52
+        "bytes": 1132,
+        "lines": 50
       }
     }
   },

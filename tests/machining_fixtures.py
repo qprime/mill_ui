@@ -72,8 +72,8 @@ def write_machining_configuration(root: Path) -> Path:
     }
     machine = {
         "name": "Test router",
-        "envelope": {"x_min": 0, "y_min": 0, "x_max": 1300, "y_max": 1300},
-        "defaults": {"safe_z_mm": 3, "park_z_mm": 100},
+        "envelope": {"x_min": 0, "y_min": 0, "x_max": 1300, "y_max": 1300, "z_min": -77, "z_max": 0},
+        "defaults": {"safe_z_mm": 3, "park_z_mm": 18},
         "cutting_preset": "test_cutting",
         "controller": {"work_coord_system": "G54", "spindle_dwell_s": 5},
         "capabilities": {"max_feed_xy": 10000, "max_feed_z": 5000, "rapid_z": 1000},

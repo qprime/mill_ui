@@ -17,12 +17,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 42344,
-    "total_lines": 2117,
+    "total_bytes": 42315,
+    "total_lines": 2115,
     "files": {
       "engrave-1.00mm": {
-        "bytes": 42344,
-        "lines": 2117
+        "bytes": 42315,
+        "lines": 2115
       }
     }
   },

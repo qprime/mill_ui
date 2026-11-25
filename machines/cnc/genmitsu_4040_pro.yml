@@ -5,6 +5,8 @@ envelope:
   x_max: 434
   y_min: 0
   y_max: 403.5
+  z_min: -77
+  z_max: 0
 
 spoilboard:
   width_mm: 400

@@ -39,20 +39,20 @@
         ]
       },
       "output_size": {
-        "total_bytes": 18667,
-        "total_lines": 679,
+        "total_bytes": 18580,
+        "total_lines": 673,
         "files": {
           "pocket-9.53mm": {
-            "bytes": 12219,
-            "lines": 431
+            "bytes": 12190,
+            "lines": 429
           },
           "profile-9.53mm": {
-            "bytes": 5717,
-            "lines": 210
+            "bytes": 5688,
+            "lines": 208
           },
           "release-9.53mm": {
-            "bytes": 731,
-            "lines": 38
+            "bytes": 702,
+            "lines": 36
           }
         }
       },
@@ -91,20 +91,20 @@
         ]
       },
       "output_size": {
-        "total_bytes": 33059,
-        "total_lines": 1137,
+        "total_bytes": 32972,
+        "total_lines": 1131,
         "files": {
           "pocket-9.53mm": {
-            "bytes": 1407,
-            "lines": 60
+            "bytes": 1378,
+            "lines": 58
           },
           "profile-9.53mm": {
-            "bytes": 20843,
-            "lines": 721
+            "bytes": 20814,
+            "lines": 719
           },
           "release-9.53mm": {
-            "bytes": 10809,
-            "lines": 356
+            "bytes": 10780,
+            "lines": 354
           }
         }
       },

@@ -94,6 +94,62 @@ def test_export_blueprint_produces_svg(tmp_path: Path):
     assert "</svg>" in svg_content, "SVG file missing closing </svg> tag"
 
 
+@pytest.mark.parametrize(
+    ("extra_args", "expected_tail"),
+    [
+        pytest.param([], ["G0 Z3.000", "M5", "M2", "(end)"], id="default"),
+        pytest.param(
+            ["--park", "--work-offset", "5", "10", "-30"],
+            ["G0 Z3.000", "G0 Z18.000", "G0 X0.000 Y0.000", "M5", "M2", "(end)"],
+            id="profile_height",
+        ),
+        pytest.param(
+            ["--park", "--work-offset", "5", "10", "-30", "--park-z", "25"],
+            ["G0 Z3.000", "G0 Z25.000", "G0 X0.000 Y0.000", "M5", "M2", "(end)"],
+            id="override",
+        ),
+    ],
+)
+def test_milling_parking_is_opt_in(tmp_path: Path, extra_args: list[str], expected_tail: list[str]):
+    output = tmp_path / "out"
+    source = _write_simple_profile(tmp_path)
+    _run_cli(["-m", "cli.mill", "--input", str(source), "--out", str(output), *extra_args])
+
+    (program,) = output.glob("*.nc")
+    lines = program.read_text().splitlines()
+    assert lines[-len(expected_tail) :] == expected_tail
+    if not extra_args:
+        assert "G0 X0.000 Y0.000" not in lines
+        assert "G0 Z18.000" not in lines
+
+
+@pytest.mark.parametrize(
+    ("extra_args", "missing_z_min", "diagnostic"),
+    [
+        pytest.param([], False, "--work-offset X Y Z", id="missing_offset"),
+        pytest.param(["--work-offset", "0", "0", "-30"], True, "envelope.z_min", id="missing_z_limit"),
+        pytest.param(["--work-offset", "0", "0", "-30", "--park-z", "100"], False, "machine Z70", id="out_of_travel"),
+    ],
+)
+def test_rejected_parking_leaves_no_program(
+    tmp_path: Path, machining_config: Path, extra_args: list[str], missing_z_min: bool, diagnostic: str
+):
+    if missing_z_min:
+        profile = machining_config / "cnc" / "test_router.yml"
+        profile.write_text(profile.read_text().replace("  z_min: -77\n", ""))
+    source = _write_simple_profile(tmp_path)
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "old.nc").write_text("M2\n")
+    result = _run_cli(
+        ["-m", "cli.mill", "--input", str(source), "--out", str(output), "--park", *extra_args],
+        check=False,
+    )
+    assert result.returncode == 3, result.stderr
+    assert diagnostic in result.stderr
+    assert list(output.glob("*.nc")) == []
+
+
 def test_cli_missing_input_fails():
 
     result = _run_cli(

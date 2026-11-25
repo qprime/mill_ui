@@ -43,24 +43,24 @@
     ]
   },
   "output_size": {
-    "total_bytes": 397850,
-    "total_lines": 13627,
+    "total_bytes": 397734,
+    "total_lines": 13619,
     "files": {
       "pocket_offset-9.53mm": {
-        "bytes": 376158,
-        "lines": 12836
+        "bytes": 376129,
+        "lines": 12834
       },
       "edge-12.70mm-90deg": {
-        "bytes": 10816,
-        "lines": 379
+        "bytes": 10787,
+        "lines": 377
       },
       "edge-12.70mm-60deg": {
-        "bytes": 2505,
-        "lines": 94
+        "bytes": 2476,
+        "lines": 92
       },
       "profile-9.53mm": {
-        "bytes": 8371,
-        "lines": 318
+        "bytes": 8342,
+        "lines": 316
       }
     }
   },

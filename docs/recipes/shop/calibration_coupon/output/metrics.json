@@ -37,28 +37,28 @@
     ]
   },
   "output_size": {
-    "total_bytes": 159880,
-    "total_lines": 5434,
+    "total_bytes": 159735,
+    "total_lines": 5424,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 13856,
-        "lines": 500
+        "bytes": 13827,
+        "lines": 498
       },
       "drill-6.35mm": {
-        "bytes": 572,
-        "lines": 40
+        "bytes": 543,
+        "lines": 38
       },
       "bore-6.35mm": {
-        "bytes": 56107,
-        "lines": 1744
+        "bytes": 56078,
+        "lines": 1742
       },
       "pocket-6.35mm": {
-        "bytes": 77057,
-        "lines": 2719
+        "bytes": 77028,
+        "lines": 2717
       },
       "profile-9.53mm": {
-        "bytes": 12288,
-        "lines": 431
+        "bytes": 12259,
+        "lines": 429
       }
     }
   },

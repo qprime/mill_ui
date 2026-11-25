@@ -30,6 +30,8 @@ envelope:                      # Machine travel envelope (mm)
   x_max: 800                   # Maximum X position
   y_min: 0                     # Minimum Y position
   y_max: 800                   # Maximum Y position
+  z_min: -77                   # Signed lower machine Z bound, required for parking
+  z_max: 0                     # Signed upper machine Z bound, required for parking
 
 spoilboard:                    # Optional: spoilboard dimensions
   width_mm: 750                # Spoilboard width
@@ -39,6 +41,7 @@ spoilboard:                    # Optional: spoilboard dimensions
 
 defaults:                      # Optional: default machining parameters
   safe_z_mm: 5.0              # Retract height above the stock top; a PML Sheet safe_z overrides it
+  park_z_mm: 18               # Optional work Z for an explicit parking request
 ```
 
 ### Coordinate System
@@ -47,6 +50,26 @@ All dimensions use millimeters (mm). The coordinate system follows the project c
 - X axis: Left ↔ Right
 - Y axis: Front ↔ Back
 - Origin (0,0) is at the front-left corner of the envelope
+
+### Parking
+
+Milling exports omit parking by default. Use `cli.mill --park --work-offset X Y Z`
+to use the selected profile's `defaults.park_z_mm`. Add `--park-z MM` to supply a
+per-job work Z or override the profile. Parking has no built-in height. It
+retracts to the selected work Z, then returns to work X0 Y0.
+
+Specify `envelope.z_min` and `envelope.z_max` as signed machine coordinates with the
+lower bound first. For a top-homed Z axis, travel typically extends below
+machine Z0. The shipped Genmitsu profile uses the same measured setup for all
+three axes, with Z from -77 to 0 mm. Match the signed envelope to the homed
+machine before exporting with parking. [SainSmart's measured setup](https://www.sainsmart.com/blogs/news/setting-up-the-genmitsu-4040-pro#measuring-maximum-travel)
+
+Supply the effective XYZ work offset in millimeters for the profile's active
+`controller.work_coord_system` (G54 by default). At a stationary position,
+subtract the displayed work position from the machine position on each axis.
+The same effective offset must apply when each program runs, including any
+sender or tool offsets. Verify fixture clearance along the return. The compiler
+checks the emitted path against the machine travel envelope.
 
 ### Derived Calculations
 

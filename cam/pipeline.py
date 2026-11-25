@@ -33,7 +33,7 @@ from cam.planner.passes.tools import (
     pick_tool_for_engrave,
     tools_for_role,
 )
-from cam.post.gcode import write_gcode
+from cam.post.gcode import ParkingRequest, write_gcode
 from config.machine_loader import (
     Endmill,
     FeedsEntry,
@@ -186,7 +186,8 @@ def _plan_and_emit_face(
     machine: Machine,
     stock: Stock,
     safe_z: float,
-    park_z_mm: float | None,
+    machine_config: MachineConfig,
+    parking: ParkingRequest | None,
     y_origin: str,
     errors: list[str],
     warnings: list[str],
@@ -257,7 +258,8 @@ def _plan_and_emit_face(
             sheet_height=ast.sheet.height_mm,
             y_origin=y_origin,
             margin_mm=margin_mm,
-            park_z_mm=park_z_mm,
+            machine_config=machine_config,
+            parking=parking,
         )
 
         total_moves += len(moves)
@@ -294,6 +296,7 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
     endmill: Endmill | None = None,
     validate_machine_bounds: bool = True,
     context: CompilationContext | None = None,
+    parking: ParkingRequest | None = None,
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
 ) -> PipelineResult:
@@ -418,7 +421,6 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
                 warnings.append(f"Machine bounds: {failure}")
 
     safe_z = ast.sheet.safe_z_mm if ast.sheet.safe_z_mm is not None else machine_config.defaults.safe_z_mm
-    park_z_mm = machine_config.defaults.park_z_mm
 
     constraint_summary = {
         entry.constraint: {
@@ -492,7 +494,8 @@ def run_pipeline(  # noqa: C901 — sequential pipeline orchestrator
             machine=machine,
             stock=stock,
             safe_z=safe_z,
-            park_z_mm=park_z_mm,
+            machine_config=machine_config,
+            parking=parking,
             y_origin=y_origin,
             errors=errors,
             warnings=warnings,

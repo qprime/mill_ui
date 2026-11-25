@@ -13,6 +13,7 @@ from cam.compilation import CompilationContext, default_machine_name
 from cam.compilation import load_pml_asts as load_pml_asts
 from cam.pipeline import GcodeNameCollisionError, SheetRun, run_sheets, write_run_outputs
 from cam.plot import DEFAULT_STROKE_WIDTH_MM, PlotError, PlotOptions, compile_plot, load_plot_pml
+from cam.post.gcode import ParkingError, ParkingRequest
 from cli.nest import nest_machining_job
 from cli.project import (
     DEFAULT_KERF_MM,
@@ -226,6 +227,7 @@ def _compile(
     feeds: list[FeedsEntry] | None = None,
     tool_db: list[dict] | None = None,
     context: CompilationContext | None = None,
+    parking: ParkingRequest | None = None,
 ) -> list[SheetRun]:
     pipeline_kwargs: dict = {
         "kerf_mm": kerf_mm,
@@ -234,6 +236,7 @@ def _compile(
         "y_origin": y_origin,
         "machine_config": machine_config,
         "context": context,
+        "parking": parking,
     }
     if tool_db is not None:
         pipeline_kwargs["tool_db"] = tool_db
@@ -367,6 +370,22 @@ def _validate_plot_args(parser: argparse.ArgumentParser, args: argparse.Namespac
         parser.error("--plot-stroke-width must be finite and positive")
 
 
+def _validate_parking_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    if (args.park_z is not None or args.work_offset is not None) and not args.park:
+        parser.error("--park-z and --work-offset require --park")
+    if args.park and (args.plot or args.init_project):
+        parser.error("--park requires a milling export")
+
+
+def _parking_request(args: argparse.Namespace) -> ParkingRequest | None:
+    if not args.park:
+        return None
+    if args.work_offset is None:
+        raise ParkingError("Parking requires --work-offset X Y Z in mm for the selected work coordinate system")
+    x, y, z = args.work_offset
+    return ParkingRequest(work_offset_mm=(x, y, z), z_mm=args.park_z)
+
+
 def process_file(
     input_path: Path,
     args,
@@ -417,6 +436,7 @@ def process_file(
         generate_svg=not args.no_svg,
         machine_config=machine_config,
         context=context,
+        parking=_parking_request(args),
     )
     _report_runs(runs)
     return runs
@@ -463,6 +483,7 @@ def write_recipe_outputs(
     endmills: list[Endmill] | None = None,
     feeds: list[FeedsEntry] | None = None,
     preset_path: Path | None = None,
+    parking: ParkingRequest | None = None,
 ) -> tuple[list[SheetRun], dict[str, Path]]:
     machine_config = machine_config or load_machine_by_name(default_machine_name(recipe=True))
     runs = []
@@ -482,6 +503,7 @@ def write_recipe_outputs(
             generate_svg=generate_svg,
             machine_config=machine_config,
             context=context,
+            parking=parking,
         )
         runs.extend(source_runs)
     kerfs = set(source_kerfs.values())
@@ -516,6 +538,7 @@ def process_recipe(recipe_dir: Path, args) -> None:
         preset_path=Path(args.preset) if args.preset else None,
         endmills=endmills,
         feeds=feeds,
+        parking=_parking_request(args),
     )
     _report_runs(runs)
     _report_outputs(runs, outputs)
@@ -560,10 +583,10 @@ Exit codes:
   0  success
   1  input, parse, or unexpected error
   2  command-line usage error
-  3  design errors (listed in metrics.json); outputs are still written, except
-     G-code for setups with planner errors or keepout violations, and G-code
-     and SVG when the sheet exceeds the machine envelope. Plot design errors
-     publish no program.
+  3  design errors. Plot and parking errors are reported on stderr and publish
+     no programs. Milling design errors are listed in metrics.json. Outputs
+     are still written, except G-code for setups with planner errors or keepout
+     violations, and G-code and SVG when the sheet exceeds the machine envelope.
         """,
     )
 
@@ -604,6 +627,15 @@ Exit codes:
         "--no-svg",
         action="store_true",
         help="Skip SVG blueprint generation",
+    )
+    parser.add_argument("--park", action="store_true", help="Retract and return to work X0 Y0 at program end")
+    parser.add_argument("--park-z", type=float, help="Work Z park height in mm (default: selected machine profile)")
+    parser.add_argument(
+        "--work-offset",
+        nargs=3,
+        metavar=("X", "Y", "Z"),
+        type=float,
+        help="Machine coordinates of the setup work zero in mm, required with --park",
     )
     parser.add_argument("--plot", action="store_true", help="Compile a fixed-Z centerline plot")
     parser.add_argument("--plot-stroke-width", type=float, help="Plot preview stroke width in millimeters (default: 1)")
@@ -665,6 +697,7 @@ Exit codes:
 
     args = parser.parse_args()
     _validate_plot_args(parser, args)
+    _validate_parking_args(parser, args)
 
     try:
         if args.init_project:
@@ -731,6 +764,9 @@ Exit codes:
     except (GcodeNameCollisionError, PlotInputError) as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+    except ParkingError as e:
+        print(f"Parking error: {e}", file=sys.stderr)
+        sys.exit(DESIGN_ERROR_EXIT_CODE)
     except PlotError as e:
         print(f"Plot error: {e}", file=sys.stderr)
         sys.exit(DESIGN_ERROR_EXIT_CODE)

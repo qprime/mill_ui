@@ -38,24 +38,24 @@
     ]
   },
   "output_size": {
-    "total_bytes": 67812,
-    "total_lines": 3145,
+    "total_bytes": 67696,
+    "total_lines": 3137,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 8323,
-        "lines": 336
+        "bytes": 8294,
+        "lines": 334
       },
       "dogbone-3.17mm": {
-        "bytes": 13958,
-        "lines": 786
+        "bytes": 13929,
+        "lines": 784
       },
       "dogbone-9.53mm": {
-        "bytes": 10530,
-        "lines": 604
+        "bytes": 10501,
+        "lines": 602
       },
       "profile-9.53mm": {
-        "bytes": 35001,
-        "lines": 1419
+        "bytes": 34972,
+        "lines": 1417
       }
     }
   },

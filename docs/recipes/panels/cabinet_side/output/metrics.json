@@ -27,20 +27,20 @@
     ]
   },
   "output_size": {
-    "total_bytes": 518880,
-    "total_lines": 16191,
+    "total_bytes": 518793,
+    "total_lines": 16185,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 1591,
-        "lines": 65
+        "bytes": 1562,
+        "lines": 63
       },
       "bore-3.17mm": {
-        "bytes": 516395,
-        "lines": 16084
+        "bytes": 516366,
+        "lines": 16082
       },
       "profile-9.53mm": {
-        "bytes": 894,
-        "lines": 42
+        "bytes": 865,
+        "lines": 40
       }
     }
   },

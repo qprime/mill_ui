@@ -63,32 +63,32 @@
     ]
   },
   "output_size": {
-    "total_bytes": 135988,
-    "total_lines": 5024,
+    "total_bytes": 135814,
+    "total_lines": 5012,
     "files": {
       "pocket-9.53mm": {
-        "bytes": 21008,
-        "lines": 755
+        "bytes": 20979,
+        "lines": 753
       },
       "pocket_rest-3.17mm": {
-        "bytes": 1080,
-        "lines": 48
+        "bytes": 1051,
+        "lines": 46
       },
       "finish-9.53mm": {
-        "bytes": 624,
-        "lines": 33
+        "bytes": 595,
+        "lines": 31
       },
       "corner_cleanup-3.17mm": {
-        "bytes": 111285,
-        "lines": 4060
+        "bytes": 111256,
+        "lines": 4058
       },
       "dogbone-9.53mm": {
-        "bytes": 975,
-        "lines": 64
+        "bytes": 946,
+        "lines": 62
       },
       "dogbone-6.35mm": {
-        "bytes": 1016,
-        "lines": 64
+        "bytes": 987,
+        "lines": 62
       }
     }
   },

@@ -11,7 +11,8 @@
 | safe_z_mm | 5.0 mm | ir/removal_intent.py (Constraints), cam/config.py, validation/invariants/gcode_invariants.py |
 | pipeline retract height | PML `Sheet.safe_z`, else machine `defaults.safe_z_mm` (3.0 mm on altmill_4x4), else 6.0 mm | cam/pipeline.py (DEFAULT_SAFE_Z_MM), machines/cnc/altmill_4x4.yml |
 | default machine | altmill_4x4 for `cli.mill --project` / `--input` | machines/defaults.yml |
-| park_z_mm | 100.0 mm | config/machine_loader.py (MachineDefaults), cam/post/gcode.py (DEFAULT_PARK_Z_MM) |
+| milling parking | Off | cam/post/gcode.py, cli/mill.py (`--park`) |
+| park_z_mm | Selected profile's optional `defaults.park_z_mm` for an explicit park request, overridden by `--park-z` | config/machine_loader.py (MachineDefaults), cam/post/gcode.py |
 | max_stepdown_mm | 25.0 mm | validation/invariants/gcode_invariants.py |
 
 **Note:** safe_z_mm is defined in multiple places for different contexts but uses the same canonical value (5.0mm).

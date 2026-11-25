@@ -17,12 +17,12 @@
     ]
   },
   "output_size": {
-    "total_bytes": 5747,
-    "total_lines": 256,
+    "total_bytes": 5718,
+    "total_lines": 254,
     "files": {
       "profile-9.53mm": {
-        "bytes": 5747,
-        "lines": 256
+        "bytes": 5718,
+        "lines": 254
       }
     }
   },

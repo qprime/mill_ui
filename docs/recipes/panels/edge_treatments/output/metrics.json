@@ -43,24 +43,24 @@
     ]
   },
   "output_size": {
-    "total_bytes": 5917,
-    "total_lines": 247,
+    "total_bytes": 5801,
+    "total_lines": 239,
     "files": {
       "edge-12.70mm": {
-        "bytes": 1249,
-        "lines": 54
+        "bytes": 1220,
+        "lines": 52
       },
       "edge-12.00mm": {
-        "bytes": 1237,
-        "lines": 54
+        "bytes": 1208,
+        "lines": 52
       },
       "profile-9.53mm": {
-        "bytes": 2520,
-        "lines": 97
+        "bytes": 2491,
+        "lines": 95
       },
       "finish-9.53mm": {
-        "bytes": 911,
-        "lines": 42
+        "bytes": 882,
+        "lines": 40
       }
     }
   },

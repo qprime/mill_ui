@@ -44,24 +44,24 @@
         ]
       },
       "output_size": {
-        "total_bytes": 50430,
-        "total_lines": 2401,
+        "total_bytes": 50314,
+        "total_lines": 2393,
         "files": {
           "pocket-9.53mm": {
-            "bytes": 5273,
-            "lines": 190
+            "bytes": 5244,
+            "lines": 188
           },
           "dogbone-9.53mm": {
-            "bytes": 5342,
-            "lines": 310
+            "bytes": 5313,
+            "lines": 308
           },
           "dogbone-3.17mm": {
-            "bytes": 22845,
-            "lines": 1281
+            "bytes": 22816,
+            "lines": 1279
           },
           "profile-9.53mm": {
-            "bytes": 16970,
-            "lines": 620
+            "bytes": 16941,
+            "lines": 618
           }
         }
       },
@@ -126,24 +126,24 @@
         ]
       },
       "output_size": {
-        "total_bytes": 122055,
-        "total_lines": 5931,
+        "total_bytes": 121939,
+        "total_lines": 5923,
         "files": {
           "pocket-9.53mm": {
-            "bytes": 6141,
-            "lines": 219
+            "bytes": 6112,
+            "lines": 217
           },
           "dogbone-9.53mm": {
-            "bytes": 6215,
-            "lines": 359
+            "bytes": 6186,
+            "lines": 357
           },
           "dogbone-3.17mm": {
-            "bytes": 64355,
-            "lines": 3591
+            "bytes": 64326,
+            "lines": 3589
           },
           "profile-9.53mm": {
-            "bytes": 45344,
-            "lines": 1762
+            "bytes": 45315,
+            "lines": 1760
           }
         }
       },

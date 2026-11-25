@@ -19,6 +19,7 @@
 | GC-9 | STRUCTURAL | TOOL_DECLARED | Tool declared before M6 |
 | GC-10 | HARD | CONTINUOUS_PATH | No large XY jumps during cutting |
 | GC-11 | STRUCTURAL | MODAL_MOTION | G0/G1/G2/G3 are modal |
+| GC-12 | HARD | VALIDATED_PARKING | Explicit milling parking requires a known work offset and a return path within the signed machine envelope |
 
 ---
 
@@ -38,6 +39,22 @@
 - Deeper cuts require multiple passes
 
 ---
+
+## Milling Program End and Parking
+
+By default the program retains its planned exit and safe retract, then emits
+`M5` and `M2`. With `--park`, the postprocessor adds a Z-only rapid followed by
+an XY-only rapid to work X0 Y0 before program shutdown. The work Z comes from
+`--park-z` or the selected profile's `defaults.park_z_mm`.
+
+Parking requires the standard absolute-millimeter header and its selected
+G54 through G59 coordinate system. Resolve the formatted exit and park
+positions with `machine = work + offset` on each axis. The exit and target
+must be inside the signed XYZ machine envelope. The intermediate point
+combines the exit XY with the target Z. Those bounds cover both straight
+segments. The emitted park Z must be at least the effective safe Z and the
+emitted exit Z. Missing coordinates or limits, an unsafe height, or travel
+outside the envelope aborts the export before NC files are written.
 
 ## Physical Clearance Before Emission
 
